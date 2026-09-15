@@ -26,27 +26,33 @@ public class SeettuGroupService {
     private final AuditLogService auditLogService;
     private final NotificationService notificationService;
 
+    @Transactional(readOnly = true)
     public SeettuGroup getGroupById(Long id) {
         return groupRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Group", "id", id));
     }
 
+    @Transactional(readOnly = true)
     public List<SeettuGroup> getAllGroups() {
         return groupRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<SeettuGroup> getGroupsByUser(Long userId) {
         return groupRepository.findGroupsByMemberId(userId);
     }
 
+    @Transactional(readOnly = true)
     public List<SeettuGroup> getGroupsByCreator(Long userId) {
         return groupRepository.findByCreatedById(userId);
     }
 
+    @Transactional(readOnly = true)
     public List<SeettuGroup> getJoinedGroupsByMember(Long userId) {
         return groupRepository.findJoinedGroupsByMemberId(userId);
     }
 
+    @Transactional(readOnly = true)
     public List<SeettuGroup> searchGroups(String keyword) {
         return groupRepository.searchByKeyword(keyword);
     }
@@ -151,6 +157,7 @@ public class SeettuGroupService {
         notificationService.sendNotification(userId, "You have been removed from group: " + group.getName(), "GROUP");
     }
 
+    @Transactional(readOnly = true)
     public List<GroupMember> getGroupMembers(Long groupId) {
         return memberRepository.findByGroupIdAndStatus(groupId, GroupMember.MemberStatus.ACTIVE);
     }
