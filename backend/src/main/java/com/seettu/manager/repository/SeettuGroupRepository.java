@@ -10,18 +10,45 @@ import java.util.List;
 
 @Repository
 public interface SeettuGroupRepository extends JpaRepository<SeettuGroup, Long> {
-    List<SeettuGroup> findByCreatedById(Long userId);
-    List<SeettuGroup> findByStatus(SeettuGroup.GroupStatus status);
-    List<SeettuGroup> findByShopId(Long shopId);
-    List<SeettuGroup> findBySeettuTypeId(Long typeId);
 
-    @Query("SELECT g FROM SeettuGroup g WHERE g.name LIKE %:keyword% OR g.description LIKE %:keyword%")
+    @Query("SELECT g FROM SeettuGroup g " +
+           "JOIN FETCH g.createdBy " +
+           "LEFT JOIN FETCH g.seettuType " +
+           "WHERE g.createdBy.id = :userId")
+    List<SeettuGroup> findByCreatedById(@Param("userId") Long userId);
+
+    List<SeettuGroup> findByStatus(SeettuGroup.GroupStatus status);
+
+    @Query("SELECT g FROM SeettuGroup g " +
+           "JOIN FETCH g.createdBy " +
+           "LEFT JOIN FETCH g.seettuType " +
+           "WHERE g.shop.id = :shopId")
+    List<SeettuGroup> findByShopId(@Param("shopId") Long shopId);
+
+    @Query("SELECT g FROM SeettuGroup g " +
+           "JOIN FETCH g.createdBy " +
+           "LEFT JOIN FETCH g.seettuType " +
+           "WHERE g.seettuType.id = :typeId")
+    List<SeettuGroup> findBySeettuTypeId(@Param("typeId") Long typeId);
+
+    @Query("SELECT g FROM SeettuGroup g " +
+           "JOIN FETCH g.createdBy " +
+           "LEFT JOIN FETCH g.seettuType " +
+           "WHERE g.name LIKE %:keyword% OR g.description LIKE %:keyword%")
     List<SeettuGroup> searchByKeyword(@Param("keyword") String keyword);
 
-    @Query("SELECT DISTINCT g FROM SeettuGroup g LEFT JOIN GroupMember gm ON gm.group.id = g.id WHERE g.createdBy.id = :userId OR (gm.user.id = :userId AND gm.status = 'ACTIVE')")
+    @Query("SELECT DISTINCT g FROM SeettuGroup g " +
+           "JOIN FETCH g.createdBy " +
+           "LEFT JOIN FETCH g.seettuType " +
+           "LEFT JOIN GroupMember gm ON gm.group.id = g.id " +
+           "WHERE g.createdBy.id = :userId OR (gm.user.id = :userId AND gm.status = 'ACTIVE')")
     List<SeettuGroup> findGroupsByMemberId(@Param("userId") Long userId);
 
-    @Query("SELECT DISTINCT g FROM SeettuGroup g JOIN GroupMember gm ON gm.group.id = g.id WHERE gm.user.id = :userId AND gm.status = 'ACTIVE'")
+    @Query("SELECT DISTINCT g FROM SeettuGroup g " +
+           "JOIN FETCH g.createdBy " +
+           "LEFT JOIN FETCH g.seettuType " +
+           "JOIN GroupMember gm ON gm.group.id = g.id " +
+           "WHERE gm.user.id = :userId AND gm.status = 'ACTIVE'")
     List<SeettuGroup> findJoinedGroupsByMemberId(@Param("userId") Long userId);
 
     long countByStatus(SeettuGroup.GroupStatus status);
