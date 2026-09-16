@@ -117,3 +117,4 @@ Role	Email	Password
 Admin	admin@seetumanager.com	Hello@12345
 Organizer	org@gmail.com	Hello@12345
 Member	user@gmail.com	Hello@12345
+asrar asrar123@gmail.com	Hello@12345
