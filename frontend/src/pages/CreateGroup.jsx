@@ -83,12 +83,6 @@ const CreateGroup = () => {
           {/* Header Banner matching theme color pattern */}
           <div className="p-4" style={{ backgroundColor: '#235665', color: '#FFFFFF' }}>
             <div className="d-flex align-items-center mb-1">
-              <span 
-                className="me-2 d-inline-flex align-items-center justify-content-center"
-                style={{ color: '#A855F7', fontSize: '1.45rem', fontWeight: 900, lineHeight: 1 }}
-              >
-                +
-              </span>
               <h4 className="mb-0 fw-bold text-white" style={{ fontSize: '1.25rem' }}>Create Group</h4>
             </div>
             <p className="mb-0 text-white-50" style={{ fontSize: '0.85rem' }}>

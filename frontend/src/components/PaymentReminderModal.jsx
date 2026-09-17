@@ -90,8 +90,8 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
           className="p-3 rounded-3 border"
           style={{ backgroundColor: '#F8FAFC', borderColor: '#E2E8F0' }}
         >
-          <div className="small text-danger d-flex align-items-center gap-1" style={{ fontSize: '0.8rem' }}>
-            <span>★</span> Sending this reminder notifies the member and logs an activity audit record per SRS REQ-NOT-01.
+          <div className="small text-danger" style={{ fontSize: '0.8rem' }}>
+            Sending this reminder notifies the member and logs an activity audit record.
           </div>
         </div>
       </div>

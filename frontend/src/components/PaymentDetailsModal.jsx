@@ -108,8 +108,8 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           className="p-3 rounded-3 border"
           style={{ backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' }}
         >
-          <div className="fw-bold small text-primary mb-1 d-flex align-items-center gap-1">
-            <span>★</span> Financial Discipline Impact
+          <div className="fw-bold small text-primary mb-1">
+            Financial Discipline Impact
           </div>
           <div className="small text-primary" style={{ fontSize: '0.8rem' }}>
             {isPaid
