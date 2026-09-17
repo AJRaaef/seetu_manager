@@ -26,8 +26,7 @@ const Navbar = () => {
     <nav className="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
       <div className="container-fluid px-lg-4">
         <Link className="navbar-brand me-4" to="/dashboard">
-          <span style={{ fontSize: '1.4rem' }}>💎</span>
-          <span>{t('app_name') || 'Seettu Manager'}</span>
+          <span className="fw-bold"><span style={{ color: '#FFFFFF' }}>Seettu</span><span style={{ color: '#008CA7' }}>Manager</span></span>
         </Link>
         <button
           className="navbar-toggler border-0"

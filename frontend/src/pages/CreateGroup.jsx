@@ -77,16 +77,28 @@ const CreateGroup = () => {
   };
 
   return (
-    <div className="row justify-content-center py-3">
-      <div className="col-md-8">
-        <div className="card shadow-lg border-0">
-          <div className="card-header bg-primary text-white p-4">
-            <h4 className="mb-0 fw-bold">➕ {t('create_group') || 'Create New Seettu Group'}</h4>
-            <p className="mb-0 text-white-50 small mt-1">Configure contribution terms, member capacity, Seettu type, and shop details</p>
+    <div className="row justify-content-center py-4">
+      <div className="col-12 col-lg-8 col-xl-7">
+        <div className="card shadow-sm border-0" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+          {/* Header Banner matching theme color pattern */}
+          <div className="p-4" style={{ backgroundColor: '#235665', color: '#FFFFFF' }}>
+            <div className="d-flex align-items-center mb-1">
+              <span 
+                className="me-2 d-inline-flex align-items-center justify-content-center"
+                style={{ color: '#A855F7', fontSize: '1.45rem', fontWeight: 900, lineHeight: 1 }}
+              >
+                +
+              </span>
+              <h4 className="mb-0 fw-bold text-white" style={{ fontSize: '1.25rem' }}>Create Group</h4>
+            </div>
+            <p className="mb-0 text-white-50" style={{ fontSize: '0.85rem' }}>
+              Configure contribution terms, member capacity, Seettu type, and shop details
+            </p>
           </div>
-          <div className="card-body p-4 p-md-5">
+
+          <div className="card-body p-4 p-md-4">
             {error && (
-              <div className="alert alert-danger shadow-sm border-0 mb-4 p-3">
+              <div className="alert alert-danger shadow-sm border-0 mb-4 p-3 rounded-3">
                 <div className="fw-bold">{error}</div>
               </div>
             )}
@@ -94,19 +106,25 @@ const CreateGroup = () => {
             <form onSubmit={handleSubmit}>
               <div className="row mb-3">
                 <div className="col-md-6 mb-3 mb-md-0">
-                  <label className="form-label">Group Name</label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Group Name</label>
                   <input
                     type="text"
                     className="form-control"
                     placeholder="e.g. Gold Saver Circle Q4"
                     value={formData.name}
                     onChange={e => setFormData({...formData, name: e.target.value})}
+                    style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                     required
                   />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label">Category</label>
-                  <select className="form-select" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Category</label>
+                  <select 
+                    className="form-select" 
+                    value={formData.category} 
+                    onChange={e => setFormData({...formData, category: e.target.value})}
+                    style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
+                  >
                     <option value="GENERAL">General Monetary</option>
                     <option value="GOLD">Gold & Jewelry</option>
                     <option value="FURNITURE">Furniture & Home</option>
@@ -117,11 +135,12 @@ const CreateGroup = () => {
 
               <div className="row mb-3">
                 <div className="col-md-6 mb-3 mb-md-0">
-                  <label className="form-label">Seettu Type (Monetary / Non-Monetary)</label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Seettu Type (Monetary / Non-Monetary)</label>
                   <select
                     className="form-select"
                     value={formData.seettuTypeId}
                     onChange={e => setFormData({...formData, seettuTypeId: e.target.value})}
+                    style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                     required
                   >
                     {seettuTypes.map(st => (
@@ -131,18 +150,19 @@ const CreateGroup = () => {
                     ))}
                     {seettuTypes.length === 0 && (
                       <>
-                        <option value="1">Monetary (Traditional cash-based Seettu)</option>
+                        <option value="1">Monetary (Traditional cash-based Seettu when...</option>
                         <option value="2">Non-Monetary (Item-based Seettu)</option>
                       </>
                     )}
                   </select>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label">Associated Shop (Optional)</label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Associated Shop (Optional)</label>
                   <select
                     className="form-select"
                     value={formData.shopId}
                     onChange={e => setFormData({...formData, shopId: e.target.value})}
+                    style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                   >
                     <option value="">None / Independent Group</option>
                     {shops.map(shop => (
@@ -155,51 +175,64 @@ const CreateGroup = () => {
               </div>
               
               <div className="mb-3">
-                <label className="form-label">Description</label>
+                <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Description</label>
                 <textarea
                   className="form-control"
                   rows="3"
                   placeholder="Explain group rules, auction conditions, or purpose..."
                   value={formData.description}
                   onChange={e => setFormData({...formData, description: e.target.value})}
+                  style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                 ></textarea>
               </div>
               
               <div className="row mb-4">
                 <div className="col-md-4 mb-3 mb-md-0">
-                  <label className="form-label">Contribution Amount (LKR)</label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Contribution Amount (LKR)</label>
                   <input
                     type="number"
                     className="form-control"
                     placeholder="e.g. 10000"
                     value={formData.contributionAmount}
                     onChange={e => setFormData({...formData, contributionAmount: e.target.value})}
+                    style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                     required
                   />
                 </div>
                 <div className="col-md-4 mb-3 mb-md-0">
-                  <label className="form-label">Member Count</label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Member Count</label>
                   <input
                     type="number"
                     className="form-control"
                     placeholder="e.g. 12"
                     value={formData.memberCount}
                     onChange={e => setFormData({...formData, memberCount: e.target.value})}
+                    style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                     required
                   />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label">Cycle Frequency</label>
-                  <select className="form-select" value={formData.cycleFrequency} onChange={e => setFormData({...formData, cycleFrequency: e.target.value})}>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Cycle Frequency</label>
+                  <select 
+                    className="form-select" 
+                    value={formData.cycleFrequency} 
+                    onChange={e => setFormData({...formData, cycleFrequency: e.target.value})}
+                    style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
+                  >
+                    <option value="MONTHLY">Monthly</option>
                     <option value="WEEKLY">Weekly</option>
                     <option value="BI_WEEKLY">Bi-Weekly</option>
-                    <option value="MONTHLY">Monthly</option>
                   </select>
                 </div>
               </div>
               
-              <button type="submit" className="btn btn-primary btn-lg w-100 fw-bold shadow-sm" disabled={loading}>
-                {loading ? 'Creating Group...' : (t('submit') || 'Create Group')}
+              <button 
+                type="submit" 
+                className="btn btn-teal w-100 fw-bold shadow-sm py-2 text-white" 
+                disabled={loading}
+                style={{ backgroundColor: '#235665', borderRadius: '8px', fontSize: '1rem' }}
+              >
+                {loading ? 'Creating Group...' : 'Submit'}
               </button>
             </form>
           </div>

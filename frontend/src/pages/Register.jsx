@@ -59,122 +59,141 @@ const Register = () => {
   };
 
   return (
-    <div className="py-4">
+    <div className="py-5" style={{ minHeight: '100vh', backgroundColor: '#F8F9FA' }}>
       <div className="row justify-content-center">
-        <div className="col-md-8 col-lg-6">
-          <div className="card shadow-lg border-0">
-            <div className="card-header text-white text-center py-4" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)' }}>
-              <div style={{ fontSize: '2.5rem' }}>💎</div>
-              <h3 className="fw-bold mb-1">{t('app_name') || 'Seettu Manager System'}</h3>
-              <p className="mb-0 text-white-50 small">Create your account to start managing or joining Seettu groups</p>
-            </div>
-
+        <div className="col-12 col-md-8 col-lg-6">
+          <div className="card shadow-sm border-0" style={{ borderRadius: '16px', overflow: 'hidden' }}>
             <div className="card-body p-4 p-md-5">
-              <h4 className="fw-bold text-dark mb-4 text-center">{t('register') || 'Create New Account'}</h4>
+              {/* Brand Header matching exact logo colors */}
+              <div className="text-center mb-4">
+                <h2 className="fw-bold mb-1" style={{ fontSize: '1.85rem', letterSpacing: '-0.4px' }}>
+                  <span className="brand-seettu">Seettu</span>
+                  <span className="brand-manager">Manager</span>
+                </h2>
+                <p className="text-muted small mb-1" style={{ fontSize: '0.875rem' }}>
+                  Digital Financial Discipline for Seettu Group
+                </p>
+                <p className="text-muted small mb-4" style={{ fontSize: '0.8rem' }}>
+                  Create your account to start managing or joining Seettu groups
+                </p>
+                <h3 className="fw-bold text-center" style={{ color: '#1A3644', fontSize: '1.35rem' }}>Register</h3>
+              </div>
 
               {error && (
-                <div className="alert alert-danger border-0 shadow-sm p-3 mb-4">
+                <div className="alert alert-danger border-0 shadow-sm p-3 mb-4 rounded-3">
                   <div className="fw-bold">{error}</div>
                 </div>
               )}
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label className="form-label">{t('full_name') || 'Full Name'}</label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Full Name</label>
                   <input
                     type="text"
                     className="form-control"
                     placeholder="e.g. John Doe"
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                     required
                   />
                 </div>
 
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">{t('email') || 'Email Address'}</label>
+                <div className="row mb-3">
+                  <div className="col-md-6 mb-3 mb-md-0">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Email Address</label>
                     <input
                       type="email"
                       className="form-control"
                       placeholder="e.g. john@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                       required
                     />
                   </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">{t('phone') || 'Phone Number'}</label>
+                  <div className="col-md-6">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Phone Number</label>
                     <input
                       type="tel"
                       className="form-control"
                       placeholder="e.g. +94 77 123 4567"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                       required
                     />
                   </div>
                 </div>
 
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">{t('password') || 'Password (Min 6 chars)'}</label>
+                <div className="row mb-3">
+                  <div className="col-md-6 mb-3 mb-md-0">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Password</label>
                     <input
                       type="password"
                       className="form-control"
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                       required
                     />
                   </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">{t('confirm_password') || 'Confirm Password'}</label>
+                  <div className="col-md-6">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Confirm Password</label>
                     <input
                       type="password"
                       className="form-control"
                       placeholder="••••••••"
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                      style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                       required
                     />
                   </div>
                 </div>
 
-                <div className="row">
-                  <div className="col-md-6 mb-4">
-                    <label className="form-label">{t('role') || 'Role'}</label>
+                <div className="row mb-4">
+                  <div className="col-md-6 mb-3 mb-md-0">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>role</label>
                     <select
                       className="form-select"
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                      style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                     >
                       <option value="MEMBER">Member (Join Groups)</option>
                       <option value="ORGANIZER">Organizer (Manage Groups)</option>
                     </select>
                   </div>
-                  <div className="col-md-6 mb-4">
-                    <label className="form-label">{t('preferred_language') || 'Preferred Language'}</label>
+                  <div className="col-md-6">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>preferred_language</label>
                     <select
                       className="form-select"
                       value={formData.preferredLanguage}
                       onChange={(e) => setFormData({ ...formData, preferredLanguage: e.target.value })}
+                      style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                     >
                       <option value="EN">English</option>
-                      <option value="SI">Sinhala (සිංහල)</option>
-                      <option value="TA">Tamil (தமிழ்)</option>
+                      <option value="SI">Sinhala</option>
+                      <option value="TA">Tamil</option>
                     </select>
                   </div>
                 </div>
 
-                <button disabled={loading} type="submit" className="btn btn-primary btn-lg w-100 fw-bold mb-4 shadow-sm">
-                  {loading ? 'Creating Account...' : (t('register') || 'Complete Registration')}
+                <button 
+                  disabled={loading} 
+                  type="submit" 
+                  className="btn btn-teal w-100 fw-bold py-2 mb-4 shadow-sm"
+                  style={{ backgroundColor: '#235665', borderRadius: '8px', fontSize: '1rem', color: '#FFFFFF' }}
+                >
+                  {loading ? 'Creating Account...' : 'Register'}
                 </button>
 
                 <div className="text-center text-muted small">
                   Already have an account?{' '}
-                  <Link to="/login" className="fw-bold text-primary text-decoration-none">
-                    {t('login') || 'Sign In Here'}
+                  <Link to="/login" className="fw-bold text-decoration-none" style={{ color: '#235665' }}>
+                    Sign In Here
                   </Link>
                 </div>
               </form>

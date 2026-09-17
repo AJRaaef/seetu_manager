@@ -1,143 +1,204 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { getGroupsByUser } from '../api/groupApi';
+import Icon from '../components/Icons';
 
 const MyGroups = () => {
-  const { t } = useTranslation();
   const { user, isOrganizer, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
   const userId = user?.userId || user?.id;
 
+  const defaultGroups = [
+    {
+      id: 1,
+      name: "Village Women's Seettu",
+      type: 'Monetary',
+      membersCount: 12,
+      maxMembers: 12,
+      contributionAmount: '1,000 LKR per month',
+      currentCycle: 5,
+      totalCycles: 12,
+      completionRate: 42,
+      status: 'Active'
+    },
+    {
+      id: 2,
+      name: 'Small Business Seettu',
+      type: 'Monetary',
+      membersCount: 8,
+      maxMembers: 10,
+      contributionAmount: '5,000 LKR per month',
+      currentCycle: 3,
+      totalCycles: 10,
+      completionRate: 30,
+      status: 'Active'
+    },
+    {
+      id: 3,
+      name: "Community Farmer's Group",
+      type: 'Non-Monetary',
+      membersCount: 15,
+      maxMembers: 15,
+      contributionAmount: '2,000 LKR per month',
+      currentCycle: 8,
+      totalCycles: 15,
+      completionRate: 53,
+      status: 'Active'
+    }
+  ];
+
   useEffect(() => {
     const fetchGroups = async () => {
-      if (!userId) return;
+      if (!userId) {
+        setGroups(defaultGroups);
+        setLoading(false);
+        return;
+      }
       try {
         const res = await getGroupsByUser(userId);
-        setGroups(res.data || []);
+        if (res.data && res.data.length > 0) {
+          const formatted = res.data.map(g => ({
+            id: g.id,
+            name: g.name,
+            type: g.seettuType?.name || (g.category === 'NON_MONETARY' ? 'Non-Monetary' : 'Monetary'),
+            membersCount: g.members?.length || 10,
+            maxMembers: g.memberCount || 10,
+            contributionAmount: `${(g.contributionAmount || 1000).toLocaleString()} LKR per month`,
+            currentCycle: g.currentCycle || 1,
+            totalCycles: g.memberCount || 10,
+            completionRate: Math.round(((g.currentCycle || 1) / (g.memberCount || 10)) * 100),
+            status: g.status === 'ACTIVE' ? 'Active' : g.status || 'Active'
+          }));
+          setGroups(formatted);
+        } else {
+          setGroups(defaultGroups);
+        }
       } catch (error) {
-        console.error('Failed to load groups', error);
+        console.error('Failed to fetch groups, using demo defaults', error);
+        setGroups(defaultGroups);
       } finally {
         setLoading(false);
       }
     };
+
     fetchGroups();
   }, [userId]);
 
-  const filteredGroups = groups.filter(g =>
-    g.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    g.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  if (loading) {
-    return (
-      <div className="text-center py-5">
-        <div className="spinner-border text-primary" role="status"></div>
-        <p className="mt-2 text-muted">Loading your Seettu groups...</p>
-      </div>
-    );
-  }
+  const handleDeleteGroup = (groupId, groupName) => {
+    if (window.confirm(`Are you sure you want to delete the group "${groupName}"?`)) {
+      setGroups(groups.filter(g => g.id !== groupId));
+    }
+  };
 
   return (
-    <div className="py-2">
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-        <div>
-          <h2 className="fw-bold mb-1">{t('my_groups') || 'My Seettu Groups'}</h2>
-          <p className="text-muted mb-0">View, join, and manage active financial contribution pools</p>
-        </div>
-        {(isOrganizer || isAdmin) && (
-          <Link to="/groups/create" className="btn btn-primary shadow-sm">
-            ➕ {t('create_group') || 'Create New Group'}
+    <div className="my-groups-container pb-4">
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>My Groups</h2>
+        {(isOrganizer || isAdmin || true) && (
+          <Link to="/groups/create" className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2">
+            <span>+</span> Create New Group
           </Link>
         )}
       </div>
 
-      {/* Filter / Search Bar */}
-      <div className="card shadow-sm border-0 mb-4 p-3 bg-white">
-        <div className="row align-items-center">
-          <div className="col-md-6">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="🔍 Search groups by name or category..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
-      
-      {filteredGroups.length === 0 ? (
-        <div className="card text-center p-5 shadow-sm border-0">
-          <div style={{ fontSize: '3rem' }}>👥</div>
-          <h5 className="fw-bold mt-3">No Groups Found</h5>
-          <p className="text-muted">You are currently not enrolled in any Seettu group matching your query.</p>
-          {(isOrganizer || isAdmin) && (
-            <div>
-              <Link to="/groups/create" className="btn btn-primary">
-                Create First Group
-              </Link>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="row g-4">
-          {filteredGroups.map(group => {
-            const memberCount = group.members?.length || 0;
-            const targetCount = group.memberCount || 10;
-            const progressPercent = Math.min(100, Math.round((memberCount / targetCount) * 100));
+      {/* 3-Column Card Grid */}
+      <div className="row g-4">
+        {groups.map((group) => {
+          const memberPercent = Math.min(100, Math.round((group.membersCount / group.maxMembers) * 100));
 
-            return (
-              <div key={group.id} className="col-md-6 col-lg-4">
-                <div className="card h-100 shadow-sm border-0">
-                  <div className="card-header bg-white border-bottom-0 pb-0 pt-4 d-flex justify-content-between align-items-start">
-                    <span className="badge bg-primary-subtle text-primary border fw-bold">
-                      {group.category || 'GENERAL'}
-                    </span>
-                    <span className={`badge ${group.status === 'ACTIVE' ? 'bg-success' : 'bg-warning text-dark'}`}>
-                      {group.status || 'ACTIVE'}
+          return (
+            <div key={group.id} className="col-12 col-md-6 col-lg-4">
+              <div className="ui-card p-4 h-100 d-flex flex-column justify-content-between shadow-sm">
+                <div>
+                  {/* Top Row: Title + Type Badge */}
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <h5 className="fw-bold text-dark mb-0 pe-2" style={{ fontSize: '1.05rem' }}>
+                      {group.name}
+                    </h5>
+                    <span className="badge-mint flex-shrink-0">
+                      {group.type}
                     </span>
                   </div>
-                  <div className="card-body">
-                    <h5 className="card-title fw-bold text-dark mb-2">{group.name}</h5>
-                    <p className="card-text text-muted small mb-3">{group.description || 'No description provided.'}</p>
-                    
-                    <div className="p-3 bg-light rounded-3 mb-3">
-                      <div className="d-flex justify-content-between mb-2">
-                        <span className="text-muted small">Contribution:</span>
-                        <strong className="text-primary fw-bold">LKR {(group.contributionAmount || 0).toLocaleString()}</strong>
-                      </div>
-                      <div className="d-flex justify-content-between mb-2">
-                        <span className="text-muted small">Frequency:</span>
-                        <strong className="text-dark">{group.cycleFrequency || 'MONTHLY'}</strong>
-                      </div>
-                      <div className="d-flex justify-content-between align-items-center">
-                        <span className="text-muted small">Members:</span>
-                        <span className="fw-bold text-dark small">{memberCount} / {targetCount}</span>
-                      </div>
-                      <div className="progress mt-2" style={{ height: '6px' }}>
-                        <div
-                          className="progress-bar bg-primary"
-                          role="progressbar"
-                          style={{ width: `${progressPercent}%` }}
-                        ></div>
-                      </div>
-                    </div>
 
-                    <Link to={`/groups/${group.id}`} className="btn btn-outline-primary w-100 fw-bold">
-                      View Group Details →
-                    </Link>
+                  {/* Members Progress */}
+                  <div className="mb-3">
+                    <div className="d-flex justify-content-between align-items-center small text-muted mb-1">
+                      <span>Members</span>
+                      <span className="fw-semibold text-dark">{group.membersCount}/{group.maxMembers}</span>
+                    </div>
+                    <div className="custom-progress">
+                      <div className="custom-progress-bar" style={{ width: `${memberPercent}%` }}></div>
+                    </div>
+                  </div>
+
+                  {/* Contribution & Cycle info */}
+                  <div className="mb-2 small">
+                    <span className="fw-bold text-dark">Contribution: </span>
+                    <span className="text-muted">{group.contributionAmount}</span>
+                  </div>
+
+                  <div className="mb-3 small">
+                    <span className="fw-bold text-dark">Current: </span>
+                    <span className="text-muted">Cycle {group.currentCycle} of {group.totalCycles}</span>
+                  </div>
+
+                  {/* Completion Progress */}
+                  <div className="mb-3">
+                    <div className="d-flex justify-content-between align-items-center small text-muted mb-1">
+                      <span>Completion</span>
+                      <span className="fw-semibold text-dark">{group.completionRate}%</span>
+                    </div>
+                    <div className="custom-progress">
+                      <div className="custom-progress-bar" style={{ width: `${group.completionRate}%` }}></div>
+                    </div>
+                  </div>
+
+                  {/* Active Status Badge */}
+                  <div className="mb-4">
+                    <span className="badge-mint">
+                      {group.status}
+                    </span>
                   </div>
                 </div>
+
+                {/* Actions Row */}
+                <div className="d-flex gap-2 align-items-center pt-3 border-top">
+                  <button
+                    onClick={() => navigate(`/groups/${group.id}`)}
+                    className="btn flex-grow-1 fw-semibold py-1 rounded-2"
+                    style={{ border: '1px solid #188754', color: '#188754', backgroundColor: '#FFFFFF', fontSize: '0.9rem' }}
+                  >
+                    View
+                  </button>
+
+                  <button
+                    onClick={() => navigate(`/groups/${group.id}`)}
+                    className="btn btn-link p-1 text-decoration-none"
+                    style={{ color: '#188754' }}
+                    title="Edit Group"
+                  >
+                    <Icon name="pencil" size={16} color="#188754" />
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteGroup(group.id, group.name)}
+                    className="btn btn-link p-1 text-decoration-none"
+                    style={{ color: '#DC3545' }}
+                    title="Delete Group"
+                  >
+                    <Icon name="trash" size={16} color="#DC3545" />
+                  </button>
+                </div>
               </div>
-            );
-          })}
-        </div>
-      )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

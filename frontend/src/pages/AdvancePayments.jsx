@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/axios';
 import * as groupApi from '../api/groupApi';
+import Icon from '../components/Icons';
 
 const AdvancePayments = () => {
   const { user } = useAuth();
@@ -12,7 +13,7 @@ const AdvancePayments = () => {
 
   const [formData, setFormData] = useState({
     groupId: '',
-    memberId: user.userId,
+    memberId: user?.userId || user?.id,
     amount: '',
     notes: '',
   });
@@ -24,10 +25,10 @@ const AdvancePayments = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const groupRes = await groupApi.getUserGroups(user.userId);
+      const groupRes = await groupApi.getUserGroups(user?.userId || user?.id);
       setGroups(groupRes.data || []);
 
-      const advRes = await api.get(`/advance-payments/user/${user.userId}`);
+      const advRes = await api.get(`/advance-payments/user/${user?.userId || user?.id}`);
       setAdvancePayments(advRes.data?.data || []);
     } catch (err) {
       console.error('Error fetching advance payments', err);
@@ -39,9 +40,10 @@ const AdvancePayments = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      await api.post(`/advance-payments?groupId=${formData.groupId}&memberId=${user.userId}&amount=${formData.amount}&notes=${encodeURIComponent(formData.notes || '')}`);
+      const uid = user?.userId || user?.id;
+      await api.post(`/advance-payments?groupId=${formData.groupId}&memberId=${uid}&amount=${formData.amount}&notes=${encodeURIComponent(formData.notes || '')}`);
       setShowModal(false);
-      setFormData({ groupId: '', memberId: user.userId, amount: '', notes: '' });
+      setFormData({ groupId: '', memberId: uid, amount: '', notes: '' });
       fetchData();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to submit advance payment.');
@@ -54,49 +56,64 @@ const AdvancePayments = () => {
     <div className="py-2">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
-          <h2 className="fw-bold mb-1">⚡ Advance Contributions</h2>
+          <div className="d-flex align-items-center gap-2 mb-1">
+            <Icon name="advance" size={24} color="#235665" />
+            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>Advance Contributions</h2>
+          </div>
           <p className="text-muted mb-0">Record and track advance installment payments before cycle due dates</p>
         </div>
-        <button className="btn btn-primary shadow-sm" onClick={() => setShowModal(true)}>
-          ➕ Record Advance Payment
+        <button 
+          className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
+          onClick={() => setShowModal(true)}
+        >
+          <span>+</span> Record Advance Payment
         </button>
       </div>
 
-      {/* Summary Card */}
-      <div className="card shadow-sm border-0 mb-4 bg-gradient text-white p-4" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' }}>
+      {/* Summary Card matching brand teal palette */}
+      <div 
+        className="card shadow-sm border-0 mb-4 p-4 text-white" 
+        style={{ backgroundColor: '#134A5A', borderRadius: '12px' }}
+      >
         <div className="d-flex justify-content-between align-items-center">
           <div>
-            <span className="text-white-50 text-uppercase fw-bold small">Total Advance Deposited</span>
+            <span className="text-white-50 text-uppercase fw-semibold" style={{ fontSize: '0.8rem', letterSpacing: '0.5px' }}>
+              Total Advance Deposited
+            </span>
             <h2 className="display-6 fw-bold mb-0 mt-1">LKR {totalAdvance.toLocaleString()}</h2>
           </div>
-          <div style={{ fontSize: '2.5rem' }}>💰</div>
+          <div className="p-3 rounded-circle" style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)' }}>
+            <Icon name="payments" size={32} color="#FFFFFF" />
+          </div>
         </div>
       </div>
 
       {loading ? (
         <div className="text-center py-5">
-          <div className="spinner-border text-primary" role="status"></div>
+          <div className="spinner-border" style={{ color: '#235665' }} role="status"></div>
           <p className="mt-2 text-muted">Loading advance payment records...</p>
         </div>
       ) : advancePayments.length === 0 ? (
-        <div className="card text-center p-5 shadow-sm border-0">
-          <div style={{ fontSize: '3rem' }}>⚡</div>
-          <h5 className="fw-bold mt-3">No Advance Payments Recorded</h5>
-          <p className="text-muted">You have no recorded advance payment contributions for your groups.</p>
+        <div className="ui-card text-center p-5 shadow-sm border-0">
+          <div className="d-inline-flex p-3 rounded-circle mb-3" style={{ backgroundColor: '#E8F0F3' }}>
+            <Icon name="advance" size={36} color="#235665" />
+          </div>
+          <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>No Advance Payments Recorded</h5>
+          <p className="text-muted small mb-4">You have no recorded advance payment contributions for your groups.</p>
           <div>
-            <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+            <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
               Record Advance Payment
             </button>
           </div>
         </div>
       ) : (
-        <div className="card shadow-sm border-0">
+        <div className="ui-card shadow-sm border-0 overflow-hidden">
           <div className="card-header bg-white border-bottom fw-bold text-dark py-3">
-            📋 Advance Contribution History ({advancePayments.length})
+            Advance Contribution History ({advancePayments.length})
           </div>
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
-              <thead className="table-light">
+              <thead style={{ backgroundColor: '#DCE7EB' }}>
                 <tr>
                   <th>Record ID</th>
                   <th>Group</th>
@@ -124,20 +141,21 @@ const AdvancePayments = () => {
       {/* Record Modal */}
       {showModal && (
         <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+              <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#134A5A' }}>
                 <h5 className="modal-title fw-bold">Record Advance Contribution</h5>
-                <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleCreate}>
-                <div className="modal-body">
+                <div className="modal-body p-4">
                   <div className="mb-3">
-                    <label className="form-label">Select Group</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Select Group</label>
                     <select
                       className="form-select"
                       value={formData.groupId}
                       onChange={(e) => setFormData({ ...formData, groupId: e.target.value })}
+                      style={{ borderRadius: '8px' }}
                       required
                     >
                       <option value="">-- Select Group --</option>
@@ -147,30 +165,32 @@ const AdvancePayments = () => {
                     </select>
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Advance Amount (LKR)</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Advance Amount (LKR)</label>
                     <input
                       type="number"
                       className="form-control"
                       placeholder="e.g. 5000"
                       value={formData.amount}
                       onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                      style={{ borderRadius: '8px' }}
                       required
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">Notes / Reference</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Notes / Reference</label>
                     <textarea
                       className="form-control"
                       rows="3"
                       placeholder="e.g. Paid 2 months ahead"
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      style={{ borderRadius: '8px' }}
                     ></textarea>
                   </div>
                 </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary">Save Advance Payment</button>
+                <div className="modal-footer py-3 px-4 bg-light">
+                  <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>Save Advance Payment</button>
                 </div>
               </form>
             </div>

@@ -10,6 +10,7 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import MyGroups from './pages/MyGroups';
+import Members from './pages/Members';
 import CreateGroup from './pages/CreateGroup';
 import GroupDetail from './pages/GroupDetail';
 import PaymentTracking from './pages/PaymentTracking';
@@ -22,8 +23,7 @@ import Certificates from './pages/Certificates';
 import Notifications from './pages/Notifications';
 
 // Components
-import Navbar from './components/Navbar';
-import ChatbotWidget from './components/ChatbotWidget';
+import AppLayout from './components/AppLayout';
 
 const ProtectedRoute = ({ children, roles }) => {
   const { user, loading } = useAuth();
@@ -43,41 +43,42 @@ const MainLayout = () => {
   const location = useLocation();
 
   const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
-  const showNavbarAndWidget = user && !isAuthPage;
+
+  if (isAuthPage || !user) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
+  }
 
   return (
-    <>
-      {/* Navbar is displayed ONLY when user is logged in AND NOT on login/registration/forgot-password pages */}
-      {showNavbarAndWidget && <Navbar />}
+    <AppLayout>
+      <Routes>
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/groups" element={<ProtectedRoute><MyGroups /></ProtectedRoute>} />
+        <Route path="/groups/create" element={<ProtectedRoute><CreateGroup /></ProtectedRoute>} />
+        <Route path="/groups/:id" element={<ProtectedRoute><GroupDetail /></ProtectedRoute>} />
+        
+        <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
+        
+        <Route path="/payments" element={<ProtectedRoute><PaymentTracking /></ProtectedRoute>} />
+        <Route path="/advance-payments" element={<ProtectedRoute><AdvancePayments /></ProtectedRoute>} />
+        
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/disputes" element={<ProtectedRoute><Disputes /></ProtectedRoute>} />
+        <Route path="/emergency" element={<ProtectedRoute><EmergencyRequests /></ProtectedRoute>} />
+        
+        <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+        <Route path="/certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 
-      <div className={showNavbarAndWidget ? "container mt-4 mb-5 pb-5" : "container-fluid p-0"}>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/groups" element={<ProtectedRoute><MyGroups /></ProtectedRoute>} />
-          <Route path="/groups/create" element={<ProtectedRoute roles={['ORGANIZER']}><CreateGroup /></ProtectedRoute>} />
-          <Route path="/groups/:id" element={<ProtectedRoute><GroupDetail /></ProtectedRoute>} />
-          
-          <Route path="/payments" element={<ProtectedRoute roles={['ORGANIZER', 'ADMIN']}><PaymentTracking /></ProtectedRoute>} />
-          <Route path="/advance-payments" element={<ProtectedRoute roles={['ORGANIZER', 'ADMIN']}><AdvancePayments /></ProtectedRoute>} />
-          
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/disputes" element={<ProtectedRoute><Disputes /></ProtectedRoute>} />
-          <Route path="/emergency" element={<ProtectedRoute><EmergencyRequests /></ProtectedRoute>} />
-          
-          <Route path="/reports" element={<ProtectedRoute roles={['ADMIN', 'ORGANIZER']}><Reports /></ProtectedRoute>} />
-          <Route path="/certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
-          <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-
-          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
-        </Routes>
-      </div>
-
-      {showNavbarAndWidget && <ChatbotWidget />}
-    </>
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </AppLayout>
   );
 };
 

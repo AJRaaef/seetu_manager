@@ -117,8 +117,8 @@ const GroupDetail = () => {
             ← Back to Groups
           </Link>
           {(isOrganizer || isAdmin) && (
-            <button className="btn btn-primary fw-bold" onClick={() => setShowAddMemberModal(true)}>
-              ➕ Add Member
+            <button className="btn btn-teal fw-semibold d-flex align-items-center gap-1" onClick={() => setShowAddMemberModal(true)}>
+              <span>+</span> Add Member
             </button>
           )}
         </div>
@@ -130,10 +130,10 @@ const GroupDetail = () => {
       <div className="row g-4 mb-4">
         {/* Summary Side Card */}
         <div className="col-lg-4">
-          <div className="card shadow-sm border-0 h-100">
-            <div className="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
-              <span>📌 Group & Pool Summary</span>
-              {activeCycle && <span className="badge bg-warning text-dark">Active Cycle #{activeCycle.cycleNumber}</span>}
+          <div className="card shadow-sm border-0 h-100 overflow-hidden" style={{ borderRadius: '12px' }}>
+            <div className="card-header text-white fw-bold d-flex justify-content-between align-items-center py-3 px-4" style={{ backgroundColor: '#134A5A' }}>
+              <span>Group & Pool Summary</span>
+              {activeCycle && <span className="badge rounded-pill bg-light text-dark">Active Cycle #{activeCycle.cycleNumber}</span>}
             </div>
             <div className="card-body p-0">
               <ul className="list-group list-group-flush">
