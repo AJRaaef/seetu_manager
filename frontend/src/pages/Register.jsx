@@ -27,22 +27,22 @@ const Register = () => {
     setError('');
 
     if (formData.fullName.trim().length < 3) {
-      setError('⚠️ Full Name Guidance: Please enter your complete name (at least 3 characters).');
+      setError(' Full Name Guidance: Please enter your complete name (at least 3 characters).');
       return;
     }
 
     if (!formData.email.includes('@') || !formData.email.includes('.')) {
-      setError('⚠️ Email Guidance: Please provide a valid email address (e.g. user@example.com).');
+      setError(' Email Guidance: Please provide a valid email address (e.g. user@example.com).');
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('⚠️ Password Guidance: Password must be at least 6 characters long.');
+      setError('Password Guidance: Password must be at least 6 characters long.');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('⚠️ Password Mismatch: The Password and Confirm Password fields do not match. Please verify both inputs.');
+      setError(' Password Mismatch: The Password and Confirm Password fields do not match. Please verify both inputs.');
       return;
     }
 
@@ -52,7 +52,7 @@ const Register = () => {
       navigate('/dashboard');
     } catch (err) {
       const guidance = getErrorMessage(err, 'Registration failed. The email address or phone number may already be registered.');
-      setError(`⚠️ Registration Error Guidance: ${guidance}`);
+      setError(`Registration Error Guidance: ${guidance}`);
     } finally {
       setLoading(false);
     }
@@ -117,7 +117,7 @@ const Register = () => {
                     <input
                       type="tel"
                       className="form-control"
-                      placeholder="e.g. +94 77 123 4567"
+                      placeholder="e.g.  077 123 4567"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
