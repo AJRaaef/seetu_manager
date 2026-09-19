@@ -206,13 +206,13 @@ const PaymentTracking = () => {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'PAID':
-        return <span className="badge-paid">Paid</span>;
+        return <span className="badge-paid" style={{ cursor: 'pointer' }}>Paid</span>;
       case 'PENDING':
-        return <span className="badge-pending">Pending</span>;
+        return <span className="badge-pending" style={{ cursor: 'pointer' }}>Pending</span>;
       case 'OVERDUE':
-        return <span className="badge-overdue">Overdue</span>;
+        return <span className="badge-overdue" style={{ cursor: 'pointer' }}>Overdue</span>;
       default:
-        return <span className="badge-paid">{status}</span>;
+        return <span className="badge-paid" style={{ cursor: 'pointer' }}>{status}</span>;
     }
   };
 
@@ -552,28 +552,40 @@ const PaymentTracking = () => {
                 </tr>
               ) : (
                 filteredPayments.map((p) => (
-                  <tr key={p.id}>
+                  <tr
+                    key={p.id}
+                    onClick={() => setViewPayment(p)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <td className="py-3 px-3 text-muted small">{p.date}</td>
                     <td className="py-3 px-3 text-dark small">{p.group}</td>
-                    <td
-                      className="py-3 px-3 fw-semibold text-dark small"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => setViewPayment(p)}
-                    >
+                    <td className="py-3 px-3 fw-semibold text-dark small">
                       {p.member}
                     </td>
                     <td className="py-3 px-3 text-muted small">{p.cycle}</td>
                     <td className="py-3 px-3 fw-semibold text-dark small">{p.amount.toLocaleString()} LKR</td>
-                    <td className="py-3 px-3 text-center">{getStatusBadge(p.status)}</td>
+                    <td
+                      className="py-3 px-3 text-center"
+                      onClick={() => setViewPayment(p)}
+                      title="Click to view payment details"
+                    >
+                      {getStatusBadge(p.status)}
+                    </td>
                     <td className="py-3 px-3 text-muted small">{p.recordedBy}</td>
-                    <td className="py-3 px-3 text-end">
+                    <td
+                      className="py-3 px-3 text-end"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {p.status === 'PAID' ? (
                         <div className="d-flex justify-content-end gap-2">
                           <button
                             className="btn btn-link p-1 text-decoration-none"
                             style={{ color: '#188754' }}
                             title="Edit Payment"
-                            onClick={() => setEditPayment(p)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditPayment(p);
+                            }}
                           >
                             <Icon name="pencil" size={16} color="#188754" />
                           </button>
@@ -581,7 +593,10 @@ const PaymentTracking = () => {
                             className="btn btn-link p-1 text-decoration-none"
                             style={{ color: '#DC3545' }}
                             title="Delete Payment"
-                            onClick={() => setDeletePayment(p)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeletePayment(p);
+                            }}
                           >
                             <Icon name="trash" size={16} color="#DC3545" />
                           </button>
@@ -590,7 +605,10 @@ const PaymentTracking = () => {
                         <button
                           className="btn btn-link fw-semibold p-0 text-decoration-none small"
                           style={{ color: '#188754' }}
-                          onClick={() => handleQuickRecord(p)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleQuickRecord(p);
+                          }}
                         >
                           Record
                         </button>
@@ -598,7 +616,10 @@ const PaymentTracking = () => {
                         <button
                           className="btn btn-link fw-semibold p-0 text-decoration-none small d-inline-flex align-items-center gap-1"
                           style={{ color: '#DC3545' }}
-                          onClick={() => setReminderPayment(p)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setReminderPayment(p);
+                          }}
                         >
                           <Icon name="bell" size={14} color="#DC3545" />
                           <span>Reminder</span>
