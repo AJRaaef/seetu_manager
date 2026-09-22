@@ -172,7 +172,7 @@ const GroupDetail = () => {
                     className={`nav-link border-0 py-3 px-4 fw-bold ${activeTab === 'members' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}`}
                     onClick={() => setActiveTab('members')}
                   >
-                    👥 Enrolled Members ({group.members?.length || 0})
+                    Enrolled Members ({group.members?.length || 0})
                   </button>
                 </li>
                 <li className="nav-item">
@@ -180,7 +180,7 @@ const GroupDetail = () => {
                     className={`nav-link border-0 py-3 px-4 fw-bold ${activeTab === 'cycles' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}`}
                     onClick={() => setActiveTab('cycles')}
                   >
-                     Seettu Rotation Cycles ({group.cycles?.length || 0})
+                    Seettu Rotation Cycles ({group.cycles?.length || 0})
                   </button>
                 </li>
               </ul>

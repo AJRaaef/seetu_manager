@@ -107,7 +107,7 @@ const Profile = () => {
   const groups = profileData?.groups || [];
   const totalContributed = Number(profileData?.totalContributed || 0);
   const groupsParticipated = profileData?.groupsParticipated ?? groups.length;
-  const averageDisciplineScore = profileData?.averageDisciplineScore ?? 85;
+  const averageDisciplineScore = profileData?.averageDisciplineScore ?? 100;
   const certificatesEarned = profileData?.certificatesEarned ?? 0;
   const userInfo = profileData?.user || user;
 
@@ -226,7 +226,6 @@ const Profile = () => {
               </div>
             ) : groups.length === 0 ? (
               <div className="text-center py-4 text-muted small">
-                <Icon name="groups" size={32} color="#94A3B8" className="mb-2" />
                 <div>You are not enrolled in any Seettu groups yet.</div>
               </div>
             ) : (
@@ -236,9 +235,6 @@ const Profile = () => {
                   return (
                     <div key={g.id} className="p-3 border rounded-3 d-flex justify-content-between align-items-center bg-white">
                       <div className="d-flex align-items-center gap-3">
-                        <div className="text-dark opacity-75">
-                          <Icon name="groups" size={24} color="#0F2F3D" />
-                        </div>
                         <div>
                           <div className="fw-bold text-dark small">{g.name}</div>
                           <span

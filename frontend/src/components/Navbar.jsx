@@ -50,7 +50,7 @@ const Navbar = () => {
             </li>
             <li className="nav-item">
               <Link className={`nav-link ${isActive('/groups')}`} to="/groups">
-                👥 {t('my_groups') || 'My Groups'}
+                {t('my_groups') || 'My Groups'}
               </Link>
             </li>
             {(isAdmin || isOrganizer) && (

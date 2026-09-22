@@ -1,4 +1,5 @@
 import React from 'react';
+import { Icon } from './Icons';
 
 const StatsCard = ({ title, value, icon, colorClass = 'primary', subtitle }) => {
   const getGradient = () => {
@@ -11,6 +12,15 @@ const StatsCard = ({ title, value, icon, colorClass = 'primary', subtitle }) => 
     }
   };
 
+  const getIconName = () => {
+    switch(icon) {
+      case 'fa-users': return 'users';
+      case 'fa-check-circle': return 'check-circle';
+      case 'fa-money-bill': return 'payments';
+      default: return 'dashboard';
+    }
+  };
+
   return (
     <div className="card shadow-sm border-0 h-100 text-white" style={{ background: getGradient() }}>
       <div className="card-body p-4">
@@ -20,8 +30,8 @@ const StatsCard = ({ title, value, icon, colorClass = 'primary', subtitle }) => 
             <h2 className="display-6 fw-bold mb-0 mt-2">{value}</h2>
             {subtitle && <p className="mb-0 mt-1 small text-white-50">{subtitle}</p>}
           </div>
-          <div className="bg-white bg-opacity-25 rounded-3 p-3 d-flex align-items-center justify-content-center" style={{ width: '52px', height: '52px', fontSize: '1.5rem' }}>
-            {icon === 'fa-users' ? '👥' : icon === 'fa-check-circle' ? '✅' : icon === 'fa-money-bill' ? '💵' : '📊'}
+          <div className="bg-white bg-opacity-25 rounded-3 p-3 d-flex align-items-center justify-content-center" style={{ width: '52px', height: '52px' }}>
+            <Icon name={getIconName()} size={24} color="#FFFFFF" />
           </div>
         </div>
       </div>
