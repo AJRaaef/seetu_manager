@@ -18,12 +18,17 @@ const Profile = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [actionMsg, setActionMsg] = useState('');
 
+  const currentUserId = user?.id || user?.userId;
+
   const fetchProfile = async () => {
-    if (!user?.id) return;
+    if (!currentUserId) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       setErrorMsg('');
-      const res = await getUserProfileStats(user.id);
+      const res = await getUserProfileStats(currentUserId);
       const data = res?.data || res || {};
       setProfileData(data);
       if (data.user) {
@@ -39,10 +44,12 @@ const Profile = () => {
   };
 
   useEffect(() => {
-    if (user?.id) {
-      setFullName(user.fullName || '');
-      setPhone(user.phone || '');
+    if (currentUserId) {
+      setFullName(user?.fullName || '');
+      setPhone(user?.phone || '');
       fetchProfile();
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
@@ -75,7 +82,7 @@ const Profile = () => {
     setErrorMsg('');
 
     try {
-      await updateUserProfile(user.id, {
+      await updateUserProfile(currentUserId, {
         fullName: fullName.trim(),
         phone: phone.trim()
       });

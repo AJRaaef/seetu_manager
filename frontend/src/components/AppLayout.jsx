@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Topbar from './Topbar';
 import Sidebar from './Sidebar';
+import ChatbotWidget from './ChatbotWidget';
+
 const AppLayout = ({ children }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
@@ -18,6 +20,8 @@ const AppLayout = ({ children }) => {
           {children}
         </main>
       </div>
+
+      <ChatbotWidget />
     </div>
   );
 };

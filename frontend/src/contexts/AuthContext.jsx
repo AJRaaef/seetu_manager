@@ -3,6 +3,16 @@ import * as authApi from '../api/authApi';
 
 export const AuthContext = createContext();
 
+const normalizeUser = (userData) => {
+  if (!userData) return null;
+  const id = userData.id || userData.userId;
+  return {
+    ...userData,
+    id,
+    userId: id
+  };
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token') || null);
@@ -11,9 +21,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       try {
-        const userData = JSON.parse(localStorage.getItem('user'));
-        if (userData) {
+        const rawUserData = JSON.parse(localStorage.getItem('user'));
+        if (rawUserData) {
+          const userData = normalizeUser(rawUserData);
           setUser(userData);
+          localStorage.setItem('user', JSON.stringify(userData));
         } else {
           setToken(null);
           localStorage.removeItem('token');
@@ -28,7 +40,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     const data = await authApi.login(credentials);
-    const { token, ...userData } = data.data;
+    const { token, ...rawUserData } = data.data;
+    const userData = normalizeUser(rawUserData);
     setToken(token);
     setUser(userData);
     localStorage.setItem('token', token);
@@ -38,7 +51,8 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (details) => {
     const data = await authApi.register(details);
-    const { token, ...userData } = data.data;
+    const { token, ...rawUserData } = data.data;
+    const userData = normalizeUser(rawUserData);
     setToken(token);
     setUser(userData);
     localStorage.setItem('token', token);
@@ -54,7 +68,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (updatedData) => {
-    const newUser = { ...user, ...updatedData };
+    const newUser = normalizeUser({ ...user, ...updatedData });
     setUser(newUser);
     localStorage.setItem('user', JSON.stringify(newUser));
   };
