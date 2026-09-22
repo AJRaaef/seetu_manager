@@ -79,43 +79,43 @@ const GroupCard = ({
           {isOrganizer ? (
             <div className="d-flex flex-column gap-2">
               <Link to={`/groups/${group.id}`} className="btn btn-primary w-100 fw-bold">
-                🔍 View Details
+                 View Details
               </Link>
               <div className="d-flex gap-2">
                 <button
                   className="btn btn-outline-success btn-sm w-50 fw-bold"
                   onClick={() => onRecordPayment && onRecordPayment(group)}
                 >
-                  💳 Record Payment
+                  Record Payment
                 </button>
                 <button
                   className="btn btn-outline-info btn-sm w-50 fw-bold"
                   onClick={() => onGenerateReport && onGenerateReport(group)}
                 >
-                  📈 Report
+                  Report
                 </button>
               </div>
             </div>
           ) : isMember ? (
             <Link to={`/groups/${group.id}`} className="btn btn-outline-primary w-100 fw-bold">
-              🔍 View Details
+                View Details
             </Link>
           ) : (
             <div>
               {joinRequestStatus === 'PENDING' ? (
                 <button className="btn btn-warning w-100 fw-bold text-dark" disabled>
-                  ⏳ Request Pending
+                    Request Pending
                 </button>
               ) : joinRequestStatus === 'APPROVED' ? (
                 <Link to={`/groups/${group.id}`} className="btn btn-outline-primary w-100 fw-bold">
-                  🔍 View Details
+                   View Details
                 </Link>
               ) : (
                 <button
                   className="btn btn-success w-100 fw-bold"
                   onClick={() => onRequestJoin && onRequestJoin(group)}
                 >
-                  🙋‍♂️ Request to Join
+                  ️ Request to Join
                 </button>
               )}
             </div>

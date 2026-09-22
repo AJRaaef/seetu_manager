@@ -26,6 +26,12 @@ public class PaymentService {
 
     @Transactional
     public Payment recordPayment(PaymentRecordRequest request, User recorder) {
+        if (request.getCycleId() == null) {
+            throw new IllegalArgumentException("Cycle ID is required");
+        }
+        if (request.getMemberId() == null) {
+            throw new IllegalArgumentException("Member ID is required");
+        }
         PaymentCycle cycle = paymentCycleService.getCycleById(request.getCycleId());
         User member = userService.getUserById(request.getMemberId());
 
@@ -78,20 +84,59 @@ public class PaymentService {
         return payment;
     }
 
+    @Transactional(readOnly = true)
     public List<Payment> getPaymentsByGroup(Long groupId) {
-        return paymentRepository.findByGroupId(groupId);
+        return paymentRepository.findByGroupIdWithDetails(groupId);
     }
 
+    @Transactional(readOnly = true)
     public List<Payment> getPaymentsByMember(Long memberId) {
-        return paymentRepository.findByMemberId(memberId);
+        return paymentRepository.findByMemberIdWithDetails(memberId);
     }
 
+    @Transactional(readOnly = true)
     public List<Payment> getPaymentsByCycle(Long cycleId) {
-        return paymentRepository.findByCycleId(cycleId);
+        return paymentRepository.findByCycleIdWithDetails(cycleId);
     }
 
+    @Transactional(readOnly = true)
     public List<Payment> getPaymentsByGroupAndMember(Long groupId, Long memberId) {
         return paymentRepository.findByGroupIdAndMemberId(groupId, memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Payment> getAllPayments() {
+        return paymentRepository.findAllWithDetails();
+    }
+
+    @Transactional
+    public Payment updatePayment(Long id, PaymentRecordRequest request) {
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + id));
+        if (request.getAmount() != null) {
+            payment.setAmount(request.getAmount());
+        }
+        if (request.getNotes() != null) {
+            payment.setNotes(request.getNotes());
+        }
+        if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
+            try {
+                payment.setStatus(Payment.PaymentStatus.valueOf(request.getStatus().trim().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // invalid status ignored
+            }
+        }
+        if (request.getPaymentDate() != null) {
+            payment.setPaymentDate(request.getPaymentDate());
+        }
+        return paymentRepository.save(payment);
+    }
+
+    @Transactional
+    public void deletePayment(Long id) {
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + id));
+        paymentRepository.delete(payment);
     }
 
     @Transactional

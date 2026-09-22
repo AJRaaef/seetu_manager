@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../hooks/useLanguage';
 import { useNotification } from '../hooks/useNotification';
 import { useTheme } from '../contexts/ThemeContext';
+import Icon from './Icons';
 
 const Navbar = () => {
   const { user, logout, isAdmin, isOrganizer } = useAuth();
@@ -123,8 +124,8 @@ const Navbar = () => {
 
             {/* Notifications Bell */}
             <li className="nav-item me-2">
-              <Link className={`nav-link position-relative ${isActive('/notifications')}`} to="/notifications">
-                <span style={{ fontSize: '1.2rem' }}>🔔</span>
+              <Link className={`nav-link position-relative d-flex align-items-center ${isActive('/notifications')}`} to="/notifications">
+                <Icon name="bell" size={20} color="#FFFFFF" />
                 {unreadCount > 0 && (
                   <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
                     {unreadCount}

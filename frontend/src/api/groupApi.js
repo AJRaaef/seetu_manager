@@ -51,3 +51,18 @@ export const removeMember = async (groupId, userId) => {
   const response = await api.delete(`/groups/${groupId}/members/${userId}`);
   return response.data;
 };
+
+export const getGroupMembers = async (groupId) => {
+  const response = await api.get(`/groups/${groupId}/members`);
+  return response.data;
+};
+
+export const getAllMembers = async () => {
+  const response = await api.get('/groups/members');
+  return response.data;
+};
+
+export const inviteMember = async (groupId, data) => {
+  const response = await api.post(`/groups/${groupId}/members/invite`, data);
+  return response.data;
+};

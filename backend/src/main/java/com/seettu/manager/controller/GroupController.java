@@ -109,6 +109,17 @@ public class GroupController {
         return ResponseEntity.ok(ApiResponse.success("Member added", member));
     }
 
+    @PostMapping("/{groupId}/members/invite")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    public ResponseEntity<?> inviteMember(@PathVariable Long groupId,
+                                          @RequestBody java.util.Map<String, String> request) {
+        String fullName = request.get("fullName");
+        String email = request.get("email");
+        String phone = request.get("phone");
+        GroupMember member = groupService.inviteOrAddMember(groupId, fullName, email, phone);
+        return ResponseEntity.ok(ApiResponse.success("Member added to group successfully", member));
+    }
+
     @DeleteMapping("/{groupId}/members/{userId}")
     @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public ResponseEntity<?> removeMember(@PathVariable Long groupId,
@@ -120,6 +131,12 @@ public class GroupController {
     @GetMapping("/{groupId}/members")
     public ResponseEntity<?> getGroupMembers(@PathVariable Long groupId) {
         List<GroupMember> members = groupService.getGroupMembers(groupId);
+        return ResponseEntity.ok(ApiResponse.success(members));
+    }
+
+    @GetMapping("/members")
+    public ResponseEntity<?> getAllMembers() {
+        List<GroupMember> members = groupService.getAllActiveMembers();
         return ResponseEntity.ok(ApiResponse.success(members));
     }
 }

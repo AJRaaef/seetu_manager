@@ -7,6 +7,7 @@ import com.seettu.manager.exception.DuplicateResourceException;
 import com.seettu.manager.exception.ResourceNotFoundException;
 import com.seettu.manager.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ public class SeettuGroupService {
     private final PaymentCycleService paymentCycleService;
     private final AuditLogService auditLogService;
     private final NotificationService notificationService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public SeettuGroup getGroupById(Long id) {
@@ -34,7 +36,7 @@ public class SeettuGroupService {
 
     @Transactional(readOnly = true)
     public List<SeettuGroup> getAllGroups() {
-        return groupRepository.findAll();
+        return groupRepository.findAllWithDetails();
     }
 
     @Transactional(readOnly = true)
@@ -147,6 +149,28 @@ public class SeettuGroupService {
     }
 
     @Transactional
+    public GroupMember inviteOrAddMember(Long groupId, String fullName, String email, String phone) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email is required to invite or add a member");
+        }
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
+            User newUser = User.builder()
+                    .fullName(fullName != null && !fullName.isBlank() ? fullName : email.split("@")[0])
+                    .email(email)
+                    .phone(phone != null && !phone.isBlank() ? phone : "0770000000")
+                    .passwordHash(passwordEncoder.encode("Seettu@123"))
+                    .role(User.Role.MEMBER)
+                    .preferredLanguage(User.Language.EN)
+                    .isLocked(false)
+                    .failedLoginAttempts(0)
+                    .build();
+            return userRepository.save(newUser);
+        });
+
+        return addMember(groupId, user.getId());
+    }
+
+    @Transactional
     public void removeMember(Long groupId, Long userId) {
         GroupMember member = memberRepository.findByGroupIdAndUserId(groupId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found in this group"));
@@ -160,6 +184,11 @@ public class SeettuGroupService {
     @Transactional(readOnly = true)
     public List<GroupMember> getGroupMembers(Long groupId) {
         return memberRepository.findByGroupIdAndStatus(groupId, GroupMember.MemberStatus.ACTIVE);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupMember> getAllActiveMembers() {
+        return memberRepository.findAllActiveWithDetails();
     }
 
     @Transactional(readOnly = true)

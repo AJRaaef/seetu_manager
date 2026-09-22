@@ -20,10 +20,12 @@ public class Dispute {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"members", "cycles", "hibernateLazyInitializer", "handler"})
     private SeettuGroup group;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "raised_by_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"password", "hibernateLazyInitializer", "handler"})
     private User raisedBy;
 
     @Column(nullable = false, length = 50)
@@ -41,6 +43,7 @@ public class Dispute {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "resolved_by_id")
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"password", "hibernateLazyInitializer", "handler"})
     private User resolvedBy;
 
     @Column(name = "created_at", nullable = false, updatable = false)

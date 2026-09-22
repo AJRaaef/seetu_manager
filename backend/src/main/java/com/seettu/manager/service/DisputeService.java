@@ -44,14 +44,22 @@ public class DisputeService {
         return dispute;
     }
 
+    @Transactional(readOnly = true)
+    public List<Dispute> getAllDisputes() {
+        return disputeRepository.findAllWithDetails();
+    }
+
+    @Transactional(readOnly = true)
     public List<Dispute> getDisputesByGroup(Long groupId) {
-        return disputeRepository.findByGroupId(groupId);
+        return disputeRepository.findByGroupIdWithDetails(groupId);
     }
 
+    @Transactional(readOnly = true)
     public List<Dispute> getDisputesByRaisedBy(Long userId) {
-        return disputeRepository.findByRaisedById(userId);
+        return disputeRepository.findByRaisedByIdWithDetails(userId);
     }
 
+    @Transactional(readOnly = true)
     public Dispute getDisputeById(Long id) {
         return disputeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Dispute", "id", id));

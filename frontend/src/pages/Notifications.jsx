@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import * as notificationApi from '../api/notificationApi';
+import Icon from '../components/Icons';
 
 const Notifications = () => {
   const { user } = useAuth();
@@ -44,12 +45,16 @@ const Notifications = () => {
     <div className="py-2">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
-          <h2 className="fw-bold mb-1">🔔 Notification Center</h2>
+          <h2 className="fw-bold mb-1 d-flex align-items-center gap-2">
+            <Icon name="bell" size={26} color="#1A5265" />
+            <span>Notification Center</span>
+          </h2>
           <p className="text-muted mb-0">Stay updated on payment reminders, cycle auctions, and group notices</p>
         </div>
         <div className="d-flex gap-2">
-          <button className="btn btn-outline-secondary btn-sm fw-bold" onClick={fetchNotifications}>
-            🔄 Refresh
+          <button className="btn btn-outline-secondary btn-sm fw-bold d-flex align-items-center gap-1" onClick={fetchNotifications}>
+            <Icon name="refresh" size={14} />
+            <span>Refresh</span>
           </button>
         </div>
       </div>
@@ -81,8 +86,10 @@ const Notifications = () => {
         </div>
       ) : filteredNotifications.length === 0 ? (
         <div className="card text-center p-5 shadow-sm border-0">
-          <div style={{ fontSize: '3rem' }}>🔔</div>
-          <h5 className="fw-bold mt-3">No Notifications Found</h5>
+          <div className="d-flex justify-content-center mb-2">
+            <Icon name="bell" size={48} color="#94A3B8" />
+          </div>
+          <h5 className="fw-bold mt-2">No Notifications Found</h5>
           <p className="text-muted">You have no pending notifications matching your filter.</p>
         </div>
       ) : (

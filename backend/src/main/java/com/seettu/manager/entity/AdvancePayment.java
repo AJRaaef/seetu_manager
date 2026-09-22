@@ -21,6 +21,7 @@ public class AdvancePayment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"password", "hibernateLazyInitializer", "handler"})
     private User member;
 
     @Column(nullable = false, precision = 12, scale = 2)

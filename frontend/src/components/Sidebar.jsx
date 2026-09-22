@@ -14,7 +14,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
 
   const handleHelpCenter = () => {
     if (onCloseMobile) onCloseMobile();
-    window.dispatchEvent(new CustomEvent('toggle-chatbot'));
+    navigate('/disputes');
   };
 
   const portalLabel = isAdmin ? 'ADMIN PORTAL' : isOrganizer ? 'ORGANIZER PORTAL' : 'MEMBER PORTAL';

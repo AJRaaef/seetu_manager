@@ -37,16 +37,19 @@ public class AdvancePaymentService {
         return payment;
     }
 
+    @Transactional(readOnly = true)
     public List<AdvancePayment> getByMember(Long memberId) {
         return advancePaymentRepository.findByMemberId(memberId);
     }
 
+    @Transactional(readOnly = true)
     public AdvancePayment getById(Long id) {
         return advancePaymentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AdvancePayment", "id", id));
     }
 
+    @Transactional(readOnly = true)
     public List<AdvancePayment> getAll() {
-        return advancePaymentRepository.findAll();
+        return advancePaymentRepository.findAllWithMember();
     }
 }

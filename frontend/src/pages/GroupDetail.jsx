@@ -180,7 +180,7 @@ const GroupDetail = () => {
                     className={`nav-link border-0 py-3 px-4 fw-bold ${activeTab === 'cycles' ? 'active text-primary border-bottom border-primary border-3' : 'text-muted'}`}
                     onClick={() => setActiveTab('cycles')}
                   >
-                    🔄 Seettu Rotation Cycles ({group.cycles?.length || 0})
+                     Seettu Rotation Cycles ({group.cycles?.length || 0})
                   </button>
                 </li>
               </ul>
@@ -262,7 +262,7 @@ const GroupDetail = () => {
                                     setShowAssignPayoutModal(true);
                                   }}
                                 >
-                                  🎯 Select Payout
+                                   Select Payout
                                 </button>
                                 {c.status === 'ACTIVE' && (
                                   <button
@@ -277,7 +277,7 @@ const GroupDetail = () => {
                                     className="btn btn-sm btn-warning text-dark fw-bold"
                                     onClick={() => handleCycleStatusChange(c.id, 'ACTIVE')}
                                   >
-                                    ▶ Start Cycle
+                                     Start Cycle
                                   </button>
                                 )}
                               </div>

@@ -29,3 +29,18 @@ export const getPaymentCyclesByGroup = async (groupId) => {
   const response = await api.get(`/payment-cycles/group/${groupId}`);
   return response.data;
 };
+
+export const getAllPayments = async () => {
+  const response = await api.get('/payments');
+  return response.data;
+};
+
+export const updatePayment = async (paymentId, data) => {
+  const response = await api.put(`/payments/${paymentId}`, data);
+  return response.data;
+};
+
+export const deletePayment = async (paymentId) => {
+  const response = await api.delete(`/payments/${paymentId}`);
+  return response.data;
+};

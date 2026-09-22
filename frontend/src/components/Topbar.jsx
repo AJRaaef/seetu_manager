@@ -49,7 +49,7 @@ const Topbar = ({ onToggleSidebar }) => {
             style={{ fontSize: '0.9rem' }}
           >
             <span>{language.toUpperCase()}</span>
-            <span style={{ fontSize: '0.75rem' }}>▼</span>
+            <Icon name="chevron-down" size={13} className="text-muted" />
           </button>
 
           {showLangMenu && (

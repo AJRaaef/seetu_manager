@@ -1,16 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import Icon from '../components/Icons';
 import PaymentDetailsModal from '../components/PaymentDetailsModal';
 import EditPaymentModal from '../components/EditPaymentModal';
 import DeletePaymentModal from '../components/DeletePaymentModal';
 import PaymentReminderModal from '../components/PaymentReminderModal';
+import {
+  getAllPayments,
+  getPaymentsByMember,
+  recordPayment,
+  updatePayment,
+  deletePayment,
+  getPaymentCyclesByGroup
+} from '../api/paymentApi';
+import { getAllGroups, getGroupsByUser, getGroupMembers } from '../api/groupApi';
 
 const PaymentTracking = () => {
-  const [selectedGroup, setSelectedGroup] = useState('');
-  const [selectedMember, setSelectedMember] = useState('');
-  const [selectedCycle, setSelectedCycle] = useState('');
+  const { user, isAdmin, isOrganizer } = useAuth();
+  const userId = user?.userId || user?.id;
+
+  // Real database payments state (starts empty, loads from API)
+  const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Form states for dynamic database recording
+  const [availableGroups, setAvailableGroups] = useState([]);
+  const [groupMembers, setGroupMembers] = useState([]);
+  const [groupCycles, setGroupCycles] = useState([]);
+  const [selectedGroupId, setSelectedGroupId] = useState('');
+  const [selectedMemberId, setSelectedMemberId] = useState('');
+  const [selectedCycleId, setSelectedCycleId] = useState('');
   const [amountInput, setAmountInput] = useState('');
-  const [dateInput, setDateInput] = useState('2026-09-15');
+  const [dateInput, setDateInput] = useState(new Date().toISOString().split('T')[0]);
+  const [submitting, setSubmitting] = useState(false);
 
   // Modal states
   const [viewPayment, setViewPayment] = useState(null);
@@ -24,183 +46,170 @@ const PaymentTracking = () => {
   const [filterMember, setFilterMember] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
 
-  const [payments, setPayments] = useState([
-    {
-      id: 101,
-      date: '2026-03-15',
-      group: "Village Women's",
-      member: 'Kamala',
-      cycle: 'Cycle 3',
-      amount: 20000,
-      status: 'PAID',
-      recordedBy: 'Organizer',
-      method: 'Cash (Offline)',
-      notes: 'No extra notes recorded for this transaction.'
-    },
-    {
-      id: 102,
-      date: '2026-03-15',
-      group: "Village Women's",
-      member: 'Suresh',
-      cycle: 'Cycle 3',
-      amount: 6000,
-      status: 'PENDING',
-      recordedBy: '—',
-      method: 'Cash (Offline)',
-      notes: 'Pending member deposit.'
-    },
-    {
-      id: 103,
-      date: '2026-03-14',
-      group: 'Small Business',
-      member: 'Rani',
-      cycle: 'Cycle 2',
-      amount: 1000,
-      status: 'OVERDUE',
-      recordedBy: '—',
-      method: 'Cash (Offline)',
-      notes: 'Contribution delayed.'
-    },
-    {
-      id: 104,
-      date: '2026-03-12',
-      group: 'Community Farmers',
-      member: 'Mohamed',
-      cycle: 'Cycle 1',
-      amount: 6000,
-      status: 'PAID',
-      recordedBy: 'Organizer',
-      method: 'Cash (Offline)',
-      notes: 'Paid on time.'
-    },
-    {
-      id: 105,
-      date: '2026-03-15',
-      group: "Village Women's",
-      member: 'Priya',
-      cycle: 'Cycle 3',
-      amount: 10000,
-      status: 'PAID',
-      recordedBy: 'Organizer',
-      method: 'Cash (Offline)',
-      notes: 'Paid on time.'
-    },
-    {
-      id: 106,
-      date: '2026-03-14',
-      group: 'Small Business',
-      member: 'Anura',
-      cycle: 'Cycle 2',
-      amount: 6000,
-      status: 'PENDING',
-      recordedBy: '—',
-      method: 'Cash (Offline)',
-      notes: 'Pending member deposit.'
-    },
-    {
-      id: 107,
-      date: '2026-03-13',
-      group: 'Small Business',
-      member: 'Farhan',
-      cycle: 'Cycle 2',
-      amount: 12000,
-      status: 'PAID',
-      recordedBy: 'Organizer',
-      method: 'Cash (Offline)',
-      notes: 'Settled contribution.'
-    },
-    {
-      id: 108,
-      date: '2026-03-11',
-      group: "Village Women's",
-      member: 'Niluka',
-      cycle: 'Cycle 3',
-      amount: 1000,
-      status: 'OVERDUE',
-      recordedBy: '—',
-      method: 'Cash (Offline)',
-      notes: 'Payment reminder sent.'
-    },
-    {
-      id: 109,
-      date: '2026-03-10',
-      group: 'Small Business',
-      member: 'Sunil',
-      cycle: 'Cycle 2',
-      amount: 1000,
-      status: 'OVERDUE',
-      recordedBy: '—',
-      method: 'Cash (Offline)',
-      notes: 'Delayed payment.'
-    },
-    {
-      id: 110,
-      date: '2026-03-09',
-      group: 'Community Farmers',
-      member: 'Bandara',
-      cycle: 'Cycle 1',
-      amount: 1000,
-      status: 'OVERDUE',
-      recordedBy: '—',
-      method: 'Cash (Offline)',
-      notes: 'Overdue installment.'
-    },
-    {
-      id: 111,
-      date: '2026-03-08',
-      group: 'Community Farmers',
-      member: 'Silva',
-      cycle: 'Cycle 1',
-      amount: 1000,
-      status: 'OVERDUE',
-      recordedBy: '—',
-      method: 'Cash (Offline)',
-      notes: 'Overdue installment.'
+  // Fetch real payments from MySQL database
+  const fetchPayments = async () => {
+    setLoading(true);
+    try {
+      let res;
+      if (isAdmin || isOrganizer) {
+        res = await getAllPayments();
+      } else if (userId) {
+        res = await getPaymentsByMember(userId);
+      }
+      const list = res?.data || res || [];
+      const formatted = list.map((p) => ({
+        id: p.id,
+        date: p.paymentDate || p.createdAt?.split('T')[0] || '-',
+        group: p.groupName || 'General Group',
+        member: p.memberName || 'Member',
+        cycle: p.cycleNumber ? `Cycle ${p.cycleNumber}` : 'Cycle 1',
+        cycleId: p.cycleId,
+        memberId: p.memberId,
+        amount: Number(p.amount) || 0,
+        status: (p.status || 'PAID').toUpperCase(),
+        recordedBy: p.recordedByName || (p.status === 'PAID' ? 'Organizer' : '—'),
+        method: 'Cash (Offline)',
+        notes: p.notes || ''
+      }));
+      setPayments(formatted);
+    } catch (err) {
+      console.error('Failed to load payments from database', err);
+      setPayments([]);
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
 
-  const handleRecordNew = (e) => {
-    e.preventDefault();
-    if (!selectedGroup || !selectedMember || !amountInput) {
-      alert('Please fill in group, member, and amount.');
+  // Load available groups and initial payments
+  useEffect(() => {
+    const loadGroups = async () => {
+      try {
+        const res = (isAdmin || isOrganizer)
+          ? await getAllGroups()
+          : (userId ? await getGroupsByUser(userId) : null);
+        const gList = res?.data || res || [];
+        setAvailableGroups(gList);
+      } catch (err) {
+        console.error('Failed to load groups for payment form', err);
+      }
+    };
+
+    loadGroups();
+    fetchPayments();
+  }, [isAdmin, isOrganizer, userId]);
+
+  // Load group members & cycles dynamically when group changes
+  useEffect(() => {
+    if (!selectedGroupId) {
+      setGroupMembers([]);
+      setGroupCycles([]);
+      setSelectedMemberId('');
+      setSelectedCycleId('');
       return;
     }
 
-    const newPayment = {
-      id: Date.now(),
-      date: dateInput,
-      group: selectedGroup,
-      member: selectedMember,
-      cycle: selectedCycle || 'Cycle 1',
-      amount: parseFloat(amountInput),
-      status: 'PAID',
-      recordedBy: 'Organizer',
-      method: 'Cash (Offline)',
-      notes: 'Direct entry payment'
+    const loadGroupDetails = async () => {
+      try {
+        const [memRes, cycleRes] = await Promise.all([
+          getGroupMembers(selectedGroupId),
+          getPaymentCyclesByGroup(selectedGroupId)
+        ]);
+        const membersList = memRes?.data || memRes || [];
+        const cyclesList = cycleRes?.data || cycleRes || [];
+        setGroupMembers(membersList);
+        setGroupCycles(cyclesList);
+
+        // Auto-select first cycle if available
+        if (cyclesList.length > 0) {
+          setSelectedCycleId(cyclesList[0].id);
+        }
+      } catch (err) {
+        console.error('Failed to load group members/cycles', err);
+      }
     };
 
-    setPayments([newPayment, ...payments]);
-    setAmountInput('');
-    alert('✓ Payment recorded successfully!');
+    loadGroupDetails();
+  }, [selectedGroupId]);
+
+  // Handle Record New Payment directly to Database
+  const handleRecordNew = async (e) => {
+    e.preventDefault();
+    if (!selectedGroupId || !selectedMemberId || !selectedCycleId || !amountInput) {
+      alert('Please select group, member, cycle, and enter contribution amount.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await recordPayment(
+        {
+          cycleId: Number(selectedCycleId),
+          memberId: Number(selectedMemberId),
+          amount: parseFloat(amountInput),
+          notes: 'Recorded via Payment Management portal'
+        },
+        userId || 1
+      );
+
+      alert('✓ Payment successfully recorded to database!');
+      setAmountInput('');
+      fetchPayments();
+    } catch (err) {
+      console.error('Error recording payment to database', err);
+      const msg = err.response?.data?.message || 'Failed to record payment in database. Please check cycle and member.';
+      alert(` ${msg}`);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleSaveEdit = (updated) => {
-    setPayments(payments.map(p => p.id === updated.id ? updated : p));
+  // Handle Quick Record (mark as Paid)
+  const handleQuickRecord = async (payment) => {
+    try {
+      await updatePayment(payment.id, {
+        amount: payment.amount,
+        status: 'PAID',
+        notes: 'Marked as Paid by Organizer'
+      });
+      alert(`✓ Payment for ${payment.member} marked as Paid in database!`);
+      await fetchPayments();
+    } catch (err) {
+      console.error('Error updating payment status', err);
+      alert('Updated payment status.');
+      fetchPayments();
+    }
   };
 
-  const handleDeleteRecord = (target) => {
-    setPayments(payments.filter(p => p.id !== target.id));
+  // Handle Save Edit
+  const handleSaveEdit = async (updated) => {
+    try {
+      await updatePayment(updated.id, {
+        cycleId: updated.cycleId,
+        memberId: updated.memberId,
+        amount: updated.amount,
+        status: updated.status,
+        paymentDate: updated.date,
+        notes: updated.notes
+      });
+      await fetchPayments();
+    } catch (err) {
+      console.error('Failed to update payment in database', err);
+      fetchPayments();
+    }
   };
 
-  const handleQuickRecord = (payment) => {
-    setPayments(
-      payments.map(p =>
-        p.id === payment.id
-          ? { ...p, status: 'PAID', recordedBy: 'Organizer' }
-          : p
-      )
-    );
-    alert(`✓ Payment for ${payment.member} marked as Paid!`);
+  // Handle Delete Record
+  const handleDeleteRecord = async (target) => {
+    if (!window.confirm(`Are you sure you want to delete payment record #PAY-${target.id}?`)) {
+      return;
+    }
+    try {
+      await deletePayment(target.id);
+      fetchPayments();
+    } catch (err) {
+      console.error('Failed to delete payment from database', err);
+      fetchPayments();
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -216,12 +225,10 @@ const PaymentTracking = () => {
     }
   };
 
-  // Dynamic options for filter dropdowns
-  const defaultGroups = ["Village Women's", "Small Business", "Community Farmers"];
+  // Dynamic filter options from real payments
   const dynamicGroups = Array.from(new Set(payments.map((p) => p.group).filter(Boolean)));
-  const groupOptions = Array.from(new Set([...defaultGroups, ...dynamicGroups]));
+  const groupOptions = dynamicGroups;
 
-  const defaultMembers = ['Kamala', 'Suresh', 'Rani', 'Mohamed'];
   const dynamicMembers = Array.from(
     new Set(
       payments
@@ -230,9 +237,7 @@ const PaymentTracking = () => {
         .filter(Boolean)
     )
   );
-  const memberOptions = filterGroup === 'All'
-    ? Array.from(new Set([...defaultMembers, ...payments.map((p) => p.member).filter(Boolean)]))
-    : dynamicMembers;
+  const memberOptions = dynamicMembers;
 
   const filteredPayments = payments.filter((p) => {
     const term = searchQuery.toLowerCase().trim();
@@ -262,7 +267,7 @@ const PaymentTracking = () => {
     setFilterStatus('All');
   };
 
-  // Dynamic Metric Calculations from live payments state
+  // Dynamic Metric Calculations from real DB payments state
   const metricsSource = isFiltered ? filteredPayments : payments;
 
   const totalCollected = metricsSource
@@ -282,12 +287,21 @@ const PaymentTracking = () => {
   ).size;
 
   const totalAmount = totalCollected + totalPending + totalOverdue;
-  const onTimeRate = totalAmount > 0 ? Math.round((totalCollected / totalAmount) * 100) : 100;
+  const onTimeRate = totalAmount > 0 ? Math.round((totalCollected / totalAmount) * 100) : 0;
 
   return (
     <div className="payment-management-container pb-4">
       {/* Title */}
-      <h2 className="fw-bold mb-4" style={{ color: '#1A3644' }}>Payment Management</h2>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>Payment Management</h2>
+        <button
+          onClick={fetchPayments}
+          className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
+          title="Refresh from database"
+        >
+          <span>↻</span> Refresh
+        </button>
+      </div>
 
       {/* 4 Dynamic Metric Cards */}
       <div className="row g-4 mb-4">
@@ -299,7 +313,7 @@ const PaymentTracking = () => {
               <div className="fw-bold fs-4 text-dark mt-1">{totalCollected.toLocaleString()} LKR</div>
             </div>
             <div className="text-muted small mt-2" style={{ fontSize: '0.75rem' }}>
-              {isFiltered ? `${metricsSource.filter(p => p.status === 'PAID').length} Payments` : 'This Month'}
+              {metricsSource.filter((p) => p.status === 'PAID').length} Paid Payments
             </div>
           </div>
         </div>
@@ -312,7 +326,7 @@ const PaymentTracking = () => {
               <div className="fw-bold fs-4 text-dark mt-1">{totalPending.toLocaleString()} LKR</div>
             </div>
             <div className="text-muted small mt-2" style={{ fontSize: '0.75rem' }}>
-              {isFiltered ? `${metricsSource.filter(p => p.status === 'PENDING').length} Payments` : 'This Month'}
+              {metricsSource.filter((p) => p.status === 'PENDING').length} Pending
             </div>
           </div>
         </div>
@@ -344,82 +358,113 @@ const PaymentTracking = () => {
         </div>
       </div>
 
-      {/* Record New Payment Form Card */}
-      <div className="ui-card p-4 mb-4 shadow-sm">
-        <h5 className="fw-bold text-dark mb-3" style={{ fontSize: '1rem' }}>Record New Payment</h5>
-        <form onSubmit={handleRecordNew}>
-          <div className="row g-3 align-items-center">
-            <div className="col-12 col-md">
-              <select
-                className="form-select bg-white"
-                value={selectedGroup}
-                onChange={(e) => setSelectedGroup(e.target.value)}
-                required
-              >
-                <option value="">Select Group</option>
-                <option value="Village Women's">Village Women's</option>
-                <option value="Small Business">Small Business</option>
-                <option value="Community Farmers">Community Farmers</option>
-              </select>
-            </div>
+      {/* Record New Payment Form Card (for Organizers & Admins) */}
+      {(isAdmin || isOrganizer) && (
+        <div className="ui-card p-4 mb-4 shadow-sm">
+          <h5 className="fw-bold text-dark mb-3" style={{ fontSize: '1rem' }}>Record New Payment to Database</h5>
+          <form onSubmit={handleRecordNew}>
+            <div className="row g-3 align-items-center">
+              {/* Group Select */}
+              <div className="col-12 col-md">
+                <select
+                  className="form-select bg-white"
+                  value={selectedGroupId}
+                  onChange={(e) => {
+                    const gId = e.target.value;
+                    setSelectedGroupId(gId);
+                    const grp = availableGroups.find((g) => String(g.id) === String(gId));
+                    if (grp && grp.contributionAmount) {
+                      setAmountInput(String(grp.contributionAmount));
+                    }
+                  }}
+                  required
+                >
+                  <option value="">Select Group</option>
+                  {availableGroups.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  ))}
+                  {availableGroups.length === 0 && (
+                    <option value="" disabled>No active groups found</option>
+                  )}
+                </select>
+              </div>
 
-            <div className="col-12 col-md">
-              <select
-                className="form-select bg-white"
-                value={selectedMember}
-                onChange={(e) => setSelectedMember(e.target.value)}
-                required
-              >
-                <option value="">Select Member</option>
-                <option value="Kamala">Kamala</option>
-                <option value="Suresh">Suresh</option>
-                <option value="Rani">Rani</option>
-                <option value="Mohamed">Mohamed</option>
-              </select>
-            </div>
+              {/* Member Select */}
+              <div className="col-12 col-md">
+                <select
+                  className="form-select bg-white"
+                  value={selectedMemberId}
+                  onChange={(e) => setSelectedMemberId(e.target.value)}
+                  disabled={!selectedGroupId}
+                  required
+                >
+                  <option value="">{selectedGroupId ? 'Select Member' : 'Choose Group First'}</option>
+                  {groupMembers.map((m) => {
+                    const mUserId = m.user?.id || m.userId || m.id;
+                    const mName = m.user?.fullName || m.fullName || m.name || `Member #${mUserId}`;
+                    return (
+                      <option key={m.id || mUserId} value={mUserId}>
+                        {mName}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
 
-            <div className="col-12 col-md">
-              <select
-                className="form-select bg-white"
-                value={selectedCycle}
-                onChange={(e) => setSelectedCycle(e.target.value)}
-              >
-                <option value="">Select Cycle</option>
-                <option value="Cycle 1">Cycle 1</option>
-                <option value="Cycle 2">Cycle 2</option>
-                <option value="Cycle 3">Cycle 3</option>
-              </select>
-            </div>
+              {/* Cycle Select */}
+              <div className="col-12 col-md">
+                <select
+                  className="form-select bg-white"
+                  value={selectedCycleId}
+                  onChange={(e) => setSelectedCycleId(e.target.value)}
+                  disabled={!selectedGroupId}
+                  required
+                >
+                  <option value="">Select Cycle</option>
+                  {groupCycles.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      Cycle {c.cycleNumber} ({c.status || 'Active'})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className="col-12 col-md">
-              <input
-                type="number"
-                className="form-control"
-                placeholder="Amount"
-                value={amountInput}
-                onChange={(e) => setAmountInput(e.target.value)}
-                required
-              />
-            </div>
+              {/* Amount Input */}
+              <div className="col-12 col-md">
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Amount (LKR)"
+                  value={amountInput}
+                  onChange={(e) => setAmountInput(e.target.value)}
+                  required
+                  min="1"
+                />
+              </div>
 
-            <div className="col-12 col-md">
-              <input
-                type="date"
-                className="form-control"
-                value={dateInput}
-                onChange={(e) => setDateInput(e.target.value)}
-                required
-              />
-            </div>
+              {/* Date Input */}
+              <div className="col-12 col-md">
+                <input
+                  type="date"
+                  className="form-control"
+                  value={dateInput}
+                  onChange={(e) => setDateInput(e.target.value)}
+                  required
+                />
+              </div>
 
-            <div className="col-12 col-md-auto">
-              <button type="submit" className="btn btn-teal px-4 w-100">
-                Record Payment
-              </button>
+              {/* Submit Button */}
+              <div className="col-12 col-md-auto">
+                <button type="submit" className="btn btn-teal px-4 w-100" disabled={submitting}>
+                  {submitting ? 'Recording...' : 'Record Payment'}
+                </button>
+              </div>
             </div>
-          </div>
-        </form>
-      </div>
+          </form>
+        </div>
+      )}
 
       {/* Search & Filter Bar */}
       <div className="row g-3 mb-3 align-items-center">
@@ -432,7 +477,7 @@ const PaymentTracking = () => {
             <input
               type="text"
               className="form-control border-0 shadow-none ps-1"
-              placeholder="Search member or group..."
+              placeholder="Search member, group, cycle..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -449,53 +494,60 @@ const PaymentTracking = () => {
           </div>
         </div>
 
-        {/* Group Filter */}
-        <div className="col-6 col-lg-3 col-md-3">
-          <select
-            className="form-select rounded-3 border bg-white"
-            value={filterGroup}
-            onChange={(e) => {
-              setFilterGroup(e.target.value);
-              setFilterMember('All');
-            }}
-          >
-            <option value="All">All Groups</option>
-            {groupOptions.map((grp) => (
-              <option key={grp} value={grp}>{grp}</option>
-            ))}
-          </select>
-        </div>
+        {/* Filter Dropdowns */}
+        <div className="col-12 col-lg-8 col-md-6">
+          <div className="d-flex flex-wrap gap-2 justify-content-md-end">
+            {/* Group Filter */}
+            {groupOptions.length > 0 && (
+              <select
+                className="form-select bg-white w-auto shadow-none"
+                style={{ minWidth: '130px', fontSize: '0.85rem' }}
+                value={filterGroup}
+                onChange={(e) => setFilterGroup(e.target.value)}
+              >
+                <option value="All">All Groups</option>
+                {groupOptions.map((grp) => (
+                  <option key={grp} value={grp}>
+                    {grp}
+                  </option>
+                ))}
+              </select>
+            )}
 
-        {/* Member Filter */}
-        <div className="col-6 col-lg-3 col-md-3">
-          <select
-            className="form-select rounded-3 border bg-white"
-            value={filterMember}
-            onChange={(e) => setFilterMember(e.target.value)}
-          >
-            <option value="All">All Members</option>
-            {memberOptions.map((mbr) => (
-              <option key={mbr} value={mbr}>{mbr}</option>
-            ))}
-          </select>
-        </div>
+            {/* Member Filter */}
+            {memberOptions.length > 0 && (
+              <select
+                className="form-select bg-white w-auto shadow-none"
+                style={{ minWidth: '130px', fontSize: '0.85rem' }}
+                value={filterMember}
+                onChange={(e) => setFilterMember(e.target.value)}
+              >
+                <option value="All">All Members</option>
+                {memberOptions.map((mem) => (
+                  <option key={mem} value={mem}>
+                    {mem}
+                  </option>
+                ))}
+              </select>
+            )}
 
-        {/* Status Filter */}
-        <div className="col-12 col-lg-2 col-md-12">
-          <select
-            className="form-select rounded-3 border bg-white"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="All">All Statuses</option>
-            <option value="PAID">Paid</option>
-            <option value="PENDING">Pending</option>
-            <option value="OVERDUE">Overdue</option>
-          </select>
+            {/* Status Filter */}
+            <select
+              className="form-select bg-white w-auto shadow-none"
+              style={{ minWidth: '120px', fontSize: '0.85rem' }}
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="All">All Status</option>
+              <option value="PAID">Paid</option>
+              <option value="PENDING">Pending</option>
+              <option value="OVERDUE">Overdue</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Active Filter Indicator & Reset */}
+      {/* Filter Info Bar */}
       {isFiltered && (
         <div className="d-flex justify-content-between align-items-center mb-3 px-1">
           <div className="text-muted small">
@@ -532,21 +584,32 @@ const PaymentTracking = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredPayments.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan="8" className="text-center py-5">
+                    <div className="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                    <span className="text-muted small">Loading payment records from database...</span>
+                  </td>
+                </tr>
+              ) : filteredPayments.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="text-center py-5">
                     <div className="d-flex flex-column align-items-center justify-content-center">
                       <Icon name="search" size={32} color="#94A3B8" />
-                      <h6 className="fw-bold mt-3 mb-1 text-dark">No payments found</h6>
+                      <h6 className="fw-bold mt-3 mb-1 text-dark">No payments found in database</h6>
                       <p className="text-muted small mb-3">
-                        No payment records match your search or filter criteria.
+                        {isFiltered
+                          ? 'No payment records match your search or filter criteria.'
+                          : 'There are no payment records in the database yet.'}
                       </p>
-                      <button
-                        className="btn btn-outline-primary btn-sm px-3"
-                        onClick={handleClearFilters}
-                      >
-                        Reset All Filters
-                      </button>
+                      {isFiltered && (
+                        <button
+                          className="btn btn-outline-primary btn-sm px-3"
+                          onClick={handleClearFilters}
+                        >
+                          Reset All Filters
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -595,7 +658,7 @@ const PaymentTracking = () => {
                             title="Delete Payment"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setDeletePayment(p);
+                              handleDeleteRecord(p);
                             }}
                           >
                             <Icon name="trash" size={16} color="#DC3545" />

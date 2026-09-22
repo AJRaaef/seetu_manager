@@ -20,6 +20,7 @@ public class PaymentCycle {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private SeettuGroup group;
 
     @Column(name = "cycle_number", nullable = false)
@@ -33,6 +34,7 @@ public class PaymentCycle {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payout_member_id")
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"password", "hibernateLazyInitializer", "handler"})
     private User payoutMember;
 
     @Enumerated(EnumType.STRING)

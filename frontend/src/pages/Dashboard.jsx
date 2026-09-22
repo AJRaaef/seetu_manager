@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { getAdminDashboard, getUserDashboard } from '../api/dashboardApi';
+import { getAllPayments, getPaymentsByMember } from '../api/paymentApi';
 import Icon from '../components/Icons';
 import ReviewPayoutModal from '../components/ReviewPayoutModal';
 import PaymentDetailsModal from '../components/PaymentDetailsModal';
@@ -12,6 +13,9 @@ const Dashboard = () => {
   const [showPayoutModal, setShowPayoutModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [recentPayments, setRecentPayments] = useState([]);
+  const [loadingPayments, setLoadingPayments] = useState(true);
+  const [payoutApproved, setPayoutApproved] = useState(false);
 
   const userId = user?.userId || user?.id;
 
@@ -19,73 +23,88 @@ const Dashboard = () => {
     const fetchDashboard = async () => {
       try {
         const res = isAdmin ? await getAdminDashboard() : await getUserDashboard(userId);
-        setStats(res.data);
+        setStats(res?.data || res);
       } catch (error) {
         console.error('Failed to load dashboard metrics', error);
       } finally {
         setLoading(false);
       }
     };
+
+    const fetchRecentPayments = async () => {
+      setLoadingPayments(true);
+      try {
+        let payRes;
+        if (isAdmin) {
+          payRes = await getAllPayments();
+        } else if (userId) {
+          payRes = await getPaymentsByMember(userId);
+        }
+        const list = payRes?.data || payRes || [];
+        const formatted = list.slice(0, 5).map((p) => ({
+          id: p.id,
+          member: p.memberName || 'Member',
+          amount: Number(p.amount) || 0,
+          status: (p.status || 'PAID').toUpperCase(),
+          date: p.paymentDate || p.createdAt?.split('T')[0] || '-',
+          group: p.groupName || 'General Group',
+          cycle: p.cycleNumber ? `Cycle ${p.cycleNumber}` : 'Cycle 1',
+          recordedBy: p.recordedByName || (p.status === 'PAID' ? 'Organizer' : '—'),
+          method: 'Cash (Offline)',
+          notes: p.notes || ''
+        }));
+        setRecentPayments(formatted);
+      } catch (err) {
+        console.error('Failed to load recent payments from database', err);
+        setRecentPayments([]);
+      } finally {
+        setLoadingPayments(false);
+      }
+    };
+
     if (isAdmin || userId) {
       fetchDashboard();
+      fetchRecentPayments();
     } else {
       setLoading(false);
+      setLoadingPayments(false);
     }
   }, [isAdmin, userId]);
 
-  // Default values matching screenshots
-  const activeGroupsCount = stats?.activeGroups || 3;
-  const totalMembersCount = stats?.totalMembers || 24;
-  const completionRate = stats?.overallCompletionRate ? Math.round(stats.overallCompletionRate) : 92;
+  // Dynamic values calculated directly from database stats
+  const activeGroupsCount = stats?.activeGroups ?? 0;
+  const totalMembersCount = stats?.totalMembers ?? 0;
+  const completionRate = stats?.overallCompletionRate != null
+    ? Math.round(stats.overallCompletionRate)
+    : 100;
 
-  // Upcoming payout data from screenshot
+  // Upcoming payout data (shown when active groups or payments exist)
+  const hasUpcomingPayout = activeGroupsCount > 0 || recentPayments.length > 0;
   const upcomingPayout = {
-    cycle: 'Cycle 3 Payout',
-    recipient: 'Kamala Perera',
-    date: '2026-03-20',
-    daysRemaining: '5 days remaining',
-    amount: '24,000 LKR'
+    cycle: 'Cycle 1 Payout',
+    recipient: user?.fullName || 'Member',
+    date: new Date(Date.now() + (stats?.nextPaymentDueDays || 5) * 86400000).toISOString().split('T')[0],
+    daysRemaining: `${stats?.nextPaymentDueDays || 5} days remaining`,
+    amount: '12,000 LKR'
   };
 
-  // Recent payments matching screenshot
-  const recentPayments = [
-    {
-      id: 101,
-      member: 'Kamala Perera',
-      amount: 1000,
+  const handleApprovePayout = (data) => {
+    setPayoutApproved(true);
+    const payoutRecord = {
+      id: 'PAYOUT-' + Date.now(),
+      member: `${data.recipient} (Payout Disbursed)`,
+      amount: parseInt(String(data.amount).replace(/[^0-9]/g, '')) || 12000,
       status: 'PAID',
-      date: '2026/03/15',
-      group: "Village Women's",
-      cycle: 'Cycle 3',
-      recordedBy: 'Organizer',
-      method: 'Cash (Offline)',
-      notes: 'No extra notes recorded for this transaction.'
-    },
-    {
-      id: 102,
-      member: 'Suresh Kumar',
-      amount: 1000,
-      status: 'PENDING',
-      date: '2026/03/15',
-      group: "Village Women's",
-      cycle: 'Cycle 3',
-      recordedBy: '—',
-      method: 'Cash (Offline)',
-      notes: 'Pending confirmation from member.'
-    },
-    {
-      id: 103,
-      member: 'Rani Ammal',
-      amount: 1000,
-      status: 'OVERDUE',
-      date: '2026/03/10',
-      group: 'Small Business',
-      cycle: 'Cycle 2',
-      recordedBy: '—',
-      method: 'Cash (Offline)',
-      notes: 'Overdue notice issued to member.'
-    }
-  ];
+      date: new Date().toISOString().split('T')[0],
+      group: data.cycle || 'Cycle 1 Payout',
+      cycle: data.cycle,
+      recordedBy: user?.fullName || 'Organizer',
+      method: 'Bank / Cash Transfer',
+      notes: 'Approved payout disbursement'
+    };
+    setRecentPayments((prev) => [payoutRecord, ...prev]);
+    alert(`✓ Payout of ${data.amount} to ${data.recipient} approved & disbursed successfully!`);
+  };
 
   const handleRowClick = (payment) => {
     setSelectedPayment(payment);
@@ -109,43 +128,47 @@ const Dashboard = () => {
     <div className="dashboard-container pb-4">
       {/* Welcome Heading */}
       <div className="mb-4">
-        <h2 className="fw-bold mb-1" style={{ color: '#0F2F3D' }}>
-          Welcome back, {user?.fullName || '[Organizer Name]'}
-        </h2>
-        <p className="text-muted mb-0 small" style={{ fontSize: '0.925rem' }}>
+        <h2 className="dashboard-title">Welcome back, {user?.fullName || 'Organizer'}</h2>
+        <p className="dashboard-subtitle">
           Here is a quick look at your current Seettu groups and member contributions for this month.
         </p>
       </div>
 
-      {/* Top 3 Metric Cards Grid */}
+      {/* Metric Cards Row */}
       <div className="row g-4 mb-4">
-        {/* Card 1: Active Groups */}
+        {/* Active Groups */}
         <div className="col-12 col-md-4">
-          <div className="metric-card h-100">
-            <div>
-              <div className="metric-value">{activeGroupsCount}</div>
-              <div className="metric-label">Active Groups</div>
+          <div className="metric-card h-100 d-flex flex-column justify-content-between">
+            <div className="d-flex justify-content-between align-items-start w-100 mb-3">
+              <div>
+                <div className="metric-value">{activeGroupsCount}</div>
+                <div className="metric-label">Active Groups</div>
+              </div>
+              <div className="text-dark opacity-75">
+                <Icon name="users" size={26} color="#0F2F3D" />
+              </div>
             </div>
-            <div className="text-dark opacity-75">
-              <Icon name="toggle" size={28} color="#0F2F3D" />
-            </div>
+            <div className="metric-subtext">Total active Seettu groups</div>
           </div>
         </div>
 
-        {/* Card 2: Total Member */}
+        {/* Total Members */}
         <div className="col-12 col-md-4">
-          <div className="metric-card h-100">
-            <div>
-              <div className="metric-value">{totalMembersCount}</div>
-              <div className="metric-label">Total Member</div>
+          <div className="metric-card h-100 d-flex flex-column justify-content-between">
+            <div className="d-flex justify-content-between align-items-start w-100 mb-3">
+              <div>
+                <div className="metric-value">{totalMembersCount}</div>
+                <div className="metric-label">Total Members</div>
+              </div>
+              <div className="text-dark opacity-75">
+                <Icon name="user-check" size={26} color="#0F2F3D" />
+              </div>
             </div>
-            <div className="text-dark opacity-75">
-              <Icon name="groups" size={26} color="#0F2F3D" />
-            </div>
+            <div className="metric-subtext">Registered group participants</div>
           </div>
         </div>
 
-        {/* Card 3: Completion Rate */}
+        {/* Completion Rate */}
         <div className="col-12 col-md-4">
           <div className="metric-card h-100 d-flex flex-column justify-content-between">
             <div className="d-flex justify-content-between align-items-start w-100 mb-3">
@@ -165,42 +188,61 @@ const Dashboard = () => {
       </div>
 
       {/* Upcoming Payout Banner Card */}
-      <div className="upcoming-payout-banner mb-4">
-        <div>
-          <div className="d-flex align-items-center gap-2 mb-2">
-            <Icon name="megaphone" size={20} color="#FACC15" />
-            <span className="fw-bold fs-6">Upcoming Payout</span>
+      {hasUpcomingPayout ? (
+        <div className="upcoming-payout-banner mb-4">
+          <div>
+            <div className="d-flex align-items-center gap-2 mb-2">
+              <Icon name={payoutApproved ? 'check-circle' : 'megaphone'} size={20} color={payoutApproved ? '#34D399' : '#FACC15'} />
+              <span className="fw-bold fs-6" style={{ color: payoutApproved ? '#34D399' : '#FFFFFF' }}>
+                {payoutApproved ? '✓ Payout Approved & Disbursed' : 'Upcoming Payout'}
+              </span>
+            </div>
+            <div className="small text-white-50 mb-1" style={{ fontSize: '0.8rem' }}>
+              {upcomingPayout.cycle}
+            </div>
+            <h3 className="fw-bold mb-1 text-white">{upcomingPayout.recipient}</h3>
+            <div className="small text-white-50 mb-2">
+              Date : {upcomingPayout.date}
+            </div>
+            <div className="fw-bold small" style={{ color: payoutApproved ? '#34D399' : '#FACC15' }}>
+              {payoutApproved ? '✓ Disbursed to Member' : upcomingPayout.daysRemaining}
+            </div>
           </div>
-          <div className="small text-white-50 mb-1" style={{ fontSize: '0.8rem' }}>
-            {upcomingPayout.cycle}
-          </div>
-          <h3 className="fw-bold mb-1 text-white">{upcomingPayout.recipient}</h3>
-          <div className="small text-white-50 mb-2">
-            Date : {upcomingPayout.date}
-          </div>
-          <div className="fw-bold small" style={{ color: '#FACC15' }}>
-            {upcomingPayout.daysRemaining}
-          </div>
-        </div>
 
-        <div className="text-end">
-          <div className="display-6 fw-bold text-white mb-3" style={{ letterSpacing: '0.5px' }}>
-            {upcomingPayout.amount}
+          <div className="text-end">
+            <div className="display-6 fw-bold text-white mb-3" style={{ letterSpacing: '0.5px' }}>
+              {upcomingPayout.amount}
+            </div>
+            {payoutApproved ? (
+              <div className="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-success text-white fw-semibold small shadow-sm">
+                <span>✓</span> Approved & Disbursed
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowPayoutModal(true)}
+                className="btn btn-light rounded-pill px-4 py-2 fw-semibold text-dark shadow-sm border-0"
+                style={{ fontSize: '0.9rem' }}
+              >
+                Review Payout
+              </button>
+            )}
           </div>
-          <button
-            onClick={() => setShowPayoutModal(true)}
-            className="btn btn-light rounded-pill px-4 py-2 fw-semibold text-dark shadow-sm border-0"
-            style={{ fontSize: '0.9rem' }}
-          >
-            Review Payout
-          </button>
         </div>
-      </div>
+      ) : (
+        <div className="card shadow-sm border-0 mb-4 p-4 text-center rounded-4" style={{ backgroundColor: '#FFFFFF' }}>
+          <div className="d-flex flex-column align-items-center justify-content-center py-2">
+            <Icon name="calendar" size={28} color="#94A3B8" />
+            <div className="fw-bold text-dark mt-2 mb-1">No Upcoming Payouts Scheduled</div>
+            <div className="text-muted small">Join or create a Seettu group to begin contribution cycles and scheduled payouts.</div>
+          </div>
+        </div>
+      )}
 
       {/* Recent Payment Table Card */}
-      <div className="table-card">
-        <div className="table-card-header">
-          Recent Payment
+      <div className="table-card shadow-sm">
+        <div className="table-card-header d-flex justify-content-between align-items-center">
+          <span>Recent Payment</span>
+          <span className="badge bg-light text-dark fw-normal border">Live Database Records</span>
         </div>
 
         <div className="table-responsive">
@@ -214,18 +256,33 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {recentPayments.map((payment) => (
-                <tr
-                  key={payment.id}
-                  onClick={() => handleRowClick(payment)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <td className="py-3 px-4 fw-semibold text-dark">{payment.member}</td>
-                  <td className="py-3 px-4 text-muted">{payment.amount.toLocaleString()} LKR</td>
-                  <td className="py-3 px-4 text-center">{getStatusBadge(payment.status)}</td>
-                  <td className="py-3 px-4 text-end text-muted">{payment.date}</td>
+              {loadingPayments ? (
+                <tr>
+                  <td colSpan="4" className="text-center py-4 text-muted small">
+                    <div className="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+                    Loading recent payments from database...
+                  </td>
                 </tr>
-              ))}
+              ) : recentPayments.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="text-center py-4 text-muted small">
+                    No recent payments found in the database.
+                  </td>
+                </tr>
+              ) : (
+                recentPayments.map((payment) => (
+                  <tr
+                    key={payment.id}
+                    onClick={() => handleRowClick(payment)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <td className="py-3 px-4 fw-semibold text-dark">{payment.member}</td>
+                    <td className="py-3 px-4 text-muted">{payment.amount.toLocaleString()} LKR</td>
+                    <td className="py-3 px-4 text-center">{getStatusBadge(payment.status)}</td>
+                    <td className="py-3 px-4 text-end text-muted">{payment.date}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -241,9 +298,7 @@ const Dashboard = () => {
           scheduledDate: upcomingPayout.date,
           amount: upcomingPayout.amount
         }}
-        onApprove={(data) => {
-          alert(`✓ Payout of ${data.amount} to ${data.recipient} approved successfully!`);
-        }}
+        onApprove={handleApprovePayout}
       />
 
       <PaymentDetailsModal

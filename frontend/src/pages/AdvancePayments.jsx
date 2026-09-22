@@ -25,11 +25,20 @@ const AdvancePayments = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const groupRes = await groupApi.getUserGroups(user?.userId || user?.id);
-      setGroups(groupRes.data || []);
+      const uid = user?.userId || user?.id;
+      const isAdminOrOrg = user?.role === 'ADMIN' || user?.role === 'ORGANIZER';
 
-      const advRes = await api.get(`/advance-payments/user/${user?.userId || user?.id}`);
-      setAdvancePayments(advRes.data?.data || []);
+      const groupRes = isAdminOrOrg
+        ? await groupApi.getAllGroups()
+        : (uid ? await groupApi.getUserGroups(uid) : null);
+      const gList = groupRes?.data || groupRes || [];
+      setGroups(Array.isArray(gList) ? gList : []);
+
+      const advRes = isAdminOrOrg
+        ? await api.get('/advance-payments')
+        : (uid ? await api.get(`/advance-payments/user/${uid}`) : null);
+      const advList = advRes?.data?.data || advRes?.data || [];
+      setAdvancePayments(Array.isArray(advList) ? advList : []);
     } catch (err) {
       console.error('Error fetching advance payments', err);
     } finally {
@@ -41,7 +50,15 @@ const AdvancePayments = () => {
     e.preventDefault();
     try {
       const uid = user?.userId || user?.id;
-      await api.post(`/advance-payments?groupId=${formData.groupId}&memberId=${uid}&amount=${formData.amount}&notes=${encodeURIComponent(formData.notes || '')}`);
+      const params = new URLSearchParams({
+        amount: formData.amount,
+        notes: formData.notes || ''
+      });
+      if (uid) params.append('memberId', uid);
+      if (formData.groupId) params.append('groupId', formData.groupId);
+
+      await api.post(`/advance-payments?${params.toString()}`);
+      alert('✓ Advance payment recorded successfully to database!');
       setShowModal(false);
       setFormData({ groupId: '', memberId: uid, amount: '', notes: '' });
       fetchData();
@@ -116,7 +133,7 @@ const AdvancePayments = () => {
               <thead style={{ backgroundColor: '#DCE7EB' }}>
                 <tr>
                   <th>Record ID</th>
-                  <th>Group</th>
+                  <th>Member</th>
                   <th>Advance Amount</th>
                   <th>Notes</th>
                   <th>Recorded Date</th>
@@ -125,11 +142,11 @@ const AdvancePayments = () => {
               <tbody>
                 {advancePayments.map((adv) => (
                   <tr key={adv.id}>
-                    <td className="fw-bold">#{adv.id}</td>
-                    <td>Group #{adv.groupId || adv.seettuGroup?.id || 'N/A'}</td>
-                    <td><strong className="text-success fs-6">LKR {(adv.amount || 0).toLocaleString()}</strong></td>
+                    <td className="fw-bold">#ADV-{adv.id}</td>
+                    <td>{adv.member?.fullName || adv.member?.email || 'Member'}</td>
+                    <td><strong className="text-success fs-6">LKR {(Number(adv.amount) || 0).toLocaleString()}</strong></td>
                     <td className="text-muted">{adv.notes || '-'}</td>
-                    <td className="text-muted">{adv.createdAt ? new Date(adv.createdAt).toLocaleDateString() : 'N/A'}</td>
+                    <td className="text-muted">{adv.paymentDate || (adv.createdAt ? new Date(adv.createdAt).toLocaleDateString() : '-')}</td>
                   </tr>
                 ))}
               </tbody>

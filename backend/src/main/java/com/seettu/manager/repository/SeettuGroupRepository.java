@@ -11,6 +11,12 @@ import java.util.List;
 @Repository
 public interface SeettuGroupRepository extends JpaRepository<SeettuGroup, Long> {
 
+    @Query("SELECT DISTINCT g FROM SeettuGroup g " +
+           "LEFT JOIN FETCH g.createdBy " +
+           "LEFT JOIN FETCH g.seettuType " +
+           "LEFT JOIN FETCH g.shop")
+    List<SeettuGroup> findAllWithDetails();
+
     @Query("SELECT g FROM SeettuGroup g " +
            "JOIN FETCH g.createdBy " +
            "LEFT JOIN FETCH g.seettuType " +

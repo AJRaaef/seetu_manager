@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,9 +26,15 @@ public class PaymentController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
-    public ResponseEntity<ApiResponse<PaymentResponse>> recordPayment(@Valid @RequestBody PaymentRecordRequest request,
-                                                                      @RequestParam Long recorderId) {
-        User recorder = userService.getUserById(recorderId);
+    public ResponseEntity<ApiResponse<PaymentResponse>> recordPayment(
+            @Valid @RequestBody PaymentRecordRequest request,
+            @RequestParam(required = false) Long recorderId,
+            @AuthenticationPrincipal User authUser) {
+        Long finalRecorderId = (recorderId != null) ? recorderId : (authUser != null ? authUser.getId() : null);
+        if (finalRecorderId == null) {
+            throw new IllegalArgumentException("Recorder ID is required");
+        }
+        User recorder = userService.getUserById(finalRecorderId);
         Payment payment = paymentService.recordPayment(request, recorder);
         return ResponseEntity.ok(ApiResponse.success("Payment recorded successfully", paymentService.toPaymentResponse(payment)));
     }
@@ -48,5 +55,26 @@ public class PaymentController {
     public ResponseEntity<ApiResponse<List<PaymentResponse>>> getPaymentsByCycle(@PathVariable Long cycleId) {
         List<Payment> payments = paymentService.getPaymentsByCycle(cycleId);
         return ResponseEntity.ok(ApiResponse.success(paymentService.toPaymentResponseList(payments)));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<PaymentResponse>>> getAllPayments() {
+        List<Payment> payments = paymentService.getAllPayments();
+        return ResponseEntity.ok(ApiResponse.success(paymentService.toPaymentResponseList(payments)));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public ResponseEntity<ApiResponse<PaymentResponse>> updatePayment(@PathVariable Long id,
+                                                                      @RequestBody PaymentRecordRequest request) {
+        Payment payment = paymentService.updatePayment(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Payment updated successfully", paymentService.toPaymentResponse(payment)));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public ResponseEntity<ApiResponse<Void>> deletePayment(@PathVariable Long id) {
+        paymentService.deletePayment(id);
+        return ResponseEntity.ok(ApiResponse.success("Payment deleted successfully", null));
     }
 }
