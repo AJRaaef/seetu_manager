@@ -19,10 +19,12 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      // Clear JWT token and user session on auth expiration / invalid token
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      if (window.location.pathname !== '/login') {
+      const publicPaths = ['/', '/login', '/register', '/forgot-password'];
+      const isPublicPath = publicPaths.includes(window.location.pathname);
+
+      if (!isPublicPath) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
         window.location.href = '/login';
       }
     }

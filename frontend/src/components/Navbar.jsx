@@ -26,7 +26,7 @@ const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
       <div className="container-fluid px-lg-4">
-        <Link className="navbar-brand me-4" to="/dashboard">
+        <Link className="navbar-brand me-4" to="/">
           <span className="fw-bold"><span style={{ color: '#FFFFFF' }}>Seettu</span><span style={{ color: '#008CA7' }}>Manager</span></span>
         </Link>
         <button
@@ -45,48 +45,48 @@ const Navbar = () => {
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <Link className={`nav-link ${isActive('/dashboard')}`} to="/dashboard">
-                📊 {t('dashboard') || 'Dashboard'}
+                <Icon name="dashboard" size={16} className="me-1" /> {t('dashboard') || 'Dashboard'}
               </Link>
             </li>
             <li className="nav-item">
               <Link className={`nav-link ${isActive('/groups')}`} to="/groups">
-                {t('my_groups') || 'My Groups'}
+                <Icon name="groups" size={16} className="me-1" /> {t('my_groups') || 'My Groups'}
               </Link>
             </li>
             {(isAdmin || isOrganizer) && (
               <li className="nav-item">
                 <Link className={`nav-link ${isActive('/payments')}`} to="/payments">
-                  💳 {t('payments') || 'Payments'}
+                  <Icon name="payments" size={16} className="me-1" /> {t('payments') || 'Payments'}
                 </Link>
               </li>
             )}
             {(isAdmin || isOrganizer) && (
               <li className="nav-item">
                 <Link className={`nav-link ${isActive('/advance-payments')}`} to="/advance-payments">
-                  ⚡ Advance
+                  <Icon name="advance" size={16} className="me-1" /> Advance
                 </Link>
               </li>
             )}
             <li className="nav-item">
               <Link className={`nav-link ${isActive('/emergency')}`} to="/emergency">
-                🚨 Emergency
+                <Icon name="emergency" size={16} className="me-1" /> Emergency
               </Link>
             </li>
             <li className="nav-item">
               <Link className={`nav-link ${isActive('/disputes')}`} to="/disputes">
-                ⚖️ {t('disputes') || 'Disputes'}
+                <Icon name="disputes" size={16} className="me-1" /> {t('disputes') || 'Disputes'}
               </Link>
             </li>
             {(isAdmin || isOrganizer) && (
               <li className="nav-item">
                 <Link className={`nav-link ${isActive('/reports')}`} to="/reports">
-                  📈 {t('reports') || 'Reports'}
+                  <Icon name="reports" size={16} className="me-1" /> {t('reports') || 'Reports'}
                 </Link>
               </li>
             )}
             <li className="nav-item">
               <Link className={`nav-link ${isActive('/certificates')}`} to="/certificates">
-                🎓 Certificates
+                <Icon name="certificates" size={16} className="me-1" /> Certificates
               </Link>
             </li>
           </ul>
@@ -99,7 +99,7 @@ const Navbar = () => {
                 onClick={toggleTheme}
                 title="Toggle Day/Night Mode"
               >
-                {theme === 'dark' ? '☀️ Day' : '🌙 Night'}
+                {theme === 'dark' ? 'Day' : 'Night'}
               </button>
             </li>
 
@@ -113,12 +113,12 @@ const Navbar = () => {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                🌐 {language.toUpperCase()}
+                {language.toUpperCase()}
               </a>
               <ul className="dropdown-menu dropdown-menu-end shadow border-0">
-                <li><button className="dropdown-item" onClick={() => changeLanguage('en')}>🇬🇧 English (EN)</button></li>
-                <li><button className="dropdown-item" onClick={() => changeLanguage('si')}>🇱🇰 Sinhala (SI)</button></li>
-                <li><button className="dropdown-item" onClick={() => changeLanguage('ta')}>🇱🇰 Tamil (TA)</button></li>
+                <li><button className="dropdown-item" onClick={() => changeLanguage('en')}>English (EN)</button></li>
+                <li><button className="dropdown-item" onClick={() => changeLanguage('si')}>Sinhala (SI)</button></li>
+                <li><button className="dropdown-item" onClick={() => changeLanguage('ta')}>Tamil (TA)</button></li>
               </ul>
             </li>
 
@@ -156,10 +156,10 @@ const Navbar = () => {
               <ul className="dropdown-menu dropdown-menu-end shadow border-0">
                 <li className="dropdown-header">Logged in as {user?.email}</li>
                 <li><hr className="dropdown-divider" /></li>
-                <li><Link className="dropdown-item" to="/profile">👤 {t('profile') || 'My Profile'}</Link></li>
-                <li><Link className="dropdown-item" to="/certificates">📜 Certificates</Link></li>
+                <li><Link className="dropdown-item" to="/profile"><Icon name="user" size={14} className="me-2" />{t('profile') || 'My Profile'}</Link></li>
+                <li><Link className="dropdown-item" to="/certificates"><Icon name="certificates" size={14} className="me-2" />Certificates</Link></li>
                 <li><hr className="dropdown-divider" /></li>
-                <li><button className="dropdown-item text-danger fw-bold" onClick={handleLogout}>🚪 {t('logout') || 'Logout'}</button></li>
+                <li><button className="dropdown-item text-danger fw-bold" onClick={handleLogout}><Icon name="logout" size={14} className="me-2 text-danger" />{t('logout') || 'Logout'}</button></li>
               </ul>
             </li>
 
@@ -170,7 +170,7 @@ const Navbar = () => {
                 onClick={handleLogout}
                 title="Logout from system"
               >
-                🚪 Logout
+                <Icon name="logout" size={14} /> Logout
               </button>
             </li>
           </ul>

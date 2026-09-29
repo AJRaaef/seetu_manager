@@ -1,10 +1,11 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 
 // Pages
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
@@ -39,46 +40,59 @@ const ProtectedRoute = ({ children, roles }) => {
 };
 
 const MainLayout = () => {
-  const { user } = useAuth();
-  const location = useLocation();
+  const { user, loading } = useAuth();
 
-  const isAuthPage = ['/login', '/register', '/forgot-password'].includes(location.pathname);
-
-  if (isAuthPage || !user) {
+  if (loading) {
     return (
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+      <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+        <div className="spinner-border text-info" role="status" style={{ width: '3rem', height: '3rem', color: '#0097B2' }}>
+          <span className="visually-hidden">Loading SeettuManager...</span>
+        </div>
+      </div>
     );
   }
 
   return (
-    <AppLayout>
-      <Routes>
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/groups" element={<ProtectedRoute><MyGroups /></ProtectedRoute>} />
-        <Route path="/groups/create" element={<ProtectedRoute><CreateGroup /></ProtectedRoute>} />
-        <Route path="/groups/:id" element={<ProtectedRoute><GroupDetail /></ProtectedRoute>} />
-        
-        <Route path="/members" element={<ProtectedRoute><Members /></ProtectedRoute>} />
-        
-        <Route path="/payments" element={<ProtectedRoute><PaymentTracking /></ProtectedRoute>} />
-        <Route path="/advance-payments" element={<ProtectedRoute><AdvancePayments /></ProtectedRoute>} />
-        
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/disputes" element={<ProtectedRoute><Disputes /></ProtectedRoute>} />
-        <Route path="/emergency" element={<ProtectedRoute><EmergencyRequests /></ProtectedRoute>} />
-        
-        <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-        <Route path="/certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
-        <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+    <Routes>
+      {/* Root Public Landing Page */}
+      <Route path="/" element={<LandingPage />} />
 
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </AppLayout>
+      {/* Auth Routes */}
+      <Route 
+        path="/login" 
+        element={user ? <Navigate to="/dashboard" replace /> : <Login />} 
+      />
+      <Route 
+        path="/register" 
+        element={user ? <Navigate to="/dashboard" replace /> : <Register />} 
+      />
+      <Route 
+        path="/forgot-password" 
+        element={user ? <Navigate to="/dashboard" replace /> : <ForgotPassword />} 
+      />
+
+      {/* Protected Dashboard & App Routes */}
+      <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
+      <Route path="/groups" element={<ProtectedRoute><AppLayout><MyGroups /></AppLayout></ProtectedRoute>} />
+      <Route path="/groups/create" element={<ProtectedRoute><AppLayout><CreateGroup /></AppLayout></ProtectedRoute>} />
+      <Route path="/groups/:id" element={<ProtectedRoute><AppLayout><GroupDetail /></AppLayout></ProtectedRoute>} />
+      
+      <Route path="/members" element={<ProtectedRoute><AppLayout><Members /></AppLayout></ProtectedRoute>} />
+      
+      <Route path="/payments" element={<ProtectedRoute><AppLayout><PaymentTracking /></AppLayout></ProtectedRoute>} />
+      <Route path="/advance-payments" element={<ProtectedRoute><AppLayout><AdvancePayments /></AppLayout></ProtectedRoute>} />
+      
+      <Route path="/profile" element={<ProtectedRoute><AppLayout><Profile /></AppLayout></ProtectedRoute>} />
+      <Route path="/disputes" element={<ProtectedRoute><AppLayout><Disputes /></AppLayout></ProtectedRoute>} />
+      <Route path="/emergency" element={<ProtectedRoute><AppLayout><EmergencyRequests /></AppLayout></ProtectedRoute>} />
+      
+      <Route path="/reports" element={<ProtectedRoute><AppLayout><Reports /></AppLayout></ProtectedRoute>} />
+      <Route path="/certificates" element={<ProtectedRoute><AppLayout><Certificates /></AppLayout></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute><AppLayout><Notifications /></AppLayout></ProtectedRoute>} />
+
+      {/* Default Catch-all redirects to Landing Page */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 };
 
