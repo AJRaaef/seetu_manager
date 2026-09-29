@@ -58,19 +58,19 @@ const Topbar = ({ onToggleSidebar }) => {
                 className={`dropdown-item py-1 px-3 rounded-2 text-start w-100 btn btn-link text-decoration-none ${language === 'en' ? 'fw-bold text-primary' : 'text-dark'}`}
                 onClick={() => { changeLanguage('en'); setShowLangMenu(false); }}
               >
-                🇬🇧 English (EN)
+                English (EN)
               </button>
               <button
                 className={`dropdown-item py-1 px-3 rounded-2 text-start w-100 btn btn-link text-decoration-none ${language === 'si' ? 'fw-bold text-primary' : 'text-dark'}`}
                 onClick={() => { changeLanguage('si'); setShowLangMenu(false); }}
               >
-                🇱🇰 Sinhala (SI)
+                Sinhala (SI)
               </button>
               <button
                 className={`dropdown-item py-1 px-3 rounded-2 text-start w-100 btn btn-link text-decoration-none ${language === 'ta' ? 'fw-bold text-primary' : 'text-dark'}`}
                 onClick={() => { changeLanguage('ta'); setShowLangMenu(false); }}
               >
-                🇱🇰 Tamil (TA)
+                Tamil (TA)
               </button>
             </div>
           )}
