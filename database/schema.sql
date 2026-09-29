@@ -109,7 +109,7 @@ CREATE TABLE payments (
     cycle_id BIGINT NOT NULL,
     member_id BIGINT NOT NULL,
     amount DECIMAL(12,2) NOT NULL,
-    status ENUM('PAID', 'PENDING', 'LATE', 'OVERDUE', 'MISSED') NOT NULL DEFAULT 'PENDING',
+    status ENUM('PAID', 'PENDING', 'LATE', 'OVERDUE', 'MISSED', 'PARTIAL') NOT NULL DEFAULT 'PENDING',
     payment_date DATE,
     recorded_by BIGINT,
     notes TEXT,

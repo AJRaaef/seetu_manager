@@ -58,9 +58,12 @@ public class PaymentService {
             return existing;
         }
 
-        // Determine status based on timing
+        // Determine status based on timing and contribution amount
         Payment.PaymentStatus status = Payment.PaymentStatus.PAID;
-        if (LocalDate.now().isAfter(cycle.getEndDate())) {
+        if (cycle.getGroup() != null && cycle.getGroup().getContributionAmount() != null
+                && request.getAmount().compareTo(cycle.getGroup().getContributionAmount()) < 0) {
+            status = Payment.PaymentStatus.PARTIAL;
+        } else if (LocalDate.now().isAfter(cycle.getEndDate())) {
             status = Payment.PaymentStatus.LATE;
         }
 

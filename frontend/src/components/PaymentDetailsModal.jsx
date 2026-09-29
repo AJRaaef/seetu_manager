@@ -13,6 +13,8 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
         return <span className="badge-pending">Pending</span>;
       case 'OVERDUE':
         return <span className="badge-overdue">Overdue</span>;
+      case 'PARTIAL':
+        return <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 rounded-2" style={{ fontSize: '0.75rem' }}>Partial</span>;
       default:
         return <span className="badge-paid">{status || 'Paid'}</span>;
     }

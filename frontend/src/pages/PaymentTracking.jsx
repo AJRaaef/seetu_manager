@@ -220,6 +220,8 @@ const PaymentTracking = () => {
         return <span className="badge-pending" style={{ cursor: 'pointer' }}>Pending</span>;
       case 'OVERDUE':
         return <span className="badge-overdue" style={{ cursor: 'pointer' }}>Overdue</span>;
+      case 'PARTIAL':
+        return <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 rounded-2" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>Partial</span>;
       default:
         return <span className="badge-paid" style={{ cursor: 'pointer' }}>{status}</span>;
     }
@@ -542,6 +544,7 @@ const PaymentTracking = () => {
               <option value="PAID">Paid</option>
               <option value="PENDING">Pending</option>
               <option value="OVERDUE">Overdue</option>
+              <option value="PARTIAL">Partial</option>
             </select>
           </div>
         </div>

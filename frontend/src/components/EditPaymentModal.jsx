@@ -92,6 +92,7 @@ const EditPaymentModal = ({ show, onHide, payment, onSave }) => {
               <option value="PAID">Paid</option>
               <option value="PENDING">Pending</option>
               <option value="OVERDUE">Overdue</option>
+              <option value="PARTIAL">Partial</option>
             </select>
           </div>
 

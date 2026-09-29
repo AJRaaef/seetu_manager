@@ -55,6 +55,6 @@ public class Payment {
     }
 
     public enum PaymentStatus {
-        PAID, PENDING, LATE, OVERDUE, MISSED
+        PAID, PENDING, LATE, OVERDUE, MISSED, PARTIAL
     }
 }
