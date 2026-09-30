@@ -54,7 +54,7 @@ const LandingPage = () => {
       cta: 'Browse Asset Plans →',
       link: '#schemes',
       accentColor: '#0097B2',
-      bgImage: 'https://images.unsplash.com/photo-1618042164219-62c820f10723?auto=format&fit=crop&w=1200&q=80',
+      bgImage: 'https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=1200&q=80',
       slideTitle: 'Asset Seettu'
     }
   ];
