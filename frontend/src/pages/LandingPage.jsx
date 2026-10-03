@@ -54,7 +54,7 @@ const LandingPage = () => {
       cta: 'Browse Asset Plans →',
       link: '#schemes',
       accentColor: '#0097B2',
-      bgImage: 'https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&w=1200&q=80',
+      bgImage: 'https://media.istockphoto.com/id/2281200876/photo/business-professional-using-smartphone-to-access-digital-icons-of-online-services-and.jpg?s=170667a&w=0&k=20&c=th4UPnlNLUDNpOkya864Jy4WVcltCoW4DoTXKE02-dw=',
       slideTitle: 'Asset Seettu'
     }
   ];
@@ -423,23 +423,42 @@ const LandingPage = () => {
         </div>
       </nav>
 
-      {/* Hero Section Banner with Full-Coverage Dynamic Background Image */}
+      {/* Full-Width Navigatable Background Image Hero Section */}
       <header 
         key={heroSlide}
         className="text-white py-5 position-relative overflow-hidden slide-fade-in"
         style={{
-          backgroundColor: '#0F2F3D',
-          backgroundImage: `linear-gradient(135deg, rgba(15, 47, 61, 0.88) 0%, rgba(10, 33, 43, 0.94) 100%), url(${currentSlide.bgImage})`,
+          backgroundImage: `linear-gradient(90deg, rgba(15, 47, 61, 0.94) 0%, rgba(15, 47, 61, 0.75) 42%, rgba(15, 47, 61, 0.1) 100%), url(${currentSlide.bgImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           transition: 'background-image 0.6s ease-in-out',
-          minHeight: '520px'
+          minHeight: '540px'
         }}
       >
+        {/* Left Arrow - Previous Full Image */}
+        <button
+          onClick={() => setHeroSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1))}
+          className="btn btn-dark rounded-circle position-absolute top-50 start-0 translate-middle-y ms-3 d-flex align-items-center justify-content-center shadow-lg border-0"
+          style={{ width: '48px', height: '48px', backgroundColor: 'rgba(15, 47, 61, 0.85)', color: '#FFFFFF', zIndex: 10, cursor: 'pointer' }}
+          title="Previous Image"
+        >
+          <Icon name="chevron-left" size={26} />
+        </button>
+
+        {/* Right Arrow - Next Full Image */}
+        <button
+          onClick={() => setHeroSlide((prev) => (prev + 1) % heroSlides.length)}
+          className="btn btn-dark rounded-circle position-absolute top-50 end-0 translate-middle-y me-3 d-flex align-items-center justify-content-center shadow-lg border-0"
+          style={{ width: '48px', height: '48px', backgroundColor: 'rgba(15, 47, 61, 0.85)', color: '#FFFFFF', zIndex: 10, cursor: 'pointer' }}
+          title="Next Image"
+        >
+          <Icon name="chevron-right" size={26} />
+        </button>
+
         <div className="container py-lg-4 position-relative" style={{ zIndex: 2 }}>
           <div className="row align-items-center min-vh-50">
             <div className="col-lg-7">
-              <span className="badge rounded-pill px-3 py-2 mb-3 fw-semibold border border-light border-opacity-25" style={{ backgroundColor: 'rgba(255, 255, 255, 0.12)', backdropFilter: 'blur(6px)' }}>
+              <span className="badge rounded-pill px-3 py-2 mb-3 fw-semibold border border-light border-opacity-25" style={{ backgroundColor: '#0097B2' }}>
                 {currentSlide.tag}
               </span>
               
@@ -487,58 +506,22 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* Right Side Live System Glassmorphic Summary Card */}
-            <div className="col-lg-5 d-none d-lg-block">
+            {/* Right Side Image Info Badge Floating Tag */}
+            <div className="col-lg-5 d-none d-lg-flex justify-content-end align-items-end" style={{ height: '320px' }}>
               <div 
-                className="rounded-4 p-4 shadow-2xl border border-white border-opacity-25"
-                style={{ 
-                  backgroundColor: 'rgba(15, 47, 61, 0.75)', 
-                  backdropFilter: 'blur(12px)',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
-                }}
+                className="p-3 rounded-4 border border-light border-opacity-25 text-white shadow-2xl"
+                style={{ backgroundColor: 'rgba(10, 33, 43, 0.85)', maxWidth: '300px' }}
               >
-                <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-light border-opacity-25">
-                  <div className="d-flex align-items-center gap-2">
-                    <span className="badge bg-success px-3 py-2 rounded-pill fw-bold">Live System</span>
-                    <span className="small text-white-50">Rotational Savings Circle</span>
-                  </div>
-                  <Icon name="shield" size={24} color="#0097B2" />
+                <div className="d-flex align-items-center justify-content-between mb-1">
+                  <span className="badge px-2.5 py-1 text-white fw-bold rounded-pill" style={{ backgroundColor: '#0097B2', fontSize: '0.75rem' }}>
+                    {currentSlide.slideTitle}
+                  </span>
+                  <span className="small text-info fw-bold" style={{ color: '#0097B2' }}>
+                    {heroSlide + 1} / {heroSlides.length}
+                  </span>
                 </div>
-
-                <div className="bg-dark bg-opacity-50 p-3 rounded-3 mb-3 border border-light border-opacity-10">
-                  <div className="d-flex justify-content-between align-items-center mb-1">
-                    <span className="small text-white-50">Active Scheme:</span>
-                    <span className="fw-bold text-info" style={{ color: '#0097B2' }}>{currentSlide.slideTitle}</span>
-                  </div>
-                  <h4 className="fw-extrabold text-white mb-0">120,000 LKR Pot Value</h4>
-                </div>
-
-                <div className="row g-2 mb-3">
-                  <div className="col-6">
-                    <div className="bg-dark bg-opacity-40 p-3 rounded-3 border border-light border-opacity-10">
-                      <span className="fs-7 text-white-50 d-block mb-1">Discipline Score</span>
-                      <h5 className="fw-bold text-success mb-0">98 / 100</h5>
-                    </div>
-                  </div>
-                  <div className="col-6">
-                    <div className="bg-dark bg-opacity-40 p-3 rounded-3 border border-light border-opacity-10">
-                      <span className="fs-7 text-white-50 d-block mb-1">Payout Status</span>
-                      <h5 className="fw-bold text-white mb-0">Cycle #4 Paid</h5>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-3 text-white" style={{ background: 'linear-gradient(135deg, rgba(0,151,178,0.4) 0%, rgba(15,47,61,0.85) 100%)' }}>
-                  <div className="d-flex align-items-center gap-3">
-                    <div className="bg-info text-white p-2 rounded-circle" style={{ backgroundColor: '#0097B2' }}>
-                      <Icon name="check" size={20} />
-                    </div>
-                    <div>
-                      <h6 className="fw-bold mb-0 text-white">{currentSlide.slideTitle}</h6>
-                      <p className="small text-white-50 mb-0">Verified Payout Rotation & Digital Ledger</p>
-                    </div>
-                  </div>
-                </div>
+                <div className="fw-bold small mb-1">{currentSlide.title}</div>
+                <div className="text-white-50" style={{ fontSize: '0.78rem' }}>Full-width navigatable scheme preview</div>
               </div>
             </div>
           </div>
