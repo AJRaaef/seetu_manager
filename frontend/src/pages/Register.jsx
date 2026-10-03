@@ -66,6 +66,9 @@ const Register = () => {
             <div className="card-body p-4 p-md-5">
               {/* Brand Header matching exact logo colors */}
               <div className="text-center mb-4">
+                <div className="mb-2">
+                  <img src="/logo.png" alt="SeettuManager Logo" style={{ height: '70px', width: '70px', borderRadius: '50%', objectFit: 'cover' }} />
+                </div>
                 <h2 className="fw-bold mb-1" style={{ fontSize: '1.85rem', letterSpacing: '-0.4px' }}>
                   <span className="brand-seettu">Seettu</span>
                   <span className="brand-manager">Manager</span>

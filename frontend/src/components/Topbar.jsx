@@ -28,9 +28,12 @@ const Topbar = ({ onToggleSidebar }) => {
           <Icon name="menu" size={24} color="#0F2F3D" />
         </button>
 
-        <Link to="/dashboard" className="topbar-brand">
-          <span className="brand-seettu">Seettu</span>
-          <span className="brand-manager">Manager</span>
+        <Link to="/dashboard" className="topbar-brand d-flex align-items-center gap-2 text-decoration-none">
+          <img src="/logo.png" alt="SeettuManager Logo" style={{ height: '38px', width: '38px', borderRadius: '50%', objectFit: 'cover' }} />
+          <span>
+            <span className="brand-seettu">Seettu</span>
+            <span className="brand-manager">Manager</span>
+          </span>
         </Link>
       </div>
 

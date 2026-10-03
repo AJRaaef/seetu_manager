@@ -33,15 +33,13 @@ const Login = () => {
     }
   };
 
-  const fillDemo = (email, password) => {
-    setFormData({ email, password });
-    setError('');
-  };
-
   return (
     <div className="auth-page-wrapper">
       <div className="auth-card">
-        <h2 className="auth-title">
+        <div className="text-center mb-2">
+          <img src="/logo.png" alt="SeettuManager Logo" style={{ height: '70px', width: '70px', borderRadius: '50%', objectFit: 'cover' }} />
+        </div>
+        <h2 className="auth-title mt-1">
           <span className="brand-seettu">Seettu</span>
           <span className="brand-manager">Manager</span>
         </h2>
@@ -103,42 +101,11 @@ const Login = () => {
             {loading ? 'Logging in...' : 'Login'}
           </button>
 
-          <div className="text-center mb-3">
+          <div className="text-center mb-0">
             <span className="small text-muted">Don't have an account? </span>
             <Link to="/register" className="small fw-semibold text-decoration-none" style={{ color: '#1A5265' }}>
               Register New Account
             </Link>
-          </div>
-
-          {/* Quick Demo Logins Helper */}
-          <div className="pt-2 border-top text-center">
-            <span className="small text-muted d-block mb-2" style={{ fontSize: '0.75rem' }}>Demo Quick-Fill:</span>
-            <div className="d-flex justify-content-center gap-1 flex-wrap">
-              <button
-                type="button"
-                className="btn btn-sm btn-light border py-0 px-2 small"
-                style={{ fontSize: '0.75rem' }}
-                onClick={() => fillDemo('admin@seetumanager.com', 'Admin@123')}
-              >
-                Admin
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-light border py-0 px-2 small"
-                style={{ fontSize: '0.75rem' }}
-                onClick={() => fillDemo('org@gmail.com', 'Hello@12345')}
-              >
-                Organizer
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-light border py-0 px-2 small"
-                style={{ fontSize: '0.75rem' }}
-                onClick={() => fillDemo('user@gmail.com', 'Hello@12345')}
-              >
-                Member
-              </button>
-            </div>
           </div>
         </form>
       </div>

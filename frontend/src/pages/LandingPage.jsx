@@ -365,11 +365,12 @@ const LandingPage = () => {
       </div>
 
       {/* Main Navigation Bar */}
-      <nav className="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm py-2" style={{ backgroundColor: '#0F2F3D' }}>
+      <nav className="navbar navbar-expand-lg navbar-light sticky-top bg-white shadow-sm py-2">
         <div className="container">
-          <Link className="navbar-brand d-flex align-items-center me-4" to="/" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <Link className="navbar-brand d-flex align-items-center gap-2 me-4" to="/" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <img src="/logo.png" alt="SeettuManager Logo" style={{ height: '40px', width: '40px', borderRadius: '50%', objectFit: 'cover' }} />
             <span className="fw-bold fs-3">
-              <span style={{ color: '#FFFFFF' }}>Seettu</span>
+              <span style={{ color: '#0F2F3D' }}>Seettu</span>
               <span style={{ color: '#0097B2' }}>Manager</span>
             </span>
           </Link>
@@ -381,22 +382,22 @@ const LandingPage = () => {
           <div className="collapse navbar-collapse" id="landingNav">
             <ul className="navbar-nav mx-auto mb-2 mb-lg-0 fw-semibold">
               <li className="nav-item">
-                <a className="nav-link active px-3" href="#">Home</a>
+                <a className="nav-link active px-3 fw-bold" style={{ color: '#0097B2' }} href="#">Home</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 text-white-50" href="#schemes">Seettu Schemes</a>
+                <a className="nav-link px-3 text-secondary" href="#schemes">Seettu Schemes</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 text-white-50" href="#how-it-works">How It Works</a>
+                <a className="nav-link px-3 text-secondary" href="#how-it-works">How It Works</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 text-white-50" href="#calculator">Discipline Score</a>
+                <a className="nav-link px-3 text-secondary" href="#calculator">Discipline Score</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 text-white-50" href="#faq">FAQs</a>
+                <a className="nav-link px-3 text-secondary" href="#faq">FAQs</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 text-white-50" href="#contact">Contact Us</a>
+                <a className="nav-link px-3 text-secondary" href="#contact">Contact Us</a>
               </li>
             </ul>
 
@@ -409,7 +410,7 @@ const LandingPage = () => {
                 </>
               ) : (
                 <>
-                  <Link to="/login" className="btn btn-outline-light fw-semibold px-3 py-2 rounded-3">
+                  <Link to="/login" className="btn btn-outline-dark fw-semibold px-3 py-2 rounded-3" style={{ borderColor: '#0F2F3D', color: '#0F2F3D' }}>
                     Login
                   </Link>
                   <Link to="/register" className="btn btn-info fw-bold text-white px-3 py-2 rounded-3 shadow-sm" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}>
