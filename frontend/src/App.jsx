@@ -74,7 +74,7 @@ const MainLayout = () => {
       {/* Protected Dashboard & App Routes */}
       <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
       <Route path="/groups" element={<ProtectedRoute><AppLayout><MyGroups /></AppLayout></ProtectedRoute>} />
-      <Route path="/groups/create" element={<ProtectedRoute><AppLayout><CreateGroup /></AppLayout></ProtectedRoute>} />
+      <Route path="/groups/create" element={<ProtectedRoute roles={['ORGANIZER', 'ADMIN']}><AppLayout><CreateGroup /></AppLayout></ProtectedRoute>} />
       <Route path="/groups/:id" element={<ProtectedRoute><AppLayout><GroupDetail /></AppLayout></ProtectedRoute>} />
       
       <Route path="/members" element={<ProtectedRoute><AppLayout><Members /></AppLayout></ProtectedRoute>} />

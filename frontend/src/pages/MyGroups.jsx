@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { getGroupsByUser } from '../api/groupApi';
+import { getGroupsByUser, getAllGroups } from '../api/groupApi';
+import { createJoinRequest } from '../api/joinRequestApi';
 import Icon from '../components/Icons';
 
 const MyGroups = () => {
@@ -88,6 +89,55 @@ const MyGroups = () => {
     fetchGroups();
   }, [userId]);
 
+  const [showJoinModal, setShowJoinModal] = useState(false);
+  const [selectedJoinGroup, setSelectedJoinGroup] = useState('');
+  const [joinMsg, setJoinMsg] = useState('');
+  const [submittingJoin, setSubmittingJoin] = useState(false);
+  const [publicGroups, setPublicGroups] = useState([]);
+
+  useEffect(() => {
+    const fetchPublicGroups = async () => {
+      try {
+        const res = await getAllGroups();
+        const list = res.data || res || [];
+        if (Array.isArray(list) && list.length > 0) {
+          setPublicGroups(list);
+        }
+      } catch (err) {
+        console.error('Failed to load public groups for join modal', err);
+      }
+    };
+    fetchPublicGroups();
+  }, []);
+
+  const defaultPublicGroups = [
+    { id: 101, name: "Gold Saver Monthly Seettu", contributionAmount: 10000, category: "GOLD" },
+    { id: 102, name: "Community Farmer Circle", contributionAmount: 5000, category: "GENERAL" },
+    { id: 103, name: "Small Business Equipment Seettu", contributionAmount: 25000, category: "FURNITURE" },
+    { id: 104, name: "Express Weekly Micro Savings", contributionAmount: 2000, category: "GENERAL" }
+  ];
+
+  const displayPublicGroups = publicGroups.length > 0 ? publicGroups : defaultPublicGroups;
+
+  const handleJoinSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedJoinGroup) return;
+    setSubmittingJoin(true);
+    try {
+      await createJoinRequest(selectedJoinGroup, userId);
+      alert('✓ Request to join Seettu group submitted successfully to the database! The group organizer will review your request.');
+      setShowJoinModal(false);
+      setSelectedJoinGroup('');
+      setJoinMsg('');
+    } catch (err) {
+      console.error('Join request error', err);
+      const msg = err.response?.data?.message || 'Failed to submit join request to database.';
+      alert('⚠️ ' + msg);
+    } finally {
+      setSubmittingJoin(false);
+    }
+  };
+
   const handleDeleteGroup = (groupId, groupName) => {
     if (window.confirm(`Are you sure you want to delete the group "${groupName}"?`)) {
       setGroups(groups.filter(g => g.id !== groupId));
@@ -99,10 +149,17 @@ const MyGroups = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>My Groups</h2>
-        {(isOrganizer || isAdmin || true) && (
+        {isOrganizer || isAdmin ? (
           <Link to="/groups/create" className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2">
             <span>+</span> Create New Group
           </Link>
+        ) : (
+          <button 
+            onClick={() => setShowJoinModal(true)} 
+            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm"
+          >
+            <span>+</span> Join Group
+          </button>
         )}
       </div>
 
@@ -176,29 +233,88 @@ const MyGroups = () => {
                     View
                   </button>
 
-                  <button
-                    onClick={() => navigate(`/groups/${group.id}`)}
-                    className="btn btn-link p-1 text-decoration-none"
-                    style={{ color: '#188754' }}
-                    title="Edit Group"
-                  >
-                    <Icon name="pencil" size={16} color="#188754" />
-                  </button>
+                  {(isOrganizer || isAdmin) && (
+                    <>
+                      <button
+                        onClick={() => navigate(`/groups/${group.id}`)}
+                        className="btn btn-link p-1 text-decoration-none"
+                        style={{ color: '#188754' }}
+                        title="Edit Group"
+                      >
+                        <Icon name="pencil" size={16} color="#188754" />
+                      </button>
 
-                  <button
-                    onClick={() => handleDeleteGroup(group.id, group.name)}
-                    className="btn btn-link p-1 text-decoration-none"
-                    style={{ color: '#DC3545' }}
-                    title="Delete Group"
-                  >
-                    <Icon name="trash" size={16} color="#DC3545" />
-                  </button>
+                      <button
+                        onClick={() => handleDeleteGroup(group.id, group.name)}
+                        className="btn btn-link p-1 text-decoration-none"
+                        style={{ color: '#DC3545' }}
+                        title="Delete Group"
+                      >
+                        <Icon name="trash" size={16} color="#DC3545" />
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           );
         })}
       </div>
+
+      {/* Join Seettu Group Modal for Members */}
+      {showJoinModal && (
+        <div className="modal show d-block tab-modal-backdrop" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060 }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg rounded-3">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold" style={{ color: '#1A3644' }}>Join Seettu Group</h5>
+                <button type="button" className="btn-close" onClick={() => setShowJoinModal(false)}></button>
+              </div>
+              <form onSubmit={handleJoinSubmit}>
+                <div className="modal-body py-3">
+                  <p className="text-muted small mb-3">
+                    Select an open Seettu group to request joining as a participating member.
+                  </p>
+                  <div className="mb-3 text-start">
+                    <label className="form-label fw-semibold text-dark small mb-1">Select Available Seettu Scheme</label>
+                    <select 
+                      className="form-select"
+                      value={selectedJoinGroup}
+                      onChange={(e) => setSelectedJoinGroup(e.target.value)}
+                      required
+                    >
+                      <option value="">-- Choose a Seettu Group --</option>
+                      {displayPublicGroups.map((g) => (
+                        <option key={g.id} value={g.id}>
+                          {g.name} ({g.contributionAmount ? `${g.contributionAmount} LKR` : 'Standard Contribution'} • {g.category || 'Monetary'})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mb-3 text-start">
+                    <label className="form-label fw-semibold text-dark small mb-1">Optional Note for Organizer</label>
+                    <textarea 
+                      className="form-control" 
+                      rows="3" 
+                      placeholder="e.g. Interested in joining this monthly cycle scheme."
+                      value={joinMsg}
+                      onChange={(e) => setJoinMsg(e.target.value)}
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="modal-footer border-0 pt-0">
+                  <button type="button" className="btn btn-outline-secondary px-3" onClick={() => setShowJoinModal(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit" disabled={submittingJoin} className="btn btn-teal px-4 fw-semibold">
+                    {submittingJoin ? 'Submitting...' : 'Submit Join Request'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

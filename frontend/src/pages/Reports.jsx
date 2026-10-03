@@ -21,15 +21,23 @@ const Reports = () => {
     fetchReports();
   }, [user]);
 
+  const { isOrganizer, isAdmin } = useAuth();
+
   const fetchReports = async () => {
     try {
       setLoading(true);
+      setError('');
       const uid = user?.userId || user?.id;
-      const res = await reportApi.getReportsByUser(uid);
-      setReports(res.data || []);
+      if (uid) {
+        const res = await reportApi.getReportsByUser(uid);
+        const list = res?.data || res || [];
+        setReports(Array.isArray(list) ? list : []);
+      } else {
+        setReports([]);
+      }
     } catch (err) {
       console.error(err);
-      setError('Failed to fetch reports list.');
+      setReports([]);
     } finally {
       setLoading(false);
     }
@@ -62,12 +70,14 @@ const Reports = () => {
           </div>
           <p className="text-muted mb-0">Generate, review, and print audit summaries for financial groups</p>
         </div>
-        <button 
-          className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
-          onClick={() => setShowModal(true)}
-        >
-          <span>+</span> Generate New Report
-        </button>
+        {(isOrganizer || isAdmin) && (
+          <button 
+            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
+            onClick={() => setShowModal(true)}
+          >
+            <span>+</span> Generate New Report
+          </button>
+        )}
       </div>
 
       {error && <div className="alert alert-danger shadow-sm mb-4 rounded-3">{error}</div>}
@@ -84,11 +94,13 @@ const Reports = () => {
           </div>
           <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>No Reports Generated Yet</h5>
           <p className="text-muted small mb-4">Generate group summary, payment audit, or discipline score reports.</p>
-          <div>
-            <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
-              Generate First Report
-            </button>
-          </div>
+          {(isOrganizer || isAdmin) && (
+            <div>
+              <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
+                Generate First Report
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="row g-4">

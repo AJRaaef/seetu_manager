@@ -225,7 +225,7 @@ const Disputes = () => {
                             setResolutionNotes(d.resolutionNotes || '');
                           }}
                         >
-                          {d.status === 'RESOLVED' || d.status === 'REJECTED' ? 'View' : 'Review'}
+                          {(isOrganizer || isAdmin) ? (d.status === 'RESOLVED' || d.status === 'REJECTED' ? 'View' : 'Review') : 'View'}
                         </button>
                       </td>
                     </tr>

@@ -5,6 +5,8 @@ import EditMemberModal from '../components/EditMemberModal';
 import { getAllMembers, getAllGroups, removeMember, inviteMember } from '../api/groupApi';
 import { getErrorMessage } from '../utils/errorHandler';
 
+import { useAuth } from '../hooks/useAuth';
+
 const getScoreMeta = (scoreNum) => {
   const num = Number(scoreNum);
   if (num >= 90) return { label: 'Excellent', color: '#188754' };
@@ -19,7 +21,10 @@ const calculateScore = (member) => {
   return Math.min(100, Math.max(50, base));
 };
 
+import { getPendingJoinRequests, approveJoinRequest, rejectJoinRequest } from '../api/joinRequestApi';
+
 const Members = () => {
+  const { isOrganizer, isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [groupFilter, setGroupFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -32,20 +37,38 @@ const Members = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [actionMsg, setActionMsg] = useState('');
 
+  const [pendingRequests, setPendingRequests] = useState([]);
+
   const fetchData = async () => {
     try {
       setLoading(true);
       setErrorMsg('');
-      const [membersRes, groupsRes] = await Promise.all([
-        getAllMembers(),
-        getAllGroups()
+      const [membersRes, groupsRes, pendingRes] = await Promise.all([
+        getAllMembers().catch(() => ({ data: [] })),
+        getAllGroups().catch(() => ({ data: [] })),
+        (isOrganizer || isAdmin) ? getPendingJoinRequests().catch(() => ({ data: [] })) : Promise.resolve({ data: [] })
       ]);
 
       const mList = membersRes?.data || membersRes || [];
       const gList = groupsRes?.data || groupsRes || [];
+      const pList = pendingRes?.data || pendingRes || [];
 
       setRawMembers(Array.isArray(mList) ? mList : []);
       setGroups(Array.isArray(gList) ? gList : []);
+
+      if (Array.isArray(pList) && pList.length > 0) {
+        const formattedPending = pList.map(r => ({
+          id: r.id,
+          memberName: r.user?.fullName || r.userName || 'Member',
+          email: r.user?.email || 'N/A',
+          groupName: r.group?.name || 'Seettu Group',
+          date: r.requestedAt ? r.requestedAt.split('T')[0] : 'Today',
+          status: r.status || 'PENDING'
+        }));
+        setPendingRequests(formattedPending);
+      } else {
+        setPendingRequests([]);
+      }
     } catch (err) {
       console.error('Failed to load members or groups:', err);
       setErrorMsg(getErrorMessage(err, 'Failed to fetch members from database.'));
@@ -56,7 +79,31 @@ const Members = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [isOrganizer, isAdmin]);
+
+  const handleApproveRequest = async (reqId, memberName, groupName) => {
+    try {
+      setActionMsg('');
+      setErrorMsg('');
+      await approveJoinRequest(reqId);
+      setActionMsg(`✓ Member ${memberName} approved and successfully added to group "${groupName}" in MySQL database!`);
+      await fetchData();
+    } catch (err) {
+      setErrorMsg(getErrorMessage(err, 'Failed to approve join request in database.'));
+    }
+  };
+
+  const handleRejectRequest = async (reqId, memberName) => {
+    try {
+      setActionMsg('');
+      setErrorMsg('');
+      await rejectJoinRequest(reqId);
+      setActionMsg(`Join request for ${memberName} was rejected.`);
+      await fetchData();
+    } catch (err) {
+      setErrorMsg(getErrorMessage(err, 'Failed to reject join request in database.'));
+    }
+  };
 
   const handleAddMember = async ({ groupId, fullName, email, phone }) => {
     try {
@@ -155,13 +202,15 @@ const Members = () => {
           <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>Members</h2>
           <p className="text-muted small mb-0">Manage registered members across all Seettu groups</p>
         </div>
-        <button
-          onClick={() => setShowInviteModal(true)}
-          className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2"
-        >
-          <Icon name="user-plus" size={18} />
-          <span>Invite Members</span>
-        </button>
+        {(isOrganizer || isAdmin) && (
+          <button
+            onClick={() => setShowInviteModal(true)}
+            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2"
+          >
+            <Icon name="user-plus" size={18} />
+            <span>Invite Members</span>
+          </button>
+        )}
       </div>
 
       {actionMsg && (
@@ -177,6 +226,55 @@ const Members = () => {
           <Icon name="alert-circle" size={18} />
           <div>{errorMsg}</div>
           <button type="button" className="btn-close ms-auto" onClick={() => setErrorMsg('')} aria-label="Close"></button>
+        </div>
+      )}
+
+      {/* Pending Join Requests Section for Organizers / Admins */}
+      {(isOrganizer || isAdmin) && pendingRequests.length > 0 && (
+        <div className="ui-card p-4 mb-4 shadow-sm border-0 rounded-3">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h5 className="fw-bold mb-0" style={{ color: '#1A3644' }}>
+              Pending Group Join Requests ({pendingRequests.length})
+            </h5>
+            <span className="badge rounded-pill bg-warning text-dark px-3 py-1">Requires Organizer Approval</span>
+          </div>
+          <div className="table-responsive">
+            <table className="table table-sm align-middle mb-0">
+              <thead className="table-light">
+                <tr>
+                  <th>Member Name</th>
+                  <th>Email</th>
+                  <th>Requested Seettu Group</th>
+                  <th>Request Date</th>
+                  <th className="text-end">Organizer Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingRequests.map((req) => (
+                  <tr key={req.id}>
+                    <td className="fw-semibold text-dark">{req.memberName}</td>
+                    <td className="text-muted small">{req.email}</td>
+                    <td><span className="badge-mint">{req.groupName}</span></td>
+                    <td className="text-muted small">{req.date}</td>
+                    <td className="text-end">
+                      <button 
+                        onClick={() => handleApproveRequest(req.id, req.memberName, req.groupName)} 
+                        className="btn btn-sm btn-success px-3 me-2 shadow-sm"
+                      >
+                        ✓ Approve
+                      </button>
+                      <button 
+                        onClick={() => handleRejectRequest(req.id, req.memberName)} 
+                        className="btn btn-sm btn-outline-danger px-2"
+                      >
+                        ✕ Reject
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -237,20 +335,20 @@ const Members = () => {
                 <th className="py-3 px-3 text-muted fw-semibold small">Joined Date</th>
                 <th className="py-3 px-3 text-muted fw-semibold small text-center">Discipline Score</th>
                 <th className="py-3 px-3 text-muted fw-semibold small text-center">Status</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-end">Actions</th>
+                {(isOrganizer || isAdmin) && <th className="py-3 px-3 text-muted fw-semibold small text-end">Actions</th>}
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="8" className="text-center py-5">
+                  <td colSpan={(isOrganizer || isAdmin) ? "8" : "7"} className="text-center py-5">
                     <div className="spinner-border text-teal" role="status" style={{ color: '#1A5265' }}></div>
                     <p className="mt-2 text-muted small">Loading members from database...</p>
                   </td>
                 </tr>
               ) : filteredMembers.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="text-center py-5">
+                  <td colSpan={(isOrganizer || isAdmin) ? "8" : "7"} className="text-center py-5">
                     <Icon name="users" size={36} color="#94A3B8" className="mb-2" />
                     <h6 className="fw-bold text-dark">No members found</h6>
                     <p className="text-muted small mb-0">No active members match the current filters or no members are registered yet.</p>
@@ -277,26 +375,28 @@ const Members = () => {
                         {member.status}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-end">
-                      <div className="d-flex justify-content-end gap-2">
-                        <button
-                          className="btn btn-link p-1 text-decoration-none"
-                          style={{ color: '#188754' }}
-                          title="Edit Member"
-                          onClick={() => setEditingMember(member)}
-                        >
-                          <Icon name="pencil" size={16} color="#188754" />
-                        </button>
-                        <button
-                          className="btn btn-link p-1 text-decoration-none"
-                          style={{ color: '#DC3545' }}
-                          title="Delete Member"
-                          onClick={() => handleDeleteMember(member)}
-                        >
-                          <Icon name="trash" size={16} color="#DC3545" />
-                        </button>
-                      </div>
-                    </td>
+                    {(isOrganizer || isAdmin) && (
+                      <td className="py-3 px-3 text-end">
+                        <div className="d-flex justify-content-end gap-2">
+                          <button
+                            className="btn btn-link p-1 text-decoration-none"
+                            style={{ color: '#188754' }}
+                            title="Edit Member"
+                            onClick={() => setEditingMember(member)}
+                          >
+                            <Icon name="pencil" size={16} color="#188754" />
+                          </button>
+                          <button
+                            className="btn btn-link p-1 text-decoration-none"
+                            style={{ color: '#DC3545' }}
+                            title="Delete Member"
+                            onClick={() => handleDeleteMember(member)}
+                          >
+                            <Icon name="trash" size={16} color="#DC3545" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
