@@ -99,12 +99,26 @@ const PaymentAuditTrail = () => {
   };
 
   const getRoleBadge = (role) => {
-    if (role === 'ADMIN') {
-      return <span className="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-25 ms-1">ADMIN</span>;
-    } else if (role === 'ORGANIZER') {
-      return <span className="badge bg-info bg-opacity-15 text-info border border-info border-opacity-25 ms-1" style={{ color: '#0097B2' }}>ORGANIZER</span>;
+    const norm = (role || '').replace('ROLE_', '').toUpperCase();
+    if (norm === 'ADMIN') {
+      return (
+        <span className="badge ms-1" style={{ backgroundColor: '#FEE2E2', color: '#991B1B', border: '1px solid #FCA5A5', fontSize: '0.7rem', fontWeight: 700 }}>
+          ADMIN
+        </span>
+      );
     }
-    return <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 ms-1">{role}</span>;
+    if (norm === 'ORGANIZER') {
+      return (
+        <span className="badge ms-1" style={{ backgroundColor: '#E0F2FE', color: '#0369A1', border: '1px solid #7DD3FC', fontSize: '0.7rem', fontWeight: 700 }}>
+          ORGANIZER
+        </span>
+      );
+    }
+    return (
+      <span className="badge ms-1" style={{ backgroundColor: '#F1F5F9', color: '#475569', border: '1px solid #CBD5E1', fontSize: '0.7rem', fontWeight: 600 }}>
+        {norm || 'SYSTEM'}
+      </span>
+    );
   };
 
   return (

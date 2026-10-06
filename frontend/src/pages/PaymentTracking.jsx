@@ -298,7 +298,7 @@ const PaymentTracking = () => {
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>Payment Management</h2>
         <div className="d-flex align-items-center gap-2">
-          {(isAdmin || isOrganizer) && (
+          {isAdmin && (
             <Link
               to="/audit-trail"
               className="btn btn-info btn-sm text-white fw-bold d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-2 shadow-sm"

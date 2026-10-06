@@ -19,21 +19,21 @@ public class AuditLogController {
     private final AuditLogService auditLogService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<AuditLogResponse>>> getAllAuditLogs() {
         List<AuditLog> logs = auditLogService.getAllLogs();
         return ResponseEntity.ok(ApiResponse.success(auditLogService.toResponseList(logs)));
     }
 
     @GetMapping("/payments")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<AuditLogResponse>>> getPaymentAuditLogs() {
         List<AuditLog> logs = auditLogService.getPaymentAuditLogs();
         return ResponseEntity.ok(ApiResponse.success(auditLogService.toResponseList(logs)));
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<AuditLogResponse>>> getAuditLogsByUser(@PathVariable Long userId) {
         List<AuditLog> logs = auditLogService.getLogsByUser(userId);
         return ResponseEntity.ok(ApiResponse.success(auditLogService.toResponseList(logs)));

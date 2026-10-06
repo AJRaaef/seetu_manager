@@ -82,7 +82,7 @@ const MainLayout = () => {
       
       <Route path="/payments" element={<ProtectedRoute><AppLayout><PaymentTracking /></AppLayout></ProtectedRoute>} />
       <Route path="/advance-payments" element={<ProtectedRoute><AppLayout><AdvancePayments /></AppLayout></ProtectedRoute>} />
-      <Route path="/audit-trail" element={<ProtectedRoute roles={['ORGANIZER', 'ADMIN']}><AppLayout><PaymentAuditTrail /></AppLayout></ProtectedRoute>} />
+      <Route path="/audit-trail" element={<ProtectedRoute roles={['ADMIN']}><AppLayout><PaymentAuditTrail /></AppLayout></ProtectedRoute>} />
       
       <Route path="/profile" element={<ProtectedRoute><AppLayout><Profile /></AppLayout></ProtectedRoute>} />
       <Route path="/disputes" element={<ProtectedRoute><AppLayout><Disputes /></AppLayout></ProtectedRoute>} />

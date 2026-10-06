@@ -1,7 +1,21 @@
 import api from './axios';
 
 export const generateReport = async (title, type, generatedById, content) => {
-  const response = await api.post(`/reports?title=${title}&type=${type}&generatedById=${generatedById}`, content);
+  const safeTitle = encodeURIComponent(title || 'System Report');
+  const safeType = encodeURIComponent(type || 'GENERAL');
+  const safeUserId = generatedById || 1;
+  const safeContent = content || 'System generated summary report.';
+
+  const response = await api.post(
+    `/reports?title=${safeTitle}&type=${safeType}&generatedById=${safeUserId}`,
+    {
+      title: title || 'System Report',
+      type: type || 'GENERAL',
+      generatedById: safeUserId,
+      content: safeContent,
+      notes: safeContent
+    }
+  );
   return response.data;
 };
 
