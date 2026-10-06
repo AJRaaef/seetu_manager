@@ -98,6 +98,19 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
               </NavLink>
             </li>
 
+            {(isAdmin || isOrganizer) && (
+              <li>
+                <NavLink
+                  to="/audit-trail"
+                  className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                  onClick={onCloseMobile}
+                >
+                  <Icon name="shield" size={18} color="#0097B2" />
+                  <span>Audit Trail</span>
+                </NavLink>
+              </li>
+            )}
+
             <li>
               <NavLink
                 to="/emergency"

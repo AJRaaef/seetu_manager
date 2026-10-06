@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import Icon from '../components/Icons';
 import PaymentDetailsModal from '../components/PaymentDetailsModal';
@@ -294,15 +295,27 @@ const PaymentTracking = () => {
   return (
     <div className="payment-management-container pb-4">
       {/* Title */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>Payment Management</h2>
-        <button
-          onClick={fetchPayments}
-          className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
-          title="Refresh from database"
-        >
-          <span>↻</span> Refresh
-        </button>
+        <div className="d-flex align-items-center gap-2">
+          {(isAdmin || isOrganizer) && (
+            <Link
+              to="/audit-trail"
+              className="btn btn-info btn-sm text-white fw-bold d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-2 shadow-sm"
+              style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
+            >
+              <Icon name="shield" size={15} />
+              <span>Payment Audit Trail</span>
+            </Link>
+          )}
+          <button
+            onClick={fetchPayments}
+            className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 py-1.5"
+            title="Refresh from database"
+          >
+            <span>↻</span> Refresh
+          </button>
+        </div>
       </div>
 
       {/* 4 Dynamic Metric Cards */}

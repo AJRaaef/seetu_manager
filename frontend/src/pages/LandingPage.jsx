@@ -316,7 +316,7 @@ const LandingPage = () => {
       </Link>
 
       {/* Floating Call Widget */}
-      <div className="floating-call-bar d-none d-md-flex">
+      <div className="floating-call-bar d-none d-mdc-flex">
         <a href="tel:0112345678" className="floating-call-btn" title="Call Helpline">
           <Icon name="phone" size={22} />
         </a>

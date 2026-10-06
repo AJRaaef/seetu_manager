@@ -132,13 +132,21 @@ public class PaymentService {
         if (request.getPaymentDate() != null) {
             payment.setPaymentDate(request.getPaymentDate());
         }
-        return paymentRepository.save(payment);
+        Payment updated = paymentRepository.save(payment);
+
+        User recorder = payment.getRecordedBy();
+        auditLogService.log(recorder, "PAYMENT_UPDATED", "payments", payment.getId(),
+                "Payment #" + payment.getId() + " updated: amount=" + payment.getAmount() + " LKR, status=" + payment.getStatus());
+
+        return updated;
     }
 
     @Transactional
     public void deletePayment(Long id) {
         Payment payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + id));
+        auditLogService.log(payment.getRecordedBy(), "PAYMENT_DELETED", "payments", payment.getId(),
+                "Payment #" + payment.getId() + " deleted for member: " + (payment.getMember() != null ? payment.getMember().getFullName() : "Member"));
         paymentRepository.delete(payment);
     }
 

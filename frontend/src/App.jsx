@@ -19,6 +19,7 @@ import AdvancePayments from './pages/AdvancePayments';
 import Profile from './pages/Profile';
 import Disputes from './pages/Disputes';
 import EmergencyRequests from './pages/EmergencyRequests';
+import PaymentAuditTrail from './pages/PaymentAuditTrail';
 import Reports from './pages/Reports';
 import Certificates from './pages/Certificates';
 import Notifications from './pages/Notifications';
@@ -81,6 +82,7 @@ const MainLayout = () => {
       
       <Route path="/payments" element={<ProtectedRoute><AppLayout><PaymentTracking /></AppLayout></ProtectedRoute>} />
       <Route path="/advance-payments" element={<ProtectedRoute><AppLayout><AdvancePayments /></AppLayout></ProtectedRoute>} />
+      <Route path="/audit-trail" element={<ProtectedRoute roles={['ORGANIZER', 'ADMIN']}><AppLayout><PaymentAuditTrail /></AppLayout></ProtectedRoute>} />
       
       <Route path="/profile" element={<ProtectedRoute><AppLayout><Profile /></AppLayout></ProtectedRoute>} />
       <Route path="/disputes" element={<ProtectedRoute><AppLayout><Disputes /></AppLayout></ProtectedRoute>} />
