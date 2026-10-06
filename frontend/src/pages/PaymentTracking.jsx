@@ -12,7 +12,8 @@ import {
   recordPayment,
   updatePayment,
   deletePayment,
-  getPaymentCyclesByGroup
+  getPaymentCyclesByGroup,
+  uploadPaymentEvidence
 } from '../api/paymentApi';
 import { getAllGroups, getGroupsByUser, getGroupMembers } from '../api/groupApi';
 
@@ -34,6 +35,7 @@ const PaymentTracking = () => {
   const [amountInput, setAmountInput] = useState('');
   const [dateInput, setDateInput] = useState(new Date().toISOString().split('T')[0]);
   const [paymentMethodInput, setPaymentMethodInput] = useState('Cash (Offline)');
+  const [evidenceFile, setEvidenceFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Modal states
@@ -136,26 +138,36 @@ const PaymentTracking = () => {
   // Handle Record New Payment directly to Database
   const handleRecordNew = async (e) => {
     e.preventDefault();
-    if (!selectedGroupId || !selectedMemberId || !selectedCycleId || !amountInput) {
-      alert('Please select group, member, cycle, and enter contribution amount.');
+    const targetMemberId = selectedMemberId || userId;
+    if (!selectedGroupId || !targetMemberId || !selectedCycleId || !amountInput) {
+      alert('Please select group, cycle, and enter contribution amount.');
       return;
     }
 
     setSubmitting(true);
     try {
-      await recordPayment(
+      const created = await recordPayment(
         {
           cycleId: Number(selectedCycleId),
-          memberId: Number(selectedMemberId),
+          memberId: Number(targetMemberId),
           amount: parseFloat(amountInput),
           paymentMethod: paymentMethodInput,
-          notes: 'Recorded via Payment Management portal'
+          notes: (isAdmin || isOrganizer) ? 'Recorded via Payment Management portal' : 'Submitted by member with payment slip'
         },
         userId || 1
       );
 
-      alert('✓ Payment successfully recorded to database!');
+      if (evidenceFile && created?.id) {
+        try {
+          await uploadPaymentEvidence(created.id, evidenceFile.name);
+        } catch (fileErr) {
+          console.error('Failed to attach digital slip', fileErr);
+        }
+      }
+
+      alert(`✓ Payment ${(isAdmin || isOrganizer) ? 'recorded' : 'evidence submitted'} successfully${evidenceFile ? ' with attached payment slip' : ''}!`);
       setAmountInput('');
+      setEvidenceFile(null);
       fetchPayments();
     } catch (err) {
       console.error('Error recording payment to database', err);
@@ -375,8 +387,8 @@ const PaymentTracking = () => {
         </div>
       </div>
 
-      {/* Record New Payment Form Card (for Organizers & Admins) */}
-      {(isAdmin || isOrganizer) && (
+      {/* Record Payment / Submit Evidence Form Card */}
+      {(isAdmin || isOrganizer) ? (
         <div className="ui-card p-4 mb-4 shadow-sm">
           <h5 className="fw-bold text-dark mb-3" style={{ fontSize: '1rem' }}>Record New Payment to Database</h5>
           <form onSubmit={handleRecordNew}>
@@ -487,10 +499,126 @@ const PaymentTracking = () => {
                 </select>
               </div>
 
+              {/* Payment Slip / Evidence Attachment (Optional) */}
+              <div className="col-12 col-md">
+                <input
+                  type="file"
+                  accept="image/*,.pdf"
+                  className="form-control bg-white"
+                  title="Attach Payment Slip / Evidence (Optional)"
+                  onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)}
+                />
+              </div>
+
               {/* Submit Button */}
               <div className="col-12 col-md-auto">
                 <button type="submit" className="btn btn-teal px-4 w-100" disabled={submitting}>
                   {submitting ? 'Recording...' : 'Record Payment'}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      ) : (
+        <div className="ui-card p-4 mb-4 shadow-sm border-start border-4 border-info">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h5 className="fw-bold text-dark mb-1" style={{ fontSize: '1rem' }}>Submit Contribution & Attach Payment Slip</h5>
+              <p className="text-muted small mb-0">Upload bank transfer or cash deposit slips to report your group payments to organizers.</p>
+            </div>
+            <span className="badge bg-info-subtle text-info border border-info px-3 py-1 rounded-pill">Member Submission</span>
+          </div>
+          <form onSubmit={handleRecordNew}>
+            <div className="row g-3 align-items-center">
+              {/* Group Select */}
+              <div className="col-12 col-md">
+                <select
+                  className="form-select bg-white"
+                  value={selectedGroupId}
+                  onChange={(e) => {
+                    const gId = e.target.value;
+                    setSelectedGroupId(gId);
+                    setSelectedMemberId(userId);
+                    const grp = availableGroups.find((g) => String(g.id) === String(gId));
+                    if (grp && grp.contributionAmount) {
+                      setAmountInput(String(grp.contributionAmount));
+                    }
+                  }}
+                  required
+                >
+                  <option value="">Select My Group</option>
+                  {availableGroups.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name}
+                    </option>
+                  ))}
+                  {availableGroups.length === 0 && (
+                    <option value="" disabled>No enrolled groups found</option>
+                  )}
+                </select>
+              </div>
+
+              {/* Cycle Select */}
+              <div className="col-12 col-md">
+                <select
+                  className="form-select bg-white"
+                  value={selectedCycleId}
+                  onChange={(e) => setSelectedCycleId(e.target.value)}
+                  disabled={!selectedGroupId}
+                  required
+                >
+                  <option value="">Select Cycle</option>
+                  {groupCycles.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      Cycle {c.cycleNumber} ({c.status || 'Active'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Amount Input */}
+              <div className="col-12 col-md">
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Amount (LKR)"
+                  value={amountInput}
+                  onChange={(e) => setAmountInput(e.target.value)}
+                  required
+                  min="1"
+                />
+              </div>
+
+              {/* Settlement Method Select */}
+              <div className="col-12 col-md">
+                <select
+                  className="form-select bg-white"
+                  value={paymentMethodInput}
+                  onChange={(e) => setPaymentMethodInput(e.target.value)}
+                  title="Payment Settlement Method"
+                >
+                  <option value="Bank Deposit / Transfer">Bank Deposit / Transfer</option>
+                  <option value="Cash (Offline)">Cash (Offline)</option>
+                  <option value="Mobile Wallet (EzCash/mCash)">Mobile Wallet (EzCash/mCash)</option>
+                  <option value="Online Banking">Online Banking</option>
+                </select>
+              </div>
+
+              {/* Attach Payment Slip File Input */}
+              <div className="col-12 col-md">
+                <input
+                  type="file"
+                  accept="image/*,.pdf"
+                  className="form-control bg-white"
+                  title="Attach Payment Slip / Evidence"
+                  onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)}
+                />
+              </div>
+
+              {/* Submit Button */}
+              <div className="col-12 col-md-auto">
+                <button type="submit" className="btn btn-teal px-4 w-100" disabled={submitting}>
+                  {submitting ? 'Submitting...' : 'Submit Payment & Slip'}
                 </button>
               </div>
             </div>

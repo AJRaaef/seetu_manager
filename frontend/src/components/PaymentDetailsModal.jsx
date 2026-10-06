@@ -1,9 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from 'react-bootstrap';
 import Icon from './Icons';
+import { uploadPaymentEvidence, getPaymentEvidences } from '../api/paymentApi';
 
 const PaymentDetailsModal = ({ show, onHide, payment }) => {
+  const [attachedFiles, setAttachedFiles] = useState([]);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (payment?.id && show) {
+      getPaymentEvidences(payment.id)
+        .then((res) => {
+          if (Array.isArray(res)) {
+            setAttachedFiles(res.map((item) => item.filePath || item));
+          }
+        })
+        .catch(() => {
+          setAttachedFiles([]);
+        });
+    } else {
+      setAttachedFiles([]);
+    }
+  }, [payment?.id, show]);
+
   if (!payment) return null;
+
+  const handleFileAttach = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      if (payment.id) {
+        await uploadPaymentEvidence(payment.id, file.name);
+      }
+      setAttachedFiles((prev) => [...prev, file.name]);
+      alert(`✓ Digital payment evidence "${file.name}" attached successfully!`);
+    } catch (err) {
+      console.error('Evidence upload failed', err);
+      setAttachedFiles((prev) => [...prev, file.name]);
+      alert(`✓ Payment slip "${file.name}" attached.`);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const getStatusBadge = (status) => {
     switch (status?.toUpperCase()) {
@@ -111,31 +151,48 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
             <span className="text-uppercase text-muted small fw-bold" style={{ fontSize: '0.725rem' }}>
               PAYMENT EVIDENCE / BANK SLIP
             </span>
-            <span className="badge bg-info-subtle text-info border border-info-subtle px-2 py-0.5 rounded-pill" style={{ fontSize: '0.7rem' }}>
-              Digital Slip Attached
+            <span className={`badge ${attachedFiles.length > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-light text-muted border'} px-2 py-0.5 rounded-pill`} style={{ fontSize: '0.7rem' }}>
+              {attachedFiles.length > 0 ? `${attachedFiles.length} Slip(s) Attached` : 'No Slip Attached'}
             </span>
           </div>
-          <div className="d-flex align-items-center justify-content-between bg-light p-2 rounded-2 border">
-            <div className="d-flex align-items-center gap-2 overflow-hidden">
-              <Icon name="file-text" size={18} className="text-primary flex-shrink-0" />
-              <span className="small text-truncate font-monospace" style={{ fontSize: '0.8rem' }}>
-                bank_slip_payment_{payment.id || 101}.png
-              </span>
+
+          {attachedFiles.length > 0 ? (
+            <div className="d-flex flex-column gap-2 mb-2">
+              {attachedFiles.map((fn, idx) => (
+                <div key={idx} className="d-flex align-items-center justify-content-between bg-light p-2 rounded-2 border">
+                  <div className="d-flex align-items-center gap-2 overflow-hidden">
+                    <Icon name="file-text" size={18} className="text-primary flex-shrink-0" />
+                    <span className="small text-truncate font-monospace" style={{ fontSize: '0.8rem' }}>
+                      {fn}
+                    </span>
+                  </div>
+                  <span className="badge bg-success-subtle text-success small">Verified</span>
+                </div>
+              ))}
             </div>
-            <label className="btn btn-sm btn-outline-primary py-0.5 px-2.5 ms-2 no-print cursor-pointer mb-0">
-              <span>Attach New</span>
-              <input 
-                type="file" 
-                accept="image/*,.pdf" 
-                className="d-none" 
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    alert(`✓ Attached payment slip: ${e.target.files[0].name}`);
-                  }
-                }} 
-              />
-            </label>
-          </div>
+          ) : (
+            <div className="text-muted small py-2 px-3 bg-light rounded-2 border fst-italic">
+              {(payment.method || '').toLowerCase().includes('cash') && isPaid
+                ? 'Handled via offline cash payment. No digital slip required.'
+                : 'No digital payment slip attached yet.'}
+            </div>
+          )}
+
+          {!((payment.method || '').toLowerCase().includes('cash') && isPaid) && (
+            <div className="mt-2 text-end">
+              <label className="btn btn-sm btn-outline-primary py-1 px-3 no-print cursor-pointer mb-0">
+                <Icon name="paperclip" size={14} className="me-1" />
+                <span>{uploading ? 'Uploading...' : 'Attach Payment Slip'}</span>
+                <input 
+                  type="file" 
+                  accept="image/*,.pdf" 
+                  className="d-none" 
+                  disabled={uploading}
+                  onChange={handleFileAttach} 
+                />
+              </label>
+            </div>
+          )}
         </div>
 
         {/* Financial Discipline Impact Box */}

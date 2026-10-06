@@ -21,7 +21,12 @@ export const recordAdvancePayment = async (memberId, amount, notes) => {
 };
 
 export const getAdvancePayments = async (memberId) => {
-  const response = await api.get(`/advance-payments/member/${memberId}`);
+  const response = await api.get(`/advance-payments/user/${memberId}`);
+  return response.data;
+};
+
+export const getAllAdvancePayments = async () => {
+  const response = await api.get('/advance-payments');
   return response.data;
 };
 

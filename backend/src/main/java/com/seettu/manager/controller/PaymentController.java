@@ -26,7 +26,7 @@ public class PaymentController {
     private final com.seettu.manager.service.PaymentEvidenceService paymentEvidenceService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER') or hasRole('MEMBER')")
     public ResponseEntity<ApiResponse<PaymentResponse>> recordPayment(
             @Valid @RequestBody PaymentRecordRequest request,
             @RequestParam(required = false) Long recorderId,

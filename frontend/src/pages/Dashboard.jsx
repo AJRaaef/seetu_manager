@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { getAdminDashboard, getUserDashboard } from '../api/dashboardApi';
-import { getAllPayments, getPaymentsByMember } from '../api/paymentApi';
+import { getAllPayments, getPaymentsByMember, getAdvancePayments, getAllAdvancePayments } from '../api/paymentApi';
 import Icon from '../components/Icons';
 import ReviewPayoutModal from '../components/ReviewPayoutModal';
 import PaymentDetailsModal from '../components/PaymentDetailsModal';
@@ -16,6 +17,7 @@ const Dashboard = () => {
   const [recentPayments, setRecentPayments] = useState([]);
   const [loadingPayments, setLoadingPayments] = useState(true);
   const [payoutApproved, setPayoutApproved] = useState(false);
+  const [advanceTotal, setAdvanceTotal] = useState(0);
 
   const userId = user?.userId || user?.id;
 
@@ -28,6 +30,19 @@ const Dashboard = () => {
         console.error('Failed to load dashboard metrics', error);
       } finally {
         setLoading(false);
+      }
+    };
+
+    const fetchAdvance = async () => {
+      try {
+        const res = isAdmin ? await getAllAdvancePayments() : (userId ? await getAdvancePayments(userId) : null);
+        const list = res?.data?.data || res?.data || res || [];
+        if (Array.isArray(list)) {
+          const sum = list.reduce((acc, item) => acc + (Number(item.amount) || 0), 0);
+          setAdvanceTotal(sum);
+        }
+      } catch (err) {
+        console.error('Failed to fetch advance payments for dashboard', err);
       }
     };
 
@@ -65,6 +80,7 @@ const Dashboard = () => {
     if (isAdmin || userId) {
       fetchDashboard();
       fetchRecentPayments();
+      fetchAdvance();
     } else {
       setLoading(false);
       setLoadingPayments(false);
@@ -135,11 +151,11 @@ const Dashboard = () => {
       </div>
 
       {/* Metric Cards Row */}
-      <div className="row g-4 mb-4">
+      <div className="row g-3 mb-4">
         {/* Active Groups */}
-        <div className="col-12 col-md-4">
+        <div className="col-12 col-sm-6 col-xl-3">
           <div className="metric-card h-100 d-flex flex-column justify-content-between">
-            <div className="d-flex justify-content-between align-items-start w-100 mb-3">
+            <div className="d-flex justify-content-between align-items-start w-100 mb-2">
               <div>
                 <div className="metric-value">{activeGroupsCount}</div>
                 <div className="metric-label">Active Groups</div>
@@ -153,9 +169,9 @@ const Dashboard = () => {
         </div>
 
         {/* Total Members */}
-        <div className="col-12 col-md-4">
+        <div className="col-12 col-sm-6 col-xl-3">
           <div className="metric-card h-100 d-flex flex-column justify-content-between">
-            <div className="d-flex justify-content-between align-items-start w-100 mb-3">
+            <div className="d-flex justify-content-between align-items-start w-100 mb-2">
               <div>
                 <div className="metric-value">{totalMembersCount}</div>
                 <div className="metric-label">Total Members</div>
@@ -169,9 +185,9 @@ const Dashboard = () => {
         </div>
 
         {/* Completion Rate */}
-        <div className="col-12 col-md-4">
+        <div className="col-12 col-sm-6 col-xl-3">
           <div className="metric-card h-100 d-flex flex-column justify-content-between">
-            <div className="d-flex justify-content-between align-items-start w-100 mb-3">
+            <div className="d-flex justify-content-between align-items-start w-100 mb-2">
               <div>
                 <div className="metric-value">{completionRate}%</div>
                 <div className="metric-label">Completion Rate</div>
@@ -183,6 +199,24 @@ const Dashboard = () => {
             <div className="custom-progress w-100">
               <div className="custom-progress-bar" style={{ width: `${completionRate}%` }}></div>
             </div>
+          </div>
+        </div>
+
+        {/* Advance Contributions Card */}
+        <div className="col-12 col-sm-6 col-xl-3">
+          <div className="metric-card h-100 d-flex flex-column justify-content-between">
+            <div className="d-flex justify-content-between align-items-start w-100 mb-2">
+              <div>
+                <div className="metric-value" style={{ fontSize: '1.4rem' }}>
+                  {advanceTotal.toLocaleString()} LKR
+                </div>
+                <div className="metric-label">Advance Contributions</div>
+              </div>
+              <div className="text-teal opacity-75">
+                <Icon name="advance" size={26} color="#008CA7" />
+              </div>
+            </div>
+            <div className="metric-subtext">Pre-paid cycle balance</div>
           </div>
         </div>
       </div>
