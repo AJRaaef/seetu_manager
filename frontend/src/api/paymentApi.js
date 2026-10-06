@@ -44,3 +44,13 @@ export const deletePayment = async (paymentId) => {
   const response = await api.delete(`/payments/${paymentId}`);
   return response.data;
 };
+
+export const uploadPaymentEvidence = async (paymentId, filePath) => {
+  const response = await api.post(`/payments/${paymentId}/evidence`, { filePath });
+  return response.data;
+};
+
+export const getPaymentEvidences = async (paymentId) => {
+  const response = await api.get(`/payments/${paymentId}/evidence`);
+  return response.data;
+};

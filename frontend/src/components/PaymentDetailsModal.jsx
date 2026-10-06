@@ -105,6 +105,39 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           </div>
         </div>
 
+        {/* Digital Payment Evidence / Bank Slip Box */}
+        <div className="bg-white p-3 rounded-3 border mb-3">
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <span className="text-uppercase text-muted small fw-bold" style={{ fontSize: '0.725rem' }}>
+              PAYMENT EVIDENCE / BANK SLIP
+            </span>
+            <span className="badge bg-info-subtle text-info border border-info-subtle px-2 py-0.5 rounded-pill" style={{ fontSize: '0.7rem' }}>
+              Digital Slip Attached
+            </span>
+          </div>
+          <div className="d-flex align-items-center justify-content-between bg-light p-2 rounded-2 border">
+            <div className="d-flex align-items-center gap-2 overflow-hidden">
+              <Icon name="file-text" size={18} className="text-primary flex-shrink-0" />
+              <span className="small text-truncate font-monospace" style={{ fontSize: '0.8rem' }}>
+                bank_slip_payment_{payment.id || 101}.png
+              </span>
+            </div>
+            <label className="btn btn-sm btn-outline-primary py-0.5 px-2.5 ms-2 no-print cursor-pointer mb-0">
+              <span>Attach New</span>
+              <input 
+                type="file" 
+                accept="image/*,.pdf" 
+                className="d-none" 
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    alert(`✓ Attached payment slip: ${e.target.files[0].name}`);
+                  }
+                }} 
+              />
+            </label>
+          </div>
+        </div>
+
         {/* Financial Discipline Impact Box */}
         <div
           className="p-3 rounded-3 border"

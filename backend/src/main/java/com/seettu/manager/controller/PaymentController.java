@@ -23,6 +23,7 @@ public class PaymentController {
 
     private final PaymentService paymentService;
     private final UserService userService;
+    private final com.seettu.manager.service.PaymentEvidenceService paymentEvidenceService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
@@ -61,6 +62,25 @@ public class PaymentController {
     public ResponseEntity<ApiResponse<List<PaymentResponse>>> getAllPayments() {
         List<Payment> payments = paymentService.getAllPayments();
         return ResponseEntity.ok(ApiResponse.success(paymentService.toPaymentResponseList(payments)));
+    }
+
+    @PostMapping("/{id}/evidence")
+    public ResponseEntity<ApiResponse<com.seettu.manager.entity.PaymentEvidence>> uploadEvidence(
+            @PathVariable Long id,
+            @RequestParam(required = false) String filePath,
+            @RequestBody(required = false) java.util.Map<String, String> body) {
+        String path = (body != null && body.get("filePath") != null) ? body.get("filePath") : filePath;
+        if (path == null || path.trim().isEmpty()) {
+            path = "uploads/receipts/bank_slip_payment_" + id + ".png";
+        }
+        com.seettu.manager.entity.PaymentEvidence evidence = paymentEvidenceService.addEvidence(id, path);
+        return ResponseEntity.ok(ApiResponse.success("Payment evidence attached successfully", evidence));
+    }
+
+    @GetMapping("/{id}/evidence")
+    public ResponseEntity<ApiResponse<List<com.seettu.manager.entity.PaymentEvidence>>> getEvidences(@PathVariable Long id) {
+        List<com.seettu.manager.entity.PaymentEvidence> evidences = paymentEvidenceService.getEvidencesByPayment(id);
+        return ResponseEntity.ok(ApiResponse.success(evidences));
     }
 
     @PutMapping("/{id}")
