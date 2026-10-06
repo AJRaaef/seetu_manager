@@ -24,6 +24,7 @@ public class PaymentResponse {
     private LocalDate paymentDate;
     private String recordedByName;
     private String notes;
+    private String paymentMethod;
     private LocalDateTime createdAt;
     private String groupName;
 }

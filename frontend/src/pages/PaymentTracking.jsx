@@ -33,6 +33,7 @@ const PaymentTracking = () => {
   const [selectedCycleId, setSelectedCycleId] = useState('');
   const [amountInput, setAmountInput] = useState('');
   const [dateInput, setDateInput] = useState(new Date().toISOString().split('T')[0]);
+  const [paymentMethodInput, setPaymentMethodInput] = useState('Cash (Offline)');
   const [submitting, setSubmitting] = useState(false);
 
   // Modal states
@@ -69,7 +70,7 @@ const PaymentTracking = () => {
         amount: Number(p.amount) || 0,
         status: (p.status || 'PAID').toUpperCase(),
         recordedBy: p.recordedByName || (p.status === 'PAID' ? 'Organizer' : '—'),
-        method: 'Cash (Offline)',
+        method: p.paymentMethod || 'Cash (Offline)',
         notes: p.notes || ''
       }));
       setPayments(formatted);
@@ -147,6 +148,7 @@ const PaymentTracking = () => {
           cycleId: Number(selectedCycleId),
           memberId: Number(selectedMemberId),
           amount: parseFloat(amountInput),
+          paymentMethod: paymentMethodInput,
           notes: 'Recorded via Payment Management portal'
         },
         userId || 1
@@ -468,6 +470,21 @@ const PaymentTracking = () => {
                   onChange={(e) => setDateInput(e.target.value)}
                   required
                 />
+              </div>
+
+              {/* Settlement Method Select */}
+              <div className="col-12 col-md">
+                <select
+                  className="form-select bg-white"
+                  value={paymentMethodInput}
+                  onChange={(e) => setPaymentMethodInput(e.target.value)}
+                  title="Payment Settlement Method"
+                >
+                  <option value="Cash (Offline)">Cash (Offline)</option>
+                  <option value="Bank Deposit / Transfer">Bank Deposit / Transfer</option>
+                  <option value="Mobile Wallet (EzCash/mCash)">Mobile Wallet (EzCash/mCash)</option>
+                  <option value="Online Banking">Online Banking</option>
+                </select>
               </div>
 
               {/* Submit Button */}

@@ -75,6 +75,7 @@ public class PaymentService {
                 .paymentDate(LocalDate.now())
                 .recordedBy(recorder)
                 .notes(request.getNotes())
+                .paymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "Cash (Offline)")
                 .build();
 
         payment = paymentRepository.save(payment);
@@ -179,6 +180,7 @@ public class PaymentService {
                 .paymentDate(payment.getPaymentDate())
                 .recordedByName(payment.getRecordedBy() != null ? payment.getRecordedBy().getFullName() : null)
                 .notes(payment.getNotes())
+                .paymentMethod(payment.getPaymentMethod() != null ? payment.getPaymentMethod() : "Cash (Offline)")
                 .createdAt(payment.getCreatedAt())
                 .groupName(payment.getCycle().getGroup().getName())
                 .build();

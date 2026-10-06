@@ -19,3 +19,8 @@ Thumbs.db
 
 # Environment
 .env
+
+# Generated PDF Reports & Documents
+*.pdf
+backend/*.pdf
+backend/reports/

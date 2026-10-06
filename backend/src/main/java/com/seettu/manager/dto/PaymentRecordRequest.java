@@ -22,4 +22,6 @@ public class PaymentRecordRequest {
     private LocalDate paymentDate;
 
     private String notes;
+
+    private String paymentMethod;
 }
