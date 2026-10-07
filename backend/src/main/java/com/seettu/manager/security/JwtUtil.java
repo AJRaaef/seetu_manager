@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -22,13 +23,13 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long expiration;
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(@org.springframework.lang.NonNull UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
         return createToken(claims, userDetails.getUsername());
     }
 
-    private String createToken(Map<String, Object> claims, String subject) {
+    private String createToken(@org.springframework.lang.NonNull Map<String, Object> claims, @org.springframework.lang.NonNull String subject) {
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)
@@ -38,24 +39,24 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String extractUsername(String token) {
+    public String extractUsername(@org.springframework.lang.NonNull String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public String extractRole(String token) {
+    public String extractRole(@org.springframework.lang.NonNull String token) {
         return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
-    public Date extractExpiration(String token) {
+    public Date extractExpiration(@org.springframework.lang.NonNull String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public <T> T extractClaim(@org.springframework.lang.NonNull String token, @org.springframework.lang.NonNull Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
+    private Claims extractAllClaims(@org.springframework.lang.NonNull String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()

@@ -163,26 +163,31 @@ const Members = () => {
   };
 
   // Normalized display items
-  const formattedMembers = rawMembers.map((m) => {
-    const scoreVal = calculateScore(m);
-    const scoreMeta = getScoreMeta(scoreVal);
-    const dateStr = m.joinedAt ? m.joinedAt.split('T')[0] : 'N/A';
+  const formattedMembers = rawMembers
+    .filter((m) => {
+      const role = (m.user?.role || m.role || '').toString().toUpperCase();
+      return role !== 'ADMIN';
+    })
+    .map((m) => {
+      const scoreVal = calculateScore(m);
+      const scoreMeta = getScoreMeta(scoreVal);
+      const dateStr = m.joinedAt ? m.joinedAt.split('T')[0] : 'N/A';
 
-    return {
-      id: m.id,
-      userId: m.user?.id,
-      groupId: m.group?.id,
-      name: m.user?.fullName || 'Unknown Member',
-      email: m.user?.email || 'N/A',
-      phone: m.user?.phone || 'N/A',
-      groupName: m.group?.name || 'General Group',
-      joinedDate: dateStr,
-      score: scoreVal,
-      scoreLabel: scoreMeta.label,
-      scoreColor: scoreMeta.color,
-      status: m.status === 'ACTIVE' || !m.status ? 'Active' : m.status
-    };
-  });
+      return {
+        id: m.id,
+        userId: m.user?.id,
+        groupId: m.group?.id,
+        name: m.user?.fullName || 'Unknown Member',
+        email: m.user?.email || 'N/A',
+        phone: m.user?.phone || 'N/A',
+        groupName: m.group?.name || 'General Group',
+        joinedDate: dateStr,
+        score: scoreVal,
+        scoreLabel: scoreMeta.label,
+        scoreColor: scoreMeta.color,
+        status: m.status === 'ACTIVE' || !m.status ? 'Active' : m.status
+      };
+    });
 
   const filteredMembers = formattedMembers.filter((m) => {
     const matchesSearch =

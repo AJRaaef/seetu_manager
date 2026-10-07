@@ -52,9 +52,6 @@ public class DashboardService {
         paymentStatusDistribution.put("LATE", (long) paymentRepository.findByStatus(Payment.PaymentStatus.LATE).size());
         paymentStatusDistribution.put("OVERDUE", overduePayments);
 
-        double completionRate = totalPayments > 0 ? 
-            (double) paymentRepository.findByStatus(Payment.PaymentStatus.PAID).size() / totalPayments * 100 : 100.0;
-
         // Calculate next payment due days from earliest active cycle in DB
         List<PaymentCycle> activeCycles = paymentCycleRepository.findByStatus(PaymentCycle.CycleStatus.ACTIVE);
         int nextDueDays = 5;
@@ -76,7 +73,6 @@ public class DashboardService {
                 .certificatesEarned(certificatesEarned)
                 .disciplineScore(95)
                 .nextPaymentDueDays(nextDueDays)
-                .overallCompletionRate(completionRate)
                 .groupStatusDistribution(groupStatusDistribution)
                 .paymentStatusDistribution(paymentStatusDistribution)
                 .build();

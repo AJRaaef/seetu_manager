@@ -1,10 +1,4 @@
 import {
-  require_jsx_runtime
-} from "./chunk-RZSASJON.js";
-import {
-  require_react
-} from "./chunk-TWJRYSII.js";
-import {
   BarController,
   BubbleController,
   Chart,
@@ -15,6 +9,12 @@ import {
   RadarController,
   ScatterController
 } from "./chunk-R5T4AUMD.js";
+import {
+  require_jsx_runtime
+} from "./chunk-RZSASJON.js";
+import {
+  require_react
+} from "./chunk-TWJRYSII.js";
 import {
   __toESM
 } from "./chunk-DC5AMYBS.js";
