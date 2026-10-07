@@ -1,5 +1,6 @@
 package com.seettu.manager.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,7 +25,8 @@ public class DashboardResponse {
     private long certificatesEarned;
     private int disciplineScore;
     private int nextPaymentDueDays;
-    private double overallCompletionRate;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Double overallCompletionRate;
     private Map<String, Long> paymentStatusDistribution;
     private Map<String, Long> groupStatusDistribution;
 }

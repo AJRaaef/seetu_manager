@@ -112,7 +112,9 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public List<Payment> getAllPayments() {
-        return paymentRepository.findAllWithDetails();
+        return paymentRepository.findAllWithDetails().stream()
+                .filter(payment -> payment.getMember() != null && payment.getMember().getRole() != User.Role.ADMIN)
+                .collect(Collectors.toList());
     }
 
     @Transactional

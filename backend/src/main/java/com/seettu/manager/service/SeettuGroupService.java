@@ -188,7 +188,9 @@ public class SeettuGroupService {
 
     @Transactional(readOnly = true)
     public List<GroupMember> getAllActiveMembers() {
-        return memberRepository.findAllActiveWithDetails();
+        return memberRepository.findAllActiveWithDetails().stream()
+                .filter(member -> member.getUser() != null && member.getUser().getRole() != User.Role.ADMIN)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)

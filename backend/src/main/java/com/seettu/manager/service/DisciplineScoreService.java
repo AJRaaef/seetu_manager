@@ -3,7 +3,6 @@ package com.seettu.manager.service;
 import com.seettu.manager.dto.ScoreResponse;
 import com.seettu.manager.entity.Payment;
 import com.seettu.manager.entity.User;
-import com.seettu.manager.exception.ResourceNotFoundException;
 import com.seettu.manager.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

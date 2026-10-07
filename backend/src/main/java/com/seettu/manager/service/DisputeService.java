@@ -18,7 +18,6 @@ public class DisputeService {
 
     private final DisputeRepository disputeRepository;
     private final SeettuGroupService groupService;
-    private final UserService userService;
     private final AuditLogService auditLogService;
     private final NotificationService notificationService;
 

@@ -56,18 +56,25 @@ const Dashboard = () => {
           payRes = await getPaymentsByMember(userId);
         }
         const list = payRes?.data || payRes || [];
-        const formatted = list.slice(0, 5).map((p) => ({
-          id: p.id,
-          member: p.memberName || 'Member',
-          amount: Number(p.amount) || 0,
-          status: (p.status || 'PAID').toUpperCase(),
-          date: p.paymentDate || p.createdAt?.split('T')[0] || '-',
-          group: p.groupName || 'General Group',
-          cycle: p.cycleNumber ? `Cycle ${p.cycleNumber}` : 'Cycle 1',
-          recordedBy: p.recordedByName || (p.status === 'PAID' ? 'Organizer' : '—'),
-          method: 'Cash (Offline)',
-          notes: p.notes || ''
-        }));
+        const formatted = list
+          .filter((p) => {
+            const memberRole = (p.memberRole || p.userRole || p.role || '').toString().toUpperCase();
+            const memberName = (p.memberName || p.user?.fullName || '').toString();
+            return memberRole !== 'ADMIN' && !memberName.toLowerCase().includes('system admin');
+          })
+          .slice(0, 5)
+          .map((p) => ({
+            id: p.id,
+            member: p.memberName || 'Member',
+            amount: Number(p.amount) || 0,
+            status: (p.status || 'PAID').toUpperCase(),
+            date: p.paymentDate || p.createdAt?.split('T')[0] || '-',
+            group: p.groupName || 'General Group',
+            cycle: p.cycleNumber ? `Cycle ${p.cycleNumber}` : 'Cycle 1',
+            recordedBy: p.recordedByName || (p.status === 'PAID' ? 'Organizer' : '—'),
+            method: 'Cash (Offline)',
+            notes: p.notes || ''
+          }));
         setRecentPayments(formatted);
       } catch (err) {
         console.error('Failed to load recent payments from database', err);
@@ -153,7 +160,7 @@ const Dashboard = () => {
       {/* Metric Cards Row */}
       <div className="row g-3 mb-4">
         {/* Active Groups */}
-        <div className="col-12 col-sm-6 col-xl-3">
+        <div className={`col-12 col-sm-6 ${isAdmin ? 'col-xl-4' : 'col-xl-3'}`}>
           <div className="metric-card h-100 d-flex flex-column justify-content-between">
             <div className="d-flex justify-content-between align-items-start w-100 mb-2">
               <div>
@@ -169,7 +176,7 @@ const Dashboard = () => {
         </div>
 
         {/* Total Members */}
-        <div className="col-12 col-sm-6 col-xl-3">
+        <div className={`col-12 col-sm-6 ${isAdmin ? 'col-xl-4' : 'col-xl-3'}`}>
           <div className="metric-card h-100 d-flex flex-column justify-content-between">
             <div className="d-flex justify-content-between align-items-start w-100 mb-2">
               <div>
@@ -184,26 +191,27 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Completion Rate */}
-        <div className="col-12 col-sm-6 col-xl-3">
-          <div className="metric-card h-100 d-flex flex-column justify-content-between">
-            <div className="d-flex justify-content-between align-items-start w-100 mb-2">
-              <div>
-                <div className="metric-value">{completionRate}%</div>
-                <div className="metric-label">Completion Rate</div>
+        {!isAdmin && (
+          <div className="col-12 col-sm-6 col-xl-3">
+            <div className="metric-card h-100 d-flex flex-column justify-content-between">
+              <div className="d-flex justify-content-between align-items-start w-100 mb-2">
+                <div>
+                  <div className="metric-value">{completionRate}%</div>
+                  <div className="metric-label">Completion Rate</div>
+                </div>
+                <div className="text-dark opacity-75">
+                  <Icon name="check-square" size={26} color="#0F2F3D" />
+                </div>
               </div>
-              <div className="text-dark opacity-75">
-                <Icon name="check-square" size={26} color="#0F2F3D" />
+              <div className="custom-progress w-100">
+                <div className="custom-progress-bar" style={{ width: `${completionRate}%` }}></div>
               </div>
-            </div>
-            <div className="custom-progress w-100">
-              <div className="custom-progress-bar" style={{ width: `${completionRate}%` }}></div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Advance Contributions Card */}
-        <div className="col-12 col-sm-6 col-xl-3">
+        <div className={`col-12 col-sm-6 ${isAdmin ? 'col-xl-4' : 'col-xl-3'}`}>
           <div className="metric-card h-100 d-flex flex-column justify-content-between">
             <div className="d-flex justify-content-between align-items-start w-100 mb-2">
               <div>
