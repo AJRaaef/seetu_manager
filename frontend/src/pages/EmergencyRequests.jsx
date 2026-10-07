@@ -28,7 +28,7 @@ const EmergencyRequests = () => {
       const groupRes = await groupApi.getUserGroups(uid);
       setGroups(groupRes.data || []);
 
-      const reqRes = await api.get(`/emergency-requests/user/${uid}`);
+      const reqRes = await api.get(`/emergency/user/${uid}`);
       setRequests(reqRes.data?.data || []);
     } catch (err) {
       console.error('Error fetching emergency requests', err);
@@ -41,7 +41,12 @@ const EmergencyRequests = () => {
     e.preventDefault();
     try {
       const uid = user?.userId || user?.id;
-      await api.post(`/emergency-requests?groupId=${formData.groupId}&memberId=${uid}&requestedAmount=${formData.requestedAmount}&reason=${encodeURIComponent(formData.reason)}`);
+      const payload = {
+        groupId: Number(formData.groupId),
+        reason: formData.reason,
+        requestedAmount: Number(formData.requestedAmount),
+      };
+      await api.post(`/emergency?raisedById=${uid}`, payload);
       setShowModal(false);
       setFormData({ groupId: '', reason: '', requestedAmount: '' });
       fetchData();
