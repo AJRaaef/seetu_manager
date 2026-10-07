@@ -6,14 +6,17 @@ import Icon from '../components/Icons';
 
 const AdvancePayments = () => {
   const { user } = useAuth();
+  const isAdminOrOrg = user?.role === 'ADMIN' || user?.role === 'ORGANIZER';
+
   const [advancePayments, setAdvancePayments] = useState([]);
   const [groups, setGroups] = useState([]);
+  const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
   const [formData, setFormData] = useState({
     groupId: '',
-    memberId: user?.userId || user?.id,
+    memberId: '',
     amount: '',
     notes: '',
   });
@@ -26,7 +29,6 @@ const AdvancePayments = () => {
     try {
       setLoading(true);
       const uid = user?.userId || user?.id;
-      const isAdminOrOrg = user?.role === 'ADMIN' || user?.role === 'ORGANIZER';
 
       const groupRes = isAdminOrOrg
         ? await groupApi.getAllGroups()
@@ -46,21 +48,39 @@ const AdvancePayments = () => {
     }
   };
 
+  const handleGroupChange = async (gId) => {
+    setFormData((prev) => ({ ...prev, groupId: gId, memberId: '' }));
+    if (!gId) {
+      setMembers([]);
+      return;
+    }
+    try {
+      const res = await groupApi.getGroupMembers(gId);
+      const mList = res?.data || res || [];
+      setMembers(Array.isArray(mList) ? mList : []);
+    } catch (err) {
+      console.error('Failed to load group members', err);
+      setMembers([]);
+    }
+  };
+
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
       const uid = user?.userId || user?.id;
+      const targetMemberId = formData.memberId || uid;
+
       const params = new URLSearchParams({
         amount: formData.amount,
         notes: formData.notes || ''
       });
-      if (uid) params.append('memberId', uid);
+      if (targetMemberId) params.append('memberId', targetMemberId);
       if (formData.groupId) params.append('groupId', formData.groupId);
 
       await api.post(`/advance-payments?${params.toString()}`);
       alert('✓ Advance payment recorded successfully to database!');
       setShowModal(false);
-      setFormData({ groupId: '', memberId: uid, amount: '', notes: '' });
+      setFormData({ groupId: '', memberId: '', amount: '', notes: '' });
       fetchData();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to submit advance payment.');
@@ -79,12 +99,14 @@ const AdvancePayments = () => {
           </div>
           <p className="text-muted mb-0">Record and track advance installment payments before cycle due dates</p>
         </div>
-        <button 
-          className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
-          onClick={() => setShowModal(true)}
-        >
-          <span>+</span> Record Advance Payment
-        </button>
+        {isAdminOrOrg && (
+          <button 
+            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
+            onClick={() => setShowModal(true)}
+          >
+            <span>+</span> Record Advance Payment
+          </button>
+        )}
       </div>
 
       {/* Summary Card matching brand teal palette */}
@@ -117,11 +139,13 @@ const AdvancePayments = () => {
           </div>
           <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>No Advance Payments Recorded</h5>
           <p className="text-muted small mb-4">You have no recorded advance payment contributions for your groups.</p>
-          <div>
-            <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
-              Record Advance Payment
-            </button>
-          </div>
+          {isAdminOrOrg && (
+            <div>
+              <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
+                Record Advance Payment
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="ui-card shadow-sm border-0 overflow-hidden">
@@ -155,8 +179,8 @@ const AdvancePayments = () => {
         </div>
       )}
 
-      {/* Record Modal */}
-      {showModal && (
+      {/* Record Modal (Admin/Organizer only) */}
+      {showModal && isAdminOrOrg && (
         <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
@@ -171,7 +195,7 @@ const AdvancePayments = () => {
                     <select
                       className="form-select"
                       value={formData.groupId}
-                      onChange={(e) => setFormData({ ...formData, groupId: e.target.value })}
+                      onChange={(e) => handleGroupChange(e.target.value)}
                       style={{ borderRadius: '8px' }}
                       required
                     >
@@ -179,6 +203,25 @@ const AdvancePayments = () => {
                       {groups.map((g) => (
                         <option key={g.id} value={g.id}>{g.name}</option>
                       ))}
+                    </select>
+                  </div>
+                  {/* Member Selection - Always Visible */}
+                  <div className="mb-3">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Select Member</label>
+                    <select
+                      className="form-select"
+                      value={formData.memberId}
+                      onChange={(e) => setFormData({ ...formData, memberId: e.target.value })}
+                      style={{ borderRadius: '8px' }}
+                      disabled={!formData.groupId}
+                      required
+                    >
+                      <option value="">{formData.groupId ? '-- Select Member --' : '-- Choose Group First --'}</option>
+                      {members.map((m) => {
+                        const mId = m.user?.id || m.userId || m.id;
+                        const mName = m.user?.fullName || m.fullName || m.name || `Member #${mId}`;
+                        return <option key={mId} value={mId}>{mName}</option>;
+                      })}
                     </select>
                   </div>
                   <div className="mb-3">

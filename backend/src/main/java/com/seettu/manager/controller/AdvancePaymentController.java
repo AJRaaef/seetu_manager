@@ -21,6 +21,7 @@ public class AdvancePaymentController {
     private final AdvancePaymentService advancePaymentService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
     public ResponseEntity<ApiResponse<AdvancePayment>> recordAdvancePayment(
             @RequestParam(required = false) Long memberId,
             @RequestParam BigDecimal amount,
