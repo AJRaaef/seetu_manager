@@ -86,13 +86,15 @@ public class SeettuGroupService {
 
         group = groupRepository.save(group);
 
-        // Add creator as first member
-        GroupMember creatorMember = GroupMember.builder()
-                .group(group)
-                .user(creator)
-                .status(GroupMember.MemberStatus.ACTIVE)
-                .build();
-        memberRepository.save(creatorMember);
+        // Add creator as first member ONLY if creator is NOT a System Admin
+        if (creator != null && creator.getRole() != User.Role.ADMIN) {
+            GroupMember creatorMember = GroupMember.builder()
+                    .group(group)
+                    .user(creator)
+                    .status(GroupMember.MemberStatus.ACTIVE)
+                    .build();
+            memberRepository.save(creatorMember);
+        }
 
         // Generate payment cycles automatically
         paymentCycleService.generateCycles(group);
@@ -124,6 +126,10 @@ public class SeettuGroupService {
         SeettuGroup group = getGroupById(groupId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        if (user.getRole() == User.Role.ADMIN) {
+            throw new IllegalArgumentException("System Admins cannot participate in Seettu group contribution cycles");
+        }
 
         if (memberRepository.existsByGroupIdAndUserId(groupId, userId)) {
             throw new DuplicateResourceException("User is already a member of this group");
