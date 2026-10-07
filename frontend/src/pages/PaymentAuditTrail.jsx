@@ -121,6 +121,11 @@ const PaymentAuditTrail = () => {
     );
   };
 
+  const getInitial = (name) => {
+    if (!name || !name.trim()) return 'S';
+    return name.trim().charAt(0).toUpperCase();
+  };
+
   return (
     <div className="container-fluid py-4">
       {/* Header Banner */}
@@ -172,8 +177,8 @@ const PaymentAuditTrail = () => {
                 <span className="text-muted small fw-semibold text-uppercase">Total Payment Audits</span>
                 <h3 className="fw-extrabold mb-0 mt-1" style={{ color: '#0F2F3D' }}>{totalLogs}</h3>
               </div>
-              <div className="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
-                <Icon name="file-text" size={22} />
+              <div className="d-flex align-items-center justify-content-center rounded-circle text-primary" style={{ width: '42px', height: '42px', backgroundColor: 'rgba(13, 110, 253, 0.1)' }}>
+                <Icon name="file-text" size={20} />
               </div>
             </div>
           </div>
@@ -186,8 +191,8 @@ const PaymentAuditTrail = () => {
                 <span className="text-muted small fw-semibold text-uppercase">Payments Recorded</span>
                 <h3 className="fw-extrabold text-success mb-0 mt-1">{recordedCount}</h3>
               </div>
-              <div className="p-3 rounded-circle bg-success bg-opacity-10 text-success">
-                <Icon name="check" size={22} />
+              <div className="d-flex align-items-center justify-content-center rounded-circle text-success" style={{ width: '42px', height: '42px', backgroundColor: 'rgba(25, 135, 84, 0.1)' }}>
+                <Icon name="check" size={20} />
               </div>
             </div>
           </div>
@@ -200,8 +205,8 @@ const PaymentAuditTrail = () => {
                 <span className="text-muted small fw-semibold text-uppercase">Payment Updates</span>
                 <h3 className="fw-extrabold text-info mb-0 mt-1" style={{ color: '#0097B2' }}>{updatedCount}</h3>
               </div>
-              <div className="p-3 rounded-circle bg-info bg-opacity-10 text-info" style={{ color: '#0097B2' }}>
-                <Icon name="edit" size={22} />
+              <div className="d-flex align-items-center justify-content-center rounded-circle text-info" style={{ width: '42px', height: '42px', backgroundColor: 'rgba(0, 151, 178, 0.1)', color: '#0097B2' }}>
+                <Icon name="edit" size={20} />
               </div>
             </div>
           </div>
@@ -214,8 +219,8 @@ const PaymentAuditTrail = () => {
                 <span className="text-muted small fw-semibold text-uppercase">Deletions / Overdues</span>
                 <h3 className="fw-extrabold text-danger mb-0 mt-1">{deletedCount}</h3>
               </div>
-              <div className="p-3 rounded-circle bg-danger bg-opacity-10 text-danger">
-                <Icon name="trash" size={22} />
+              <div className="d-flex align-items-center justify-content-center rounded-circle text-danger" style={{ width: '42px', height: '42px', backgroundColor: 'rgba(220, 53, 69, 0.1)' }}>
+                <Icon name="trash" size={20} />
               </div>
             </div>
           </div>
@@ -340,8 +345,11 @@ const PaymentAuditTrail = () => {
                     <td>{getActionBadge(log.action)}</td>
                     <td>
                       <div className="d-flex align-items-center gap-2">
-                        <div className="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style={{ width: '28px', height: '28px', fontSize: '0.75rem', backgroundColor: '#0F2F3D' }}>
-                          {log.userName ? log.userName.charAt(0).toUpperCase() : 'S'}
+                        <div 
+                          className="rounded-circle d-inline-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" 
+                          style={{ width: '32px', height: '32px', backgroundColor: '#0F2F3D', fontSize: '0.8rem' }}
+                        >
+                          {getInitial(log.userName)}
                         </div>
                         <div>
                           <span className="fw-bold text-dark d-block small" style={{ color: '#0F2F3D' }}>
