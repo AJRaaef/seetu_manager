@@ -86,7 +86,7 @@ const Disputes = () => {
         description: description.trim()
       }, user?.id);
 
-      setActionMsg('✓ Dispute submitted successfully! Organizer has been notified.');
+      setActionMsg('Dispute submitted successfully! Organizer has been notified.');
       setDescription('');
       setFileName('');
       await fetchDisputesAndGroups();
@@ -109,7 +109,7 @@ const Disputes = () => {
         resolutionNotes,
         user?.id
       );
-      setActionMsg(`✓ Dispute #${reviewingDispute.id} marked as ${newStatus}`);
+      setActionMsg(`Dispute #${reviewingDispute.id} marked as ${newStatus}`);
       setReviewingDispute(null);
       setResolutionNotes('');
       await fetchDisputesAndGroups();
