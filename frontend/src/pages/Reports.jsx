@@ -70,14 +70,12 @@ const Reports = () => {
           </div>
           <p className="text-muted mb-0">Generate, review, and print audit summaries for financial groups</p>
         </div>
-        {(isOrganizer || isAdmin) && (
-          <button 
-            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
-            onClick={() => setShowModal(true)}
-          >
-            <span>+</span> Generate New Report
-          </button>
-        )}
+        <button 
+          className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
+          onClick={() => setShowModal(true)}
+        >
+          <span>+</span> Generate New Report
+        </button>
       </div>
 
       {error && <div className="alert alert-danger shadow-sm mb-4 rounded-3">{error}</div>}
@@ -93,14 +91,12 @@ const Reports = () => {
             <Icon name="reports" size={36} color="#235665" />
           </div>
           <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>No Reports Generated Yet</h5>
-          <p className="text-muted small mb-4">Generate group summary, payment audit, or discipline score reports.</p>
-          {(isOrganizer || isAdmin) && (
-            <div>
-              <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
-                Generate First Report
-              </button>
-            </div>
-          )}
+          <p className="text-muted small mb-4">Generate group summary, personal payment history, or discipline score reports.</p>
+          <div>
+            <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
+              Generate First Report
+            </button>
+          </div>
         </div>
       ) : (
         <div className="row g-4">
@@ -150,7 +146,7 @@ const Reports = () => {
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="e.g. Monthly Seettu Group Audit Q3"
+                      placeholder={isAdmin || isOrganizer ? "e.g. Monthly Seettu Group Audit Q3" : "e.g. Personal Seettu Payment Summary"}
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       style={{ borderRadius: '8px' }}
@@ -165,9 +161,19 @@ const Reports = () => {
                       onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                       style={{ borderRadius: '8px' }}
                     >
-                      <option value="GROUP_SUMMARY">Group Summary</option>
-                      <option value="PAYMENT_AUDIT">Payment Audit</option>
-                      <option value="DISCIPLINE_SCORE_SUMMARY">Discipline Score Summary</option>
+                      {isAdmin || isOrganizer ? (
+                        <>
+                          <option value="GROUP_SUMMARY">Group Summary Audit</option>
+                          <option value="PAYMENT_AUDIT">Payment Audit Trail</option>
+                          <option value="DISCIPLINE_SCORE_SUMMARY">Discipline Score Summary</option>
+                        </>
+                      ) : (
+                        <>
+                          <option value="PERSONAL_PAYMENT_HISTORY">Personal Payment History & Receipts</option>
+                          <option value="DISCIPLINE_SCORE_SUMMARY">Personal Discipline Score Summary</option>
+                          <option value="GROUP_SUMMARY">Member Group Activity Summary</option>
+                        </>
+                      )}
                     </select>
                   </div>
                   <div className="mb-3">

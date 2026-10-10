@@ -23,7 +23,7 @@ public class ReportController {
     private final UserService userService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER') or hasRole('MEMBER')")
     public ResponseEntity<ApiResponse<Report>> generateReport(
             @RequestBody(required = false) ReportRequest requestBody,
             @RequestParam(name = "title", required = false, defaultValue = "System Report") String title,
