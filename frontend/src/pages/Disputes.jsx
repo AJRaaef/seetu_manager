@@ -62,6 +62,10 @@ const Disputes = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isAdmin) {
+      alert('System Admins cannot submit disputes as they serve as platform arbitrators.');
+      return;
+    }
     if (!description.trim()) {
       alert('Please enter dispute description.');
       return;
@@ -238,8 +242,9 @@ const Disputes = () => {
       </div>
 
       {/* Submit New Dispute Card */}
-      <div className="ui-card p-4 shadow-sm">
-        <h4 className="fw-bold text-dark mb-3" style={{ fontSize: '1.2rem' }}>Submit New Dispute</h4>
+      {!isAdmin ? (
+        <div className="ui-card p-4 shadow-sm">
+          <h4 className="fw-bold text-dark mb-3" style={{ fontSize: '1.2rem' }}>Submit New Dispute</h4>
 
         <form onSubmit={handleSubmit}>
           <div className="row g-3 mb-3">
@@ -325,6 +330,14 @@ const Disputes = () => {
           </button>
         </form>
       </div>
+      ) : (
+        <div className="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3" style={{ backgroundColor: '#E0F2FE', color: '#0369A1' }}>
+          <Icon name="shield" size={24} />
+          <div>
+            <strong>System Admin Notice:</strong> System Admins serve as platform arbitrators and overseers. Admins review and resolve dispute grievances submitted by group members/organizers and do not raise disputes.
+          </div>
+        </div>
+      )}
 
       {/* Review / Details Modal */}
       <Modal show={!!reviewingDispute} onHide={() => setReviewingDispute(null)} centered contentClassName="custom-modal-content">

@@ -23,6 +23,10 @@ public class DisputeService {
 
     @Transactional
     public Dispute createDispute(DisputeRequest request, User raisedBy) {
+        if (raisedBy != null && raisedBy.getRole() == User.Role.ADMIN) {
+            throw new IllegalArgumentException("System Admins cannot submit disputes as they serve as platform arbitrators.");
+        }
+
         SeettuGroup group = groupService.getGroupById(request.getGroupId());
 
         Dispute dispute = Dispute.builder()

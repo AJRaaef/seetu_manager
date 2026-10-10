@@ -28,10 +28,15 @@ const EmergencyRequests = () => {
       const groupRes = await groupApi.getUserGroups(uid);
       setGroups(groupRes.data || []);
 
-      const reqRes = await api.get(`/emergency/user/${uid}`);
-      setRequests(reqRes.data?.data || []);
+      const reqRes = (isAdmin || isOrganizer)
+        ? await api.get('/emergency')
+        : await api.get(`/emergency/user/${uid}`);
+
+      const list = reqRes.data?.data || reqRes.data || [];
+      setRequests(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error('Error fetching emergency requests', err);
+      setRequests([]);
     } finally {
       setLoading(false);
     }
@@ -56,6 +61,16 @@ const EmergencyRequests = () => {
       fetchData();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to submit emergency request.');
+    }
+  };
+
+  const handleStatusUpdate = async (id, status) => {
+    try {
+      const uid = user?.userId || user?.id;
+      await api.put(`/emergency/${id}/status?status=${status}&resolvedById=${uid}`);
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.message || `Failed to ${status.toLowerCase()} request.`);
     }
   };
 
@@ -126,18 +141,25 @@ const EmergencyRequests = () => {
               <thead style={{ backgroundColor: '#DCE7EB' }}>
                 <tr>
                   <th>Request ID</th>
+                  {(isAdmin || isOrganizer) && <th>Raised By</th>}
                   <th>Group</th>
                   <th>Requested Amount</th>
                   <th>Reason</th>
                   <th>Status</th>
                   <th>Submitted On</th>
+                  {(isAdmin || isOrganizer) && <th className="text-end">Actions</th>}
                 </tr>
               </thead>
               <tbody>
                 {requests.map((r) => (
                   <tr key={r.id}>
                     <td className="fw-bold">#{r.id}</td>
-                    <td>Group #{r.groupId || r.seettuGroup?.id || 'N/A'}</td>
+                    {(isAdmin || isOrganizer) && (
+                      <td>
+                        <span className="fw-semibold text-dark">{r.raisedBy?.fullName || r.raisedBy?.email || 'Member'}</span>
+                      </td>
+                    )}
+                    <td>{r.group?.name || `Group #${r.groupId || r.seettuGroup?.id || 'N/A'}`}</td>
                     <td><strong className="text-danger fs-6">LKR {(r.requestedAmount || 0).toLocaleString()}</strong></td>
                     <td className="text-dark">{r.reason}</td>
                     <td>
@@ -146,6 +168,34 @@ const EmergencyRequests = () => {
                       </span>
                     </td>
                     <td className="text-muted">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'N/A'}</td>
+                    {(isAdmin || isOrganizer) && (
+                      <td className="text-end">
+                        {r.status === 'PENDING' ? (
+                          (r.raisedBy?.id === (user?.userId || user?.id) && !isAdmin) ? (
+                            <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1">
+                              Awaiting Admin Review
+                            </span>
+                          ) : (
+                            <div className="d-inline-flex gap-1">
+                              <button
+                                className="btn btn-sm btn-success px-2 py-1 fs-7"
+                                onClick={() => handleStatusUpdate(r.id, 'APPROVED')}
+                              >
+                                Approve
+                              </button>
+                              <button
+                                className="btn btn-sm btn-outline-danger px-2 py-1 fs-7"
+                                onClick={() => handleStatusUpdate(r.id, 'REJECTED')}
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          )
+                        ) : (
+                          <span className="text-muted small">Resolved</span>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

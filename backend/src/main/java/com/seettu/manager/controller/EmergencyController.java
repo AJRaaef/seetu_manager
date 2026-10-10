@@ -29,6 +29,12 @@ public class EmergencyController {
         return ResponseEntity.ok(ApiResponse.success("Emergency request submitted", requestService.createRequest(dto, raisedBy)));
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public ResponseEntity<ApiResponse<List<EmergencyRequest>>> getAllRequests() {
+        return ResponseEntity.ok(ApiResponse.success(requestService.getAllRequests()));
+    }
+
     @GetMapping("/group/{groupId}")
     public ResponseEntity<ApiResponse<List<EmergencyRequest>>> getRequestsByGroup(@PathVariable Long groupId) {
         return ResponseEntity.ok(ApiResponse.success(requestService.getRequestsByGroup(groupId)));
