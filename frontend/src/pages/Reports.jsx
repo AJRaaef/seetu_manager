@@ -11,11 +11,87 @@ const Reports = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
 
+  const defaultType = (isAdmin || isOrganizer) ? 'GROUP_SUMMARY' : 'PERSONAL_PAYMENT_HISTORY';
   const [formData, setFormData] = useState({
     title: '',
-    type: 'GROUP_SUMMARY',
+    type: defaultType,
     content: '',
   });
+
+  const templates = (isAdmin || isOrganizer)
+    ? [
+        {
+          name: 'Group Summary Audit',
+          icon: 'users',
+          bgColor: '#E0F2FE',
+          iconColor: '#0284C7',
+          type: 'GROUP_SUMMARY',
+          title: 'Monthly Group Summary Audit',
+          content: 'Audit report summarizing total active groups, registered member headcount, pot balances, and draw rotation statuses.',
+          desc: 'High-level audit of group health, rotation cycles, and collected funds.'
+        },
+        {
+          name: 'Payment Audit Trail',
+          icon: 'payments',
+          bgColor: '#ECFDF5',
+          iconColor: '#059669',
+          type: 'PAYMENT_AUDIT',
+          title: 'System Payment Audit Trail',
+          content: 'Detailed ledger of all verified member payments, pending installments, and overdue fines across groups.',
+          desc: 'Complete payment reconciliation across all group cycles.'
+        },
+        {
+          name: 'Discipline Score Summary',
+          icon: 'award',
+          bgColor: '#FEF3C7',
+          iconColor: '#D97706',
+          type: 'DISCIPLINE_SCORE_SUMMARY',
+          title: 'Member Discipline Score Summary',
+          content: 'Performance rankings and compliance ratings identifying on-time contributors and frequent default risks.',
+          desc: 'Comprehensive reliability scores and payment discipline analytics.'
+        }
+      ]
+    : [
+        {
+          name: 'Personal Payment History',
+          icon: 'payments',
+          bgColor: '#ECFDF5',
+          iconColor: '#059669',
+          type: 'PERSONAL_PAYMENT_HISTORY',
+          title: `Personal Payment History & Receipts - ${user?.fullName || 'Member'}`,
+          content: `Comprehensive contribution statement detailing all verified offline & online monthly installments, payment cycles, and receipt references for ${user?.fullName || 'Member'}.`,
+          desc: 'Official statement of all your completed contributions and advance balances.'
+        },
+        {
+          name: 'Discipline Scorecard',
+          icon: 'award',
+          bgColor: '#FEF3C7',
+          iconColor: '#D97706',
+          type: 'DISCIPLINE_SCORE_SUMMARY',
+          title: `Personal Discipline Scorecard - ${user?.fullName || 'Member'}`,
+          content: `Financial discipline certification confirming on-time payment track record (100% completion rate), zero default history, and high reliability rating across Seettu groups.`,
+          desc: 'Proof of your reliable credit standing, zero default rate, and 100% on-time score.'
+        },
+        {
+          name: 'Group Activity & Payout Schedule',
+          icon: 'users',
+          bgColor: '#E0F2FE',
+          iconColor: '#0284C7',
+          type: 'GROUP_SUMMARY',
+          title: `Group Activity & Payout Schedule - ${user?.fullName || 'Member'}`,
+          content: `Summary of active Seettu groups joined by ${user?.fullName || 'Member'}, assigned contribution turns, and scheduled payout distribution dates.`,
+          desc: 'Overview of all your enrolled Seettu groups and scheduled payout turns.'
+        }
+      ];
+
+  const openModalWithTemplate = (tpl) => {
+    setFormData({
+      title: tpl.title,
+      type: tpl.type,
+      content: tpl.content
+    });
+    setShowModal(true);
+  };
 
   useEffect(() => {
     fetchReports();
@@ -86,16 +162,60 @@ const Reports = () => {
           <p className="mt-2 text-muted">Loading audit reports...</p>
         </div>
       ) : reports.length === 0 ? (
-        <div className="ui-card text-center p-5 shadow-sm border-0">
-          <div className="d-inline-flex p-3 rounded-circle mb-3" style={{ backgroundColor: '#E8F0F3' }}>
-            <Icon name="reports" size={36} color="#235665" />
+        <div>
+          <div className="ui-card text-center p-5 shadow-sm border-0 mb-4">
+            <div className="d-inline-flex p-3 rounded-circle mb-3" style={{ backgroundColor: '#E8F0F3' }}>
+              <Icon name="reports" size={36} color="#235665" />
+            </div>
+            <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>No Reports Generated Yet</h5>
+            <p className="text-muted small mb-4">
+              {isAdmin || isOrganizer
+                ? 'Generate comprehensive group financial audits, payment trails, and member discipline score evaluations.'
+                : 'Select one of the recommended member report templates below or create a custom report.'}
+            </p>
+            <div>
+              <button 
+                className="btn btn-teal px-4 py-2" 
+                onClick={() => {
+                  setFormData({
+                    title: (isAdmin || isOrganizer) ? 'Monthly Group Summary Audit' : `Personal Payment History & Receipts - ${user?.fullName || 'Member'}`,
+                    type: (isAdmin || isOrganizer) ? 'GROUP_SUMMARY' : 'PERSONAL_PAYMENT_HISTORY',
+                    content: (isAdmin || isOrganizer) ? 'Comprehensive group summary and cycle audit.' : `Contribution audit and ledger statement for ${user?.fullName || 'Member'}.`
+                  });
+                  setShowModal(true);
+                }}
+              >
+                <span>+</span> Generate First Report
+              </button>
+            </div>
           </div>
-          <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>No Reports Generated Yet</h5>
-          <p className="text-muted small mb-4">Generate group summary, personal payment history, or discipline score reports.</p>
+
+          {/* Quick Start Templates */}
           <div>
-            <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
-              Generate First Report
-            </button>
+            <h6 className="fw-bold mb-3" style={{ color: '#1A3644' }}>
+              {isAdmin || isOrganizer ? 'Standard Audit Templates' : 'Recommended Reports for You'}
+            </h6>
+            <div className="row g-3">
+              {templates.map((tpl, idx) => (
+                <div key={idx} className="col-12 col-md-4">
+                  <div className="ui-card h-100 p-4 border-0 shadow-sm d-flex flex-column justify-content-between">
+                    <div>
+                      <div className="d-inline-flex p-2 rounded-3 mb-3" style={{ backgroundColor: tpl.bgColor }}>
+                        <Icon name={tpl.icon} size={22} color={tpl.iconColor} />
+                      </div>
+                      <h6 className="fw-bold text-dark mb-2">{tpl.name}</h6>
+                      <p className="text-muted small mb-3">{tpl.desc}</p>
+                    </div>
+                    <button
+                      className="btn btn-outline-primary w-100 btn-sm py-2 fw-semibold"
+                      onClick={() => openModalWithTemplate(tpl)}
+                    >
+                      Generate This Report
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       ) : (
