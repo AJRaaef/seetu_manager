@@ -320,8 +320,8 @@ const Reports = () => {
       {selectedReport && (
         <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-lg modal-dialog-centered">
-            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
-              <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#134A5A' }}>
+            <div className="modal-content border-0 shadow-lg printable-report" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+              <div className="modal-header py-3 px-4 text-white no-print" style={{ backgroundColor: '#134A5A' }}>
                 <h5 className="modal-title fw-bold">{selectedReport.title}</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setSelectedReport(null)}></button>
               </div>
@@ -346,7 +346,7 @@ const Reports = () => {
                   </div>
                 </div>
               </div>
-              <div className="modal-footer py-3 px-4 bg-light">
+              <div className="modal-footer py-3 px-4 bg-light no-print">
                 <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setSelectedReport(null)}>Close</button>
                 <button type="button" className="btn btn-teal px-4" style={{ borderRadius: '8px' }} onClick={handlePrint}>Print Report</button>
               </div>

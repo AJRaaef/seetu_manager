@@ -92,29 +92,6 @@ const Certificates = () => {
 
   return (
     <div className="py-2">
-      <style>{`
-        @media print {
-          body * {
-            visibility: hidden !important;
-          }
-          #printableCertificate, #printableCertificate * {
-            visibility: visible !important;
-          }
-          #printableCertificate {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            margin: 0 !important;
-            border: 3px solid #C5A059 !important;
-            box-shadow: none !important;
-          }
-          .modal, .modal-backdrop, .modal-header, .modal-footer {
-            background: none !important;
-          }
-        }
-      `}</style>
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
           <div className="d-flex align-items-center gap-2 mb-1">
