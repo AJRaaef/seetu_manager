@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal } from 'react-bootstrap';
 import Icon from './Icons';
 
-const ReviewPayoutModal = ({ show, onHide, payoutData, onApprove }) => {
+const ReviewPayoutModal = ({ show, onHide, payoutData, onApprove, canManage = true }) => {
   const data = payoutData || {
     recipient: 'Kamala Perera',
     cycle: 'Cycle 3 Payout',
@@ -13,7 +13,7 @@ const ReviewPayoutModal = ({ show, onHide, payoutData, onApprove }) => {
   return (
     <Modal show={show} onHide={onHide} centered contentClassName="custom-modal-content">
       <div className="custom-modal-header">
-        <h5 className="fw-bold mb-0 text-dark">Review Upcoming Payout</h5>
+        <h5 className="fw-bold mb-0 text-dark">{canManage ? 'Review Upcoming Payout' : 'Upcoming Payout Details'}</h5>
         <button className="btn btn-link text-muted p-0 border-0" onClick={onHide}>
           <Icon name="x" size={20} />
         </button>
@@ -43,24 +43,28 @@ const ReviewPayoutModal = ({ show, onHide, payoutData, onApprove }) => {
         </div>
 
         <p className="small text-muted mb-0" style={{ fontSize: '0.825rem' }}>
-          Please verify that all members have completed their contributions before approving this offline payout.
+          {canManage 
+            ? 'Please verify that all members have completed their contributions before approving this offline payout.' 
+            : 'This payout is scheduled for distribution by your group Organizer upon cycle completion.'}
         </p>
       </div>
 
       <div className="custom-modal-footer">
         <button type="button" className="btn btn-light px-4 border" onClick={onHide}>
-          Cancel
+          {canManage ? 'Cancel' : 'Close'}
         </button>
-        <button
-          type="button"
-          className="btn btn-teal px-4"
-          onClick={() => {
-            if (onApprove) onApprove(data);
-            onHide();
-          }}
-        >
-          Approve Payout
-        </button>
+        {canManage && (
+          <button
+            type="button"
+            className="btn btn-teal px-4"
+            onClick={() => {
+              if (onApprove) onApprove(data);
+              onHide();
+            }}
+          >
+            Approve Payout
+          </button>
+        )}
       </div>
     </Modal>
   );

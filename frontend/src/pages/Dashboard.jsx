@@ -8,7 +8,8 @@ import ReviewPayoutModal from '../components/ReviewPayoutModal';
 import PaymentDetailsModal from '../components/PaymentDetailsModal';
 
 const Dashboard = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isOrganizer } = useAuth();
+  const canManagePayout = isAdmin || isOrganizer;
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showPayoutModal, setShowPayoutModal] = useState(false);
@@ -285,7 +286,7 @@ const Dashboard = () => {
                 className="btn btn-light rounded-pill px-4 py-2 fw-semibold text-dark shadow-sm border-0"
                 style={{ fontSize: '0.9rem' }}
               >
-                Review Payout
+                {canManagePayout ? 'Review Payout' : 'View Payout Details'}
               </button>
             )}
           </div>
@@ -361,6 +362,7 @@ const Dashboard = () => {
           amount: upcomingPayout.amount
         }}
         onApprove={handleApprovePayout}
+        canManage={canManagePayout}
       />
 
       <PaymentDetailsModal
