@@ -214,14 +214,7 @@ const Certificates = () => {
                   <div className="d-flex justify-content-between align-items-start position-relative z-1 mb-4 ps-5 pe-4 pt-2">
                     {/* Brand Logo & Name */}
                     <div className="d-flex align-items-center gap-3">
-                      <div className="d-flex align-items-center justify-content-center rounded-circle p-2" style={{ background: 'linear-gradient(135deg, #10B981, #0284C7)', width: '56px', height: '56px' }}>
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                          <circle cx="9" cy="7" r="4" />
-                          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                        </svg>
-                      </div>
+                      <img src="/logo.png" alt="SeettuManager Logo" style={{ height: '56px', width: '56px', borderRadius: '50%', objectFit: 'cover' }} />
                       <div>
                         <h2 className="fw-bold m-0" style={{ color: '#0C2340', fontSize: '1.9rem', letterSpacing: '-0.5px', fontFamily: "'Arial', sans-serif" }}>
                           Seettu<span style={{ color: '#0284C7' }}>Manager</span>
