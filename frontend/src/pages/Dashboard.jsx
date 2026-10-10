@@ -97,6 +97,7 @@ const Dashboard = () => {
   // Dynamic values calculated directly from database stats
   const activeGroupsCount = stats?.activeGroups ?? 0;
   const totalMembersCount = stats?.totalMembers ?? 0;
+  const disciplineScore = stats?.disciplineScore ?? 100;
   const completionRate = stats?.overallCompletionRate != null
     ? Math.round(stats.overallCompletionRate)
     : 100;
@@ -160,7 +161,7 @@ const Dashboard = () => {
       {/* Metric Cards Row */}
       <div className="row g-3 mb-4">
         {/* Active Groups */}
-        <div className={`col-12 col-sm-6 ${isAdmin ? 'col-xl-4' : 'col-xl-3'}`}>
+        <div className={`col-12 col-sm-6 ${isAdmin ? 'col-xl-4' : 'col-md-4 col-xl'}`}>
           <div className="metric-card h-100 d-flex flex-column justify-content-between">
             <div className="d-flex justify-content-between align-items-start w-100 mb-2">
               <div>
@@ -175,24 +176,24 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Total Members */}
-        <div className={`col-12 col-sm-6 ${isAdmin ? 'col-xl-4' : 'col-xl-3'}`}>
+        {/* Total / Group Members */}
+        <div className={`col-12 col-sm-6 ${isAdmin ? 'col-xl-4' : 'col-md-4 col-xl'}`}>
           <div className="metric-card h-100 d-flex flex-column justify-content-between">
             <div className="d-flex justify-content-between align-items-start w-100 mb-2">
               <div>
                 <div className="metric-value">{totalMembersCount}</div>
-                <div className="metric-label">Total Members</div>
+                <div className="metric-label">{isAdmin ? 'Total Members' : 'Group Members'}</div>
               </div>
               <div className="text-dark opacity-75">
                 <Icon name="user-check" size={26} color="#0F2F3D" />
               </div>
             </div>
-            <div className="metric-subtext">Registered group participants</div>
+            <div className="metric-subtext">{isAdmin ? 'Registered system participants' : 'Participants across your groups'}</div>
           </div>
         </div>
 
         {!isAdmin && (
-          <div className="col-12 col-sm-6 col-xl-3">
+          <div className="col-12 col-sm-6 col-md-4 col-xl">
             <div className="metric-card h-100 d-flex flex-column justify-content-between">
               <div className="d-flex justify-content-between align-items-start w-100 mb-2">
                 <div>
@@ -210,8 +211,27 @@ const Dashboard = () => {
           </div>
         )}
 
+        {!isAdmin && (
+          <div className="col-12 col-sm-6 col-md-4 col-xl">
+            <div className="metric-card h-100 d-flex flex-column justify-content-between">
+              <div className="d-flex justify-content-between align-items-start w-100 mb-2">
+                <div>
+                  <div className="metric-value" style={{ fontSize: '1.4rem', color: disciplineScore >= 90 ? '#059669' : disciplineScore >= 75 ? '#D97706' : '#DC2626' }}>
+                    {disciplineScore}<span style={{ fontSize: '0.85rem', color: '#64748B' }}> / 100</span>
+                  </div>
+                  <div className="metric-label">Discipline Score</div>
+                </div>
+                <div className="text-success opacity-75">
+                  <Icon name="award" size={26} color="#059669" />
+                </div>
+              </div>
+              <div className="metric-subtext">On-time payment rating</div>
+            </div>
+          </div>
+        )}
+
         {/* Advance Contributions Card */}
-        <div className={`col-12 col-sm-6 ${isAdmin ? 'col-xl-4' : 'col-xl-3'}`}>
+        <div className={`col-12 col-sm-6 ${isAdmin ? 'col-xl-4' : 'col-md-4 col-xl'}`}>
           <div className="metric-card h-100 d-flex flex-column justify-content-between">
             <div className="d-flex justify-content-between align-items-start w-100 mb-2">
               <div>

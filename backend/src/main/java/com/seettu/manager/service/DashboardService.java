@@ -114,6 +114,13 @@ public class DashboardService {
             }
         }
 
+        long totalGroupMembers = userGroups.stream()
+                .flatMap(g -> memberRepository.findByGroupId(g.getId()).stream())
+                .map(gm -> gm.getUser() != null ? gm.getUser().getId() : null)
+                .filter(id -> id != null)
+                .distinct()
+                .count();
+
         Map<String, Long> paymentStatusDistribution = new HashMap<>();
         paymentStatusDistribution.put("PAID", paidPaymentsCount);
         paymentStatusDistribution.put("PENDING", pendingPayments);
@@ -123,6 +130,7 @@ public class DashboardService {
         return DashboardResponse.builder()
                 .totalGroups(totalGroupsJoined)
                 .activeGroups(activeGroups)
+                .totalMembers(totalGroupMembers)
                 .totalPayments(totalPayments)
                 .pendingPayments(pendingPayments)
                 .overduePayments(overduePayments)
