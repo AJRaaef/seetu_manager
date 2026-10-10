@@ -159,6 +159,8 @@ const Certificates = () => {
             </div>
           </div>
         </div>
+      )}
+
       {/* Issue Certificate Modal for Admin / Organizer */}
       {showIssueModal && (
         <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
