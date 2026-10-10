@@ -4,7 +4,7 @@ import * as reportApi from '../api/reportApi';
 import Icon from '../components/Icons';
 
 const Reports = () => {
-  const { user } = useAuth();
+  const { user, isOrganizer, isAdmin } = useAuth();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -96,8 +96,6 @@ const Reports = () => {
   useEffect(() => {
     fetchReports();
   }, [user]);
-
-  const { isOrganizer, isAdmin } = useAuth();
 
   const fetchReports = async () => {
     try {
