@@ -51,12 +51,35 @@ public class ReportController {
                 finalUserById = 1L;
             }
 
-            User generatedBy = userService.getUserById(finalUserById);
+            User generatedBy = null;
+            try {
+                generatedBy = userService.getUserById(finalUserById);
+            } catch (Exception ex) {
+                if (authUser != null) {
+                    generatedBy = authUser;
+                } else {
+                    List<User> allUsers = userService.getAllUsers();
+                    if (!allUsers.isEmpty()) {
+                        generatedBy = allUsers.get(0);
+                    }
+                }
+            }
+
+            if (generatedBy == null) {
+                return ResponseEntity.badRequest().body(ApiResponse.error("Valid user required to generate report."));
+            }
+
             Report report = reportService.generateReport(finalTitle, finalType, generatedBy, finalContent);
             return ResponseEntity.ok(ApiResponse.success("Report generated successfully", report));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to generate report: " + e.getMessage()));
         }
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public ResponseEntity<ApiResponse<List<Report>>> getAllReports() {
+        return ResponseEntity.ok(ApiResponse.success(reportService.getAllReports()));
     }
 
     @GetMapping("/user/{userId}")

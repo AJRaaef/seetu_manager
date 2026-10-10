@@ -19,6 +19,11 @@ export const generateReport = async (title, type, generatedById, content) => {
   return response.data;
 };
 
+export const getAllReports = async () => {
+  const response = await api.get('/reports');
+  return response.data;
+};
+
 export const getReportsByUser = async (userId) => {
   const response = await api.get(`/reports/user/${userId}`);
   return response.data;
