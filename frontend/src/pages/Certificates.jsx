@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/axios';
+import * as groupApi from '../api/groupApi';
 import Icon from '../components/Icons';
 
 const Certificates = () => {
@@ -11,11 +12,42 @@ const Certificates = () => {
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [issueUserId, setIssueUserId] = useState('');
   const [issueGroupId, setIssueGroupId] = useState('');
+  const [allGroups, setAllGroups] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [issuing, setIssuing] = useState(false);
 
   useEffect(() => {
     fetchCertificates();
+    if (isAdmin || isOrganizer) {
+      fetchGroupsAndUsers();
+    }
   }, [user]);
+
+  const fetchGroupsAndUsers = async () => {
+    try {
+      const [gRes, mRes] = await Promise.all([
+        groupApi.getAllGroups().catch(() => ({ data: [] })),
+        groupApi.getAllMembers().catch(() => ({ data: [] }))
+      ]);
+      const gList = gRes?.data || gRes || [];
+      const mList = mRes?.data || mRes || [];
+      setAllGroups(Array.isArray(gList) ? gList : []);
+      
+      // Deduplicate members/users list
+      const userMap = new Map();
+      if (Array.isArray(mList)) {
+        mList.forEach((m) => {
+          const u = m.user || m;
+          if (u && u.id) {
+            userMap.set(u.id, u);
+          }
+        });
+      }
+      setAllUsers(Array.from(userMap.values()));
+    } catch (err) {
+      console.error('Error fetching groups and users for certificates', err);
+    }
+  };
 
   const fetchCertificates = async () => {
     try {
@@ -34,7 +66,7 @@ const Certificates = () => {
   const handleIssueCertificate = async (e) => {
     e.preventDefault();
     if (!issueUserId || !issueGroupId) {
-      alert('Please enter both User ID and Group ID');
+      alert('Please select both a Member and a Seettu Group');
       return;
     }
     try {
@@ -173,28 +205,38 @@ const Certificates = () => {
               <form onSubmit={handleIssueCertificate}>
                 <div className="modal-body p-4">
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>User ID</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      placeholder="e.g. 5"
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Select Member / User</label>
+                    <select
+                      className="form-select"
                       value={issueUserId}
                       onChange={(e) => setIssueUserId(e.target.value)}
                       style={{ borderRadius: '8px' }}
                       required
-                    />
+                    >
+                      <option value="">-- Select Member --</option>
+                      {allUsers.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.fullName || u.email} (ID #{u.id})
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Group ID</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      placeholder="e.g. 1"
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Select Seettu Group</label>
+                    <select
+                      className="form-select"
                       value={issueGroupId}
                       onChange={(e) => setIssueGroupId(e.target.value)}
                       style={{ borderRadius: '8px' }}
                       required
-                    />
+                    >
+                      <option value="">-- Select Seettu Group --</option>
+                      {allGroups.map((g) => (
+                        <option key={g.id} value={g.id}>
+                          {g.name} (ID #{g.id})
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div className="modal-footer py-3 px-4 bg-light">
