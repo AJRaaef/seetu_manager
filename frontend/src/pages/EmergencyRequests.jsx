@@ -5,7 +5,7 @@ import * as groupApi from '../api/groupApi';
 import Icon from '../components/Icons';
 
 const EmergencyRequests = () => {
-  const { user } = useAuth();
+  const { user, isAdmin, isOrganizer } = useAuth();
   const [requests, setRequests] = useState([]);
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,6 +39,10 @@ const EmergencyRequests = () => {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+    if (isAdmin) {
+      alert('System Admins cannot submit emergency payout requests.');
+      return;
+    }
     try {
       const uid = user?.userId || user?.id;
       const payload = {
@@ -63,15 +67,30 @@ const EmergencyRequests = () => {
             <Icon name="emergency" size={24} color="#DC3545" />
             <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>Emergency Payout Requests</h2>
           </div>
-          <p className="text-muted mb-0">Apply for prioritized early payout in case of financial or medical emergencies</p>
+          <p className="text-muted mb-0">
+            {isAdmin 
+              ? 'Review and oversee emergency payout applications across group cycles' 
+              : 'Apply for prioritized early payout in case of financial or medical emergencies'}
+          </p>
         </div>
-        <button 
-          className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
-          onClick={() => setShowModal(true)}
-        >
-          <span>+</span> Submit Emergency Request
-        </button>
+        {!isAdmin && (
+          <button 
+            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
+            onClick={() => setShowModal(true)}
+          >
+            <span>+</span> Submit Emergency Request
+          </button>
+        )}
       </div>
+
+      {isAdmin && (
+        <div className="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3 mb-4" style={{ backgroundColor: '#E0F2FE', color: '#0369A1' }}>
+          <Icon name="shield" size={24} />
+          <div>
+            <strong>System Admin Notice:</strong> System Admins act as platform supervisors and do not participate in Seettu contribution draws. Submitting emergency payout applications is restricted to group members.
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="text-center py-5">
@@ -84,12 +103,18 @@ const EmergencyRequests = () => {
             <Icon name="emergency" size={36} color="#DC3545" />
           </div>
           <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>No Emergency Requests</h5>
-          <p className="text-muted small mb-4">You have no active or previous emergency payout requests.</p>
-          <div>
-            <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
-              Submit Emergency Request
-            </button>
-          </div>
+          <p className="text-muted small mb-4">
+            {isAdmin 
+              ? 'There are no active emergency payout applications to display.' 
+              : 'You have no active or previous emergency payout requests.'}
+          </p>
+          {!isAdmin && (
+            <div>
+              <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
+                Submit Emergency Request
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="ui-card shadow-sm border-0 overflow-hidden">

@@ -317,12 +317,12 @@ const LandingPage = () => {
 
       {/* Floating Call Widget */}
       <div className="floating-call-bar d-none d-mdc-flex">
-        <a href="tel:0112345678" className="floating-call-btn" title="Call Helpline">
+        <a href="tel:+94752975632" className="floating-call-btn" title="Call Helpline">
           <Icon name="phone" size={22} />
         </a>
         <div className="floating-call-card">
           <span className="text-muted fw-semibold" style={{ fontSize: '0.72rem' }}>Call to Become an Organizer</span>
-          <strong style={{ color: '#0097B2', fontSize: '0.88rem' }}>011 234 5678</strong>
+          <strong style={{ color: '#0097B2', fontSize: '0.88rem' }}>+94 75 297 5632</strong>
         </div>
       </div>
 
@@ -330,7 +330,7 @@ const LandingPage = () => {
       <div className="bg-dark text-white py-1 px-3 fs-7 border-bottom border-secondary" style={{ backgroundColor: '#0A212B' }}>
         <div className="container d-flex flex-wrap justify-content-between align-items-center">
           <div className="d-flex align-items-center gap-3 small">
-            <span className="d-flex align-items-center"><Icon name="phone" size={13} className="me-1 text-info" /> Support: 011 234 5678</span>
+            <span className="d-flex align-items-center"><Icon name="phone" size={13} className="me-1 text-info" /> Support: +94 75 297 5632</span>
             <span className="d-none d-md-inline">|</span>
             <span className="d-none d-md-inline d-flex align-items-center"><Icon name="mail" size={13} className="me-1 text-info" /> seetumanager@gmail.com</span>
             <span className="d-none d-lg-inline">|</span>
@@ -859,7 +859,7 @@ const LandingPage = () => {
                   </div>
                   <div>
                     <h6 className="fw-bold mb-0 text-dark">Dispute & Audit Helpline</h6>
-                    <span className="text-muted small">011 234 5678 (Mon - Sat)</span>
+                    <span className="text-muted small">+94 75 297 5632(Mon - Sat)</span>
                   </div>
                 </div>
               </div>
@@ -915,7 +915,7 @@ const LandingPage = () => {
               </p>
               <div className="d-flex align-items-center gap-2">
                 <a 
-                  href="https://facebook.com/seetumanager" 
+                  href="https://facebook.com/SeetuManager-App"
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="btn btn-outline-light btn-sm rounded-1 px-2 py-2 d-inline-flex align-items-center justify-content-center" 
@@ -944,17 +944,7 @@ const LandingPage = () => {
                 >
                   <Icon name="instagram" size={16} />
                 </a>
-                <a 
-                  href="https://linkedin.com/company/seetumanager" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="btn btn-outline-light btn-sm rounded-1 px-2 py-2 d-inline-flex align-items-center justify-content-center" 
-                  title="LinkedIn"
-                  style={{ width: '36px', height: '36px', backgroundColor: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.2)' }}
-                >
-                  <Icon name="linkedin" size={16} />
-                </a>
-                <a 
+                  <a
                   href="https://youtube.com/@seetumanager" 
                   target="_blank" 
                   rel="noopener noreferrer" 
@@ -991,7 +981,7 @@ const LandingPage = () => {
               
               <div className="d-flex flex-column gap-2 text-white-50 small mb-3">
                 <div>Colombo, Sri Lanka</div>
-                <div>Helpline: 011 234 5678 / 077 123 4567</div>
+                <div>Helpline: 075 297 5632</div>
                 <div>Email: <a href="mailto:seetumanager@gmail.com" className="text-info text-decoration-none" style={{ color: '#0097B2' }}>seetumanager@gmail.com</a></div>
               </div>
             </div>

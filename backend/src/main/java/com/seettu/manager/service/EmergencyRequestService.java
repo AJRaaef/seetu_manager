@@ -24,6 +24,10 @@ public class EmergencyRequestService {
 
     @Transactional
     public EmergencyRequest createRequest(EmergencyRequestDto dto, User raisedBy) {
+        if (raisedBy != null && raisedBy.getRole() == User.Role.ADMIN) {
+            throw new IllegalArgumentException("System Admins cannot submit emergency payout requests");
+        }
+
         SeettuGroup group = groupService.getGroupById(dto.getGroupId());
 
         EmergencyRequest request = EmergencyRequest.builder()
