@@ -4,10 +4,14 @@ import api from '../api/axios';
 import Icon from '../components/Icons';
 
 const Certificates = () => {
-  const { user } = useAuth();
+  const { user, isAdmin, isOrganizer } = useAuth();
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [previewCert, setPreviewCert] = useState(null);
+  const [showIssueModal, setShowIssueModal] = useState(false);
+  const [issueUserId, setIssueUserId] = useState('');
+  const [issueGroupId, setIssueGroupId] = useState('');
+  const [issuing, setIssuing] = useState(false);
 
   useEffect(() => {
     fetchCertificates();
@@ -18,11 +22,33 @@ const Certificates = () => {
       setLoading(true);
       const uid = user?.userId || user?.id;
       const res = await api.get(`/certificates/user/${uid}`);
-      setCertificates(res.data?.data || []);
+      setCertificates(res.data?.data || res.data || []);
     } catch (err) {
       console.error('Error loading certificates', err);
+      setCertificates([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleIssueCertificate = async (e) => {
+    e.preventDefault();
+    if (!issueUserId || !issueGroupId) {
+      alert('Please enter both User ID and Group ID');
+      return;
+    }
+    try {
+      setIssuing(true);
+      await api.post(`/certificates?userId=${issueUserId}&groupId=${issueGroupId}`);
+      alert('Certificate generated successfully!');
+      setShowIssueModal(false);
+      setIssueUserId('');
+      setIssueGroupId('');
+      fetchCertificates();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to generate certificate.');
+    } finally {
+      setIssuing(false);
     }
   };
 
@@ -40,6 +66,14 @@ const Certificates = () => {
           </div>
           <p className="text-muted mb-0">Official completion badges awarded upon successfully finishing full group payment cycles</p>
         </div>
+        {(isAdmin || isOrganizer) && (
+          <button 
+            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
+            onClick={() => setShowIssueModal(true)}
+          >
+            <span>+</span> Issue Certificate
+          </button>
+        )}
       </div>
 
       {loading ? (
@@ -122,6 +156,52 @@ const Certificates = () => {
                 <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setPreviewCert(null)}>Close</button>
                 <button type="button" className="btn btn-teal px-4" style={{ borderRadius: '8px' }} onClick={handlePrint}>Print Certificate</button>
               </div>
+            </div>
+          </div>
+        </div>
+      {/* Issue Certificate Modal for Admin / Organizer */}
+      {showIssueModal && (
+        <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+              <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#134A5A' }}>
+                <h5 className="modal-title fw-bold">Issue Completion Certificate</h5>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setShowIssueModal(false)}></button>
+              </div>
+              <form onSubmit={handleIssueCertificate}>
+                <div className="modal-body p-4">
+                  <div className="mb-3">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>User ID</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      placeholder="e.g. 5"
+                      value={issueUserId}
+                      onChange={(e) => setIssueUserId(e.target.value)}
+                      style={{ borderRadius: '8px' }}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Group ID</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      placeholder="e.g. 1"
+                      value={issueGroupId}
+                      onChange={(e) => setIssueGroupId(e.target.value)}
+                      style={{ borderRadius: '8px' }}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer py-3 px-4 bg-light">
+                  <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setShowIssueModal(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }} disabled={issuing}>
+                    {issuing ? 'Generating...' : 'Issue Certificate'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
