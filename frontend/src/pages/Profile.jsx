@@ -6,7 +6,7 @@ import { getUserProfileStats, updateUserProfile } from '../api/userApi';
 import { getErrorMessage } from '../utils/errorHandler';
 
 const Profile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -217,9 +217,19 @@ const Profile = () => {
         <div className="col-12 col-lg-8">
           {/* My Groups Card */}
           <div className="ui-card p-4 shadow-sm mb-4">
-            <h5 className="fw-bold text-dark mb-3">My Groups</h5>
+            <h5 className="fw-bold text-dark mb-3">
+              {isAdmin ? 'System Group Oversight' : 'My Groups'}
+            </h5>
 
-            {loading ? (
+            {isAdmin ? (
+              <div className="text-center py-4 text-muted small">
+                <Icon name="shield" size={32} color="#235665" className="mb-2 d-block mx-auto" />
+                <div className="fw-semibold text-dark mb-1">Platform Administrative Role</div>
+                <div style={{ maxWidth: '520px', margin: '0 auto' }}>
+                  As a System Administrator, you manage platform-wide groups, oversee member transactions, and resolve disputes instead of participating in personal contribution circles.
+                </div>
+              </div>
+            ) : loading ? (
               <div className="text-center py-4">
                 <div className="spinner-border spinner-border-sm text-teal" role="status" style={{ color: '#1A5265' }}></div>
                 <span className="ms-2 text-muted small">Loading groups...</span>
@@ -260,57 +270,116 @@ const Profile = () => {
 
           {/* Statistics Card */}
           <div className="ui-card p-4 shadow-sm">
-            <h5 className="fw-bold text-dark mb-3">Statistics</h5>
+            <h5 className="fw-bold text-dark mb-3">
+              {isAdmin ? 'Administrative Overview' : 'Statistics'}
+            </h5>
 
-            <div className="row g-3">
-              {/* Tile 1: Total Contributed */}
-              <div className="col-6">
-                <div className="p-3 rounded-3" style={{ backgroundColor: '#FDE8E8' }}>
-                  <div className="small fw-semibold" style={{ color: '#9B1C1C', fontSize: '0.8rem' }}>
-                    Total Contributed
+            {isAdmin ? (
+              <div>
+                <div className="row g-3">
+                  <div className="col-6">
+                    <div className="p-3 rounded-3" style={{ backgroundColor: '#EFF6FF' }}>
+                      <div className="small fw-semibold" style={{ color: '#1E429F', fontSize: '0.8rem' }}>
+                        System Role
+                      </div>
+                      <div className="fs-6 fw-bold mt-1 text-truncate" style={{ color: '#1E429F' }}>
+                        Platform Administrator
+                      </div>
+                    </div>
                   </div>
-                  <div className="fs-5 fw-bold mt-1" style={{ color: '#9B1C1C' }}>
-                    {totalContributed.toLocaleString()} LKR
+
+                  <div className="col-6">
+                    <div className="p-3 rounded-3" style={{ backgroundColor: '#DEF7EC' }}>
+                      <div className="small fw-semibold" style={{ color: '#03543F', fontSize: '0.8rem' }}>
+                        Arbitration Standing
+                      </div>
+                      <div className="fs-6 fw-bold mt-1" style={{ color: '#03543F' }}>
+                        Chief Arbitrator
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-6">
+                    <div className="p-3 rounded-3" style={{ backgroundColor: '#F3F4F6' }}>
+                      <div className="small fw-semibold" style={{ color: '#4B5563', fontSize: '0.8rem' }}>
+                        Discipline Rating
+                      </div>
+                      <div className="fs-6 fw-bold mt-1" style={{ color: '#4B5563' }}>
+                        N/A (Platform Oversight)
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-6">
+                    <div className="p-3 rounded-3" style={{ backgroundColor: '#FEF08A' }}>
+                      <div className="small fw-semibold" style={{ color: '#723B13', fontSize: '0.8rem' }}>
+                        Privilege Scope
+                      </div>
+                      <div className="fs-6 fw-bold mt-1" style={{ color: '#723B13' }}>
+                        Full System Governance
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 p-3 bg-light rounded-3 border d-flex align-items-center gap-2">
+                  <Icon name="shield" size={18} color="#235665" className="flex-shrink-0" />
+                  <div className="small text-muted" style={{ fontSize: '0.8rem' }}>
+                    As Platform Administrator, you govern dispute settlements, monitor financial audits, and enforce platform regulations. You do not participate in contribution draws or hold personal discipline ratings.
                   </div>
                 </div>
               </div>
-
-              {/* Tile 2: Groups Participated */}
-              <div className="col-6">
-                <div className="p-3 rounded-3" style={{ backgroundColor: '#E1EFFE' }}>
-                  <div className="small fw-semibold" style={{ color: '#1E429F', fontSize: '0.8rem' }}>
-                    Groups Participated
+            ) : (
+              <div className="row g-3">
+                {/* Tile 1: Total Contributed */}
+                <div className="col-6">
+                  <div className="p-3 rounded-3" style={{ backgroundColor: '#FDE8E8' }}>
+                    <div className="small fw-semibold" style={{ color: '#9B1C1C', fontSize: '0.8rem' }}>
+                      Total Contributed
+                    </div>
+                    <div className="fs-5 fw-bold mt-1" style={{ color: '#9B1C1C' }}>
+                      {totalContributed.toLocaleString()} LKR
+                    </div>
                   </div>
-                  <div className="fs-5 fw-bold mt-1" style={{ color: '#1E429F' }}>
-                    {groupsParticipated}
+                </div>
+
+                {/* Tile 2: Groups Participated */}
+                <div className="col-6">
+                  <div className="p-3 rounded-3" style={{ backgroundColor: '#E1EFFE' }}>
+                    <div className="small fw-semibold" style={{ color: '#1E429F', fontSize: '0.8rem' }}>
+                      Groups Participated
+                    </div>
+                    <div className="fs-5 fw-bold mt-1" style={{ color: '#1E429F' }}>
+                      {groupsParticipated}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tile 3: Average Discipline Score */}
+                <div className="col-6">
+                  <div className="p-3 rounded-3" style={{ backgroundColor: '#DEF7EC' }}>
+                    <div className="small fw-semibold" style={{ color: '#03543F', fontSize: '0.8rem' }}>
+                      Average Discipline Score
+                    </div>
+                    <div className="fs-5 fw-bold mt-1" style={{ color: '#03543F' }}>
+                      {averageDisciplineScore}/100
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tile 4: Certificates Earned */}
+                <div className="col-6">
+                  <div className="p-3 rounded-3" style={{ backgroundColor: '#FEF08A' }}>
+                    <div className="small fw-semibold" style={{ color: '#723B13', fontSize: '0.8rem' }}>
+                      Certificates Earned
+                    </div>
+                    <div className="fs-5 fw-bold mt-1" style={{ color: '#723B13' }}>
+                      {certificatesEarned}
+                    </div>
                   </div>
                 </div>
               </div>
-
-              {/* Tile 3: Average Discipline Score */}
-              <div className="col-6">
-                <div className="p-3 rounded-3" style={{ backgroundColor: '#DEF7EC' }}>
-                  <div className="small fw-semibold" style={{ color: '#03543F', fontSize: '0.8rem' }}>
-                    Average Discipline Score
-                  </div>
-                  <div className="fs-5 fw-bold mt-1" style={{ color: '#03543F' }}>
-                    {averageDisciplineScore}/100
-                  </div>
-                </div>
-              </div>
-
-              {/* Tile 4: Certificates Earned */}
-              <div className="col-6">
-                <div className="p-3 rounded-3" style={{ backgroundColor: '#FEF08A' }}>
-                  <div className="small fw-semibold" style={{ color: '#723B13', fontSize: '0.8rem' }}>
-                    Certificates Earned
-                  </div>
-                  <div className="fs-5 fw-bold mt-1" style={{ color: '#723B13' }}>
-                    {certificatesEarned}
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

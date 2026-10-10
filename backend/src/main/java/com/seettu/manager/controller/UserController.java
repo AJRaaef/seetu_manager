@@ -48,6 +48,20 @@ public class UserController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> getUserProfileStats(@PathVariable Long id) {
         User user = userService.getUserById(id);
 
+        // Admin oversight: Admins do not participate in contribution circles or hold discipline ratings
+        if (user.getRole() == User.Role.ADMIN) {
+            Map<String, Object> adminData = new HashMap<>();
+            adminData.put("user", user);
+            adminData.put("isAdmin", true);
+            adminData.put("role", "ADMIN");
+            adminData.put("totalContributed", BigDecimal.ZERO);
+            adminData.put("groupsParticipated", 0);
+            adminData.put("averageDisciplineScore", null);
+            adminData.put("certificatesEarned", 0);
+            adminData.put("groups", Collections.emptyList());
+            return ResponseEntity.ok(ApiResponse.success(adminData));
+        }
+
         // Calculate total contributed by user across all groups
         BigDecimal totalContributed = paymentRepository.sumAmountByUserIdAndStatus(id, com.seettu.manager.entity.Payment.PaymentStatus.PAID);
         if (totalContributed == null) {
