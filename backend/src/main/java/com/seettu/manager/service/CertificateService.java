@@ -61,6 +61,10 @@ public class CertificateService {
         return certificateRepository.save(certificate);
     }
 
+    public List<Certificate> getAllCertificates() {
+        return certificateRepository.findAll();
+    }
+
     public List<Certificate> getCertificatesByUser(Long userId) {
         return certificateRepository.findByUserId(userId);
     }

@@ -37,6 +37,12 @@ public class CertificateController {
         }
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public ResponseEntity<ApiResponse<List<Certificate>>> getAllCertificates() {
+        return ResponseEntity.ok(ApiResponse.success(certificateService.getAllCertificates()));
+    }
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<List<Certificate>>> getCertificatesByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(ApiResponse.success(certificateService.getCertificatesByUser(userId)));
