@@ -10,7 +10,7 @@ const PaymentAuditTrail = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterAction, setFilterAction] = useState('ALL');
-  const [logScope, setLogScope] = useState('PAYMENTS'); // 'PAYMENTS' or 'ALL'
+  const [logScope, setLogScope] = useState('ALL'); // 'ALL' (All System Logs) or 'PAYMENTS' (Payment Audits)
 
   const fetchAuditLogs = async () => {
     setLoading(true);
@@ -297,21 +297,22 @@ const PaymentAuditTrail = () => {
                 <button
                   onClick={() => {
                     setFilterAction('ALL');
+                    setLogScope('ALL');
+                  }}
+                  className={`btn btn-sm flex-fill fw-bold rounded-2 ${logScope === 'ALL' ? 'bg-white shadow-sm text-dark' : 'text-muted'}`}
+                  style={logScope === 'ALL' ? { color: '#0F2F3D' } : {}}
+                >
+                  All System Logs
+                </button>
+                <button
+                  onClick={() => {
+                    setFilterAction('ALL');
                     setLogScope('PAYMENTS');
                   }}
                   className={`btn btn-sm flex-fill fw-bold rounded-2 ${logScope === 'PAYMENTS' ? 'bg-white shadow-sm text-dark' : 'text-muted'}`}
                   style={logScope === 'PAYMENTS' ? { color: '#0F2F3D' } : {}}
                 >
                   Payment Audits
-                </button>
-                <button
-                  onClick={() => {
-                    setFilterAction('ALL');
-                    setLogScope('ALL');
-                  }}
-                  className={`btn btn-sm flex-fill fw-bold rounded-2 ${logScope === 'ALL' ? 'bg-white shadow-sm text-dark' : 'text-muted'}`}
-                >
-                  All System Logs
                 </button>
               </div>
             </div>
