@@ -118,9 +118,15 @@ const PaymentAuditTrail = () => {
       case 'USER_LOGIN':
         return <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="shield" size={13} className="me-1" />USER LOGIN</span>;
       case 'USER_REGISTERED':
-        return <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="plus" size={13} className="me-1" />REGISTERED</span>;
+        return <span className="badge px-2.5 py-1 rounded-pill fw-semibold" style={{ backgroundColor: '#E0F2FE', color: '#0369A1', border: '1px solid #BAE6FD' }}><Icon name="plus" size={13} className="me-1" />REGISTERED</span>;
+      case 'KYC_SUBMITTED':
+        return <span className="badge px-2.5 py-1 rounded-pill fw-semibold" style={{ backgroundColor: '#FEF3C7', color: '#B45309', border: '1px solid #FDE68A' }}><Icon name="clock" size={13} className="me-1" />KYC SUBMITTED</span>;
+      case 'MEMBER_KYC_VERIFIED':
+        return <span className="badge px-2.5 py-1 rounded-pill fw-semibold" style={{ backgroundColor: '#DCFCE7', color: '#15803D', border: '1px solid #BBF7D0' }}><Icon name="check" size={13} className="me-1" />KYC VERIFIED</span>;
+      case 'MEMBER_KYC_REJECTED':
+        return <span className="badge px-2.5 py-1 rounded-pill fw-semibold" style={{ backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #FECACA' }}><Icon name="x" size={13} className="me-1" />KYC REJECTED</span>;
       case 'GROUP_CREATED':
-        return <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="groups" size={13} className="me-1" />GROUP CREATED</span>;
+        return <span className="badge px-2.5 py-1 rounded-pill fw-semibold" style={{ backgroundColor: '#E0E7FF', color: '#4338CA', border: '1px solid #C7D2FE' }}><Icon name="groups" size={13} className="me-1" />GROUP CREATED</span>;
       case 'MEMBER_ADDED':
         return <span className="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="members" size={13} className="me-1" />MEMBER ADDED</span>;
       case 'DISPUTE_RAISED':
@@ -132,7 +138,7 @@ const PaymentAuditTrail = () => {
       case 'EMERGENCY_REJECTED':
         return <span className="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="emergency" size={13} className="me-1" />{action}</span>;
       default:
-        return <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1 rounded-pill">{action}</span>;
+        return <span className="badge bg-light text-dark border px-2.5 py-1 rounded-pill fw-semibold">{action}</span>;
     }
   };
 
