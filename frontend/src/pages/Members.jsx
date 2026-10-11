@@ -31,7 +31,7 @@ const Members = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
-  
+
   const [rawMembers, setRawMembers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,7 +94,7 @@ const Members = () => {
       setActionMsg('');
       setErrorMsg('');
       await approveJoinRequest(reqId);
-      setActionMsg(`✓ Member ${memberName} approved and successfully added to group "${groupName}" in MySQL database!`);
+      setActionMsg(`Member ${memberName} approved and successfully added to group "${groupName}" in MySQL database!`);
       await fetchData();
     } catch (err) {
       setErrorMsg(getErrorMessage(err, 'Failed to approve join request in database.'));
@@ -169,7 +169,7 @@ const Members = () => {
         setActionMsg('');
         setErrorMsg('');
         await removeMember(groupId, userId);
-        setActionMsg(`✓ Member ${name} removed successfully.`);
+        setActionMsg(` Member ${name} removed successfully.`);
         await fetchData();
       } catch (err) {
         setErrorMsg(getErrorMessage(err, 'Failed to remove member.'));
@@ -195,7 +195,7 @@ const Members = () => {
       }
       return m;
     }));
-    setActionMsg(`✓ Updated member details for ${updated.name}`);
+    setActionMsg(` Updated member details for ${updated.name}`);
   };
 
   // Normalized display items
@@ -329,10 +329,10 @@ const Members = () => {
                     </td>
                     <td>
                       {usr.gnCertificateUrl ? (
-                        <a 
-                          href={`http://localhost:8081${usr.gnCertificateUrl}`} 
-                          target="_blank" 
-                          rel="noreferrer" 
+                        <a
+                          href={`http://localhost:8081${usr.gnCertificateUrl}`}
+                          target="_blank"
+                          rel="noreferrer"
                           className="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 py-1 px-2"
                           style={{ fontSize: '0.78rem' }}
                         >
@@ -348,8 +348,8 @@ const Members = () => {
                     </td>
                     <td className="text-end">
                       <div className="d-inline-flex gap-2 align-items-center justify-content-end">
-                        <button 
-                          onClick={() => handleApproveKyc(usr.id, usr.fullName)} 
+                        <button
+                          onClick={() => handleApproveKyc(usr.id, usr.fullName)}
                           className="btn btn-sm btn-success px-3 py-1.5 shadow-sm fw-semibold d-inline-flex align-items-center gap-1.5"
                           style={{ height: '36px', minWidth: '135px', justifyContent: 'center' }}
                           title="Verify as Participating Member"
@@ -358,8 +358,8 @@ const Members = () => {
                           <span>Verify Member</span>
                         </button>
                         {isAdmin && usr.requestedRole === 'ORGANIZER' && (
-                          <button 
-                            onClick={() => handleApproveKyc(usr.id, usr.fullName, 'ORGANIZER')} 
+                          <button
+                            onClick={() => handleApproveKyc(usr.id, usr.fullName, 'ORGANIZER')}
                             className="btn btn-sm px-3 py-1.5 shadow-sm fw-semibold d-inline-flex align-items-center gap-1.5 text-white"
                             style={{ backgroundColor: '#1A5265', height: '36px', minWidth: '175px', justifyContent: 'center' }}
                             title="Applicant explicitly requested Organizer status. Click to approve and promote."
@@ -368,11 +368,11 @@ const Members = () => {
                             <span>Make Organizer</span>
                           </button>
                         )}
-                        <button 
+                        <button
                           onClick={() => {
                             setRejectKycTarget(usr);
                             setShowRejectKycModal(true);
-                          }} 
+                          }}
                           className="btn btn-sm btn-outline-danger px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5"
                           style={{ height: '36px', minWidth: '85px', justifyContent: 'center' }}
                         >
@@ -417,14 +417,14 @@ const Members = () => {
                     <td><span className="badge-mint">{req.groupName}</span></td>
                     <td className="text-muted small">{req.date}</td>
                     <td className="text-end">
-                      <button 
-                        onClick={() => handleApproveRequest(req.id, req.memberName, req.groupName)} 
+                      <button
+                        onClick={() => handleApproveRequest(req.id, req.memberName, req.groupName)}
                         className="btn btn-sm btn-success px-3 me-2 shadow-sm"
                       >
-                        ✓ Approve
+                        Approve
                       </button>
-                      <button 
-                        onClick={() => handleRejectRequest(req.id, req.memberName)} 
+                      <button
+                        onClick={() => handleRejectRequest(req.id, req.memberName)}
                         className="btn btn-sm btn-outline-danger px-2"
                       >
                         ✕ Reject
@@ -609,7 +609,7 @@ const Members = () => {
                 </p>
                 <div className="mb-3">
                   <label className="form-label small fw-semibold text-muted">Rejection Reason</label>
-                  <textarea 
+                  <textarea
                     className="form-control"
                     rows="3"
                     placeholder="e.g. Grama Niladhari seal is unclear, or NIC number mismatch."
@@ -620,8 +620,8 @@ const Members = () => {
               </div>
               <div className="modal-footer border-top">
                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowRejectKycModal(false)}>Cancel</button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-danger btn-sm px-3 fw-bold"
                   onClick={() => handleRejectKyc(rejectKycTarget?.id, rejectKycTarget?.fullName, rejectReasonInput)}
                 >

@@ -27,22 +27,18 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="py-5" style={{ minHeight: '100vh', backgroundColor: '#F8F9FA' }}>
-      <div className="row justify-content-center align-items-center">
-        <div className="col-12 col-md-6 col-lg-5 col-xl-4">
-          <div className="card shadow-sm border-0" style={{ borderRadius: '16px', overflow: 'hidden' }}>
-            <div className="card-body p-4 p-md-5">
-              {/* Brand Header matching exact logo colors */}
-              <div className="text-center mb-4">
-                <h2 className="fw-bold mb-1" style={{ fontSize: '1.75rem', letterSpacing: '-0.4px' }}>
-                  <span className="brand-seettu">Seettu</span>
-                  <span className="brand-manager">Manager</span>
-                </h2>
-                <p className="text-muted small mb-2" style={{ fontSize: '0.85rem' }}>
-                  Digital Financial Discipline for Seettu Group
-                </p>
-                <h4 className="fw-bold text-dark mt-3 mb-0" style={{ color: '#1A3644' }}>Forgot Password</h4>
-              </div>
+    <div className="auth-page-wrapper">
+      <div className="auth-card">
+        {/* Brand Header matching Login page */}
+        <div className="text-center mb-2">
+          <img src="/logo.png" alt="SeettuManager Logo" style={{ height: '70px', width: '70px', borderRadius: '50%', objectFit: 'cover' }} />
+        </div>
+        <h2 className="auth-title mt-1">
+          <span className="brand-seettu">Seettu</span>
+          <span className="brand-manager">Manager</span>
+        </h2>
+        <p className="auth-subtitle">Digital Financial Discipline for Seettu Group</p>
+        <h4 className="fw-bold text-dark mt-3 mb-2" style={{ color: '#1A3644', fontSize: '1.2rem' }}>Reset Password</h4>
 
               {message && <div className="alert alert-success border-0 small rounded-3 p-3 mb-3">{message}</div>}
               {error && <div className="alert alert-danger border-0 small rounded-3 p-3 mb-3">{error}</div>}
@@ -76,9 +72,6 @@ const ForgotPassword = () => {
                   </Link>
                 </div>
               </form>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

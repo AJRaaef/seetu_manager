@@ -91,6 +91,11 @@ const Login = () => {
                 <Icon name={showPassword ? 'eye-off' : 'eye'} size={18} />
               </span>
             </div>
+            <div className="text-end mt-1.5">
+              <Link to="/forgot-password" className="small text-decoration-none fw-medium text-muted hover-teal" style={{ fontSize: '0.8rem' }}>
+                Forgot Password?
+              </Link>
+            </div>
           </div>
 
           <button
