@@ -67,7 +67,7 @@ const MyGroups = () => {
             id: g.id,
             name: g.name,
             type: g.seettuType?.name || (g.category === 'NON_MONETARY' ? 'Non-Monetary' : 'Monetary'),
-            membersCount: g.members?.length || 1,
+            membersCount: Array.isArray(g.members) ? g.members.length : (typeof g.membersCount === 'number' ? g.membersCount : 0),
             maxMembers: g.memberCount || 10,
             contributionAmount: `${(g.contributionAmount || 1000).toLocaleString()} LKR per month`,
             currentCycle: g.currentCycle || 1,
