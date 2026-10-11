@@ -192,7 +192,7 @@ const Disputes = () => {
                 <tr>
                   <td colSpan="8" className="text-center py-5">
                     <div className="spinner-border text-teal" role="status" style={{ color: '#1A5265' }}></div>
-                    <p className="mt-2 text-muted small">Loading disputes from database...</p>
+                    <p className="mt-2 text-muted small">Loading disputes...</p>
                   </td>
                 </tr>
               ) : disputes.length === 0 ? (
@@ -200,7 +200,7 @@ const Disputes = () => {
                   <td colSpan="8" className="text-center py-5">
                     <Icon name="disputes" size={36} color="#94A3B8" className="mb-2" />
                     <h6 className="fw-bold text-dark">No disputes found</h6>
-                    <p className="text-muted small mb-0">There are currently no disputes filed in the database.</p>
+                    <p className="text-muted small mb-0">There are currently no active disputes filed.</p>
                   </td>
                 </tr>
               ) : (

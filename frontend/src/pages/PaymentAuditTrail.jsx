@@ -180,7 +180,7 @@ const PaymentAuditTrail = () => {
               <Icon name="shield" size={14} className="me-1" /> Admin Security Portal
             </span>
             <span className="badge bg-dark bg-opacity-10 text-dark px-3 py-1.5 rounded-pill fw-semibold" style={{ fontSize: '0.75rem' }}>
-              MySQL Database Audit Ledger
+              Official Audit Ledger
             </span>
           </div>
           <h2 className="fw-extrabold text-dark mb-0" style={{ color: '#0F2F3D' }}>
@@ -364,7 +364,7 @@ const PaymentAuditTrail = () => {
                     <div className="spinner-border text-info" role="status" style={{ color: '#0097B2' }}>
                       <span className="visually-hidden">Loading audit trail logs...</span>
                     </div>
-                    <p className="mt-2 text-muted small">Fetching real-time MySQL audit logs...</p>
+                    <p className="mt-2 text-muted small">Loading real-time audit logs...</p>
                   </td>
                 </tr>
               ) : filteredLogs.length === 0 ? (

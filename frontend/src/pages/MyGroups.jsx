@@ -126,13 +126,13 @@ const MyGroups = () => {
     setSubmittingJoin(true);
     try {
       await createJoinRequest(selectedJoinGroup, userId);
-      alert('✓ Request to join Seettu group submitted successfully to the database! The group organizer will review your request.');
+      alert('✓ Request to join Seettu group submitted successfully! The group organizer will review your request.');
       setShowJoinModal(false);
       setSelectedJoinGroup('');
       setJoinMsg('');
     } catch (err) {
       console.error('Join request error', err);
-      const msg = err.response?.data?.message || 'Failed to submit join request to database.';
+      const msg = err.response?.data?.message || 'Failed to submit join request.';
       alert('⚠️ ' + msg);
     } finally {
       setSubmittingJoin(false);

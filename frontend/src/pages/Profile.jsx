@@ -158,7 +158,7 @@ const Profile = () => {
         });
       }
 
-      setActionMsg('✓ Profile updated successfully in database!');
+      setActionMsg('✓ Profile updated successfully!');
       setIsEditing(false);
       await fetchProfile();
     } catch (err) {

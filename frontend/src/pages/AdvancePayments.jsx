@@ -78,7 +78,7 @@ const AdvancePayments = () => {
       if (formData.groupId) params.append('groupId', formData.groupId);
 
       await api.post(`/advance-payments?${params.toString()}`);
-      alert('✓ Advance payment recorded successfully to database!');
+      alert('✓ Advance payment recorded successfully!');
       setShowModal(false);
       setFormData({ groupId: '', memberId: '', amount: '', notes: '' });
       fetchData();

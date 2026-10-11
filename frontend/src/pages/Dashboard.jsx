@@ -305,7 +305,7 @@ const Dashboard = () => {
       <div className="table-card shadow-sm">
         <div className="table-card-header d-flex justify-content-between align-items-center">
           <span>Recent Payment</span>
-          <span className="badge bg-light text-dark fw-normal border">Live Database Records</span>
+          <span className="badge bg-light text-dark fw-normal border">Live Records</span>
         </div>
 
         <div className="table-responsive">
@@ -323,13 +323,13 @@ const Dashboard = () => {
                 <tr>
                   <td colSpan="4" className="text-center py-4 text-muted small">
                     <div className="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                    Loading recent payments from database...
+                    Loading recent payments...
                   </td>
                 </tr>
               ) : recentPayments.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="text-center py-4 text-muted small">
-                    No recent payments found in the database.
+                    No recent payments found.
                   </td>
                 </tr>
               ) : (

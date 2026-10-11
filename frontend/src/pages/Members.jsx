@@ -94,10 +94,10 @@ const Members = () => {
       setActionMsg('');
       setErrorMsg('');
       await approveJoinRequest(reqId);
-      setActionMsg(`Member ${memberName} approved and successfully added to group "${groupName}" in MySQL database!`);
+      setActionMsg(`Member ${memberName} approved and successfully added to group "${groupName}"!`);
       await fetchData();
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Failed to approve join request in database.'));
+      setErrorMsg(getErrorMessage(err, 'Failed to approve join request.'));
     }
   };
 
@@ -109,7 +109,7 @@ const Members = () => {
       setActionMsg(`Join request for ${memberName} was rejected.`);
       await fetchData();
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Failed to reject join request in database.'));
+      setErrorMsg(getErrorMessage(err, 'Failed to reject join request.'));
     }
   };
 
@@ -119,10 +119,10 @@ const Members = () => {
       setErrorMsg('');
       await verifyMemberKyc(userId, 'VERIFIED', '', role);
       const roleText = role === 'ORGANIZER' ? ' and promoted to Group Organizer' : '';
-      setActionMsg(`✓ Member ${memberName} identity & Grama Niladhari Certificate successfully verified${roleText} in database!`);
+      setActionMsg(`✓ Member ${memberName} identity & Grama Niladhari Certificate successfully verified${roleText}!`);
       await fetchData();
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Failed to verify member identity in database.'));
+      setErrorMsg(getErrorMessage(err, 'Failed to verify member identity.'));
     }
   };
 
@@ -149,7 +149,7 @@ const Members = () => {
       setActionMsg(`✓ Member ${fullName} added successfully to group!`);
       await fetchData();
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Failed to add member to database.'));
+      setErrorMsg(getErrorMessage(err, 'Failed to add member.'));
       throw err;
     }
   };
@@ -504,7 +504,7 @@ const Members = () => {
                 <tr>
                   <td colSpan={(isOrganizer || isAdmin) ? "9" : "8"} className="text-center py-5">
                     <div className="spinner-border text-teal" role="status" style={{ color: '#1A5265' }}></div>
-                    <p className="mt-2 text-muted small">Loading members from database...</p>
+                    <p className="mt-2 text-muted small">Loading members...</p>
                   </td>
                 </tr>
               ) : filteredMembers.length === 0 ? (

@@ -390,7 +390,7 @@ const PaymentTracking = () => {
       {/* Record Payment / Submit Evidence Form Card */}
       {(isAdmin || isOrganizer) ? (
         <div className="ui-card p-4 mb-4 shadow-sm">
-          <h5 className="fw-bold text-dark mb-3" style={{ fontSize: '1rem' }}>Record New Payment to Database</h5>
+          <h5 className="fw-bold text-dark mb-3" style={{ fontSize: '1rem' }}>Record New Payment</h5>
           <form onSubmit={handleRecordNew}>
             <div className="row g-3 align-items-center">
               {/* Group Select */}
@@ -749,7 +749,7 @@ const PaymentTracking = () => {
                 <tr>
                   <td colSpan="8" className="text-center py-5">
                     <div className="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                    <span className="text-muted small">Loading payment records from database...</span>
+                    <span className="text-muted small">Loading payment records...</span>
                   </td>
                 </tr>
               ) : filteredPayments.length === 0 ? (
@@ -757,11 +757,11 @@ const PaymentTracking = () => {
                   <td colSpan="8" className="text-center py-5">
                     <div className="d-flex flex-column align-items-center justify-content-center">
                       <Icon name="search" size={32} color="#94A3B8" />
-                      <h6 className="fw-bold mt-3 mb-1 text-dark">No payments found in database</h6>
+                      <h6 className="fw-bold mt-3 mb-1 text-dark">No payments found</h6>
                       <p className="text-muted small mb-3">
                         {isFiltered
                           ? 'No payment records match your search or filter criteria.'
-                          : 'There are no payment records in the database yet.'}
+                          : 'There are no payment records registered yet.'}
                       </p>
                       {isFiltered && (
                         <button
