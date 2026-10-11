@@ -195,9 +195,9 @@ const Profile = () => {
       )}
 
       <div className="row g-4">
-        {/* Left Column: User Profile Card */}
-        <div className="col-12 col-lg-4">
-          <div className="ui-card p-4 text-center shadow-sm h-100">
+        {/* Left Column: User Profile Card & KYC Verification */}
+        <div className="col-12 col-lg-4 d-flex flex-column gap-4">
+          <div className="ui-card p-4 text-center shadow-sm">
             {/* Avatar Circle with Initials */}
             <div
               className="rounded-circle text-white d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm"
