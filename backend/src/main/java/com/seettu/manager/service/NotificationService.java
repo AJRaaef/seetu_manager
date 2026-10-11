@@ -4,6 +4,7 @@ import com.seettu.manager.entity.Notification;
 import com.seettu.manager.entity.User;
 import com.seettu.manager.exception.ResourceNotFoundException;
 import com.seettu.manager.repository.NotificationRepository;
+import com.seettu.manager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,11 +16,12 @@ import java.util.List;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     @Transactional
     public Notification sendNotification(Long userId, String message, String type) {
-        User user = userService.getUserById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         Notification notification = Notification.builder()
                 .user(user)
                 .message(message)
