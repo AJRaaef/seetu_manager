@@ -15,10 +15,13 @@ export const getUserProfileStats = async (id) => {
   return response.data;
 };
 
-export const submitKyc = async (nicNumber, file) => {
+export const submitKyc = async (nicNumber, file, requestedRole = null) => {
   const formData = new FormData();
   formData.append('nicNumber', nicNumber);
   formData.append('file', file);
+  if (requestedRole) {
+    formData.append('requestedRole', requestedRole);
+  }
   const response = await api.post('/users/kyc/submit', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   });

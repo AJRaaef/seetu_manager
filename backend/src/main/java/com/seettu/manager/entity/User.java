@@ -48,6 +48,9 @@ public class User implements UserDetails {
     @Column(name = "kyc_rejection_reason", columnDefinition = "TEXT")
     private String kycRejectionReason;
 
+    @Column(name = "requested_role", length = 20)
+    private String requestedRole; // e.g. "ORGANIZER" if member explicitly asked to become an Organizer
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "verified_by")
     private User verifiedBy;

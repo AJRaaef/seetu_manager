@@ -77,7 +77,7 @@ public class UserService {
      * stores Grama Niladhari Character Certificate proof, and transitions status to PENDING.
      */
     @Transactional
-    public UserKycResponse submitKyc(Long userId, String nicNumber, MultipartFile file) throws IOException {
+    public UserKycResponse submitKyc(Long userId, String nicNumber, MultipartFile file, String requestedRole) throws IOException {
         User user = getUserById(userId);
 
         if (nicNumber == null || nicNumber.trim().isEmpty()) {
@@ -125,11 +125,15 @@ public class UserService {
         user.setGnCertificateUrl(fileUrl);
         user.setKycStatus(User.KycStatus.PENDING);
         user.setKycRejectionReason(null);
+        if (requestedRole != null && !requestedRole.trim().isEmpty()) {
+            user.setRequestedRole(requestedRole.trim().toUpperCase());
+        }
         user = userRepository.save(user);
 
         // Audit log
+        String reqRoleMsg = "ORGANIZER".equalsIgnoreCase(user.getRequestedRole()) ? " (Requested role upgrade: ORGANIZER)" : "";
         auditLogService.log(user, "KYC_SUBMITTED", "users", user.getId(),
-                "Member " + user.getFullName() + " submitted NIC (" + cleanNic + ") and Grama Niladhari certificate for verification.");
+                "Member " + user.getFullName() + " submitted NIC (" + cleanNic + ") and Grama Niladhari certificate for verification" + reqRoleMsg + ".");
 
         return toKycResponse(user);
     }
@@ -216,6 +220,7 @@ public class UserService {
                 .gnCertificateUrl(user.getGnCertificateUrl())
                 .kycStatus(user.getKycStatus() != null ? user.getKycStatus().name() : "UNVERIFIED")
                 .kycRejectionReason(user.getKycRejectionReason())
+                .requestedRole(user.getRequestedRole())
                 .verifiedById(verifiedBy != null ? verifiedBy.getId() : null)
                 .verifiedByName(verifiedBy != null ? verifiedBy.getFullName() : null)
                 .verifiedAt(user.getVerifiedAt())

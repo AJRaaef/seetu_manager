@@ -48,8 +48,9 @@ public class UserController {
     public ResponseEntity<ApiResponse<com.seettu.manager.dto.UserKycResponse>> submitKyc(
             @RequestParam("nicNumber") String nicNumber,
             @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @RequestParam(value = "requestedRole", required = false) String requestedRole,
             @AuthenticationPrincipal User currentUser) throws java.io.IOException {
-        com.seettu.manager.dto.UserKycResponse response = userService.submitKyc(currentUser.getId(), nicNumber, file);
+        com.seettu.manager.dto.UserKycResponse response = userService.submitKyc(currentUser.getId(), nicNumber, file, requestedRole);
         return ResponseEntity.ok(ApiResponse.success("Grama Niladhari certificate and NIC submitted successfully for verification", response));
     }
 

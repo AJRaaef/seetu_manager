@@ -21,6 +21,7 @@ public class UserKycResponse {
     private String gnCertificateUrl;
     private String kycStatus;
     private String kycRejectionReason;
+    private String requestedRole;
     private Long verifiedById;
     private String verifiedByName;
     private LocalDateTime verifiedAt;

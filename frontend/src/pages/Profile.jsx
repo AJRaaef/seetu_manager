@@ -21,6 +21,7 @@ const Profile = () => {
   // KYC Verification state
   const [nicInput, setNicInput] = useState('');
   const [certFile, setCertFile] = useState(null);
+  const [wantsOrganizer, setWantsOrganizer] = useState(false);
   const [kycSubmitting, setKycSubmitting] = useState(false);
   const [kycError, setKycError] = useState('');
   const [kycSuccess, setKycSuccess] = useState('');
@@ -87,7 +88,8 @@ const Profile = () => {
 
     setKycSubmitting(true);
     try {
-      const res = await submitKyc(cleanNic, certFile);
+      const requestedRole = wantsOrganizer ? 'ORGANIZER' : null;
+      const res = await submitKyc(cleanNic, certFile, requestedRole);
       setKycSuccess('✓ NIC and Grama Niladhari Certificate submitted successfully! System Admin has been notified for verification.');
       setCertFile(null);
       if (updateUser) {
@@ -452,6 +454,22 @@ const Profile = () => {
                     />
                     <div className="text-muted small mt-1" style={{ fontSize: '0.72rem' }}>
                       Official Character & Residency proof (JPG, PNG, or PDF).
+                    </div>
+                  </div>
+
+                  <div className="form-check p-2.5 bg-light rounded-2 border mb-3 text-start">
+                    <input 
+                      className="form-check-input ms-0 me-2" 
+                      type="checkbox" 
+                      id="requestOrganizerRole"
+                      checked={wantsOrganizer}
+                      onChange={(e) => setWantsOrganizer(e.target.checked)}
+                    />
+                    <label className="form-check-label small fw-semibold text-dark cursor-pointer" htmlFor="requestOrganizerRole" style={{ fontSize: '0.8rem' }}>
+                      ⭐ Request Organizer Privileges
+                    </label>
+                    <div className="text-muted small mt-0.5" style={{ fontSize: '0.72rem' }}>
+                      Check this box if you intend to create and manage your own Seettu schemes. System Admin will review your Grama Niladhari proof for organizer authority.
                     </div>
                   </div>
 

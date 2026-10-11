@@ -304,7 +304,14 @@ const Members = () => {
               <tbody>
                 {pendingKycList.map((usr) => (
                   <tr key={usr.id}>
-                    <td className="fw-bold text-dark">{usr.fullName}</td>
+                    <td className="fw-bold text-dark">
+                      <div>{usr.fullName}</div>
+                      {usr.requestedRole === 'ORGANIZER' && (
+                        <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-0.5 rounded-pill small fw-semibold" style={{ fontSize: '0.7rem' }}>
+                          ⭐ Requested: Organizer
+                        </span>
+                      )}
+                    </td>
                     <td className="small text-muted">
                       <div>{usr.email}</div>
                       <div>{usr.phone}</div>
@@ -345,12 +352,12 @@ const Members = () => {
                         >
                           ✓ Verify Member
                         </button>
-                        {isAdmin && (
+                        {isAdmin && usr.requestedRole === 'ORGANIZER' && (
                           <button 
                             onClick={() => handleApproveKyc(usr.id, usr.fullName, 'ORGANIZER')} 
                             className="btn btn-sm btn-teal px-2.5 shadow-sm fw-semibold"
                             style={{ backgroundColor: '#1A5265', color: '#fff' }}
-                            title="Verify and Promote to Group Organizer"
+                            title="Applicant explicitly requested Organizer status. Click to approve and promote."
                           >
                             ⭐ Verify & Make Organizer
                           </button>
