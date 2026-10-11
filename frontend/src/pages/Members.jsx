@@ -52,7 +52,7 @@ const Members = () => {
         getAllMembers().catch(() => ({ data: [] })),
         getAllGroups().catch(() => ({ data: [] })),
         (isOrganizer || isAdmin) ? getPendingJoinRequests().catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
-        isAdmin ? getPendingKycUsers().catch(() => ({ data: [] })) : Promise.resolve({ data: [] })
+        (isOrganizer || isAdmin) ? getPendingKycUsers().catch(() => ({ data: [] })) : Promise.resolve({ data: [] })
       ]);
 
       const mList = membersRes?.data || membersRes || [];
@@ -272,8 +272,8 @@ const Members = () => {
         </div>
       )}
 
-      {/* Admin Identity & Grama Niladhari Character Verification Queue */}
-      {isAdmin && pendingKycList.length > 0 && (
+      {/* Identity & Grama Niladhari Character Verification Queue */}
+      {(isOrganizer || isAdmin) && pendingKycList.length > 0 && (
         <div className="ui-card p-4 mb-4 shadow-sm border-0 rounded-3 border-start border-4 border-warning">
           <div className="d-flex justify-content-between align-items-center mb-3">
             <div>
@@ -285,7 +285,7 @@ const Members = () => {
                 Review applicant Sri Lankan NIC numbers and Grama Niladhari Character Certificates to prevent duplicate members and fraud before group entry.
               </small>
             </div>
-            <span className="badge rounded-pill bg-warning text-dark px-3 py-1.5 fw-bold">Admin Verification Required</span>
+            <span className="badge rounded-pill bg-warning text-dark px-3 py-1.5 fw-bold">Verification Required</span>
           </div>
 
           <div className="table-responsive">

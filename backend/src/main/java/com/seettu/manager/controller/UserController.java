@@ -61,7 +61,7 @@ public class UserController {
     }
 
     @GetMapping("/kyc/pending")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     public ResponseEntity<ApiResponse<List<com.seettu.manager.dto.UserKycResponse>>> getPendingKyc() {
         return ResponseEntity.ok(ApiResponse.success(userService.getPendingKycUsers()));
     }
@@ -73,7 +73,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/kyc/verify")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     public ResponseEntity<ApiResponse<com.seettu.manager.dto.UserKycResponse>> verifyMemberKyc(
             @PathVariable Long id,
             @RequestBody com.seettu.manager.dto.KycVerificationRequest request,
