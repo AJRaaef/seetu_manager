@@ -83,6 +83,11 @@ public class DisputeService {
                     "Your dispute has been " + status.toLowerCase(), "DISPUTE");
         }
         
-        return disputeRepository.save(dispute);
+        Dispute saved = disputeRepository.save(dispute);
+        String groupName = saved.getGroup() != null ? saved.getGroup().getName() : "Group";
+        auditLogService.log(resolvedBy, "DISPUTE_" + status, "disputes", saved.getId(),
+                "Dispute #" + saved.getId() + " marked as " + status + " for group: " + groupName);
+
+        return saved;
     }
 }

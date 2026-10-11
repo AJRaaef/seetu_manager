@@ -14,6 +14,9 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     List<AuditLog> findByActionOrderByTimestampDesc(String action);
     List<AuditLog> findByTargetTableOrderByTimestampDesc(String targetTable);
     
+    @Query("SELECT a FROM AuditLog a WHERE a.targetTable IN ('payments', 'advance_payments') ORDER BY a.timestamp DESC")
+    List<AuditLog> findPaymentAuditLogs();
+
     @Query("SELECT a FROM AuditLog a ORDER BY a.timestamp DESC")
     List<AuditLog> findAllOrderByTimestampDesc();
 }

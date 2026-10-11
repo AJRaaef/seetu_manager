@@ -46,7 +46,7 @@ public class AuditLogService {
 
     @Transactional(readOnly = true)
     public List<AuditLog> getPaymentAuditLogs() {
-        return auditLogRepository.findByTargetTableOrderByTimestampDesc("payments");
+        return auditLogRepository.findPaymentAuditLogs();
     }
 
     @Transactional(readOnly = true)

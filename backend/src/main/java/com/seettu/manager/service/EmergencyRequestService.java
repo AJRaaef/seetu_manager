@@ -83,11 +83,14 @@ public class EmergencyRequestService {
         }
         
         request.setResolvedBy(resolvedBy);
-        requestRepository.save(request);
+        EmergencyRequest saved = requestRepository.save(request);
+
+        auditLogService.log(resolvedBy, "EMERGENCY_" + status, "emergency_requests", saved.getId(),
+                "Emergency request #" + saved.getId() + " marked as " + status + " for amount: " + saved.getRequestedAmount());
 
         notificationService.sendNotification(request.getRaisedBy().getId(), 
                 "Your emergency request has been " + status.toLowerCase(), "EMERGENCY");
 
-        return request;
+        return saved;
     }
 }

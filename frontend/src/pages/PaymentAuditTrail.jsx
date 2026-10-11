@@ -41,6 +41,7 @@ const PaymentAuditTrail = () => {
       (log.userName && log.userName.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (log.details && log.details.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (log.action && log.action.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (log.targetTable && log.targetTable.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (log.id && String(log.id).includes(searchQuery));
 
     const matchesAction = filterAction === 'ALL' || log.action === filterAction;
@@ -48,11 +49,30 @@ const PaymentAuditTrail = () => {
     return matchesSearch && matchesAction;
   });
 
-  // Calculate statistics
+  // Dynamically compute unique actions available in the current dataset
+  const uniqueActions = ['ALL', ...Array.from(new Set(auditLogs.map(l => l.action).filter(Boolean)))];
+
+  // Dynamic statistics based on current scope
   const totalLogs = auditLogs.length;
-  const recordedCount = auditLogs.filter(l => l.action === 'PAYMENT_RECORDED').length;
-  const updatedCount = auditLogs.filter(l => l.action === 'PAYMENT_UPDATED').length;
-  const deletedCount = auditLogs.filter(l => l.action === 'PAYMENT_DELETED').length;
+  const isPaymentsScope = logScope === 'PAYMENTS';
+
+  const card1Title = isPaymentsScope ? 'Total Payment Audits' : 'Total System Logs';
+  const card1Value = totalLogs;
+
+  const card2Title = isPaymentsScope ? 'Payments Recorded' : 'Payment Ledger Audits';
+  const card2Value = isPaymentsScope
+    ? auditLogs.filter(l => l.action === 'PAYMENT_RECORDED' || l.action === 'ADVANCE_PAYMENT_RECORDED').length
+    : auditLogs.filter(l => l.targetTable === 'payments' || l.targetTable === 'advance_payments').length;
+
+  const card3Title = isPaymentsScope ? 'Payment Updates' : 'Auth & Account Events';
+  const card3Value = isPaymentsScope
+    ? auditLogs.filter(l => l.action === 'PAYMENT_UPDATED').length
+    : auditLogs.filter(l => l.targetTable === 'users' || (l.action && l.action.startsWith('USER_'))).length;
+
+  const card4Title = isPaymentsScope ? 'Deletions & Overdues' : 'Disputes & Emergencies';
+  const card4Value = isPaymentsScope
+    ? auditLogs.filter(l => l.action === 'PAYMENT_DELETED' || (l.details && l.details.includes('OVERDUE'))).length
+    : auditLogs.filter(l => l.targetTable === 'disputes' || l.targetTable === 'emergency_requests').length;
 
   // Export CSV function
   const handleExportCSV = () => {
@@ -64,7 +84,7 @@ const PaymentAuditTrail = () => {
     const headers = ['Log ID', 'Timestamp', 'Performed By', 'Role', 'Action', 'Target Table', 'Target ID', 'Details'];
     const rows = filteredLogs.map(l => [
       l.id,
-      l.timestamp ? new Date(l.timestamp).toLocaleString() : '-',
+      `"${l.timestamp ? new Date(l.timestamp).toLocaleString() : '-'}"`,
       `"${l.userName || 'System'}"`,
       l.userRole || 'SYSTEM',
       l.action || '-',
@@ -79,7 +99,7 @@ const PaymentAuditTrail = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Payment_Audit_Trail_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `Audit_Trail_${logScope}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -89,10 +109,28 @@ const PaymentAuditTrail = () => {
     switch (action) {
       case 'PAYMENT_RECORDED':
         return <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="check" size={13} className="me-1" />RECORDED</span>;
+      case 'ADVANCE_PAYMENT_RECORDED':
+        return <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="credit-card" size={13} className="me-1" />ADVANCE PAID</span>;
       case 'PAYMENT_UPDATED':
         return <span className="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2.5 py-1 rounded-pill" style={{ color: '#0097B2' }}><Icon name="edit" size={13} className="me-1" />UPDATED</span>;
       case 'PAYMENT_DELETED':
         return <span className="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="trash" size={13} className="me-1" />DELETED</span>;
+      case 'USER_LOGIN':
+        return <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="shield" size={13} className="me-1" />USER LOGIN</span>;
+      case 'USER_REGISTERED':
+        return <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="plus" size={13} className="me-1" />REGISTERED</span>;
+      case 'GROUP_CREATED':
+        return <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="groups" size={13} className="me-1" />GROUP CREATED</span>;
+      case 'MEMBER_ADDED':
+        return <span className="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="members" size={13} className="me-1" />MEMBER ADDED</span>;
+      case 'DISPUTE_RAISED':
+      case 'DISPUTE_RESOLVED':
+      case 'DISPUTE_REJECTED':
+        return <span className="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2.5 py-1 rounded-pill" style={{ color: '#D97706' }}><Icon name="disputes" size={13} className="me-1" />{action}</span>;
+      case 'EMERGENCY_REQUESTED':
+      case 'EMERGENCY_APPROVED':
+      case 'EMERGENCY_REJECTED':
+        return <span className="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1 rounded-pill"><Icon name="emergency" size={13} className="me-1" />{action}</span>;
       default:
         return <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1 rounded-pill">{action}</span>;
     }
@@ -174,8 +212,8 @@ const PaymentAuditTrail = () => {
           <div className="card border-0 shadow-sm rounded-3 p-3 bg-white border-start border-4 border-primary">
             <div className="d-flex align-items-center justify-content-between">
               <div>
-                <span className="text-muted small fw-semibold text-uppercase">Total Payment Audits</span>
-                <h3 className="fw-extrabold mb-0 mt-1" style={{ color: '#0F2F3D' }}>{totalLogs}</h3>
+                <span className="text-muted small fw-semibold text-uppercase">{card1Title}</span>
+                <h3 className="fw-extrabold mb-0 mt-1" style={{ color: '#0F2F3D' }}>{card1Value}</h3>
               </div>
               <div className="d-flex align-items-center justify-content-center rounded-circle text-primary" style={{ width: '42px', height: '42px', backgroundColor: 'rgba(13, 110, 253, 0.1)' }}>
                 <Icon name="file-text" size={20} />
@@ -188,8 +226,8 @@ const PaymentAuditTrail = () => {
           <div className="card border-0 shadow-sm rounded-3 p-3 bg-white border-start border-4 border-success">
             <div className="d-flex align-items-center justify-content-between">
               <div>
-                <span className="text-muted small fw-semibold text-uppercase">Payments Recorded</span>
-                <h3 className="fw-extrabold text-success mb-0 mt-1">{recordedCount}</h3>
+                <span className="text-muted small fw-semibold text-uppercase">{card2Title}</span>
+                <h3 className="fw-extrabold text-success mb-0 mt-1">{card2Value}</h3>
               </div>
               <div className="d-flex align-items-center justify-content-center rounded-circle text-success" style={{ width: '42px', height: '42px', backgroundColor: 'rgba(25, 135, 84, 0.1)' }}>
                 <Icon name="check" size={20} />
@@ -202,8 +240,8 @@ const PaymentAuditTrail = () => {
           <div className="card border-0 shadow-sm rounded-3 p-3 bg-white border-start border-4 border-info">
             <div className="d-flex align-items-center justify-content-between">
               <div>
-                <span className="text-muted small fw-semibold text-uppercase">Payment Updates</span>
-                <h3 className="fw-extrabold text-info mb-0 mt-1" style={{ color: '#0097B2' }}>{updatedCount}</h3>
+                <span className="text-muted small fw-semibold text-uppercase">{card3Title}</span>
+                <h3 className="fw-extrabold text-info mb-0 mt-1" style={{ color: '#0097B2' }}>{card3Value}</h3>
               </div>
               <div className="d-flex align-items-center justify-content-center rounded-circle text-info" style={{ width: '42px', height: '42px', backgroundColor: 'rgba(0, 151, 178, 0.1)', color: '#0097B2' }}>
                 <Icon name="edit" size={20} />
@@ -216,11 +254,11 @@ const PaymentAuditTrail = () => {
           <div className="card border-0 shadow-sm rounded-3 p-3 bg-white border-start border-4 border-danger">
             <div className="d-flex align-items-center justify-content-between">
               <div>
-                <span className="text-muted small fw-semibold text-uppercase">Deletions / Overdues</span>
-                <h3 className="fw-extrabold text-danger mb-0 mt-1">{deletedCount}</h3>
+                <span className="text-muted small fw-semibold text-uppercase">{card4Title}</span>
+                <h3 className="fw-extrabold text-danger mb-0 mt-1">{card4Value}</h3>
               </div>
               <div className="d-flex align-items-center justify-content-center rounded-circle text-danger" style={{ width: '42px', height: '42px', backgroundColor: 'rgba(220, 53, 69, 0.1)' }}>
-                <Icon name="trash" size={20} />
+                <Icon name="shield" size={20} />
               </div>
             </div>
           </div>
@@ -240,7 +278,7 @@ const PaymentAuditTrail = () => {
                 <input 
                   type="text"
                   className="form-control border-start-0 ps-0 shadow-none"
-                  placeholder="Search by admin user, member name, or log details..."
+                  placeholder="Search by user, action, table, or log details..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -251,14 +289,20 @@ const PaymentAuditTrail = () => {
             <div className="col-6 col-md-3">
               <div className="d-flex align-items-center gap-1 bg-light p-1 rounded-3 border">
                 <button
-                  onClick={() => setLogScope('PAYMENTS')}
+                  onClick={() => {
+                    setFilterAction('ALL');
+                    setLogScope('PAYMENTS');
+                  }}
                   className={`btn btn-sm flex-fill fw-bold rounded-2 ${logScope === 'PAYMENTS' ? 'bg-white shadow-sm text-dark' : 'text-muted'}`}
                   style={logScope === 'PAYMENTS' ? { color: '#0F2F3D' } : {}}
                 >
                   Payment Audits
                 </button>
                 <button
-                  onClick={() => setLogScope('ALL')}
+                  onClick={() => {
+                    setFilterAction('ALL');
+                    setLogScope('ALL');
+                  }}
                   className={`btn btn-sm flex-fill fw-bold rounded-2 ${logScope === 'ALL' ? 'bg-white shadow-sm text-dark' : 'text-muted'}`}
                 >
                   All System Logs
@@ -266,17 +310,18 @@ const PaymentAuditTrail = () => {
               </div>
             </div>
 
-            {/* Action Filter */}
+            {/* Dynamic Action Filter */}
             <div className="col-6 col-md-4">
               <select
                 className="form-select shadow-none"
                 value={filterAction}
                 onChange={(e) => setFilterAction(e.target.value)}
               >
-                <option value="ALL">All Actions</option>
-                <option value="PAYMENT_RECORDED">PAYMENT_RECORDED</option>
-                <option value="PAYMENT_UPDATED">PAYMENT_UPDATED</option>
-                <option value="PAYMENT_DELETED">PAYMENT_DELETED</option>
+                {uniqueActions.map(act => (
+                  <option key={act} value={act}>
+                    {act === 'ALL' ? 'All Actions' : act}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
