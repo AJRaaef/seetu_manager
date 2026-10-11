@@ -76,9 +76,10 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = user?.role === 'ADMIN';
   const isOrganizer = user?.role === 'ORGANIZER';
   const isMember = user?.role === 'MEMBER';
+  const isVerified = user?.kycStatus === 'VERIFIED';
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUser, isAdmin, isOrganizer, isMember }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUser, isAdmin, isOrganizer, isMember, isVerified }}>
       {children}
     </AuthContext.Provider>
   );

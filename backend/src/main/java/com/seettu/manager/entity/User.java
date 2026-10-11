@@ -34,6 +34,27 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 15)
     private String phone;
 
+    @Column(name = "nic_number", unique = true, length = 20)
+    private String nicNumber;
+
+    @Column(name = "gn_certificate_url", length = 500)
+    private String gnCertificateUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "kyc_status", nullable = false)
+    @Builder.Default
+    private KycStatus kycStatus = KycStatus.UNVERIFIED;
+
+    @Column(name = "kyc_rejection_reason", columnDefinition = "TEXT")
+    private String kycRejectionReason;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "verified_by")
+    private User verifiedBy;
+
+    @Column(name = "verified_at")
+    private LocalDateTime verifiedAt;
+
     @Column(name = "password_hash", nullable = false, length = 255)
     @com.fasterxml.jackson.annotation.JsonIgnore
     private String passwordHash;
@@ -47,9 +68,11 @@ public class User implements UserDetails {
     private Language preferredLanguage;
 
     @Column(name = "is_locked", nullable = false)
+    @Builder.Default
     private Boolean isLocked = false;
 
     @Column(name = "failed_login_attempts", nullable = false)
+    @Builder.Default
     private Integer failedLoginAttempts = 0;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -60,8 +83,13 @@ public class User implements UserDetails {
         createdAt = LocalDateTime.now();
         if (isLocked == null) isLocked = false;
         if (failedLoginAttempts == null) failedLoginAttempts = 0;
+        if (kycStatus == null) kycStatus = KycStatus.UNVERIFIED;
         if (role == null) role = Role.MEMBER;
         if (preferredLanguage == null) preferredLanguage = Language.EN;
+    }
+
+    public enum KycStatus {
+        UNVERIFIED, PENDING, VERIFIED, REJECTED
     }
 
     public enum Role {

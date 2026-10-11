@@ -13,14 +13,23 @@ CREATE TABLE users (
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
     phone VARCHAR(15) NOT NULL,
+    nic_number VARCHAR(20) NULL UNIQUE,
+    gn_certificate_url VARCHAR(500) NULL,
+    kyc_status ENUM('UNVERIFIED', 'PENDING', 'VERIFIED', 'REJECTED') NOT NULL DEFAULT 'UNVERIFIED',
+    kyc_rejection_reason TEXT NULL,
+    verified_by BIGINT NULL,
+    verified_at TIMESTAMP NULL,
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('ADMIN', 'ORGANIZER', 'MEMBER') NOT NULL DEFAULT 'MEMBER',
     preferred_language ENUM('EN', 'SI', 'TA') NOT NULL DEFAULT 'EN',
     is_locked BOOLEAN NOT NULL DEFAULT FALSE,
     failed_login_attempts INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (verified_by) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_users_email (email),
-    INDEX idx_users_role (role)
+    INDEX idx_users_role (role),
+    INDEX idx_users_nic (nic_number),
+    INDEX idx_users_kyc_status (kyc_status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================

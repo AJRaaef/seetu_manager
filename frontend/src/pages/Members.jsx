@@ -4,6 +4,7 @@ import InviteMemberModal from '../components/InviteMemberModal';
 import EditMemberModal from '../components/EditMemberModal';
 import { getAllMembers, getAllGroups, removeMember, inviteMember } from '../api/groupApi';
 import { getErrorMessage } from '../utils/errorHandler';
+import { getPendingKycUsers, verifyMemberKyc } from '../api/userApi';
 
 import { useAuth } from '../hooks/useAuth';
 
@@ -38,23 +39,30 @@ const Members = () => {
   const [actionMsg, setActionMsg] = useState('');
 
   const [pendingRequests, setPendingRequests] = useState([]);
+  const [pendingKycList, setPendingKycList] = useState([]);
+  const [showRejectKycModal, setShowRejectKycModal] = useState(false);
+  const [rejectKycTarget, setRejectKycTarget] = useState(null);
+  const [rejectReasonInput, setRejectReasonInput] = useState('');
 
   const fetchData = async () => {
     try {
       setLoading(true);
       setErrorMsg('');
-      const [membersRes, groupsRes, pendingRes] = await Promise.all([
+      const [membersRes, groupsRes, pendingRes, pendingKycRes] = await Promise.all([
         getAllMembers().catch(() => ({ data: [] })),
         getAllGroups().catch(() => ({ data: [] })),
-        (isOrganizer || isAdmin) ? getPendingJoinRequests().catch(() => ({ data: [] })) : Promise.resolve({ data: [] })
+        (isOrganizer || isAdmin) ? getPendingJoinRequests().catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
+        isAdmin ? getPendingKycUsers().catch(() => ({ data: [] })) : Promise.resolve({ data: [] })
       ]);
 
       const mList = membersRes?.data || membersRes || [];
       const gList = groupsRes?.data || groupsRes || [];
       const pList = pendingRes?.data || pendingRes || [];
+      const kycList = pendingKycRes?.data || pendingKycRes || [];
 
       setRawMembers(Array.isArray(mList) ? mList : []);
       setGroups(Array.isArray(gList) ? gList : []);
+      setPendingKycList(Array.isArray(kycList) ? kycList : []);
 
       if (Array.isArray(pList) && pList.length > 0) {
         const formattedPending = pList.map(r => ({
@@ -102,6 +110,33 @@ const Members = () => {
       await fetchData();
     } catch (err) {
       setErrorMsg(getErrorMessage(err, 'Failed to reject join request in database.'));
+    }
+  };
+
+  const handleApproveKyc = async (userId, memberName) => {
+    try {
+      setActionMsg('');
+      setErrorMsg('');
+      await verifyMemberKyc(userId, 'VERIFIED');
+      setActionMsg(`✓ Member ${memberName} identity & Grama Niladhari Certificate successfully verified and approved in MySQL database!`);
+      await fetchData();
+    } catch (err) {
+      setErrorMsg(getErrorMessage(err, 'Failed to verify member identity in database.'));
+    }
+  };
+
+  const handleRejectKyc = async (userId, memberName, reason) => {
+    try {
+      setActionMsg('');
+      setErrorMsg('');
+      await verifyMemberKyc(userId, 'REJECTED', reason);
+      setActionMsg(`Member ${memberName} verification was rejected with reason: "${reason}".`);
+      setShowRejectKycModal(false);
+      setRejectKycTarget(null);
+      setRejectReasonInput('');
+      await fetchData();
+    } catch (err) {
+      setErrorMsg(getErrorMessage(err, 'Failed to reject member verification.'));
     }
   };
 
@@ -180,6 +215,9 @@ const Members = () => {
         name: m.user?.fullName || 'Unknown Member',
         email: m.user?.email || 'N/A',
         phone: m.user?.phone || 'N/A',
+        nicNumber: m.user?.nicNumber || '-',
+        kycStatus: m.user?.kycStatus || 'UNVERIFIED',
+        gnCertificateUrl: m.user?.gnCertificateUrl,
         groupName: m.group?.name || 'General Group',
         joinedDate: dateStr,
         score: scoreVal,
@@ -231,6 +269,94 @@ const Members = () => {
           <Icon name="alert-circle" size={18} />
           <div>{errorMsg}</div>
           <button type="button" className="btn-close ms-auto" onClick={() => setErrorMsg('')} aria-label="Close"></button>
+        </div>
+      )}
+
+      {/* Admin Identity & Grama Niladhari Character Verification Queue */}
+      {isAdmin && pendingKycList.length > 0 && (
+        <div className="ui-card p-4 mb-4 shadow-sm border-0 rounded-3 border-start border-4 border-warning">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h5 className="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
+                <Icon name="shield" size={20} color="#1A5265" />
+                <span>Member Identity & Grama Niladhari Verification Queue ({pendingKycList.length})</span>
+              </h5>
+              <small className="text-muted">
+                Review applicant Sri Lankan NIC numbers and Grama Niladhari Character Certificates to prevent duplicate members and fraud before group entry.
+              </small>
+            </div>
+            <span className="badge rounded-pill bg-warning text-dark px-3 py-1.5 fw-bold">Admin Verification Required</span>
+          </div>
+
+          <div className="table-responsive">
+            <table className="table table-sm align-middle mb-0">
+              <thead className="table-light">
+                <tr>
+                  <th>Applicant Name</th>
+                  <th>Contact Details</th>
+                  <th>NIC Number</th>
+                  <th>Grama Niladhari Proof</th>
+                  <th>Submission Date</th>
+                  <th className="text-end">Verification Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingKycList.map((usr) => (
+                  <tr key={usr.id}>
+                    <td className="fw-bold text-dark">{usr.fullName}</td>
+                    <td className="small text-muted">
+                      <div>{usr.email}</div>
+                      <div>{usr.phone}</div>
+                    </td>
+                    <td>
+                      <span className="badge bg-light text-dark border font-monospace px-2 py-1">
+                        {usr.nicNumber || 'N/A'}
+                      </span>
+                      <span className="badge bg-success bg-opacity-10 text-success border border-success ms-1 small" style={{ fontSize: '0.72rem' }}>
+                        Unique NIC
+                      </span>
+                    </td>
+                    <td>
+                      {usr.gnCertificateUrl ? (
+                        <a 
+                          href={`http://localhost:8081${usr.gnCertificateUrl}`} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          className="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1 py-1 px-2"
+                          style={{ fontSize: '0.78rem' }}
+                        >
+                          <Icon name="file-text" size={14} />
+                          <span>View GN Certificate</span>
+                        </a>
+                      ) : (
+                        <span className="text-muted small">No File</span>
+                      )}
+                    </td>
+                    <td className="text-muted small">
+                      {usr.createdAt ? usr.createdAt.split('T')[0] : 'Recent'}
+                    </td>
+                    <td className="text-end">
+                      <button 
+                        onClick={() => handleApproveKyc(usr.id, usr.fullName)} 
+                        className="btn btn-sm btn-success px-3 me-2 shadow-sm fw-semibold"
+                      >
+                        ✓ Verify & Clear
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setRejectKycTarget(usr);
+                          setShowRejectKycModal(true);
+                        }} 
+                        className="btn btn-sm btn-outline-danger px-2 fw-semibold"
+                      >
+                        ✕ Reject
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -338,6 +464,7 @@ const Members = () => {
                 <th className="py-3 px-3 text-muted fw-semibold small">Phone</th>
                 <th className="py-3 px-3 text-muted fw-semibold small">Group</th>
                 <th className="py-3 px-3 text-muted fw-semibold small">Joined Date</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-center">Identity (NIC & GN)</th>
                 <th className="py-3 px-3 text-muted fw-semibold small text-center">Discipline Score</th>
                 <th className="py-3 px-3 text-muted fw-semibold small text-center">Status</th>
                 {(isOrganizer || isAdmin) && <th className="py-3 px-3 text-muted fw-semibold small text-end">Actions</th>}
@@ -346,14 +473,14 @@ const Members = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={(isOrganizer || isAdmin) ? "8" : "7"} className="text-center py-5">
+                  <td colSpan={(isOrganizer || isAdmin) ? "9" : "8"} className="text-center py-5">
                     <div className="spinner-border text-teal" role="status" style={{ color: '#1A5265' }}></div>
                     <p className="mt-2 text-muted small">Loading members from database...</p>
                   </td>
                 </tr>
               ) : filteredMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={(isOrganizer || isAdmin) ? "8" : "7"} className="text-center py-5">
+                  <td colSpan={(isOrganizer || isAdmin) ? "9" : "8"} className="text-center py-5">
                     <Icon name="users" size={36} color="#94A3B8" className="mb-2" />
                     <h6 className="fw-bold text-dark">No members found</h6>
                     <p className="text-muted small mb-0">No active members match the current filters or no members are registered yet.</p>
@@ -367,6 +494,30 @@ const Members = () => {
                     <td className="py-3 px-3 text-muted small">{member.phone}</td>
                     <td className="py-3 px-3 text-dark small">{member.groupName}</td>
                     <td className="py-3 px-3 text-muted small">{member.joinedDate}</td>
+                    <td className="py-3 px-3 text-center">
+                      {member.kycStatus === 'VERIFIED' ? (
+                        <div>
+                          <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-0.5 rounded-pill small fw-semibold">
+                            <Icon name="check" size={11} className="me-1" />Verified
+                          </span>
+                          <div className="font-monospace text-muted mt-0.5" style={{ fontSize: '0.72rem' }}>
+                            {member.nicNumber}
+                          </div>
+                        </div>
+                      ) : member.kycStatus === 'PENDING' ? (
+                        <span className="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 px-2 py-0.5 rounded-pill small fw-semibold">
+                          <Icon name="clock" size={11} className="me-1" />KYC Pending
+                        </span>
+                      ) : member.kycStatus === 'REJECTED' ? (
+                        <span className="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-0.5 rounded-pill small fw-semibold">
+                          Rejected
+                        </span>
+                      ) : (
+                        <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-0.5 rounded-pill small">
+                          Unverified
+                        </span>
+                      )}
+                    </td>
                     <td className="py-3 px-3 text-center">
                       <span className="fw-bold" style={{ color: member.scoreColor }}>
                         {member.score}
@@ -382,7 +533,7 @@ const Members = () => {
                     </td>
                     {(isOrganizer || isAdmin) && (
                       <td className="py-3 px-3 text-end">
-                        <div className="d-flex justify-content-end gap-2">
+                        <div className="d-flex justify-end gap-2">
                           <button
                             className="btn btn-link p-1 text-decoration-none"
                             style={{ color: '#188754' }}
@@ -409,6 +560,49 @@ const Members = () => {
           </table>
         </div>
       </div>
+
+      {/* Rejection Reason Modal */}
+      {showRejectKycModal && (
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1080 }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg rounded-3">
+              <div className="modal-header border-bottom">
+                <h5 className="modal-title fw-bold text-danger d-flex align-items-center gap-2">
+                  <Icon name="alert-circle" size={18} />
+                  <span>Reject Member Verification</span>
+                </h5>
+                <button type="button" className="btn-close" onClick={() => setShowRejectKycModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <p className="text-dark small mb-3">
+                  Rejecting verification for <strong>{rejectKycTarget?.fullName}</strong> (NIC: {rejectKycTarget?.nicNumber}).
+                  Please provide a reason so the applicant can submit valid Grama Niladhari documentation.
+                </p>
+                <div className="mb-3">
+                  <label className="form-label small fw-semibold text-muted">Rejection Reason</label>
+                  <textarea 
+                    className="form-control"
+                    rows="3"
+                    placeholder="e.g. Grama Niladhari seal is unclear, or NIC number mismatch."
+                    value={rejectReasonInput}
+                    onChange={(e) => setRejectReasonInput(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer border-top">
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowRejectKycModal(false)}>Cancel</button>
+                <button 
+                  type="button" 
+                  className="btn btn-danger btn-sm px-3 fw-bold"
+                  onClick={() => handleRejectKyc(rejectKycTarget?.id, rejectKycTarget?.fullName, rejectReasonInput)}
+                >
+                  Confirm Rejection
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <InviteMemberModal
         show={showInviteModal}

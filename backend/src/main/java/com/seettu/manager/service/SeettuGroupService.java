@@ -131,6 +131,11 @@ public class SeettuGroupService {
             throw new IllegalArgumentException("System Admins cannot participate in Seettu group contribution cycles");
         }
 
+        if (user.getRole() == User.Role.MEMBER && user.getKycStatus() != User.KycStatus.VERIFIED) {
+            throw new IllegalStateException("Identity Verification Required: Member '" + user.getFullName() + 
+                    "' must submit their NIC number and Grama Niladhari Character Certificate for System Admin verification before joining a Seettu group to prevent duplicate accounts, risk, and fraud.");
+        }
+
         if (memberRepository.existsByGroupIdAndUserId(groupId, userId)) {
             throw new DuplicateResourceException("User is already a member of this group");
         }

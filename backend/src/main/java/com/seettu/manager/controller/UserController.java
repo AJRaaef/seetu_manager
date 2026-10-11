@@ -44,6 +44,45 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", updated));
     }
 
+    @PostMapping("/kyc/submit")
+    public ResponseEntity<ApiResponse<com.seettu.manager.dto.UserKycResponse>> submitKyc(
+            @RequestParam("nicNumber") String nicNumber,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @AuthenticationPrincipal User currentUser) throws java.io.IOException {
+        com.seettu.manager.dto.UserKycResponse response = userService.submitKyc(currentUser.getId(), nicNumber, file);
+        return ResponseEntity.ok(ApiResponse.success("Grama Niladhari certificate and NIC submitted successfully for verification", response));
+    }
+
+    @GetMapping("/kyc/status")
+    public ResponseEntity<ApiResponse<com.seettu.manager.dto.UserKycResponse>> getMyKycStatus(
+            @AuthenticationPrincipal User currentUser) {
+        User user = userService.getUserById(currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success(userService.toKycResponse(user)));
+    }
+
+    @GetMapping("/kyc/pending")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<com.seettu.manager.dto.UserKycResponse>>> getPendingKyc() {
+        return ResponseEntity.ok(ApiResponse.success(userService.getPendingKycUsers()));
+    }
+
+    @GetMapping("/kyc/members")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
+    public ResponseEntity<ApiResponse<List<com.seettu.manager.dto.UserKycResponse>>> getAllMembersKyc() {
+        return ResponseEntity.ok(ApiResponse.success(userService.getAllMembersWithKyc()));
+    }
+
+    @PutMapping("/{id}/kyc/verify")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<com.seettu.manager.dto.UserKycResponse>> verifyMemberKyc(
+            @PathVariable Long id,
+            @RequestBody com.seettu.manager.dto.KycVerificationRequest request,
+            @AuthenticationPrincipal User admin) {
+        com.seettu.manager.dto.UserKycResponse response = userService.verifyKyc(id, request, admin);
+        String msg = "VERIFIED".equalsIgnoreCase(request.getStatus()) ? "Member verified successfully" : "Member verification rejected";
+        return ResponseEntity.ok(ApiResponse.success(msg, response));
+    }
+
     @GetMapping("/{id}/profile")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getUserProfileStats(@PathVariable Long id) {
         User user = userService.getUserById(id);

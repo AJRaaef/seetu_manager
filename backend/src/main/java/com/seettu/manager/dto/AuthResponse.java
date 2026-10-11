@@ -16,6 +16,10 @@ public class AuthResponse {
     private String email;
     private String role;
     private String preferredLanguage;
+    private String nicNumber;
+    private String kycStatus;
+    private String gnCertificateUrl;
+    private String kycRejectionReason;
 
     public Long getId() {
         return userId;

@@ -67,6 +67,10 @@ public class AuthService {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .preferredLanguage(user.getPreferredLanguage().name())
+                .nicNumber(user.getNicNumber())
+                .kycStatus(user.getKycStatus() != null ? user.getKycStatus().name() : "UNVERIFIED")
+                .gnCertificateUrl(user.getGnCertificateUrl())
+                .kycRejectionReason(user.getKycRejectionReason())
                 .build();
     }
 
@@ -102,6 +106,10 @@ public class AuthService {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .preferredLanguage(user.getPreferredLanguage().name())
+                .nicNumber(user.getNicNumber())
+                .kycStatus(user.getKycStatus() != null ? user.getKycStatus().name() : "UNVERIFIED")
+                .gnCertificateUrl(user.getGnCertificateUrl())
+                .kycRejectionReason(user.getKycRejectionReason())
                 .build();
     }
 

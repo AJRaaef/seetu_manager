@@ -155,7 +155,14 @@ const MyGroups = () => {
           </Link>
         ) : (
           <button 
-            onClick={() => setShowJoinModal(true)} 
+            onClick={() => {
+              if (user?.role === 'MEMBER' && user?.kycStatus !== 'VERIFIED') {
+                alert('⚠️ Verification Required: To prevent fraud, duplicate accounts, and financial risks, you must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before joining Seettu groups.\n\nPlease visit your Profile page to complete verification.');
+                navigate('/profile');
+                return;
+              }
+              setShowJoinModal(true);
+            }} 
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm"
           >
             <span>+</span> Join Group

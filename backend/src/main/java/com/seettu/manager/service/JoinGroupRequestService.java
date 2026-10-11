@@ -32,6 +32,14 @@ public class JoinGroupRequestService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
+        if (groupMemberRepository.existsByGroupIdAndUserId(groupId, userId)) {
+            throw new IllegalArgumentException("You are already an active member of this group. Duplicate membership is prohibited.");
+        }
+
+        if (user.getRole() == User.Role.MEMBER && user.getKycStatus() != User.KycStatus.VERIFIED) {
+            throw new IllegalStateException("Identity Verification Required: You must submit your NIC and Grama Niladhari Character Certificate in your Profile and receive System Admin verification before requesting to join a Seettu group.");
+        }
+
         if (joinGroupRequestRepository.existsByGroupIdAndUserIdAndStatus(groupId, userId, JoinGroupRequest.RequestStatus.PENDING)) {
             throw new IllegalArgumentException("You already have a pending join request for this group.");
         }
@@ -70,6 +78,11 @@ public class JoinGroupRequestService {
     public JoinGroupRequest approveRequest(Long requestId) {
         JoinGroupRequest request = joinGroupRequestRepository.findById(requestId)
                 .orElseThrow(() -> new ResourceNotFoundException("JoinGroupRequest", "id", requestId));
+
+        if (request.getUser().getRole() == User.Role.MEMBER && request.getUser().getKycStatus() != User.KycStatus.VERIFIED) {
+            throw new IllegalStateException("Cannot approve join request: Member '" + request.getUser().getFullName() + 
+                    "' has not completed Admin identity and Grama Niladhari Certificate verification.");
+        }
 
         request.setStatus(JoinGroupRequest.RequestStatus.APPROVED);
         joinGroupRequestRepository.save(request);
