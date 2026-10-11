@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import { queryChatbot } from '../api/chatbotApi';
 import Icon from './Icons';
 
 const ChatbotWidget = () => {
+  const { isAdmin } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
@@ -86,6 +88,10 @@ const ChatbotWidget = () => {
       setLoading(false);
     }
   };
+
+  if (isAdmin) {
+    return null;
+  }
 
   return (
     <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1060 }}>

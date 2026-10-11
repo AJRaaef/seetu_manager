@@ -170,14 +170,16 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
 
         {/* Bottom Section */}
         <div className="sidebar-footer">
-          <button
-            type="button"
-            className="sidebar-link btn btn-link text-start w-100 border-0"
-            onClick={handleHelpCenter}
-          >
-            <Icon name="help" size={18} />
-            <span>Help Center</span>
-          </button>
+          {!isAdmin && (
+            <button
+              type="button"
+              className="sidebar-link btn btn-link text-start w-100 border-0"
+              onClick={handleHelpCenter}
+            >
+              <Icon name="help" size={18} />
+              <span>Help Center</span>
+            </button>
+          )}
 
           <button
             onClick={() => {
