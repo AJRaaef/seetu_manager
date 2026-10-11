@@ -465,8 +465,9 @@ const Profile = () => {
                       checked={wantsOrganizer}
                       onChange={(e) => setWantsOrganizer(e.target.checked)}
                     />
-                    <label className="form-check-label small fw-semibold text-dark cursor-pointer" htmlFor="requestOrganizerRole" style={{ fontSize: '0.8rem' }}>
-                      ⭐ Request Organizer Privileges
+                    <label className="form-check-label small fw-semibold text-dark cursor-pointer d-inline-flex align-items-center gap-1.5" htmlFor="requestOrganizerRole" style={{ fontSize: '0.8rem' }}>
+                      <Icon name="users" size={14} color="#1A5265" />
+                      <span>Request Organizer Privileges</span>
                     </label>
                     <div className="text-muted small mt-0.5" style={{ fontSize: '0.72rem' }}>
                       Check this box if you intend to create and manage your own Seettu schemes. System Admin will review your Grama Niladhari proof for organizer authority.

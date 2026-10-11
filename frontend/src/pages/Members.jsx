@@ -307,9 +307,12 @@ const Members = () => {
                     <td className="fw-bold text-dark">
                       <div>{usr.fullName}</div>
                       {usr.requestedRole === 'ORGANIZER' && (
-                        <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-0.5 rounded-pill small fw-semibold" style={{ fontSize: '0.7rem' }}>
-                          ⭐ Requested: Organizer
-                        </span>
+                        <div className="mt-1">
+                          <span className="badge bg-teal bg-opacity-10 text-dark border border-secondary border-opacity-25 px-2 py-0.5 rounded-pill small fw-semibold d-inline-flex align-items-center gap-1" style={{ fontSize: '0.72rem', backgroundColor: '#E2F0F3', color: '#1A5265' }}>
+                            <Icon name="users" size={12} color="#1A5265" />
+                            <span>Requested: Organizer</span>
+                          </span>
+                        </div>
                       )}
                     </td>
                     <td className="small text-muted">
@@ -344,22 +347,25 @@ const Members = () => {
                       {usr.createdAt ? usr.createdAt.split('T')[0] : 'Recent'}
                     </td>
                     <td className="text-end">
-                      <div className="d-inline-flex gap-1.5 align-items-center">
+                      <div className="d-inline-flex gap-2 align-items-center justify-content-end">
                         <button 
                           onClick={() => handleApproveKyc(usr.id, usr.fullName)} 
-                          className="btn btn-sm btn-success px-2.5 shadow-sm fw-semibold"
+                          className="btn btn-sm btn-success px-3 py-1.5 shadow-sm fw-semibold d-inline-flex align-items-center gap-1.5"
+                          style={{ height: '36px', minWidth: '135px', justifyContent: 'center' }}
                           title="Verify as Participating Member"
                         >
-                          ✓ Verify Member
+                          <Icon name="check" size={15} />
+                          <span>Verify Member</span>
                         </button>
                         {isAdmin && usr.requestedRole === 'ORGANIZER' && (
                           <button 
                             onClick={() => handleApproveKyc(usr.id, usr.fullName, 'ORGANIZER')} 
-                            className="btn btn-sm btn-teal px-2.5 shadow-sm fw-semibold"
-                            style={{ backgroundColor: '#1A5265', color: '#fff' }}
+                            className="btn btn-sm px-3 py-1.5 shadow-sm fw-semibold d-inline-flex align-items-center gap-1.5 text-white"
+                            style={{ backgroundColor: '#1A5265', height: '36px', minWidth: '175px', justifyContent: 'center' }}
                             title="Applicant explicitly requested Organizer status. Click to approve and promote."
                           >
-                            ⭐ Verify & Make Organizer
+                            <Icon name="user-check" size={15} />
+                            <span>Make Organizer</span>
                           </button>
                         )}
                         <button 
@@ -367,9 +373,11 @@ const Members = () => {
                             setRejectKycTarget(usr);
                             setShowRejectKycModal(true);
                           }} 
-                          className="btn btn-sm btn-outline-danger px-2 fw-semibold"
+                          className="btn btn-sm btn-outline-danger px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5"
+                          style={{ height: '36px', minWidth: '85px', justifyContent: 'center' }}
                         >
-                          ✕ Reject
+                          <Icon name="x" size={15} />
+                          <span>Reject</span>
                         </button>
                       </div>
                     </td>
