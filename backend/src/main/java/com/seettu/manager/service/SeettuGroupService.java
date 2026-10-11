@@ -61,6 +61,12 @@ public class SeettuGroupService {
 
     @Transactional
     public SeettuGroup createGroup(GroupCreateRequest request, User creator) {
+        if (creator != null && creator.getRole() != User.Role.ADMIN) {
+            if (creator.getKycStatus() != User.KycStatus.VERIFIED) {
+                throw new IllegalArgumentException("Verification Required: You must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before creating a Seettu group.");
+            }
+        }
+
         SeettuGroup group = SeettuGroup.builder()
                 .name(request.getName())
                 .description(request.getDescription())

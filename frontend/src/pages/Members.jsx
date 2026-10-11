@@ -113,12 +113,13 @@ const Members = () => {
     }
   };
 
-  const handleApproveKyc = async (userId, memberName) => {
+  const handleApproveKyc = async (userId, memberName, role = null) => {
     try {
       setActionMsg('');
       setErrorMsg('');
-      await verifyMemberKyc(userId, 'VERIFIED');
-      setActionMsg(`✓ Member ${memberName} identity & Grama Niladhari Certificate successfully verified and approved in MySQL database!`);
+      await verifyMemberKyc(userId, 'VERIFIED', '', role);
+      const roleText = role === 'ORGANIZER' ? ' and promoted to Group Organizer' : '';
+      setActionMsg(`✓ Member ${memberName} identity & Grama Niladhari Certificate successfully verified${roleText} in database!`);
       await fetchData();
     } catch (err) {
       setErrorMsg(getErrorMessage(err, 'Failed to verify member identity in database.'));
@@ -336,21 +337,34 @@ const Members = () => {
                       {usr.createdAt ? usr.createdAt.split('T')[0] : 'Recent'}
                     </td>
                     <td className="text-end">
-                      <button 
-                        onClick={() => handleApproveKyc(usr.id, usr.fullName)} 
-                        className="btn btn-sm btn-success px-3 me-2 shadow-sm fw-semibold"
-                      >
-                        ✓ Verify & Clear
-                      </button>
-                      <button 
-                        onClick={() => {
-                          setRejectKycTarget(usr);
-                          setShowRejectKycModal(true);
-                        }} 
-                        className="btn btn-sm btn-outline-danger px-2 fw-semibold"
-                      >
-                        ✕ Reject
-                      </button>
+                      <div className="d-inline-flex gap-1.5 align-items-center">
+                        <button 
+                          onClick={() => handleApproveKyc(usr.id, usr.fullName)} 
+                          className="btn btn-sm btn-success px-2.5 shadow-sm fw-semibold"
+                          title="Verify as Participating Member"
+                        >
+                          ✓ Verify Member
+                        </button>
+                        {isAdmin && (
+                          <button 
+                            onClick={() => handleApproveKyc(usr.id, usr.fullName, 'ORGANIZER')} 
+                            className="btn btn-sm btn-teal px-2.5 shadow-sm fw-semibold"
+                            style={{ backgroundColor: '#1A5265', color: '#fff' }}
+                            title="Verify and Promote to Group Organizer"
+                          >
+                            ⭐ Verify & Make Organizer
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => {
+                            setRejectKycTarget(usr);
+                            setShowRejectKycModal(true);
+                          }} 
+                          className="btn btn-sm btn-outline-danger px-2 fw-semibold"
+                        >
+                          ✕ Reject
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

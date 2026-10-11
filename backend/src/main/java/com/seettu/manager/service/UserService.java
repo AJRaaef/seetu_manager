@@ -155,13 +155,17 @@ public class UserService {
             user.setKycRejectionReason(null);
             user.setVerifiedBy(admin);
             user.setVerifiedAt(LocalDateTime.now());
+            if ("ORGANIZER".equalsIgnoreCase(request.getRole())) {
+                user.setRole(User.Role.ORGANIZER);
+            }
             user = userRepository.save(user);
 
+            String roleMsg = user.getRole() == User.Role.ORGANIZER ? " and promoted to Group Organizer" : "";
             auditLogService.log(admin, "MEMBER_KYC_VERIFIED", "users", targetUserId,
-                    "Admin approved member verification for " + user.getFullName() + " (NIC: " + user.getNicNumber() + ").");
+                    "Admin approved verification for " + user.getFullName() + " (NIC: " + user.getNicNumber() + ")" + roleMsg + ".");
 
             notificationService.sendNotification(user.getId(),
-                    "Your identity and Grama Niladhari Certificate have been verified by System Admin. You can now join Seettu groups!",
+                    "Your identity and Grama Niladhari Certificate have been verified by System Admin!" + (user.getRole() == User.Role.ORGANIZER ? " You are now an authorized Group Organizer." : " You can now participate in Seettu groups."),
                     "KYC_VERIFIED");
         } else {
             String reason = request.getRejectionReason();

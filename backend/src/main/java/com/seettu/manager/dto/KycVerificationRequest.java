@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class KycVerificationRequest {
     private String status; // "VERIFIED" or "REJECTED"
     private String rejectionReason;
+    private String role; // optional: "ORGANIZER"
 }

@@ -40,10 +40,9 @@ export const getAllMembersWithKyc = async () => {
   return response.data;
 };
 
-export const verifyMemberKyc = async (userId, status, rejectionReason = '') => {
-  const response = await api.put(`/users/${userId}/kyc/verify`, {
-    status,
-    rejectionReason
-  });
+export const verifyMemberKyc = async (userId, status, rejectionReason = '', role = null) => {
+  const payload = { status, rejectionReason };
+  if (role) payload.role = role;
+  const response = await api.put(`/users/${userId}/kyc/verify`, payload);
   return response.data;
 };

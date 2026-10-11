@@ -41,9 +41,8 @@ public class AuthService {
             throw new IllegalArgumentException("Passwords do not match");
         }
 
-        User.Role role = (request.getRole() != null && !request.getRole().isBlank()) 
-                ? User.Role.valueOf(request.getRole()) 
-                : User.Role.MEMBER;
+        // All registered users start as MEMBER. To prevent fraud, organizer privileges require Admin verification.
+        User.Role role = User.Role.MEMBER;
 
         User user = User.builder()
                 .fullName(request.getFullName())

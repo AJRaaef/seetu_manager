@@ -158,16 +158,18 @@ const Register = () => {
 
                 <div className="row mb-4">
                   <div className="col-md-6 mb-3 mb-md-0">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>role</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Account Role</label>
                     <select
                       className="form-select"
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                       style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                     >
-                      <option value="MEMBER">Member (Join Groups)</option>
-                      <option value="ORGANIZER">Organizer (Manage Groups)</option>
+                      <option value="MEMBER">Member (Participate & Join Groups)</option>
                     </select>
+                    <small className="text-muted d-block mt-1" style={{ fontSize: '0.74rem' }}>
+                      * To create & organize Seettu groups, members submit their NIC and Grama Niladhari certificate for Admin verification.
+                    </small>
                   </div>
                   <div className="col-md-6">
                     <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>preferred_language</label>
