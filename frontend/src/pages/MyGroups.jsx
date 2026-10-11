@@ -55,18 +55,19 @@ const MyGroups = () => {
   useEffect(() => {
     const fetchGroups = async () => {
       if (!userId) {
-        setGroups(defaultGroups);
+        setGroups([]);
         setLoading(false);
         return;
       }
       try {
         const res = await getGroupsByUser(userId);
-        if (res.data && res.data.length > 0) {
-          const formatted = res.data.map(g => ({
+        const list = res?.data || res || [];
+        if (Array.isArray(list) && list.length > 0) {
+          const formatted = list.map(g => ({
             id: g.id,
             name: g.name,
             type: g.seettuType?.name || (g.category === 'NON_MONETARY' ? 'Non-Monetary' : 'Monetary'),
-            membersCount: g.members?.length || 10,
+            membersCount: g.members?.length || 1,
             maxMembers: g.memberCount || 10,
             contributionAmount: `${(g.contributionAmount || 1000).toLocaleString()} LKR per month`,
             currentCycle: g.currentCycle || 1,
@@ -76,11 +77,11 @@ const MyGroups = () => {
           }));
           setGroups(formatted);
         } else {
-          setGroups(defaultGroups);
+          setGroups([]);
         }
       } catch (error) {
-        console.error('Failed to fetch groups, using demo defaults', error);
-        setGroups(defaultGroups);
+        console.error('Failed to fetch groups from database', error);
+        setGroups([]);
       } finally {
         setLoading(false);
       }
@@ -170,9 +171,38 @@ const MyGroups = () => {
         )}
       </div>
 
-      {/* 3-Column Card Grid */}
-      <div className="row g-4">
-        {groups.map((group) => {
+      {/* 3-Column Card Grid or Empty State */}
+      {loading ? (
+        <div className="text-center py-5 text-muted">
+          <div className="spinner-border text-teal mb-2" role="status"></div>
+          <p className="small mb-0">Loading your Seettu groups...</p>
+        </div>
+      ) : groups.length === 0 ? (
+        <div className="ui-card p-5 text-center shadow-sm">
+          <Icon name="groups" size={42} className="text-muted opacity-50 mb-3" />
+          <h5 className="fw-bold text-dark mb-1">No Seettu Groups Joined Yet</h5>
+          <p className="text-muted small mb-3" style={{ maxWidth: '420px', margin: '0 auto' }}>
+            You are not currently enrolled in any Seettu group circles. Submit your NIC & Grama Niladhari verification to request joining open groups.
+          </p>
+          {!isOrganizer && !isAdmin && (
+            <button 
+              onClick={() => {
+                if (user?.role === 'MEMBER' && user?.kycStatus !== 'VERIFIED') {
+                  alert('⚠️ Verification Required: To prevent fraud, duplicate accounts, and financial risks, you must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before joining Seettu groups.\n\nPlease visit your Profile page to complete verification.');
+                  navigate('/profile');
+                  return;
+                }
+                setShowJoinModal(true);
+              }}
+              className="btn btn-teal px-4 py-2 fw-semibold"
+            >
+              Explore & Join a Group
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="row g-4">
+          {groups.map((group) => {
           const memberPercent = Math.min(100, Math.round((group.membersCount / group.maxMembers) * 100));
 
           return (
@@ -266,7 +296,8 @@ const MyGroups = () => {
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
 
       {/* Join Seettu Group Modal for Members */}
       {showJoinModal && (
