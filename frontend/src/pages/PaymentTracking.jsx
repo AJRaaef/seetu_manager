@@ -315,7 +315,7 @@ const PaymentTracking = () => {
           {isAdmin && (
             <Link
               to="/audit-trail"
-              className="btn btn-info btn-sm text-white fw-bold d-flex align-items-center gap-1.5 px-3 py-1.5 rounded-2 shadow-sm"
+              className="btn btn-info btn-sm text-white fw-bold d-flex align-items-center gap-2 px-3 py-1.5 rounded-2 shadow-sm"
               style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
             >
               <Icon name="shield" size={15} />
@@ -390,17 +390,19 @@ const PaymentTracking = () => {
       {/* Record Payment / Submit Evidence Form Card */}
       {(isAdmin || isOrganizer) ? (
         <div className="ui-card p-4 mb-4 shadow-sm rounded-3 border-0 bg-white">
-          <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-            <div className="d-flex align-items-center gap-2.5">
+          <div className="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+            <div className="d-flex align-items-center">
               <div
-                className="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm"
-                style={{ backgroundColor: '#1A5265', width: '38px', height: '38px', flexShrink: 0 }}
+                className="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm me-3"
+                style={{ backgroundColor: '#134A5A', width: '42px', height: '42px', minWidth: '42px', flexShrink: 0 }}
               >
-                <Icon name="credit-card" size={18} />
+                <Icon name="credit-card" size={20} color="#FFFFFF" />
               </div>
               <div>
-                <h5 className="fw-bold text-dark mb-0" style={{ fontSize: '1.05rem' }}>Record Member Payment</h5>
-                <small className="text-muted">Log verified monthly contributions or offline deposits directly into the system</small>
+                <h5 className="fw-bold mb-1" style={{ color: '#1A3644', fontSize: '1.1rem' }}>Record Member Payment</h5>
+                <p className="text-muted small mb-0" style={{ fontSize: '0.82rem' }}>
+                  Log verified monthly contributions or offline deposits directly into the system
+                </p>
               </div>
             </div>
             <span className="badge bg-light text-dark border px-3 py-1.5 rounded-pill small fw-medium font-monospace d-none d-sm-inline-block">
@@ -590,9 +592,17 @@ const PaymentTracking = () => {
       ) : (
         <div className="ui-card p-4 mb-4 shadow-sm border-start border-4 border-info">
           <div className="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <h5 className="fw-bold text-dark mb-1" style={{ fontSize: '1rem' }}>Submit Contribution & Attach Payment Slip</h5>
-              <p className="text-muted small mb-0">Upload bank transfer or cash deposit slips to report your group payments to organizers.</p>
+            <div className="d-flex align-items-center">
+              <div
+                className="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm me-3"
+                style={{ backgroundColor: '#0097B2', width: '42px', height: '42px', minWidth: '42px', flexShrink: 0 }}
+              >
+                <Icon name="upload" size={20} color="#FFFFFF" />
+              </div>
+              <div>
+                <h5 className="fw-bold text-dark mb-1" style={{ fontSize: '1.05rem' }}>Submit Contribution & Attach Payment Slip</h5>
+                <p className="text-muted small mb-0" style={{ fontSize: '0.82rem' }}>Upload bank transfer or cash deposit slips to report your group payments to organizers.</p>
+              </div>
             </div>
             <span className="badge bg-info-subtle text-info border border-info px-3 py-1 rounded-pill">Member Submission</span>
           </div>
