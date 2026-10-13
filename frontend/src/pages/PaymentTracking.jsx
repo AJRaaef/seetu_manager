@@ -389,12 +389,33 @@ const PaymentTracking = () => {
 
       {/* Record Payment / Submit Evidence Form Card */}
       {(isAdmin || isOrganizer) ? (
-        <div className="ui-card p-4 mb-4 shadow-sm">
-          <h5 className="fw-bold text-dark mb-3" style={{ fontSize: '1rem' }}>Record New Payment</h5>
+        <div className="ui-card p-4 mb-4 shadow-sm rounded-3 border-0 bg-white">
+          <div className="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+            <div className="d-flex align-items-center gap-2.5">
+              <div
+                className="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm"
+                style={{ backgroundColor: '#1A5265', width: '38px', height: '38px', flexShrink: 0 }}
+              >
+                <Icon name="credit-card" size={18} />
+              </div>
+              <div>
+                <h5 className="fw-bold text-dark mb-0" style={{ fontSize: '1.05rem' }}>Record Member Payment</h5>
+                <small className="text-muted">Log verified monthly contributions or offline deposits directly into the system</small>
+              </div>
+            </div>
+            <span className="badge bg-light text-dark border px-3 py-1.5 rounded-pill small fw-medium font-monospace d-none d-sm-inline-block">
+              Payment Entry
+            </span>
+          </div>
+
           <form onSubmit={handleRecordNew}>
-            <div className="row g-3 align-items-center">
+            {/* Row 1: Target Seettu Group, Member, and Rotation Cycle */}
+            <div className="row g-3 mb-3">
               {/* Group Select */}
-              <div className="col-12 col-md">
+              <div className="col-12 col-md-4">
+                <label className="form-label small fw-semibold text-dark mb-1">
+                  Seettu Group <span className="text-danger">*</span>
+                </label>
                 <select
                   className="form-select bg-white"
                   value={selectedGroupId}
@@ -408,10 +429,10 @@ const PaymentTracking = () => {
                   }}
                   required
                 >
-                  <option value="">Select Group</option>
+                  <option value="">-- Select Seettu Group --</option>
                   {availableGroups.map((g) => (
                     <option key={g.id} value={g.id}>
-                      {g.name}
+                      {g.name} (LKR {Number(g.contributionAmount || 0).toLocaleString()})
                     </option>
                   ))}
                   {availableGroups.length === 0 && (
@@ -421,7 +442,10 @@ const PaymentTracking = () => {
               </div>
 
               {/* Member Select */}
-              <div className="col-12 col-md">
+              <div className="col-12 col-md-4">
+                <label className="form-label small fw-semibold text-dark mb-1">
+                  Paying Member <span className="text-danger">*</span>
+                </label>
                 <select
                   className="form-select bg-white"
                   value={selectedMemberId}
@@ -429,13 +453,13 @@ const PaymentTracking = () => {
                   disabled={!selectedGroupId}
                   required
                 >
-                  <option value="">{selectedGroupId ? 'Select Member' : 'Choose Group First'}</option>
+                  <option value="">{selectedGroupId ? '-- Select Member --' : 'Select Group First'}</option>
                   {groupMembers.map((m) => {
                     const mUserId = m.user?.id || m.userId || m.id;
                     const mName = m.user?.fullName || m.fullName || m.name || `Member #${mUserId}`;
                     return (
                       <option key={m.id || mUserId} value={mUserId}>
-                        {mName}
+                        {mName} (Member #{mUserId})
                       </option>
                     );
                   })}
@@ -443,7 +467,10 @@ const PaymentTracking = () => {
               </div>
 
               {/* Cycle Select */}
-              <div className="col-12 col-md">
+              <div className="col-12 col-md-4">
+                <label className="form-label small fw-semibold text-dark mb-1">
+                  Rotation Cycle <span className="text-danger">*</span>
+                </label>
                 <select
                   className="form-select bg-white"
                   value={selectedCycleId}
@@ -451,30 +478,42 @@ const PaymentTracking = () => {
                   disabled={!selectedGroupId}
                   required
                 >
-                  <option value="">Select Cycle</option>
+                  <option value="">{selectedGroupId ? '-- Select Rotation Cycle --' : 'Select Group First'}</option>
                   {groupCycles.map((c) => (
                     <option key={c.id} value={c.id}>
-                      Cycle {c.cycleNumber} ({c.status || 'Active'})
+                      Cycle #{c.cycleNumber} — ({c.status || 'Active'})
                     </option>
                   ))}
                 </select>
               </div>
+            </div>
 
+            {/* Row 2: Financial Details & Verification Evidence */}
+            <div className="row g-3">
               {/* Amount Input */}
-              <div className="col-12 col-md">
-                <input
-                  type="number"
-                  className="form-control"
-                  placeholder="Amount (LKR)"
-                  value={amountInput}
-                  onChange={(e) => setAmountInput(e.target.value)}
-                  required
-                  min="1"
-                />
+              <div className="col-12 col-sm-6 col-md-3">
+                <label className="form-label small fw-semibold text-dark mb-1">
+                  Amount <span className="text-danger">*</span>
+                </label>
+                <div className="input-group">
+                  <span className="input-group-text bg-light font-monospace small fw-semibold text-muted">LKR</span>
+                  <input
+                    type="number"
+                    className="form-control font-monospace"
+                    placeholder="e.g. 5000"
+                    value={amountInput}
+                    onChange={(e) => setAmountInput(e.target.value)}
+                    required
+                    min="1"
+                  />
+                </div>
               </div>
 
               {/* Date Input */}
-              <div className="col-12 col-md">
+              <div className="col-12 col-sm-6 col-md-3">
+                <label className="form-label small fw-semibold text-dark mb-1">
+                  Payment Date <span className="text-danger">*</span>
+                </label>
                 <input
                   type="date"
                   className="form-control"
@@ -485,7 +524,10 @@ const PaymentTracking = () => {
               </div>
 
               {/* Settlement Method Select */}
-              <div className="col-12 col-md">
+              <div className="col-12 col-sm-6 col-md-3">
+                <label className="form-label small fw-semibold text-dark mb-1">
+                  Settlement Method
+                </label>
                 <select
                   className="form-select bg-white"
                   value={paymentMethodInput}
@@ -500,7 +542,10 @@ const PaymentTracking = () => {
               </div>
 
               {/* Payment Slip / Evidence Attachment (Optional) */}
-              <div className="col-12 col-md">
+              <div className="col-12 col-sm-6 col-md-3">
+                <label className="form-label small fw-semibold text-dark mb-1">
+                  Deposit Slip / Proof (Optional)
+                </label>
                 <input
                   type="file"
                   accept="image/*,.pdf"
@@ -510,10 +555,33 @@ const PaymentTracking = () => {
                 />
               </div>
 
-              {/* Submit Button */}
-              <div className="col-12 col-md-auto">
-                <button type="submit" className="btn btn-teal px-4 w-100" disabled={submitting}>
-                  {submitting ? 'Recording...' : 'Record Payment'}
+              {/* Summary and Submit Bar */}
+              <div className="col-12 mt-3 pt-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div className="small text-muted">
+                  {selectedGroupId && amountInput ? (
+                    <span>
+                      Recording: <strong className="text-dark">LKR {Number(amountInput || 0).toLocaleString()}</strong> via <span className="badge bg-light text-dark border">{paymentMethodInput}</span>
+                    </span>
+                  ) : (
+                    <span>Select group, member, and rotation cycle to record payment.</span>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  className="btn btn-teal px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm"
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm" role="status"></span>
+                      <span>Recording Payment...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="check" size={16} />
+                      <span>Record Payment</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>

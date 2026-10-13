@@ -175,25 +175,45 @@ const Certificates = () => {
                   }}
                 >
                   {/* Decorative Corner Swooshes */}
-                  <svg className="position-absolute top-0 start-0" width="220" height="220" viewBox="0 0 220 220" fill="none" style={{ pointerEvents: 'none' }}>
-                    <path d="M0 0 L220 0 Q110 110 0 220 Z" fill="#0C2340" />
-                    <path d="M0 0 L180 0 Q90 90 0 180 Z" fill="#C5A059" />
-                    <path d="M0 0 L150 0 Q75 75 0 150 Z" fill="#0C2340" />
+                  <svg className="position-absolute top-0 start-0" width="160" height="160" viewBox="0 0 160 160" fill="none" style={{ pointerEvents: 'none' }}>
+                    <path d="M0 0 L160 0 Q80 80 0 160 Z" fill="#0C2340" />
+                    <path d="M0 0 L130 0 Q65 65 0 130 Z" fill="#C5A059" />
+                    <path d="M0 0 L100 0 Q50 50 0 100 Z" fill="#0C2340" />
                   </svg>
 
-                  <svg className="position-absolute bottom-0 end-0" width="220" height="220" viewBox="0 0 220 220" fill="none" style={{ pointerEvents: 'none' }}>
-                    <path d="M220 220 L0 220 Q110 110 220 0 Z" fill="#0C2340" />
-                    <path d="M220 220 L40 220 Q130 130 220 40 Z" fill="#C5A059" />
-                    <path d="M220 220 L70 220 Q145 145 220 70 Z" fill="#0C2340" />
+                  <svg className="position-absolute bottom-0 end-0" width="180" height="180" viewBox="0 0 180 180" fill="none" style={{ pointerEvents: 'none' }}>
+                    <path d="M180 180 L0 180 Q90 90 180 0 Z" fill="#0C2340" />
+                    <path d="M180 180 L35 180 Q105 105 180 35 Z" fill="#C5A059" />
+                    <path d="M180 180 L60 180 Q120 120 180 60 Z" fill="#0C2340" />
                   </svg>
 
                   {/* Top Header Row */}
-                  <div className="d-flex justify-content-between align-items-start position-relative z-1 mb-4 ps-5 pe-4 pt-2">
+                  <div className="d-flex justify-content-between align-items-center position-relative z-1 mb-4 pe-4 pt-3" style={{ paddingLeft: '85px' }}>
                     {/* Brand Logo & Name */}
                     <div className="d-flex align-items-center gap-3">
-                      <img src="/logo.png" alt="SeettuManager Logo" style={{ height: '56px', width: '56px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <div
+                        style={{
+                          width: '64px',
+                          height: '64px',
+                          borderRadius: '50%',
+                          backgroundColor: '#FFFFFF',
+                          border: '2.5px solid #C5A059',
+                          boxShadow: '0 4px 14px rgba(12, 35, 64, 0.15)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          padding: '4px',
+                          flexShrink: 0
+                        }}
+                      >
+                        <img
+                          src="/logo.png"
+                          alt="SeettuManager Logo"
+                          style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'contain' }}
+                        />
+                      </div>
                       <div>
-                        <h2 className="fw-bold m-0" style={{ color: '#0C2340', fontSize: '1.9rem', letterSpacing: '-0.5px', fontFamily: "'Arial', sans-serif" }}>
+                        <h2 className="fw-bold m-0" style={{ color: '#0C2340', fontSize: '1.95rem', letterSpacing: '-0.5px', fontFamily: "'Arial', sans-serif" }}>
                           Seettu<span style={{ color: '#0284C7' }}>Manager</span>
                         </h2>
                         <span className="text-muted small fw-medium" style={{ fontFamily: "'Arial', sans-serif", fontSize: '0.85rem' }}>Save Together. Manage Smarter.</span>
