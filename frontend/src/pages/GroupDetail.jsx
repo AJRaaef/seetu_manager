@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getGroupById, addMember } from '../api/groupApi';
+import { getAllMembersWithKyc } from '../api/userApi';
 import api from '../api/axios';
 import { useAuth } from '../hooks/useAuth';
 import { getErrorMessage } from '../utils/errorHandler';
@@ -16,6 +17,7 @@ const GroupDetail = () => {
   const [selectedCycle, setSelectedCycle] = useState(null);
   const [selectedPayoutMemberId, setSelectedPayoutMemberId] = useState('');
   const [memberUserId, setMemberUserId] = useState('');
+  const [verifiedMembers, setVerifiedMembers] = useState([]);
   const [actionMsg, setActionMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -33,7 +35,12 @@ const GroupDetail = () => {
 
   useEffect(() => {
     fetchGroup();
-  }, [id]);
+    if (isOrganizer || isAdmin) {
+      getAllMembersWithKyc()
+        .then(res => setVerifiedMembers(Array.isArray(res) ? res : (res?.data || [])))
+        .catch(err => console.error('Failed to load verified members', err));
+    }
+  }, [id, isOrganizer, isAdmin]);
 
   const handleAddMember = async (e) => {
     e.preventDefault();
@@ -192,8 +199,10 @@ const GroupDetail = () => {
                   <table className="table table-hover align-middle mb-0">
                     <thead className="table-light">
                       <tr>
+                        <th>Member ID</th>
                         <th>Member Name</th>
                         <th>Email</th>
+                        <th>NIC Number</th>
                         <th>Status</th>
                         <th>Role</th>
                       </tr>
@@ -201,8 +210,16 @@ const GroupDetail = () => {
                     <tbody>
                       {group.members?.map((m) => (
                         <tr key={m.id}>
+                          <td>
+                            <span className="badge bg-light text-dark border font-monospace px-2 py-1">
+                              #{m.userId || m.id}
+                            </span>
+                          </td>
                           <td className="fw-bold text-dark">{m.fullName}</td>
                           <td className="text-muted">{m.email}</td>
+                          <td>
+                            <span className="font-monospace text-muted small">{m.nicNumber || '-'}</span>
+                          </td>
                           <td>
                             <span className="badge bg-success-subtle text-success border">
                               {m.status || 'ACTIVE'}
@@ -217,7 +234,7 @@ const GroupDetail = () => {
                       ))}
                       {(!group.members || group.members.length === 0) && (
                         <tr>
-                          <td colSpan="4" className="text-center py-4 text-muted">No members enrolled yet.</td>
+                          <td colSpan="6" className="text-center py-4 text-muted">No members enrolled yet.</td>
                         </tr>
                       )}
                     </tbody>
@@ -300,38 +317,97 @@ const GroupDetail = () => {
       </div>
 
       {/* Add Member Modal */}
-      {showAddMemberModal && (
-        <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title fw-bold">Add Member to {group.name}</h5>
-                <button type="button" className="btn-close" onClick={() => setShowAddMemberModal(false)}></button>
-              </div>
-              <form onSubmit={handleAddMember}>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label">User ID to Add</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      placeholder="e.g. 3"
-                      value={memberUserId}
-                      onChange={(e) => setMemberUserId(e.target.value)}
-                      required
-                    />
-                    <small className="text-muted">Enter the unique registered user ID of the member.</small>
+      {showAddMemberModal && (() => {
+        const matchedMember = verifiedMembers.find((vm) => String(vm.id) === String(memberUserId).trim());
+        const alreadyEnrolled = group.members?.some((m) => String(m.userId || m.id) === String(memberUserId).trim());
+
+        return (
+          <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060 }}>
+            <div className="modal-dialog modal-dialog-centered">
+              <div className="modal-content shadow border-0 rounded-3">
+                <div className="modal-header border-bottom">
+                  <h5 className="modal-title fw-bold text-dark">Add Member to {group.name}</h5>
+                  <button type="button" className="btn-close" onClick={() => setShowAddMemberModal(false)}></button>
+                </div>
+                <form onSubmit={handleAddMember}>
+                  <div className="modal-body py-3">
+                    <p className="small text-muted mb-3">
+                      Only the <strong>Member ID</strong> is required to add a member to this Seettu group.
+                    </p>
+
+                    {verifiedMembers && verifiedMembers.length > 0 && (
+                      <div className="mb-3">
+                        <label className="form-label small fw-semibold text-muted">
+                          Quick Select from Verified Members (Optional)
+                        </label>
+                        <select
+                          className="form-select"
+                          value={memberUserId}
+                          onChange={(e) => setMemberUserId(e.target.value)}
+                        >
+                          <option value="">-- Or choose from verified directory --</option>
+                          {verifiedMembers
+                            .filter((vm) => vm.role !== 'ADMIN')
+                            .map((vm) => {
+                              const enrolled = group.members?.some((m) => String(m.userId || m.id) === String(vm.id));
+                              return (
+                                <option key={vm.id} value={vm.id}>
+                                  Member #{vm.id} — {vm.fullName} {vm.nicNumber ? `(${vm.nicNumber})` : ''} {enrolled ? '• Already Enrolled' : ''}
+                                </option>
+                              );
+                            })}
+                        </select>
+                      </div>
+                    )}
+
+                    <div className="mb-3">
+                      <label className="form-label fw-bold">
+                        Member ID <span className="text-danger">*</span>
+                      </label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-light font-monospace fw-bold text-muted">#</span>
+                        <input
+                          type="number"
+                          className="form-control font-monospace"
+                          placeholder="e.g. 3"
+                          value={memberUserId}
+                          onChange={(e) => setMemberUserId(e.target.value)}
+                          required
+                          min="1"
+                          autoFocus
+                        />
+                      </div>
+                      <small className="text-muted">Enter the unique registered Member ID.</small>
+                    </div>
+
+                    {memberUserId && matchedMember && (
+                      <div className={`alert ${alreadyEnrolled ? 'alert-warning border-warning' : 'alert-success border-success'} py-2 px-3 mt-2 rounded-2 mb-0 small`}>
+                        <div className="fw-bold text-dark">{matchedMember.fullName}</div>
+                        <div className="text-muted">{matchedMember.email} • NIC: {matchedMember.nicNumber || 'N/A'}</div>
+                        {alreadyEnrolled ? (
+                          <div className="text-danger fw-bold mt-1">⚠️ This member is already enrolled in this group.</div>
+                        ) : (
+                          <div className="text-success fw-bold mt-1">✓ Identity Verified ({matchedMember.kycStatus})</div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowAddMemberModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary fw-bold">Add Member</button>
-                </div>
-              </form>
+                  <div className="modal-footer border-top">
+                    <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowAddMemberModal(false)}>Cancel</button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-sm px-3 fw-bold"
+                      disabled={alreadyEnrolled || !memberUserId}
+                    >
+                      Add Member
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Assign Payout Member Modal */}
       {showAssignPayoutModal && selectedCycle && (

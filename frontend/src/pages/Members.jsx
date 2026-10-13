@@ -229,10 +229,12 @@ const Members = () => {
     });
 
   const filteredMembers = formattedMembers.filter((m) => {
+    const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
-      m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.phone.includes(searchTerm);
+      m.name.toLowerCase().includes(searchLower) ||
+      m.email.toLowerCase().includes(searchLower) ||
+      m.phone.includes(searchTerm) ||
+      String(m.userId || m.id || '').includes(searchTerm);
     const matchesGroup = groupFilter === 'All' || m.groupName === groupFilter;
     const matchesStatus = statusFilter === 'All' || m.status === statusFilter;
     return matchesSearch && matchesGroup && matchesStatus;
@@ -488,6 +490,7 @@ const Members = () => {
           <table className="table table-hover align-middle mb-0">
             <thead style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E5E7EB' }}>
               <tr>
+                <th className="py-3 px-3 text-muted fw-semibold small">Member ID</th>
                 <th className="py-3 px-3 text-muted fw-semibold small">Member Name</th>
                 <th className="py-3 px-3 text-muted fw-semibold small">Email</th>
                 <th className="py-3 px-3 text-muted fw-semibold small">Phone</th>
@@ -502,14 +505,14 @@ const Members = () => {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={(isOrganizer || isAdmin) ? "9" : "8"} className="text-center py-5">
+                  <td colSpan={(isOrganizer || isAdmin) ? "10" : "9"} className="text-center py-5">
                     <div className="spinner-border text-teal" role="status" style={{ color: '#1A5265' }}></div>
                     <p className="mt-2 text-muted small">Loading members...</p>
                   </td>
                 </tr>
               ) : filteredMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={(isOrganizer || isAdmin) ? "9" : "8"} className="text-center py-5">
+                  <td colSpan={(isOrganizer || isAdmin) ? "10" : "9"} className="text-center py-5">
                     <Icon name="users" size={36} color="#94A3B8" className="mb-2" />
                     <h6 className="fw-bold text-dark">No members found</h6>
                     <p className="text-muted small mb-0">No active members match the current filters or no members are registered yet.</p>
@@ -518,6 +521,11 @@ const Members = () => {
               ) : (
                 filteredMembers.map((member) => (
                   <tr key={member.id}>
+                    <td className="py-3 px-3">
+                      <span className="badge bg-light text-dark border font-monospace px-2 py-1">
+                        #{member.userId || member.id}
+                      </span>
+                    </td>
                     <td className="py-3 px-3 fw-semibold text-dark">{member.name}</td>
                     <td className="py-3 px-3 text-muted small">{member.email}</td>
                     <td className="py-3 px-3 text-muted small">{member.phone}</td>
