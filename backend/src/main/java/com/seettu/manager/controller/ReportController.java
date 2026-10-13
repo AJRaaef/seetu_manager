@@ -86,4 +86,38 @@ public class ReportController {
     public ResponseEntity<ApiResponse<List<Report>>> getReportsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(ApiResponse.success(reportService.getReportsByUser(userId)));
     }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<org.springframework.core.io.Resource> downloadReportPdf(@PathVariable Long id) {
+        Report report = reportService.getReportById(id);
+        if (report.getFilePath() == null) {
+            return ResponseEntity.notFound().build();
+        }
+        java.io.File file = new java.io.File(report.getFilePath());
+        if (!file.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+        org.springframework.core.io.Resource resource = new org.springframework.core.io.FileSystemResource(file);
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                .body(resource);
+    }
+
+    @GetMapping("/{id}/view")
+    public ResponseEntity<org.springframework.core.io.Resource> viewReportPdf(@PathVariable Long id) {
+        Report report = reportService.getReportById(id);
+        if (report.getFilePath() == null) {
+            return ResponseEntity.notFound().build();
+        }
+        java.io.File file = new java.io.File(report.getFilePath());
+        if (!file.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+        org.springframework.core.io.Resource resource = new org.springframework.core.io.FileSystemResource(file);
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getName() + "\"")
+                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                .body(resource);
+    }
 }
