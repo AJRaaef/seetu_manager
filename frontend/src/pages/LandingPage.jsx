@@ -915,7 +915,7 @@ const LandingPage = () => {
               </p>
               <div className="d-flex align-items-center gap-2">
                 <a 
-                  href="https://facebook.com/SeetuManager-App"
+                  href="https://www.facebook.com/share/1DbJgZK7sY/"
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="btn btn-outline-light btn-sm rounded-1 px-2 py-2 d-inline-flex align-items-center justify-content-center" 
@@ -945,7 +945,7 @@ const LandingPage = () => {
                   <Icon name="instagram" size={16} />
                 </a>
                   <a
-                  href="https://youtube.com/@seetumanager" 
+                  href="https://youtube.com/@seetumanager?si=xo7eEJ0r_07lYg7z" 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="btn btn-outline-light btn-sm rounded-1 px-2 py-2 d-inline-flex align-items-center justify-content-center" 

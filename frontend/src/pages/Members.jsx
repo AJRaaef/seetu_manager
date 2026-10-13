@@ -55,10 +55,10 @@ const Members = () => {
         (isOrganizer || isAdmin) ? getPendingKycUsers().catch(() => ({ data: [] })) : Promise.resolve({ data: [] })
       ]);
 
-      const mList = membersRes?.data || membersRes || [];
-      const gList = groupsRes?.data || groupsRes || [];
-      const pList = pendingRes?.data || pendingRes || [];
-      const kycList = pendingKycRes?.data || pendingKycRes || [];
+      const mList = Array.isArray(membersRes?.data) ? membersRes.data : (Array.isArray(membersRes) ? membersRes : (membersRes?.data?.data || []));
+      const gList = Array.isArray(groupsRes?.data) ? groupsRes.data : (Array.isArray(groupsRes) ? groupsRes : (groupsRes?.data?.data || []));
+      const pList = Array.isArray(pendingRes?.data) ? pendingRes.data : (Array.isArray(pendingRes) ? pendingRes : (pendingRes?.data?.data || []));
+      const kycList = Array.isArray(pendingKycRes?.data) ? pendingKycRes.data : (Array.isArray(pendingKycRes) ? pendingKycRes : (pendingKycRes?.data?.data || []));
 
       setRawMembers(Array.isArray(mList) ? mList : []);
       setGroups(Array.isArray(gList) ? gList : []);

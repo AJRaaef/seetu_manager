@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from 'react-bootstrap';
 import Icon from './Icons';
+import { getAllGroups } from '../api/groupApi';
 
 const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
   const [groupId, setGroupId] = useState('');
@@ -8,12 +9,30 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingGroups, setLoadingGroups] = useState(false);
+  const [activeGroups, setActiveGroups] = useState(Array.isArray(groups) ? groups : []);
 
-  React.useEffect(() => {
-    if (groups && groups.length > 0 && !groupId) {
-      setGroupId(groups[0].id);
+  useEffect(() => {
+    if (Array.isArray(groups) && groups.length > 0) {
+      setActiveGroups(groups);
+      if (!groupId || !groups.some(g => String(g.id) === String(groupId))) {
+        setGroupId(groups[0].id);
+      }
+    } else if (show) {
+      setLoadingGroups(true);
+      getAllGroups()
+        .then((res) => {
+          const raw = res?.data ?? res;
+          const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
+          setActiveGroups(list);
+          if (list.length > 0) {
+            setGroupId(list[0].id);
+          }
+        })
+        .catch((err) => console.error('Failed to load groups for InviteMemberModal', err))
+        .finally(() => setLoadingGroups(false));
     }
-  }, [groups]);
+  }, [show, groups]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,6 +56,8 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
     }
   };
 
+  const selectedGroup = activeGroups.find(g => String(g.id) === String(groupId));
+
   return (
     <Modal show={show} onHide={onHide} centered contentClassName="custom-modal-content">
       <div className="custom-modal-header">
@@ -49,19 +70,34 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
       <form onSubmit={handleSubmit}>
         <div className="custom-modal-body">
           <div className="mb-3">
-            <label className="form-label text-dark fw-semibold small">Select Seettu Group</label>
+            <label className="form-label text-dark fw-semibold small">Select Seettu Group <span className="text-danger">*</span></label>
             <select
               className="form-select"
               value={groupId}
               onChange={(e) => setGroupId(e.target.value)}
               required
+              disabled={loadingGroups}
             >
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name} (LKR {Number(g.contributionAmount || 0).toLocaleString()})
-                </option>
-              ))}
+              {loadingGroups ? (
+                <option value="">Loading Seettu groups...</option>
+              ) : activeGroups.length === 0 ? (
+                <option value="">No Seettu groups available</option>
+              ) : (
+                <>
+                  <option value="">-- Choose Seettu Group --</option>
+                  {activeGroups.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.name} (LKR {Number(g.contributionAmount || 0).toLocaleString()} • {g.cycleFrequency || 'Monthly'})
+                    </option>
+                  ))}
+                </>
+              )}
             </select>
+            {selectedGroup && (
+              <small className="text-muted d-block mt-1">
+                Selected Group: <strong>{selectedGroup.name}</strong> • Contribution: LKR {Number(selectedGroup.contributionAmount || 0).toLocaleString()}
+              </small>
+            )}
           </div>
 
           <div className="mb-3">
