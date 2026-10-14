@@ -456,15 +456,26 @@ const PaymentTracking = () => {
                   required
                 >
                   <option value="">{selectedGroupId ? '-- Select Member --' : 'Select Group First'}</option>
-                  {groupMembers.map((m) => {
-                    const mUserId = m.user?.id || m.userId || m.id;
-                    const mName = m.user?.fullName || m.fullName || m.name || `Member #${mUserId}`;
-                    return (
-                      <option key={m.id || mUserId} value={mUserId}>
-                        {mName} (Member #{mUserId})
-                      </option>
-                    );
-                  })}
+                  {/* Current Organizer (Me) always guaranteed in dropdown */}
+                  {(isAdmin || isOrganizer) && user && (
+                    <option value={userId}>
+                      {user.fullName || user.email || 'Organizer'} (Organizer / Me)
+                    </option>
+                  )}
+                  {groupMembers
+                    .filter((m) => {
+                      const mUserId = m.user?.id || m.userId || m.id;
+                      return String(mUserId) !== String(userId);
+                    })
+                    .map((m) => {
+                      const mUserId = m.user?.id || m.userId || m.id;
+                      const mName = m.user?.fullName || m.fullName || m.name || `Member #${mUserId}`;
+                      return (
+                        <option key={m.id || mUserId} value={mUserId}>
+                          {mName} (Member #{mUserId})
+                        </option>
+                      );
+                    })}
                 </select>
               </div>
 
@@ -635,32 +646,6 @@ const PaymentTracking = () => {
                   )}
                 </select>
               </div>
-
-              {/* Member Select (Admin/Organizer can choose self or any member) */}
-              {(isAdmin || isOrganizer) && (
-                <div className="col-12 col-md">
-                  <select
-                    className="form-select bg-white"
-                    value={selectedMemberId}
-                    onChange={(e) => setSelectedMemberId(e.target.value)}
-                    disabled={!selectedGroupId}
-                    title="Select Member to Record For"
-                    required
-                  >
-                    <option value="">{selectedGroupId ? '-- Select Member --' : '-- Choose Group First --'}</option>
-                    {groupMembers.map((m) => {
-                      const mId = m.user?.id || m.userId || m.id;
-                      const mName = m.user?.fullName || m.fullName || m.name || `Member #${mId}`;
-                      const isMe = String(mId) === String(userId);
-                      return (
-                        <option key={mId} value={mId}>
-                          {mName} {isMe ? '(Me / Organizer)' : ''}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
-              )}
 
               {/* Cycle Select */}
               <div className="col-12 col-md">

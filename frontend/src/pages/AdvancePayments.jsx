@@ -280,11 +280,18 @@ const AdvancePayments = () => {
                       required
                     >
                       <option value="">{formData.groupId ? '-- Select Member --' : '-- Choose Group First --'}</option>
-                      {members.map((m) => {
-                        const mId = m.user?.id || m.userId || m.id;
-                        const mName = m.user?.fullName || m.fullName || m.name || `Member #${mId}`;
-                        return <option key={mId} value={mId}>{mName}</option>;
-                      })}
+                      {isAdminOrOrg && user && (
+                        <option value={user?.userId || user?.id}>
+                          {user.fullName || user.email || 'Organizer'} (Organizer / Me)
+                        </option>
+                      )}
+                      {members
+                        .filter(m => String(m.user?.id || m.userId || m.id) !== String(user?.userId || user?.id))
+                        .map((m) => {
+                          const mId = m.user?.id || m.userId || m.id;
+                          const mName = m.user?.fullName || m.fullName || m.name || `Member #${mId}`;
+                          return <option key={mId} value={mId}>{mName}</option>;
+                        })}
                     </select>
                   </div>
                   <div className="mb-3">

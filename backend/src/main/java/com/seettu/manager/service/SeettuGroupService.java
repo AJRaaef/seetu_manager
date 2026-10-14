@@ -200,8 +200,20 @@ public class SeettuGroupService {
         notificationService.sendNotification(userId, "You have been removed from group: " + group.getName(), "GROUP");
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<GroupMember> getGroupMembers(Long groupId) {
+        SeettuGroup group = getGroupById(groupId);
+        if (group != null && group.getCreatedBy() != null) {
+            boolean creatorPresent = memberRepository.existsByGroupIdAndUserId(groupId, group.getCreatedBy().getId());
+            if (!creatorPresent) {
+                GroupMember creatorMember = GroupMember.builder()
+                        .group(group)
+                        .user(group.getCreatedBy())
+                        .status(GroupMember.MemberStatus.ACTIVE)
+                        .build();
+                memberRepository.save(creatorMember);
+            }
+        }
         List<GroupMember> members = memberRepository.findByGroupIdAndStatus(groupId, GroupMember.MemberStatus.ACTIVE);
         attachDisciplineScores(members);
         return members;
