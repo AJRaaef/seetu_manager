@@ -1,7 +1,7 @@
 # SeettuManager
 
 > **A Digital Financial Discipline System for Rotating Savings Groups in Sri Lanka**  
-> **National Diploma in Information Technology (NDTIT) — Final Project**  
+> **National Diploma in Information Technology (NDT IT) — Final Project**  
 > **Institute of Technology, University of Moratuwa (ITUM)**
 
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
