@@ -20,7 +20,11 @@ Thumbs.db
 # Environment
 .env
 
-# Generated PDF Reports & Documents
+# Generated Runtime Files & Uploads
 *.pdf
-backend/*.pdf
+certificates/
+reports/
+uploads/
+backend/certificates/
 backend/reports/
+backend/uploads/
