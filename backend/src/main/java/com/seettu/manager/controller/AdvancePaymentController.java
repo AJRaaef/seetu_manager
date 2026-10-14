@@ -50,4 +50,21 @@ public class AdvancePaymentController {
     public ResponseEntity<ApiResponse<List<AdvancePayment>>> getAll() {
         return ResponseEntity.ok(ApiResponse.success(advancePaymentService.getAll()));
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public ResponseEntity<ApiResponse<AdvancePayment>> updateAdvancePayment(
+            @PathVariable Long id,
+            @RequestParam(required = false) BigDecimal amount,
+            @RequestParam(required = false) String notes) {
+        return ResponseEntity.ok(ApiResponse.success("Advance payment updated",
+                advancePaymentService.updateAdvancePayment(id, amount, notes)));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public ResponseEntity<ApiResponse<Void>> deleteAdvancePayment(@PathVariable Long id) {
+        advancePaymentService.deleteAdvancePayment(id);
+        return ResponseEntity.ok(ApiResponse.success("Advance payment deleted", null));
+    }
 }

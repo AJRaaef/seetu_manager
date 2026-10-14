@@ -13,6 +13,8 @@ const AdvancePayments = () => {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editRecord, setEditRecord] = useState(null);
+  const [editFormData, setEditFormData] = useState({ amount: '', notes: '' });
 
   const [formData, setFormData] = useState({
     groupId: '',
@@ -84,6 +86,44 @@ const AdvancePayments = () => {
       fetchData();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to submit advance payment.');
+    }
+  };
+
+  const handleOpenEdit = (adv) => {
+    setEditRecord(adv);
+    setEditFormData({
+      amount: adv.amount || '',
+      notes: adv.notes || ''
+    });
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+    if (!editRecord) return;
+    try {
+      const params = new URLSearchParams({
+        amount: editFormData.amount,
+        notes: editFormData.notes || ''
+      });
+      await api.put(`/advance-payments/${editRecord.id}?${params.toString()}`);
+      alert('✓ Advance payment updated successfully!');
+      setEditRecord(null);
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update advance payment.');
+    }
+  };
+
+  const handleDeleteAdvance = async (id) => {
+    if (!window.confirm(`Are you sure you want to delete advance payment record #ADV-${id}?`)) {
+      return;
+    }
+    try {
+      await api.delete(`/advance-payments/${id}`);
+      alert(`✓ Advance payment #ADV-${id} deleted successfully!`);
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete advance payment.');
     }
   };
 
@@ -161,6 +201,7 @@ const AdvancePayments = () => {
                   <th>Advance Amount</th>
                   <th>Notes</th>
                   <th>Recorded Date</th>
+                  {isAdminOrOrg && <th className="text-end pe-3">Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -171,6 +212,28 @@ const AdvancePayments = () => {
                     <td><strong className="text-success fs-6">LKR {(Number(adv.amount) || 0).toLocaleString()}</strong></td>
                     <td className="text-muted">{adv.notes || '-'}</td>
                     <td className="text-muted">{adv.paymentDate || (adv.createdAt ? new Date(adv.createdAt).toLocaleDateString() : '-')}</td>
+                    {isAdminOrOrg && (
+                      <td className="text-end pe-3">
+                        <div className="d-flex justify-content-end gap-2">
+                          <button
+                            className="btn btn-link p-1 text-decoration-none"
+                            style={{ color: '#188754' }}
+                            title="Edit Advance Payment"
+                            onClick={() => handleOpenEdit(adv)}
+                          >
+                            <Icon name="pencil" size={16} color="#188754" />
+                          </button>
+                          <button
+                            className="btn btn-link p-1 text-decoration-none"
+                            style={{ color: '#DC3545' }}
+                            title="Delete Advance Payment"
+                            onClick={() => handleDeleteAdvance(adv.id)}
+                          >
+                            <Icon name="trash" size={16} color="#DC3545" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -251,6 +314,59 @@ const AdvancePayments = () => {
                 <div className="modal-footer py-3 px-4 bg-light">
                   <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setShowModal(false)}>Cancel</button>
                   <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>Save Advance Payment</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal (Admin/Organizer only) */}
+      {editRecord && isAdminOrOrg && (
+        <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+              <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#134A5A' }}>
+                <h5 className="modal-title fw-bold">Edit Advance Contribution #ADV-{editRecord.id}</h5>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setEditRecord(null)}></button>
+              </div>
+              <form onSubmit={handleSaveEdit}>
+                <div className="modal-body p-4">
+                  <div className="mb-3">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Member</label>
+                    <input
+                      type="text"
+                      className="form-control bg-light"
+                      value={editRecord.member?.fullName || editRecord.member?.email || `Member #${editRecord.member?.id || ''}`}
+                      disabled
+                      style={{ borderRadius: '8px' }}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Advance Amount (LKR)</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      value={editFormData.amount}
+                      onChange={(e) => setEditFormData({ ...editFormData, amount: e.target.value })}
+                      style={{ borderRadius: '8px' }}
+                      required
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Notes / Reference</label>
+                    <textarea
+                      className="form-control"
+                      rows="3"
+                      value={editFormData.notes}
+                      onChange={(e) => setEditFormData({ ...editFormData, notes: e.target.value })}
+                      style={{ borderRadius: '8px' }}
+                    ></textarea>
+                  </div>
+                </div>
+                <div className="modal-footer py-3 px-4 bg-light">
+                  <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setEditRecord(null)}>Cancel</button>
+                  <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>Update Payment</button>
                 </div>
               </form>
             </div>

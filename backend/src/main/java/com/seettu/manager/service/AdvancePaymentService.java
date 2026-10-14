@@ -52,4 +52,26 @@ public class AdvancePaymentService {
     public List<AdvancePayment> getAll() {
         return advancePaymentRepository.findAllWithMember();
     }
+
+    @Transactional
+    public AdvancePayment updateAdvancePayment(Long id, BigDecimal amount, String notes) {
+        AdvancePayment payment = getById(id);
+        if (amount != null) payment.setAmount(amount);
+        if (notes != null) payment.setNotes(notes);
+        payment = advancePaymentRepository.save(payment);
+
+        auditLogService.log(payment.getMember(), "ADVANCE_PAYMENT_UPDATED", "advance_payments", payment.getId(),
+                "Advance payment updated: " + payment.getAmount() + " LKR");
+
+        return payment;
+    }
+
+    @Transactional
+    public void deleteAdvancePayment(Long id) {
+        AdvancePayment payment = getById(id);
+        advancePaymentRepository.delete(payment);
+
+        auditLogService.log(payment.getMember(), "ADVANCE_PAYMENT_DELETED", "advance_payments", id,
+                "Advance payment #" + id + " deleted");
+    }
 }
