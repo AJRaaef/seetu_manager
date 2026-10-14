@@ -890,55 +890,57 @@ const PaymentTracking = () => {
                       onClick={(e) => e.stopPropagation()}
                     >
                       {(isAdmin || isOrganizer) ? (
-                        p.status === 'PAID' ? (
-                          <div className="d-flex justify-content-end gap-2">
-                            <button
-                              className="btn btn-link p-1 text-decoration-none"
-                              style={{ color: '#188754' }}
-                              title="Edit Payment"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditPayment(p);
-                              }}
-                            >
-                              <Icon name="pencil" size={16} color="#188754" />
-                            </button>
-                            <button
-                              className="btn btn-link p-1 text-decoration-none"
-                              style={{ color: '#DC3545' }}
-                              title="Delete Payment"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteRecord(p);
-                              }}
-                            >
-                              <Icon name="trash" size={16} color="#DC3545" />
-                            </button>
-                          </div>
-                        ) : p.status === 'PENDING' ? (
+                        <div className="d-flex justify-content-end align-items-center gap-1.5 flex-nowrap">
+                          {p.status !== 'PAID' && (
+                            <>
+                              <button
+                                className="btn btn-sm btn-success px-2 py-1 d-inline-flex align-items-center gap-1 shadow-sm"
+                                style={{ fontSize: '0.75rem', borderRadius: '6px' }}
+                                title="Mark as Paid now"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleQuickRecord(p);
+                                }}
+                              >
+                                <Icon name="check" size={13} color="#FFFFFF" />
+                                <span>Mark Paid</span>
+                              </button>
+                              <button
+                                className="btn btn-link p-1 text-decoration-none"
+                                style={{ color: '#DC3545' }}
+                                title="Send Payment Reminder via WhatsApp / SMS"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setReminderPayment(p);
+                                }}
+                              >
+                                <Icon name="bell" size={15} color="#DC3545" />
+                              </button>
+                            </>
+                          )}
                           <button
-                            className="btn btn-link fw-semibold p-0 text-decoration-none small"
+                            className="btn btn-link p-1 text-decoration-none"
                             style={{ color: '#188754' }}
+                            title="Edit Payment Record & Status"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleQuickRecord(p);
+                              setEditPayment(p);
                             }}
                           >
-                            Record
+                            <Icon name="pencil" size={16} color="#188754" />
                           </button>
-                        ) : (
                           <button
-                            className="btn btn-link fw-semibold p-0 text-decoration-none small d-inline-flex align-items-center gap-1"
+                            className="btn btn-link p-1 text-decoration-none"
                             style={{ color: '#DC3545' }}
+                            title="Delete Payment Record"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setReminderPayment(p);
+                              handleDeleteRecord(p);
                             }}
                           >
-                            <Icon name="bell" size={14} color="#DC3545" />
-                            <span>Reminder</span>
+                            <Icon name="trash" size={16} color="#DC3545" />
                           </button>
-                        )
+                        </div>
                       ) : (
                         <button
                           className="btn btn-sm btn-outline-secondary px-2.5 py-1 text-decoration-none small fw-semibold"
