@@ -922,56 +922,59 @@ const PaymentTracking = () => {
                       onClick={(e) => e.stopPropagation()}
                     >
                       {(isAdmin || isOrganizer) ? (
-                        <div className="d-flex justify-content-end align-items-center gap-1.5 flex-nowrap">
+                        <div className="d-flex justify-content-end align-items-center gap-2 flex-nowrap">
                           {p.status !== 'PAID' && p.status !== 'LATE' && (
-                            <>
+                            <button
+                              className="btn btn-sm btn-teal px-2.5 py-1 d-inline-flex align-items-center gap-1.5 shadow-sm fw-medium"
+                              style={{ fontSize: '0.78rem', borderRadius: '6px' }}
+                              title="Settle payment with method & confirmation"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSettlePayment(p);
+                              }}
+                            >
+                              <Icon name="check" size={13} color="#FFFFFF" />
+                              <span>Settle Payment</span>
+                            </button>
+                          )}
+
+                          <div className="btn-group btn-group-sm border rounded bg-white shadow-xs">
+                            {p.status !== 'PAID' && p.status !== 'LATE' && (
                               <button
-                                className="btn btn-sm btn-success px-2 py-1 d-inline-flex align-items-center gap-1 shadow-sm"
-                                style={{ fontSize: '0.75rem', borderRadius: '6px' }}
-                                title="Settle overdue/pending payment with verification"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSettlePayment(p);
-                                }}
-                              >
-                                <Icon name="check" size={13} color="#FFFFFF" />
-                                <span>Mark Paid</span>
-                              </button>
-                              <button
-                                className="btn btn-link p-1 text-decoration-none"
-                                style={{ color: '#DC3545' }}
-                                title="Send Payment Reminder via WhatsApp / SMS"
+                                className="btn btn-light btn-sm text-secondary px-2 border-end"
+                                style={{ background: '#FAFBFB' }}
+                                title="Send Payment Reminder (SMS/WhatsApp)"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setReminderPayment(p);
                                 }}
                               >
-                                <Icon name="bell" size={15} color="#DC3545" />
+                                <Icon name="bell" size={14} color="#DC3545" />
                               </button>
-                            </>
-                          )}
-                          <button
-                            className="btn btn-link p-1 text-decoration-none"
-                            style={{ color: '#188754' }}
-                            title="Edit Payment Record & Status"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditPayment(p);
-                            }}
-                          >
-                            <Icon name="pencil" size={16} color="#188754" />
-                          </button>
-                          <button
-                            className="btn btn-link p-1 text-decoration-none"
-                            style={{ color: '#DC3545' }}
-                            title="Delete Payment Record"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteRecord(p);
-                            }}
-                          >
-                            <Icon name="trash" size={16} color="#DC3545" />
-                          </button>
+                            )}
+                            <button
+                              className="btn btn-light btn-sm text-secondary px-2 border-end"
+                              style={{ background: '#FAFBFB' }}
+                              title="Edit Payment Record & Details"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditPayment(p);
+                              }}
+                            >
+                              <Icon name="pencil" size={14} color="#188754" />
+                            </button>
+                            <button
+                              className="btn btn-light btn-sm text-secondary px-2"
+                              style={{ background: '#FAFBFB' }}
+                              title="Delete Payment Record"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteRecord(p);
+                              }}
+                            >
+                              <Icon name="trash" size={14} color="#DC3545" />
+                            </button>
+                          </div>
                         </div>
                       ) : (
                         <button

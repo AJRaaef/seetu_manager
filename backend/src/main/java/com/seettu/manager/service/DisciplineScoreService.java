@@ -47,7 +47,7 @@ public class DisciplineScoreService {
                         totalDelayDays += delay;
                         delayedPaymentsCount++;
                     }
-                } else if (payment.getStatus() == Payment.PaymentStatus.OVERDUE || payment.getStatus() == Payment.PaymentStatus.LATE) {
+                } else if (payment.getStatus() == Payment.PaymentStatus.OVERDUE || payment.getStatus() == Payment.PaymentStatus.LATE || payment.getStatus() == Payment.PaymentStatus.PARTIAL) {
                     LocalDate today = LocalDate.now();
                     if (today.isAfter(dueDate)) {
                         long delay = ChronoUnit.DAYS.between(dueDate, today);
@@ -60,7 +60,7 @@ public class DisciplineScoreService {
 
         double avgDelayDays = delayedPaymentsCount > 0 ? (double) totalDelayDays / delayedPaymentsCount : 0.0;
 
-        // Formula: Score = 100 - [(LatePayments × 5) + (MissedPayments × 10) + (AvgDelayDays × 0.5)]
+        // Formula (SRS REQ-SCR-01): Score = max(0, 100 - [(LatePayments × 5) + (MissedPayments × 10) + (AvgDelayDays × 0.5)])
         double deduction = (latePayments * 5.0) + (missedPayments * 10.0) + (avgDelayDays * 0.5);
         double score = Math.max(0.0, 100.0 - deduction);
         score = Math.min(100.0, score);
