@@ -6,6 +6,7 @@ import PaymentDetailsModal from '../components/PaymentDetailsModal';
 import EditPaymentModal from '../components/EditPaymentModal';
 import DeletePaymentModal from '../components/DeletePaymentModal';
 import PaymentReminderModal from '../components/PaymentReminderModal';
+import SettlePaymentModal from '../components/SettlePaymentModal';
 import {
   getAllPayments,
   getPaymentsByMember,
@@ -43,6 +44,7 @@ const PaymentTracking = () => {
   const [editPayment, setEditPayment] = useState(null);
   const [deletePayment, setDeletePayment] = useState(null);
   const [reminderPayment, setReminderPayment] = useState(null);
+  const [settlePayment, setSettlePayment] = useState(null);
 
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -227,10 +229,40 @@ const PaymentTracking = () => {
     }
   };
 
+  // Handle Settle Overdue/Pending Payment via Settlement Modal (Option A)
+  const handleConfirmSettle = async (updated) => {
+    try {
+      await updatePayment(updated.id, {
+        cycleId: updated.cycleId,
+        memberId: updated.memberId,
+        amount: updated.amount,
+        status: updated.status,
+        paymentDate: updated.date,
+        paymentMethod: updated.method,
+        notes: updated.notes
+      });
+      if (updated.evidenceFile) {
+        try {
+          await uploadPaymentEvidence(updated.id, updated.evidenceFile.name);
+        } catch (fileErr) {
+          console.error('Failed to attach digital slip', fileErr);
+        }
+      }
+      alert(`✓ Payment for ${updated.member} settled successfully as ${updated.status === 'LATE' ? 'Paid (Late)' : updated.status}!`);
+      await fetchPayments();
+    } catch (err) {
+      console.error('Failed to settle payment in database', err);
+      alert('Error settling payment. Please try again.');
+      fetchPayments();
+    }
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'PAID':
         return <span className="badge-paid" style={{ cursor: 'pointer' }}>Paid</span>;
+      case 'LATE':
+        return <span className="badge bg-warning text-dark px-2 py-1 rounded-2 fw-semibold" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>Paid (Late)</span>;
       case 'PENDING':
         return <span className="badge-pending" style={{ cursor: 'pointer' }}>Pending</span>;
       case 'OVERDUE':
@@ -891,15 +923,15 @@ const PaymentTracking = () => {
                     >
                       {(isAdmin || isOrganizer) ? (
                         <div className="d-flex justify-content-end align-items-center gap-1.5 flex-nowrap">
-                          {p.status !== 'PAID' && (
+                          {p.status !== 'PAID' && p.status !== 'LATE' && (
                             <>
                               <button
                                 className="btn btn-sm btn-success px-2 py-1 d-inline-flex align-items-center gap-1 shadow-sm"
                                 style={{ fontSize: '0.75rem', borderRadius: '6px' }}
-                                title="Mark as Paid now"
+                                title="Settle overdue/pending payment with verification"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleQuickRecord(p);
+                                  setSettlePayment(p);
                                 }}
                               >
                                 <Icon name="check" size={13} color="#FFFFFF" />
@@ -989,6 +1021,13 @@ const PaymentTracking = () => {
         onSend={(data) => {
           alert(`✓ Payment reminder sent to ${data.payment.member} via ${data.channel}!`);
         }}
+      />
+
+      <SettlePaymentModal
+        show={!!settlePayment}
+        onHide={() => setSettlePayment(null)}
+        payment={settlePayment}
+        onSettle={handleConfirmSettle}
       />
     </div>
   );

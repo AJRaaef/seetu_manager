@@ -137,6 +137,9 @@ public class PaymentService {
         if (request.getPaymentDate() != null) {
             payment.setPaymentDate(request.getPaymentDate());
         }
+        if (request.getPaymentMethod() != null && !request.getPaymentMethod().trim().isEmpty()) {
+            payment.setPaymentMethod(request.getPaymentMethod());
+        }
         Payment updated = paymentRepository.save(payment);
 
         User recorder = payment.getRecordedBy();
