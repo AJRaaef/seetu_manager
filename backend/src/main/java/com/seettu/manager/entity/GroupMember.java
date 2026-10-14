@@ -37,6 +37,12 @@ public class GroupMember {
     @Column(name = "joined_at", nullable = false, updatable = false)
     private LocalDateTime joinedAt;
 
+    @Transient
+    private Double disciplineScore;
+
+    @Transient
+    private String disciplineCategory;
+
     @PrePersist
     protected void onCreate() {
         joinedAt = LocalDateTime.now();

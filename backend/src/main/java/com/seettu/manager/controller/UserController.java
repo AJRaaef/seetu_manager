@@ -28,6 +28,7 @@ public class UserController {
     private final PaymentRepository paymentRepository;
     private final CertificateRepository certificateRepository;
     private final GroupMemberRepository groupMemberRepository;
+    private final com.seettu.manager.service.DisciplineScoreService disciplineScoreService;
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<User>> getUserById(@PathVariable Long id) {
@@ -130,14 +131,9 @@ public class UserController {
             }
         }
 
-        // Average Discipline Score based on payments on time
-        long paidCount = paymentRepository.countByMemberUserIdAndStatus(id, com.seettu.manager.entity.Payment.PaymentStatus.PAID);
-        long totalPaymentCount = paymentRepository.countAllByUserId(id);
-        int disciplineScore = 100;
-        if (totalPaymentCount > 0) {
-            disciplineScore = (int) Math.round(((double) paidCount / totalPaymentCount) * 100.0);
-            if (disciplineScore < 50) disciplineScore = 50;
-        }
+        // Average Discipline Score based on unified scoring engine
+        com.seettu.manager.dto.ScoreResponse scoreDetail = disciplineScoreService.calculateScore(id);
+        int disciplineScore = (int) Math.round(scoreDetail.getScore());
 
         // Certificates count
         List<Certificate> certs = certificateRepository.findByUserId(id);
@@ -148,6 +144,7 @@ public class UserController {
         responseData.put("totalContributed", totalContributed);
         responseData.put("groupsParticipated", groupsParticipated);
         responseData.put("averageDisciplineScore", disciplineScore);
+        responseData.put("disciplineCategory", scoreDetail.getCategory());
         responseData.put("certificatesEarned", certificatesCount);
         responseData.put("groups", joinedGroups != null ? joinedGroups : Collections.emptyList());
 

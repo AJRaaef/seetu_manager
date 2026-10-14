@@ -8,18 +8,30 @@ import { getPendingKycUsers, verifyMemberKyc } from '../api/userApi';
 
 import { useAuth } from '../hooks/useAuth';
 
-const getScoreMeta = (scoreNum) => {
+const getScoreMeta = (scoreNum, category) => {
+  if (category) {
+    if (category === 'EXCELLENT') return { label: 'Excellent', color: '#188754' };
+    if (category === 'GOOD') return { label: 'Good', color: '#0D6EFD' };
+    if (category === 'FAIR') return { label: 'Fair', color: '#FFB020' };
+    if (category === 'POOR') return { label: 'Poor', color: '#FD7E14' };
+    if (category === 'HIGH_RISK') return { label: 'High Risk', color: '#DC3545' };
+  }
   const num = Number(scoreNum);
   if (num >= 90) return { label: 'Excellent', color: '#188754' };
   if (num >= 75) return { label: 'Good', color: '#0D6EFD' };
   if (num >= 60) return { label: 'Fair', color: '#FFB020' };
-  return { label: 'Poor', color: '#DC3545' };
+  if (num >= 40) return { label: 'Poor', color: '#FD7E14' };
+  return { label: 'High Risk', color: '#DC3545' };
 };
 
 const calculateScore = (member) => {
-  if (member.score !== undefined) return member.score;
-  const base = 85 + ((Number(member.id || 1) * 7) % 15);
-  return Math.min(100, Math.max(50, base));
+  if (member.disciplineScore !== undefined && member.disciplineScore !== null) {
+    return Math.round(Number(member.disciplineScore));
+  }
+  if (member.score !== undefined && member.score !== null) {
+    return Math.round(Number(member.score));
+  }
+  return 100;
 };
 
 import { getPendingJoinRequests, approveJoinRequest, rejectJoinRequest } from '../api/joinRequestApi';
@@ -206,7 +218,7 @@ const Members = () => {
     })
     .map((m) => {
       const scoreVal = calculateScore(m);
-      const scoreMeta = getScoreMeta(scoreVal);
+      const scoreMeta = getScoreMeta(scoreVal, m.disciplineCategory);
       const dateStr = m.joinedAt ? m.joinedAt.split('T')[0] : 'N/A';
 
       return {

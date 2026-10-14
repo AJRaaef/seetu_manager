@@ -28,6 +28,7 @@ public class DashboardService {
     private final EmergencyRequestRepository emergencyRepository;
     private final ReportRepository reportRepository;
     private final CertificateRepository certificateRepository;
+    private final DisciplineScoreService disciplineScoreService;
 
     public DashboardResponse getAdminDashboardStats() {
         long totalGroups = groupRepository.count();
@@ -92,10 +93,8 @@ public class DashboardService {
         
         double completionRate = totalPayments > 0 ? (double) paidPaymentsCount / totalPayments * 100 : 100.0;
 
-        // Calculate Discipline Score dynamically from real DB payments: 100 base - (10 * overdue) - (5 * late)
-        int calculatedScore = 100 - (int)(overduePayments * 10) - (int)(latePayments * 5);
-        if (calculatedScore < 50) calculatedScore = 50;
-        if (calculatedScore > 100) calculatedScore = 100;
+        // Calculate Discipline Score dynamically using the unified DisciplineScoreService engine
+        int calculatedScore = disciplineScoreService.getScoreValue(userId);
 
         // Calculate real DB count of certificates earned by user
         long userCertificates = certificateRepository.findByUserId(userId).size();

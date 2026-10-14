@@ -27,6 +27,7 @@ public class SeettuGroupService {
     private final AuditLogService auditLogService;
     private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
+    private final DisciplineScoreService disciplineScoreService;
 
     @Transactional(readOnly = true)
     public SeettuGroup getGroupById(Long id) {
@@ -201,14 +202,34 @@ public class SeettuGroupService {
 
     @Transactional(readOnly = true)
     public List<GroupMember> getGroupMembers(Long groupId) {
-        return memberRepository.findByGroupIdAndStatus(groupId, GroupMember.MemberStatus.ACTIVE);
+        List<GroupMember> members = memberRepository.findByGroupIdAndStatus(groupId, GroupMember.MemberStatus.ACTIVE);
+        attachDisciplineScores(members);
+        return members;
     }
 
     @Transactional(readOnly = true)
     public List<GroupMember> getAllActiveMembers() {
-        return memberRepository.findAllActiveWithDetails().stream()
+        List<GroupMember> members = memberRepository.findAllActiveWithDetails().stream()
                 .filter(member -> member.getUser() != null && member.getUser().getRole() != User.Role.ADMIN)
                 .collect(Collectors.toList());
+        attachDisciplineScores(members);
+        return members;
+    }
+
+    private void attachDisciplineScores(List<GroupMember> members) {
+        if (members == null || members.isEmpty()) return;
+        for (GroupMember gm : members) {
+            if (gm.getUser() != null) {
+                try {
+                    com.seettu.manager.dto.ScoreResponse score = disciplineScoreService.calculateScore(gm.getUser().getId());
+                    gm.setDisciplineScore(score.getScore());
+                    gm.setDisciplineCategory(score.getCategory());
+                } catch (Exception e) {
+                    gm.setDisciplineScore(100.0);
+                    gm.setDisciplineCategory("EXCELLENT");
+                }
+            }
+        }
     }
 
     @Transactional(readOnly = true)
