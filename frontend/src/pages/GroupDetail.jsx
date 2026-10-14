@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { getGroupById, addMember } from '../api/groupApi';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { getGroupById, addMember, deleteGroup, removeMember } from '../api/groupApi';
 import { getAllMembersWithKyc } from '../api/userApi';
 import api from '../api/axios';
 import { useAuth } from '../hooks/useAuth';
@@ -9,6 +9,7 @@ import { getErrorMessage } from '../utils/errorHandler';
 const GroupDetail = () => {
   const { id } = useParams();
   const { user, isAdmin, isOrganizer } = useAuth();
+  const navigate = useNavigate();
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('members');
@@ -20,6 +21,32 @@ const GroupDetail = () => {
   const [verifiedMembers, setVerifiedMembers] = useState([]);
   const [actionMsg, setActionMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+
+  const handleDeleteGroup = async () => {
+    if (!window.confirm(`Are you sure you want to delete the group "${group?.name}"? All associated cycle and membership records will be deleted.`)) {
+      return;
+    }
+    try {
+      await deleteGroup(id);
+      alert(`Group "${group?.name}" deleted successfully.`);
+      navigate('/groups');
+    } catch (err) {
+      setErrorMsg(getErrorMessage(err, 'Failed to delete group from database.'));
+    }
+  };
+
+  const handleRemoveMember = async (userId, memberName) => {
+    if (!window.confirm(`Are you sure you want to remove "${memberName}" from this group?`)) {
+      return;
+    }
+    try {
+      await removeMember(id, userId);
+      setActionMsg(`Member ${memberName} removed successfully.`);
+      await fetchGroup();
+    } catch (err) {
+      setErrorMsg(getErrorMessage(err, 'Failed to remove member.'));
+    }
+  };
 
   const fetchGroup = async () => {
     try {
@@ -124,9 +151,14 @@ const GroupDetail = () => {
             ← Back to Groups
           </Link>
           {(isOrganizer || isAdmin) && (
-            <button className="btn btn-teal fw-semibold d-flex align-items-center gap-1" onClick={() => setShowAddMemberModal(true)}>
-              <span>+</span> Add Member
-            </button>
+            <>
+              <button className="btn btn-teal fw-semibold d-flex align-items-center gap-1" onClick={() => setShowAddMemberModal(true)}>
+                <span>+</span> Add Member
+              </button>
+              <button className="btn btn-outline-danger fw-semibold d-flex align-items-center gap-1" onClick={handleDeleteGroup}>
+                Delete Group
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -205,6 +237,7 @@ const GroupDetail = () => {
                         <th>NIC Number</th>
                         <th>Status</th>
                         <th>Role</th>
+                        {(isOrganizer || isAdmin) && <th className="text-end">Action</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -230,11 +263,22 @@ const GroupDetail = () => {
                               {m.role || 'MEMBER'}
                             </span>
                           </td>
+                          {(isOrganizer || isAdmin) && (
+                            <td className="text-end">
+                              <button
+                                className="btn btn-sm btn-outline-danger py-1 px-2.5 rounded-2 small fw-semibold"
+                                onClick={() => handleRemoveMember(m.userId || m.id, m.fullName)}
+                                title="Remove member from group"
+                              >
+                                Remove
+                              </button>
+                            </td>
+                          )}
                         </tr>
                       ))}
                       {(!group.members || group.members.length === 0) && (
                         <tr>
-                          <td colSpan="6" className="text-center py-4 text-muted">No members enrolled yet.</td>
+                          <td colSpan={(isOrganizer || isAdmin) ? 7 : 6} className="text-center py-4 text-muted">No members enrolled yet.</td>
                         </tr>
                       )}
                     </tbody>

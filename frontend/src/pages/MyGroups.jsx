@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { getGroupsByUser, getAllGroups } from '../api/groupApi';
+import { getGroupsByUser, getAllGroups, deleteGroup } from '../api/groupApi';
 import { createJoinRequest } from '../api/joinRequestApi';
 import Icon from '../components/Icons';
 
@@ -139,9 +139,17 @@ const MyGroups = () => {
     }
   };
 
-  const handleDeleteGroup = (groupId, groupName) => {
-    if (window.confirm(`Are you sure you want to delete the group "${groupName}"?`)) {
-      setGroups(groups.filter(g => g.id !== groupId));
+  const handleDeleteGroup = async (groupId, groupName) => {
+    if (!window.confirm(`Are you sure you want to delete the group "${groupName}"?`)) {
+      return;
+    }
+    try {
+      await deleteGroup(groupId);
+      alert(`Group "${groupName}" deleted successfully.`);
+      fetchGroups();
+    } catch (err) {
+      console.error('Failed to delete group:', err);
+      alert(err.response?.data?.message || 'Failed to delete group from database.');
     }
   };
 
