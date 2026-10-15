@@ -597,111 +597,255 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* About Us Section */}
-      <section id="about" className="py-5" style={{ backgroundColor: '#F8FAFC' }}>
+      {/* Welcome & Core Features Showcase (Jayapriya 3-Column Architecture matching brand theme & documentation) */}
+      <section id="about" className="py-5 bg-white border-bottom">
         <div className="container py-4">
-          <div className="row align-items-center g-5">
+          
+          {/* Section Header */}
+          <div className="text-center mb-5">
+            <span className="text-uppercase fw-bold" style={{ color: '#0097B2', letterSpacing: '2px', fontSize: '0.85rem' }}>
+              WELCOME TO
+            </span>
+            <h2 className="fw-black display-6 mt-1 mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <span style={{ color: '#003847', fontWeight: 900 }}>Seettu</span>
+              <span style={{ color: '#0097B2', fontWeight: 900 }}>Manager</span>{' '}
+              <span style={{ color: '#0F2F3D', fontWeight: 800 }}>Pvt. Ltd.,</span>
+            </h2>
+            <p className="lead text-secondary mx-auto mb-0" style={{ maxWidth: '820px', fontSize: '1.05rem', lineHeight: '1.6' }}>
+              Saving and Investing is a lifelong process. The sooner you start; the better off you'll be in the long run. Smart way to save and borrow.
+            </p>
+          </div>
+
+          {/* 3-Column Features Architecture */}
+          <div className="row g-4 align-items-stretch">
             
-            {/* Left Column: Mission, Heritage & Purpose */}
-            <div className="col-lg-6">
-              <span className="text-uppercase fw-bold small" style={{ color: '#0097B2', letterSpacing: '1.5px' }}>
-                ABOUT SEETTUMANAGER
-              </span>
-              <h2 className="fw-bold display-6 text-dark mt-2 mb-3" style={{ color: '#0F2F3D' }}>
-                Preserving Sri Lankan Tradition Through Modern Financial Technology
-              </h2>
-              <p className="lead text-secondary mb-3" style={{ fontSize: '1.05rem', lineHeight: '1.7' }}>
-                For generations, the traditional <strong>Seettu (සීට්ටු / சீட்டு)</strong> system has served as the financial backbone for Sri Lankan families, market traders, farmers, and self-help circles to save collectively and access interest-free lump sums.
-              </p>
-              <p className="text-muted mb-4" style={{ fontSize: '0.95rem', lineHeight: '1.7' }}>
-                <strong>SeettuManager</strong> was engineered to solve the vulnerabilities of handwritten exercise books, forgotten payments, and trust disputes. We provide community organizers and members with an automated digital ledger, rotation calendar, dispute resolution tracking, and an algorithmic 0–100 Financial Discipline Rating.
-              </p>
-
-              <div className="row g-3 pt-2">
-                <div className="col-sm-6">
-                  <div className="p-3 bg-white rounded-3 border h-100 shadow-xs">
-                    <div className="d-flex align-items-center gap-2 mb-1">
-                      <div className="p-1.5 rounded-2 text-white" style={{ backgroundColor: '#0097B2' }}>
-                        <Icon name="shield" size={16} />
-                      </div>
-                      <h6 className="fw-bold mb-0 text-dark">Zero Dispute Risk</h6>
-                    </div>
-                    <p className="text-muted small mb-0">Bank slip proof uploads & immutable ledger records eliminate payment confusion.</p>
+            {/* Left Column: 3 Core Pillars */}
+            <div className="col-lg-4 col-md-6">
+              <div className="d-flex flex-column justify-content-between h-100 gap-4 gap-lg-5 pe-lg-3">
+                
+                {/* Feature 1: Discipline Score & Expert People */}
+                <div className="d-flex align-items-start gap-3">
+                  <div 
+                    className="d-flex align-items-center justify-content-center flex-shrink-0 rounded-3 shadow-xs"
+                    style={{ 
+                      width: '54px', 
+                      height: '54px', 
+                      backgroundColor: 'rgba(0, 151, 178, 0.1)', 
+                      color: '#0097B2',
+                      border: '1.5px solid rgba(0, 151, 178, 0.25)'
+                    }}
+                  >
+                    <Icon name="award" size={26} />
+                  </div>
+                  <div>
+                    <h5 className="fw-bold mb-1" style={{ color: '#0F2F3D', fontSize: '1.15rem' }}>
+                      Financial Discipline Score
+                    </h5>
+                    <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
+                      Algorithmic 0–100 reliability scoring based on payment punctuality. Builds trusted creditability and eliminates default risks.
+                    </p>
                   </div>
                 </div>
 
-                <div className="col-sm-6">
-                  <div className="p-3 bg-white rounded-3 border h-100 shadow-xs">
-                    <div className="d-flex align-items-center gap-2 mb-1">
-                      <div className="p-1.5 rounded-2 text-white" style={{ backgroundColor: '#0F2F3D' }}>
-                        <Icon name="award" size={16} />
-                      </div>
-                      <h6 className="fw-bold mb-0 text-dark">Verified Ratings</h6>
-                    </div>
-                    <p className="text-muted small mb-0">Build lifelong financial creditability through verified 0–100 discipline certificates.</p>
+                {/* Feature 2: Become an Organizer */}
+                <div className="d-flex align-items-start gap-3">
+                  <div 
+                    className="d-flex align-items-center justify-content-center flex-shrink-0 rounded-3 shadow-xs"
+                    style={{ 
+                      width: '54px', 
+                      height: '54px', 
+                      backgroundColor: 'rgba(0, 151, 178, 0.1)', 
+                      color: '#0097B2',
+                      border: '1.5px solid rgba(0, 151, 178, 0.25)'
+                    }}
+                  >
+                    <Icon name="user-check" size={26} />
+                  </div>
+                  <div>
+                    <h5 className="fw-bold mb-1" style={{ color: '#0F2F3D', fontSize: '1.15rem' }}>
+                      Become an Organizer
+                    </h5>
+                    <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
+                      Your community calling: create private or village circles, set custom rules, and lead your circle with automated rotations.
+                    </p>
                   </div>
                 </div>
+
+                {/* Feature 3: Option to Pay Installment */}
+                <div className="d-flex align-items-start gap-3">
+                  <div 
+                    className="d-flex align-items-center justify-content-center flex-shrink-0 rounded-3 shadow-xs"
+                    style={{ 
+                      width: '54px', 
+                      height: '54px', 
+                      backgroundColor: 'rgba(0, 151, 178, 0.1)', 
+                      color: '#0097B2',
+                      border: '1.5px solid rgba(0, 151, 178, 0.25)'
+                    }}
+                  >
+                    <Icon name="credit-card" size={26} />
+                  </div>
+                  <div>
+                    <h5 className="fw-bold mb-1" style={{ color: '#0F2F3D', fontSize: '1.15rem' }}>
+                      Option to Pay Your Installment
+                    </h5>
+                    <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
+                      Flexible contribution periods on a daily, weekly, or monthly basis with offline cash tracking and instant bank slip verification.
+                    </p>
+                  </div>
+                </div>
+
               </div>
             </div>
 
-            {/* Right Column: Visual Trust Card */}
-            <div className="col-lg-6">
-              <div className="fintech-card p-4 p-md-5 bg-white position-relative overflow-hidden">
-                <div className="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+            {/* Center Column: Central Featured Building / Community Visual with Center Action Badge */}
+            <div className="col-lg-4 col-md-12 order-first order-lg-0 mb-4 mb-lg-0">
+              <div 
+                className="position-relative rounded-4 overflow-hidden shadow-lg border h-100 d-flex flex-column justify-content-center align-items-center"
+                style={{ minHeight: '380px', backgroundColor: '#0F2F3D' }}
+              >
+                <img 
+                  src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80" 
+                  alt="SeettuManager Sri Lanka Center" 
+                  className="w-100 h-100 object-fit-cover position-absolute top-0 start-0"
+                  style={{ opacity: 0.88, objectFit: 'cover' }}
+                />
+
+                {/* Dark Vignette & Brand Gradient Overlay */}
+                <div 
+                  className="position-absolute top-0 start-0 w-100 h-100" 
+                  style={{ background: 'linear-gradient(180deg, rgba(15,47,61,0.6) 0%, rgba(15,47,61,0.2) 50%, rgba(15,47,61,0.8) 100%)' }}
+                />
+
+                {/* Rooftop Signboard / Billboard (Matching Reference Style) */}
+                <div 
+                  className="position-absolute top-0 start-50 translate-middle-x mt-3 px-3 py-1.5 rounded-2 shadow text-center text-white" 
+                  style={{ backgroundColor: '#0097B2', border: '2px solid #ffffff', zIndex: 2 }}
+                >
+                  <div className="fw-extrabold text-uppercase" style={{ fontSize: '0.78rem', letterSpacing: '1.2px' }}>
+                    SEETTUMANAGER
+                  </div>
+                  <div style={{ fontSize: '0.62rem', fontWeight: 600, opacity: 0.95 }}>
+                    DIGITAL ROTATING SAVINGS
+                  </div>
+                </div>
+
+                {/* Center Circular Badge / Action Button (Matching Reference) */}
+                <div className="position-relative my-auto text-center" style={{ zIndex: 2 }}>
+                  <a 
+                    href="#how-it-works"
+                    className="rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg text-decoration-none"
+                    style={{
+                      width: '68px',
+                      height: '68px',
+                      backgroundColor: '#0097B2',
+                      border: '4px solid #ffffff',
+                      color: '#ffffff',
+                      transition: 'transform 0.25s ease, background-color 0.25s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1.0)'}
+                    title="Watch How SeettuManager Works"
+                    aria-label="How SeettuManager Works"
+                  >
+                    <Icon name="chevron-right" size={30} style={{ marginLeft: '3px' }} />
+                  </a>
+                </div>
+
+                {/* Bottom Trust Badge */}
+                <div className="position-absolute bottom-0 start-0 w-100 p-3 text-center text-white" style={{ zIndex: 2 }}>
+                  <div className="badge px-3 py-1.5 rounded-pill fw-bold" style={{ backgroundColor: 'rgba(0, 151, 178, 0.9)', fontSize: '0.75rem', letterSpacing: '0.5px' }}>
+                    100% NON-CUSTODIAL & SECURE
+                  </div>
+                  <div className="small text-white-50 mt-1" style={{ fontSize: '0.72rem' }}>
+                    Trilingual: English • සිංහල • தமிழ்
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Right Column: 3 Core Pillars */}
+            <div className="col-lg-4 col-md-6">
+              <div className="d-flex flex-column justify-content-between h-100 gap-4 gap-lg-5 ps-lg-3">
+                
+                {/* Feature 4: Payment Quality */}
+                <div className="d-flex align-items-start gap-3">
+                  <div 
+                    className="d-flex align-items-center justify-content-center flex-shrink-0 rounded-3 shadow-xs"
+                    style={{ 
+                      width: '54px', 
+                      height: '54px', 
+                      backgroundColor: 'rgba(0, 151, 178, 0.1)', 
+                      color: '#0097B2',
+                      border: '1.5px solid rgba(0, 151, 178, 0.25)'
+                    }}
+                  >
+                    <Icon name="clock" size={26} />
+                  </div>
                   <div>
-                    <h5 className="fw-bold text-dark mb-0" style={{ color: '#0F2F3D' }}>Sri Lanka's Digital Seettu Platform</h5>
-                    <small className="text-muted">Transparent Community Rotating Savings Platform</small>
-                  </div>
-                  <span className="badge px-3 py-2 text-white fw-bold rounded-pill" style={{ backgroundColor: '#0097B2' }}>
-                    100% Free & Open
-                  </span>
-                </div>
-
-                <div className="d-flex flex-column gap-3 mb-4">
-                  <div className="d-flex align-items-start gap-3">
-                    <div className="p-2 rounded-circle text-white mt-1" style={{ backgroundColor: '#0F2F3D' }}>
-                      <Icon name="check" size={14} />
-                    </div>
-                    <div>
-                      <h6 className="fw-bold text-dark mb-0.5">Non-Custodial & Transparent</h6>
-                      <p className="text-muted small mb-0">Actual cash handovers and bank transfers remain between members; SeettuManager serves as an impartial digital record-keeper.</p>
-                    </div>
-                  </div>
-
-                  <div className="d-flex align-items-start gap-3">
-                    <div className="p-2 rounded-circle text-white mt-1" style={{ backgroundColor: '#0097B2' }}>
-                      <Icon name="check" size={14} />
-                    </div>
-                    <div>
-                      <h6 className="fw-bold text-dark mb-0.5">Monetary & Physical Asset Seettu</h6>
-                      <p className="text-muted small mb-0">Full support for traditional Gold (රන් සීට්ටු), vehicles, agricultural tools, and household appliance rotation pools.</p>
-                    </div>
-                  </div>
-
-                  <div className="d-flex align-items-start gap-3">
-                    <div className="p-2 rounded-circle text-white mt-1" style={{ backgroundColor: '#FFB020' }}>
-                      <Icon name="check" size={14} />
-                    </div>
-                    <div>
-                      <h6 className="fw-bold text-dark mb-0.5">Trilingual Accessibility</h6>
-                      <p className="text-muted small mb-0">Engineered for all Sri Lankan communities with native support in Sinhala, Tamil, and English.</p>
-                    </div>
+                    <h5 className="fw-bold mb-1" style={{ color: '#0F2F3D', fontSize: '1.15rem' }}>
+                      Payment Quality & Payouts
+                    </h5>
+                    <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
+                      Automated rotation calendar guarantees on-time payouts. Every member receives their lump-sum safely on their scheduled cycle date.
+                    </p>
                   </div>
                 </div>
 
-                <div className="p-3 rounded-3 text-white d-flex align-items-center justify-content-between" style={{ backgroundColor: '#0F2F3D' }}>
+                {/* Feature 5: Joining Process */}
+                <div className="d-flex align-items-start gap-3">
+                  <div 
+                    className="d-flex align-items-center justify-content-center flex-shrink-0 rounded-3 shadow-xs"
+                    style={{ 
+                      width: '54px', 
+                      height: '54px', 
+                      backgroundColor: 'rgba(0, 151, 178, 0.1)', 
+                      color: '#0097B2',
+                      border: '1.5px solid rgba(0, 151, 178, 0.25)'
+                    }}
+                  >
+                    <Icon name="check-square" size={26} />
+                  </div>
                   <div>
-                    <div className="small text-white-50">Ready to modernize your savings?</div>
-                    <div className="fw-bold">Create or Join a Circle Today</div>
+                    <h5 className="fw-bold mb-1" style={{ color: '#0F2F3D', fontSize: '1.15rem' }}>
+                      Joining Process
+                    </h5>
+                    <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
+                      Easily join and pay into Seettu circles with zero paperwork. Instant phone verification, member directories, and transparent rules.
+                    </p>
                   </div>
-                  <Link to={user ? '/groups/create' : '/register'} className="btn btn-sm btn-info text-white fw-bold px-3 py-2 rounded-2" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}>
-                    Get Started →
-                  </Link>
                 </div>
+
+                {/* Feature 6: Secure */}
+                <div className="d-flex align-items-start gap-3">
+                  <div 
+                    className="d-flex align-items-center justify-content-center flex-shrink-0 rounded-3 shadow-xs"
+                    style={{ 
+                      width: '54px', 
+                      height: '54px', 
+                      backgroundColor: 'rgba(0, 151, 178, 0.1)', 
+                      color: '#0097B2',
+                      border: '1.5px solid rgba(0, 151, 178, 0.25)'
+                    }}
+                  >
+                    <Icon name="shield" size={26} />
+                  </div>
+                  <div>
+                    <h5 className="fw-bold mb-1" style={{ color: '#0F2F3D', fontSize: '1.15rem' }}>
+                      Secure & Non-Custodial
+                    </h5>
+                    <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
+                      Pay directly to organizer or members via bank transfer or cash with digital tamper-proof audit trails and duplicate payment prevention.
+                    </p>
+                  </div>
+                </div>
+
               </div>
             </div>
 
           </div>
+
         </div>
       </section>
 
