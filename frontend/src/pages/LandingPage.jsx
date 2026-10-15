@@ -3,25 +3,17 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../hooks/useLanguage';
 import Icon from '../components/Icons';
-import { getAllGroups } from '../api/groupApi';
 
 const LandingPage = () => {
   const { user } = useAuth();
   const { language, changeLanguage } = useLanguage();
 
   // State
-  const [selectedCategory, setSelectedCategory] = useState('ALL');
-  const [dbGroups, setDbGroups] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [openFaq, setOpenFaq] = useState(0);
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
-  // Calculator State
-  const [calcContribution, setCalcContribution] = useState(10000);
-  const [calcMembers, setCalcMembers] = useState(12);
-  const totalPot = calcContribution * calcMembers;
-
-  // Navigatable Hero Slides
+  // Navigatable Hero Slides (Traditional Sri Lankan Seettu Themes)
   const heroSlides = [
     {
       id: 0,
@@ -29,8 +21,8 @@ const LandingPage = () => {
       bannerTitle: 'HAPPY AND SATISFIED SEETTU MEMBERS',
       mainTitle: 'Traditional Community Savings, Powered by Digital Trust',
       subtitle: 'Digitize your village or neighborhood Seettu (සීට්ටු / சீட்டு) circle with transparent contribution logs, automated rotation cycles, and mutual financial discipline.',
-      cta: 'Explore Seettu Schemes',
-      link: '#schemes',
+      cta: 'Explore How It Works',
+      link: '#how-it-works',
       bgImage: 'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?auto=format&fit=crop&w=1600&q=80',
       badgeColor: '#0097B2'
     },
@@ -51,8 +43,8 @@ const LandingPage = () => {
       bannerTitle: 'GOLD & VALUABLE ASSET-BASED SEETTU',
       mainTitle: 'Preserve Family Wealth with Traditional Gold Rotations',
       subtitle: 'Organize high-value rotation pools for sovereign gold jewelry, farming equipment, and vehicles with verified item valuation.',
-      cta: 'Browse Gold & Asset Plans',
-      link: '#schemes',
+      cta: 'Learn About Asset Seettu',
+      link: '#about',
       bgImage: 'https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?auto=format&fit=crop&w=1600&q=80',
       badgeColor: '#FFB020'
     },
@@ -62,8 +54,8 @@ const LandingPage = () => {
       bannerTitle: 'VERIFIED 0–100 FINANCIAL DISCIPLINE RATINGS',
       mainTitle: 'Build Community Trust with Tamper-Proof Discipline Scores',
       subtitle: 'On-time monthly contributions award recognized discipline scores and unlock verified completion certificates for all group members.',
-      cta: 'Try Discipline Calculator',
-      link: '#calculator',
+      cta: 'About Our System',
+      link: '#about',
       bgImage: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80',
       badgeColor: '#0097B2'
     }
@@ -84,113 +76,6 @@ const LandingPage = () => {
   const handleNextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   };
-
-  // Fetch real database groups from backend Spring Boot API
-  useEffect(() => {
-    const fetchDbGroups = async () => {
-      try {
-        const groups = await getAllGroups();
-        if (groups && Array.isArray(groups) && groups.length > 0) {
-          const mapped = groups.map((g) => ({
-            id: g.id,
-            name: g.groupName || g.name || 'Seettu Group',
-            category: g.category || 'GENERAL',
-            contribution: g.monthlyContribution || g.contributionAmount || 10000,
-            members: g.totalMembers || g.memberCount || 12,
-            totalValue: (g.monthlyContribution || 10000) * (g.totalMembers || 12),
-            frequency: g.cycleFrequency || 'Monthly',
-            type: g.isNonMonetary ? 'Non-Monetary' : 'Monetary',
-            badge: g.status || 'Active'
-          }));
-          setDbGroups(mapped);
-        }
-      } catch (err) {
-        console.log('Using default schemes fallback:', err);
-      }
-    };
-    fetchDbGroups();
-  }, []);
-
-  const defaultSchemes = [
-    {
-      id: 1,
-      name: 'Gold Saver Monthly Seettu',
-      category: 'GOLD',
-      contribution: 15000,
-      members: 12,
-      totalValue: 180000,
-      frequency: 'Monthly',
-      type: 'Monetary',
-      badge: 'Popular',
-      icon: 'award'
-    },
-    {
-      id: 2,
-      name: 'Community Farmer Circle',
-      category: 'GENERAL',
-      contribution: 5000,
-      members: 20,
-      totalValue: 100000,
-      frequency: 'Monthly',
-      type: 'Monetary',
-      badge: 'Low Entry',
-      icon: 'users'
-    },
-    {
-      id: 3,
-      name: 'Small Business Equipment Seettu',
-      category: 'FURNITURE',
-      contribution: 25000,
-      members: 10,
-      totalValue: 250000,
-      frequency: 'Monthly',
-      type: 'Non-Monetary',
-      badge: 'Equipment',
-      icon: 'zap'
-    },
-    {
-      id: 4,
-      name: 'Express Weekly Micro Savings',
-      category: 'GENERAL',
-      contribution: 2500,
-      members: 8,
-      totalValue: 20000,
-      frequency: 'Weekly',
-      type: 'Monetary',
-      badge: 'Fast Payout',
-      icon: 'clock'
-    },
-    {
-      id: 5,
-      name: 'Vehicle & Transport Savings',
-      category: 'VEHICLE',
-      contribution: 50000,
-      members: 12,
-      totalValue: 600000,
-      frequency: 'Monthly',
-      type: 'Monetary',
-      badge: 'High Value',
-      icon: 'credit-card'
-    },
-    {
-      id: 6,
-      name: 'Home Appliances & Living',
-      category: 'FURNITURE',
-      contribution: 8000,
-      members: 15,
-      totalValue: 120000,
-      frequency: 'Monthly',
-      type: 'Non-Monetary',
-      badge: 'Goods Based',
-      icon: 'handshake'
-    }
-  ];
-
-  const schemes = dbGroups.length > 0 ? dbGroups : defaultSchemes;
-
-  const filteredSchemes = selectedCategory === 'ALL'
-    ? schemes
-    : schemes.filter(s => s.category === selectedCategory || (selectedCategory === 'NON_MONETARY' && s.type === 'Non-Monetary'));
 
   const faqs = [
     {
@@ -407,7 +292,7 @@ const LandingPage = () => {
           flex-direction: column;
         }
 
-        /* Fintech Cards & Buttons */
+        /* Fintech Cards */
         .fintech-card {
           background: #FFFFFF;
           border: 1px solid #E2E8F0;
@@ -419,27 +304,6 @@ const LandingPage = () => {
           transform: translateY(-3px);
           border-color: #0097B2;
           box-shadow: 0 12px 24px rgba(0, 151, 178, 0.1);
-        }
-        .filter-pill {
-          background-color: #F1F5F9;
-          color: #475569;
-          font-weight: 600;
-          font-size: 0.88rem;
-          padding: 8px 18px;
-          border-radius: 999px;
-          border: 1px solid transparent;
-          transition: all 0.2s ease;
-          cursor: pointer;
-        }
-        .filter-pill:hover {
-          background-color: #E2E8F0;
-          color: #0F2F3D;
-        }
-        .filter-pill.active {
-          background-color: #0F2F3D;
-          color: #FFFFFF;
-          border-color: #0F2F3D;
-          box-shadow: 0 4px 12px rgba(15, 47, 61, 0.2);
         }
         .stat-item {
           padding: 18px 24px;
@@ -457,21 +321,6 @@ const LandingPage = () => {
           font-size: 1.2rem;
           margin-bottom: 16px;
           border: 1px solid rgba(0, 151, 178, 0.2);
-        }
-        .calc-preset-btn {
-          background: #FFFFFF;
-          border: 1px solid #CBD5E1;
-          color: #334155;
-          font-size: 0.82rem;
-          font-weight: 600;
-          padding: 4px 12px;
-          border-radius: 6px;
-          transition: all 0.2s ease;
-        }
-        .calc-preset-btn:hover {
-          background: #E6F7F9;
-          border-color: #0097B2;
-          color: #0097B2;
         }
       `}</style>
 
@@ -574,13 +423,7 @@ const LandingPage = () => {
                 <a className="nav-link px-3 text-secondary" href="#about">About Us</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 text-secondary" href="#schemes">Schemes</a>
-              </li>
-              <li className="nav-item">
                 <a className="nav-link px-3 text-secondary" href="#how-it-works">How It Works</a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link px-3 text-secondary" href="#calculator">Discipline Calculator</a>
               </li>
               <li className="nav-item">
                 <a className="nav-link px-3 text-secondary" href="#faq">FAQs</a>
@@ -591,8 +434,8 @@ const LandingPage = () => {
             </ul>
 
             <div className="d-flex align-items-center gap-2">
-              <Link to="/groups" className="btn btn-outline-dark fw-bold px-3 py-2 rounded-2" style={{ borderColor: '#CBD5E1', color: '#0F2F3D', fontSize: '0.88rem' }}>
-                Browse Circles
+              <Link to={user ? '/groups/create' : '/register'} className="btn btn-outline-dark fw-bold px-3 py-2 rounded-2" style={{ borderColor: '#CBD5E1', color: '#0F2F3D', fontSize: '0.88rem' }}>
+                Create Circle
               </Link>
               <Link to={user ? '/dashboard' : '/register'} className="btn fw-bold text-white px-3 py-2 rounded-2 shadow-sm" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2', fontSize: '0.88rem' }}>
                 {user ? 'My Account' : 'Get Started'}
@@ -602,7 +445,7 @@ const LandingPage = () => {
         </div>
       </nav>
 
-      {/* Navigatable Image Hero Section (Reference Style with Project Theme) */}
+      {/* Navigatable Image Hero Section (Direct Photo Banner) */}
       <header 
         className="navigatable-hero text-white"
         style={{
@@ -688,12 +531,12 @@ const LandingPage = () => {
           </div>
         </div>
 
-        {/* Big Bold Banner Title Overlay on Bottom Right (Reference Style: HAPPY AND SATISFIED CUSTOMERS) */}
+        {/* Big Bold Banner Title Overlay on Bottom Right (Jayapriya Reference Style) */}
         <div className="hero-banner-title">
           {activeSlide.bannerTitle}
         </div>
 
-        {/* Navigatable Dash Indicators (Reference Image Style: Red/Teal Navigatable Dashes) */}
+        {/* Navigatable Dash Indicators (Reference Image Style) */}
         <div className="slide-indicator-bar">
           {heroSlides.map((slide, idx) => (
             <button
@@ -906,220 +749,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Featured Seettu Schemes Section */}
-      <section id="schemes" className="py-5" style={{ backgroundColor: '#F8FAFC' }}>
-        <div className="container py-4">
-          <div className="text-center mb-5">
-            <span className="text-uppercase fw-bold text-muted small" style={{ letterSpacing: '1px' }}>
-              Explore Available Plans
-            </span>
-            <h2 className="fw-bold display-6 text-dark mt-1 mb-2" style={{ color: '#0F2F3D' }}>
-              Featured Seettu Schemes
-            </h2>
-            <p className="text-muted lead mx-auto" style={{ maxWidth: '620px', fontSize: '1.05rem' }}>
-              Discover active monetary savings pools and asset plans organized by verified community organizers.
-            </p>
-
-            {/* Clean Segmented Filter Chips */}
-            <div className="d-flex flex-wrap justify-content-center gap-2 mt-4">
-              {[
-                { id: 'ALL', label: 'All Schemes' },
-                { id: 'GENERAL', label: 'Cash Savings' },
-                { id: 'GOLD', label: 'Gold Seettu' },
-                { id: 'VEHICLE', label: 'Vehicles' },
-                { id: 'FURNITURE', label: 'Home Appliances' },
-                { id: 'NON_MONETARY', label: 'Non-Monetary' }
-              ].map(cat => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`filter-pill ${selectedCategory === cat.id ? 'active' : ''}`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Scheme Cards Grid */}
-          <div className="row g-4">
-            {filteredSchemes.map((s) => (
-              <div key={s.id} className="col-md-6 col-lg-4">
-                <div className="fintech-card h-100 p-4 d-flex flex-column justify-content-between">
-                  <div>
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                      <span className="badge bg-light text-dark fw-bold px-2.5 py-1 rounded-pill border small">
-                        {s.type}
-                      </span>
-                      <span className="badge text-white fw-bold px-2.5 py-1 rounded-pill small" style={{ backgroundColor: '#0097B2' }}>
-                        {s.badge}
-                      </span>
-                    </div>
-
-                    <h5 className="fw-bold text-dark mb-2" style={{ color: '#0F2F3D' }}>{s.name}</h5>
-                    <p className="text-muted small mb-3">Organized rotation pool with automated tracking and dispute audit trail.</p>
-
-                    <div className="bg-light p-3 rounded-3 mb-3 border">
-                      <div className="d-flex justify-content-between mb-1.5 small">
-                        <span className="text-muted">Monthly Contribution:</span>
-                        <span className="fw-bold text-dark">{s.contribution.toLocaleString()} LKR</span>
-                      </div>
-                      <div className="d-flex justify-content-between mb-1.5 small">
-                        <span className="text-muted">Total Members:</span>
-                        <span className="fw-semibold text-dark">{s.members} Members</span>
-                      </div>
-                      <div className="d-flex justify-content-between border-top pt-2 mt-2">
-                        <span className="fw-bold text-dark small">Total Pool Value:</span>
-                        <span className="fw-extrabold" style={{ color: '#0097B2' }}>{s.totalValue.toLocaleString()} LKR</span>
-                      </div>
-                    </div>
-
-                    <div className="d-flex align-items-center gap-2 text-muted small mb-3">
-                      <Icon name="clock" size={15} />
-                      <span>Rotation: {s.frequency}</span>
-                    </div>
-                  </div>
-
-                  <Link 
-                    to={user ? '/groups' : '/register'} 
-                    className="btn btn-outline-dark w-100 fw-bold py-2 rounded-2 mt-2"
-                    style={{ borderColor: '#CBD5E1', color: '#0F2F3D' }}
-                  >
-                    {user ? 'View Scheme Details' : 'Join Scheme →'}
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Interactive Seettu Calculator Section */}
-      <section id="calculator" className="py-5 bg-white border-top border-bottom">
-        <div className="container py-4">
-          <div className="row align-items-center g-5">
-            
-            {/* Controls */}
-            <div className="col-lg-6">
-              <span className="text-uppercase fw-bold text-muted small" style={{ letterSpacing: '1px' }}>
-                Interactive Projection
-              </span>
-              <h2 className="fw-bold display-6 mb-3 text-dark mt-1" style={{ color: '#0F2F3D' }}>
-                Calculate Your Group Rotation Pool
-              </h2>
-              <p className="text-muted lead mb-4" style={{ fontSize: '1.05rem' }}>
-                Simulate your savings circle size, monthly member contributions, payout cycles, and expected financial discipline target.
-              </p>
-
-              <div className="bg-light p-4 rounded-4 border">
-                
-                {/* Contribution Slider */}
-                <div className="mb-4">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <label className="form-label fw-bold text-dark mb-0">Monthly Contribution per Member:</label>
-                    <span className="fw-extrabold fs-5" style={{ color: '#0097B2' }}>
-                      {calcContribution.toLocaleString()} LKR
-                    </span>
-                  </div>
-                  <input 
-                    type="range" 
-                    className="form-range" 
-                    min="1000" 
-                    max="100000" 
-                    step="1000"
-                    value={calcContribution}
-                    onChange={(e) => setCalcContribution(Number(e.target.value))}
-                  />
-                  {/* Presets */}
-                  <div className="d-flex gap-2 mt-2">
-                    {[5000, 10000, 25000, 50000].map((val) => (
-                      <button 
-                        key={val} 
-                        type="button" 
-                        className="calc-preset-btn"
-                        onClick={() => setCalcContribution(val)}
-                      >
-                        {val.toLocaleString()} LKR
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Members Slider */}
-                <div>
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <label className="form-label fw-bold text-dark mb-0">Number of Group Members:</label>
-                    <span className="fw-extrabold fs-5" style={{ color: '#0097B2' }}>
-                      {calcMembers} Members
-                    </span>
-                  </div>
-                  <input 
-                    type="range" 
-                    className="form-range" 
-                    min="3" 
-                    max="36" 
-                    step="1"
-                    value={calcMembers}
-                    onChange={(e) => setCalcMembers(Number(e.target.value))}
-                  />
-                  {/* Presets */}
-                  <div className="d-flex gap-2 mt-2">
-                    {[6, 12, 18, 24].map((cnt) => (
-                      <button 
-                        key={cnt} 
-                        type="button" 
-                        className="calc-preset-btn"
-                        onClick={() => setCalcMembers(cnt)}
-                      >
-                        {cnt} Members
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* Projection Summary Card */}
-            <div className="col-lg-6">
-              <div className="p-4 p-md-5 rounded-4 text-white shadow-lg" style={{ backgroundColor: '#0F2F3D' }}>
-                <div className="d-flex align-items-center justify-content-between mb-3">
-                  <span className="text-white-50 text-uppercase small fw-bold tracking-wider">Lump-Sum Payout Pool</span>
-                  <span className="badge bg-white-subtle text-white border border-light border-opacity-25 px-2.5 py-1 rounded-pill small">
-                    Calculated Live
-                  </span>
-                </div>
-                
-                <h1 className="display-4 fw-extrabold text-white mb-4" style={{ letterSpacing: '-0.02em' }}>
-                  LKR {totalPot.toLocaleString()}
-                </h1>
-
-                <div className="row g-3 py-3 border-top border-bottom border-light border-opacity-10 mb-4">
-                  <div className="col-6">
-                    <div className="text-white-50 small">Cycle Duration:</div>
-                    <div className="fw-bold text-white fs-5">{calcMembers} Months</div>
-                  </div>
-                  <div className="col-6">
-                    <div className="text-white-50 small">Discipline Target:</div>
-                    <div className="fw-bold text-success fs-5">95 / 100 [High]</div>
-                  </div>
-                </div>
-
-                <Link 
-                  to={user ? '/groups/create' : '/register'} 
-                  className="btn btn-lg w-100 fw-bold text-white rounded-2 shadow-sm d-flex align-items-center justify-content-center gap-2"
-                  style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
-                >
-                  <span>Start Group with this Projection</span>
-                  <Icon name="chevron-right" size={18} />
-                </Link>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
       {/* Frequently Asked Questions */}
       <section id="faq" className="py-5" style={{ backgroundColor: '#F8FAFC' }}>
         <div className="container py-4">
@@ -1310,11 +939,10 @@ const LandingPage = () => {
               <h6 className="fw-bold text-white mb-3 text-uppercase fs-7" style={{ letterSpacing: '1px' }}>Quick Navigation</h6>
               <ul className="list-unstyled text-white-50 small mb-0 d-flex flex-column gap-2">
                 <li><a href="#about" className="text-white-50 text-decoration-none">About Us</a></li>
-                <li><a href="#schemes" className="text-white-50 text-decoration-none">Available Schemes</a></li>
                 <li><a href="#how-it-works" className="text-white-50 text-decoration-none">How It Works</a></li>
-                <li><a href="#calculator" className="text-white-50 text-decoration-none">Discipline Calculator</a></li>
                 <li><Link to="/certificates" className="text-white-50 text-decoration-none">Verify Certificate</Link></li>
                 <li><Link to="/disputes" className="text-white-50 text-decoration-none">Dispute Resolution</Link></li>
+                <li><a href="#contact" className="text-white-50 text-decoration-none">Contact Us</a></li>
               </ul>
             </div>
 
