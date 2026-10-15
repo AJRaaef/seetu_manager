@@ -232,13 +232,13 @@ const LandingPage = () => {
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        /* Navigatable Hero Slider */
+        /* Direct Clear Hero Slider (No Glassmorphism) */
         .navigatable-hero {
           position: relative;
           min-height: 520px;
           background-size: cover;
           background-position: center;
-          transition: background-image 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: background-image 0.4s ease-in-out;
           display: flex;
           align-items: center;
           overflow: hidden;
@@ -249,18 +249,22 @@ const LandingPage = () => {
           }
         }
         
-        /* Subtle Vignette Overlay for Readability */
-        .hero-vignette {
+        /* Subtle Bottom Shade (Only at Bottom for Title and Nav Indicators) */
+        .hero-bottom-shade {
           position: absolute;
-          inset: 0;
-          background: linear-gradient(90deg, rgba(15, 47, 61, 0.88) 0%, rgba(15, 47, 61, 0.6) 45%, rgba(15, 47, 61, 0.15) 100%);
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 140px;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, transparent 100%);
           z-index: 1;
+          pointer-events: none;
         }
         
-        /* Big Bold Bottom-Right Banner Title (Jayapriya Reference Style) */
+        /* Direct Big Bold Bottom-Right Banner Title (Jayapriya Reference Style) */
         .hero-banner-title {
           position: absolute;
-          bottom: 32px;
+          bottom: 30px;
           right: 48px;
           z-index: 2;
           color: #FFFFFF;
@@ -268,7 +272,7 @@ const LandingPage = () => {
           font-size: 1.75rem;
           letter-spacing: 1.5px;
           text-transform: uppercase;
-          text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 3px #000;
           pointer-events: none;
         }
         @media (max-width: 768px) {
@@ -289,22 +293,22 @@ const LandingPage = () => {
           gap: 10px;
         }
         .slide-dash {
-          width: 28px;
+          width: 30px;
           height: 5px;
           border-radius: 3px;
-          background-color: rgba(255, 255, 255, 0.4);
+          background-color: rgba(255, 255, 255, 0.6);
           border: none;
           padding: 0;
-          transition: all 0.3s ease;
+          transition: all 0.25s ease;
           cursor: pointer;
         }
         .slide-dash.active {
-          width: 50px;
+          width: 54px;
           background-color: #0097B2;
-          box-shadow: 0 0 10px rgba(0, 151, 178, 0.8);
+          box-shadow: 0 0 8px rgba(0, 151, 178, 0.9);
         }
 
-        /* Navigation Arrows */
+        /* Solid Direct Navigation Arrows (No Blur) */
         .hero-arrow-btn {
           position: absolute;
           top: 50%;
@@ -313,20 +317,20 @@ const LandingPage = () => {
           width: 44px;
           height: 44px;
           border-radius: 50%;
-          background: rgba(15, 47, 61, 0.7);
-          backdrop-filter: blur(6px);
+          background: #0F2F3D;
           color: #FFFFFF;
-          border: 1px solid rgba(255, 255, 255, 0.25);
+          border: 2px solid #FFFFFF;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: all 0.25s ease;
+          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+          transition: all 0.2s ease;
         }
         .hero-arrow-btn:hover {
           background: #0097B2;
-          border-color: #0097B2;
-          transform: translateY(-50%) scale(1.08);
+          border-color: #FFFFFF;
+          transform: translateY(-50%) scale(1.1);
           color: #FFFFFF;
         }
         .hero-arrow-prev {
@@ -602,8 +606,8 @@ const LandingPage = () => {
           backgroundImage: `url(${activeSlide.bgImage})`
         }}
       >
-        {/* Dark Vignette Overlay for Readability */}
-        <div className="hero-vignette"></div>
+        {/* Subtle Bottom Shade (Only at Bottom for Indicators & Title) */}
+        <div className="hero-bottom-shade"></div>
 
         {/* Previous Slide Arrow */}
         <button 
@@ -625,26 +629,26 @@ const LandingPage = () => {
           <Icon name="chevron-right" size={22} />
         </button>
 
-        {/* Content Box */}
+        {/* Direct Content Overlay */}
         <div className="container position-relative py-5" style={{ zIndex: 2 }}>
           <div className="row align-items-center">
             <div className="col-lg-7 col-xl-6">
               
               {/* Tag Chip */}
               <span 
-                className="badge px-3 py-2 rounded-pill fw-bold mb-3 d-inline-flex align-items-center gap-1.5"
+                className="badge px-3 py-2 rounded-pill fw-bold mb-3 d-inline-flex align-items-center gap-1.5 shadow"
                 style={{ backgroundColor: activeSlide.badgeColor, fontSize: '0.78rem', letterSpacing: '0.5px' }}
               >
                 ● {activeSlide.tag}
               </span>
 
               {/* Main Headline */}
-              <h1 className="display-4 fw-extrabold text-white mb-3 lh-sm" style={{ letterSpacing: '-0.02em', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+              <h1 className="display-4 fw-extrabold text-white mb-3 lh-sm" style={{ letterSpacing: '-0.02em', textShadow: '0 2px 10px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.9)' }}>
                 {activeSlide.mainTitle}
               </h1>
 
               {/* Subtitle */}
-              <p className="lead text-white-50 mb-4 fs-5" style={{ maxWidth: '580px', lineHeight: '1.6', textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
+              <p className="lead text-white mb-4 fs-5 fw-medium" style={{ maxWidth: '580px', lineHeight: '1.6', textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 1px 3px #000' }}>
                 {activeSlide.subtitle}
               </p>
 
@@ -669,8 +673,8 @@ const LandingPage = () => {
                 {!user && (
                   <Link 
                     to="/login" 
-                    className="btn btn-lg fw-semibold btn-outline-light px-4 py-3 rounded-2"
-                    style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(255,255,255,0.1)' }}
+                    className="btn btn-lg fw-bold text-white px-4 py-3 rounded-2 shadow-lg"
+                    style={{ backgroundColor: '#0F2F3D', borderColor: '#0F2F3D' }}
                   >
                     Member Sign In
                   </Link>
