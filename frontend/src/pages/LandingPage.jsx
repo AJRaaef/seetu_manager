@@ -571,6 +571,9 @@ const LandingPage = () => {
                 <a className="nav-link px-3 active fw-bold" style={{ color: '#0097B2' }} href="#">Home</a>
               </li>
               <li className="nav-item">
+                <a className="nav-link px-3 text-secondary" href="#about">About Us</a>
+              </li>
+              <li className="nav-item">
                 <a className="nav-link px-3 text-secondary" href="#schemes">Schemes</a>
               </li>
               <li className="nav-item">
@@ -732,6 +735,114 @@ const LandingPage = () => {
                 <p className="text-muted small mb-0 fw-semibold">Gold, Vehicles & Goods</p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Us Section */}
+      <section id="about" className="py-5" style={{ backgroundColor: '#F8FAFC' }}>
+        <div className="container py-4">
+          <div className="row align-items-center g-5">
+            
+            {/* Left Column: Mission, Heritage & Purpose */}
+            <div className="col-lg-6">
+              <span className="text-uppercase fw-bold small" style={{ color: '#0097B2', letterSpacing: '1.5px' }}>
+                ABOUT SEETTUMANAGER
+              </span>
+              <h2 className="fw-bold display-6 text-dark mt-2 mb-3" style={{ color: '#0F2F3D' }}>
+                Preserving Sri Lankan Tradition Through Modern Financial Technology
+              </h2>
+              <p className="lead text-secondary mb-3" style={{ fontSize: '1.05rem', lineHeight: '1.7' }}>
+                For generations, the traditional <strong>Seettu (සීට්ටු / சீட்டு)</strong> system has served as the financial backbone for Sri Lankan families, market traders, farmers, and self-help circles to save collectively and access interest-free lump sums.
+              </p>
+              <p className="text-muted mb-4" style={{ fontSize: '0.95rem', lineHeight: '1.7' }}>
+                <strong>SeettuManager</strong> was developed at the <em>Institute of Technology University of Moratuwa (ITUM)</em> to solve the vulnerabilities of handwritten exercise books, forgotten payments, and trust disputes. We provide community organizers and members with an automated digital ledger, rotation calendar, dispute resolution tracking, and an algorithmic 0–100 Financial Discipline Rating.
+              </p>
+
+              <div className="row g-3 pt-2">
+                <div className="col-sm-6">
+                  <div className="p-3 bg-white rounded-3 border h-100 shadow-xs">
+                    <div className="d-flex align-items-center gap-2 mb-1">
+                      <div className="p-1.5 rounded-2 text-white" style={{ backgroundColor: '#0097B2' }}>
+                        <Icon name="shield" size={16} />
+                      </div>
+                      <h6 className="fw-bold mb-0 text-dark">Zero Dispute Risk</h6>
+                    </div>
+                    <p className="text-muted small mb-0">Bank slip proof uploads & immutable ledger records eliminate payment confusion.</p>
+                  </div>
+                </div>
+
+                <div className="col-sm-6">
+                  <div className="p-3 bg-white rounded-3 border h-100 shadow-xs">
+                    <div className="d-flex align-items-center gap-2 mb-1">
+                      <div className="p-1.5 rounded-2 text-white" style={{ backgroundColor: '#0F2F3D' }}>
+                        <Icon name="award" size={16} />
+                      </div>
+                      <h6 className="fw-bold mb-0 text-dark">Verified Ratings</h6>
+                    </div>
+                    <p className="text-muted small mb-0">Build lifelong financial creditability through verified 0–100 discipline certificates.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Visual Trust Card / Academic Affiliation */}
+            <div className="col-lg-6">
+              <div className="fintech-card p-4 p-md-5 bg-white position-relative overflow-hidden">
+                <div className="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+                  <div>
+                    <h5 className="fw-bold text-dark mb-0" style={{ color: '#0F2F3D' }}>Sri Lanka's Digital Seettu Platform</h5>
+                    <small className="text-muted">Division of Information Technology, ITUM Moratuwa</small>
+                  </div>
+                  <span className="badge px-3 py-2 text-white fw-bold rounded-pill" style={{ backgroundColor: '#0097B2' }}>
+                    100% Free & Open
+                  </span>
+                </div>
+
+                <div className="d-flex flex-column gap-3 mb-4">
+                  <div className="d-flex align-items-start gap-3">
+                    <div className="p-2 rounded-circle text-white mt-1" style={{ backgroundColor: '#0F2F3D' }}>
+                      <Icon name="check" size={14} />
+                    </div>
+                    <div>
+                      <h6 className="fw-bold text-dark mb-0.5">Non-Custodial & Transparent</h6>
+                      <p className="text-muted small mb-0">Actual cash handovers and bank transfers remain between members; SeettuManager serves as an impartial digital record-keeper.</p>
+                    </div>
+                  </div>
+
+                  <div className="d-flex align-items-start gap-3">
+                    <div className="p-2 rounded-circle text-white mt-1" style={{ backgroundColor: '#0097B2' }}>
+                      <Icon name="check" size={14} />
+                    </div>
+                    <div>
+                      <h6 className="fw-bold text-dark mb-0.5">Monetary & Physical Asset Seettu</h6>
+                      <p className="text-muted small mb-0">Full support for traditional Gold (රන් සීට්ටු), vehicles, agricultural tools, and household appliance rotation pools.</p>
+                    </div>
+                  </div>
+
+                  <div className="d-flex align-items-start gap-3">
+                    <div className="p-2 rounded-circle text-white mt-1" style={{ backgroundColor: '#FFB020' }}>
+                      <Icon name="check" size={14} />
+                    </div>
+                    <div>
+                      <h6 className="fw-bold text-dark mb-0.5">Trilingual Accessibility</h6>
+                      <p className="text-muted small mb-0">Engineered for all Sri Lankan communities with native support in Sinhala, Tamil, and English.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-3 text-white d-flex align-items-center justify-content-between" style={{ backgroundColor: '#0F2F3D' }}>
+                  <div>
+                    <div className="small text-white-50">Ready to modernize your savings?</div>
+                    <div className="fw-bold">Create or Join a Circle Today</div>
+                  </div>
+                  <Link to={user ? '/groups/create' : '/register'} className="btn btn-sm btn-info text-white fw-bold px-3 py-2 rounded-2" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}>
+                    Get Started →
+                  </Link>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
@@ -1198,6 +1309,7 @@ const LandingPage = () => {
             <div className="col-lg-3 col-md-3 col-6">
               <h6 className="fw-bold text-white mb-3 text-uppercase fs-7" style={{ letterSpacing: '1px' }}>Quick Navigation</h6>
               <ul className="list-unstyled text-white-50 small mb-0 d-flex flex-column gap-2">
+                <li><a href="#about" className="text-white-50 text-decoration-none">About Us</a></li>
                 <li><a href="#schemes" className="text-white-50 text-decoration-none">Available Schemes</a></li>
                 <li><a href="#how-it-works" className="text-white-50 text-decoration-none">How It Works</a></li>
                 <li><a href="#calculator" className="text-white-50 text-decoration-none">Discipline Calculator</a></li>
