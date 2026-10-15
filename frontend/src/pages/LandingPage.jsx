@@ -25,47 +25,47 @@ const LandingPage = () => {
   const heroSlides = [
     {
       id: 0,
-      tag: 'COMMUNITY TRUST & TRANSPARENCY',
+      tag: 'TRADITIONAL SRI LANKAN SEETTU (සීට්ටු / சீட்டு)',
       bannerTitle: 'HAPPY AND SATISFIED SEETTU MEMBERS',
-      mainTitle: 'Empowering Rotating Savings Groups in Sri Lanka',
-      subtitle: 'Join or manage transparent Seettu circles with automated payment ledgers, scheduled rotation payouts, and verified 0–100 discipline ratings.',
+      mainTitle: 'Traditional Community Savings, Powered by Digital Trust',
+      subtitle: 'Digitize your village or neighborhood Seettu (සීට්ටු / சீட்டு) circle with transparent contribution logs, automated rotation cycles, and mutual financial discipline.',
       cta: 'Explore Seettu Schemes',
       link: '#schemes',
-      bgImage: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1600&q=80',
+      bgImage: 'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?auto=format&fit=crop&w=1600&q=80',
       badgeColor: '#0097B2'
     },
     {
       id: 1,
-      tag: 'SEAMLESS ROTATION MANAGEMENT',
-      bannerTitle: 'AUTOMATED PAYMENT LEDGERS & SCHEDULED PAYOUTS',
-      mainTitle: 'Digital Record-Keeping for Modern Savings Circles',
-      subtitle: 'Eliminate paper disputes with automatic cycle calendar dates, bank slip uploads, payout tracking, and member confirmation alerts.',
+      tag: 'LOCAL TRADERS & COMMUNITY MERCHANTS',
+      bannerTitle: 'TRANSPARENT ROTATIONS & SCHEDULED PAYOUTS',
+      mainTitle: 'Automated Record-Keeping for Sri Lankan Savings Groups',
+      subtitle: 'Eliminate forgotten payments and handwritten notebook disputes. Manage cash handovers, bank slip verifications, and scheduled lump-sum payouts seamlessly.',
       cta: 'Create a Seettu Group',
       link: user ? '/groups/create' : '/register',
-      bgImage: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1600&q=80',
+      bgImage: 'https://images.unsplash.com/photo-1556742044-3c52d6e88c62?auto=format&fit=crop&w=1600&q=80',
       badgeColor: '#0F2F3D'
     },
     {
       id: 2,
-      tag: 'ITUM-ALIGNED ALGORITHM',
-      bannerTitle: 'VERIFIED 0–100 FINANCIAL DISCIPLINE RATINGS',
-      mainTitle: 'Build Recognized Financial Credibility Across Groups',
-      subtitle: 'On-time monthly payments award verified discipline ratings and unlock digital completion certificates backed by ITUM research.',
-      cta: 'Try Discipline Calculator',
-      link: '#calculator',
-      bgImage: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1600&q=80',
-      badgeColor: '#0097B2'
+      tag: 'TRADITIONAL GOLD SEETTU (රන් සීට්ටු / தங்கச் சீட்டு)',
+      bannerTitle: 'GOLD & VALUABLE ASSET-BASED SEETTU',
+      mainTitle: 'Preserve Family Wealth with Traditional Gold Rotations',
+      subtitle: 'Organize high-value rotation pools for sovereign gold jewelry, farming equipment, and vehicles with verified item valuation.',
+      cta: 'Browse Gold & Asset Plans',
+      link: '#schemes',
+      bgImage: 'https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?auto=format&fit=crop&w=1600&q=80',
+      badgeColor: '#FFB020'
     },
     {
       id: 3,
-      tag: 'NON-MONETARY ASSET SAVINGS',
-      bannerTitle: 'GOLD, VEHICLE & APPLIANCE ROTATIONAL PLANS',
-      mainTitle: 'Diversify Savings with Physical Asset Seettu Pools',
-      subtitle: 'Organize high-value rotation pools for sovereign gold jewelry, vehicles, and home appliances with transparent valuation.',
-      cta: 'Browse Asset Plans',
-      link: '#schemes',
-      bgImage: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=1600&q=80',
-      badgeColor: '#FFB020'
+      tag: 'VERIFIED DISCIPLINE SCORING',
+      bannerTitle: 'VERIFIED 0–100 FINANCIAL DISCIPLINE RATINGS',
+      mainTitle: 'Build Community Trust with Tamper-Proof Discipline Scores',
+      subtitle: 'On-time monthly contributions award recognized discipline scores and unlock verified completion certificates for all group members.',
+      cta: 'Try Discipline Calculator',
+      link: '#calculator',
+      bgImage: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80',
+      badgeColor: '#0097B2'
     }
   ];
 
