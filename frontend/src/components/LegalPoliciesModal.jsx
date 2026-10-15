@@ -306,14 +306,25 @@ export const LegalPoliciesModal = ({ isOpen, onClose, onAccept, initialTab = 'ru
                 {/* 3. Privacy & Policy */}
                 {activeTab === 'privacy' && (
                   <div>
-                    <div className="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
-                      <div className="p-2.5 rounded-3 text-white d-flex align-items-center justify-content-center" style={{ backgroundColor: '#0097B2', width: '44px', height: '44px' }}>
-                        <Icon name="shield" size={22} />
+                    <div className="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom flex-wrap gap-2">
+                      <div className="d-flex align-items-center gap-3">
+                        <div className="p-2.5 rounded-3 text-white d-flex align-items-center justify-content-center" style={{ backgroundColor: '#0097B2', width: '44px', height: '44px' }}>
+                          <Icon name="shield" size={22} />
+                        </div>
+                        <div>
+                          <h4 className="fw-bold mb-0 text-dark">Privacy & Personal Data Protection Policy</h4>
+                          <small className="text-muted">Compliant with the Personal Data Protection Act (PDPA) No. 9 of 2022 of Sri Lanka</small>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="fw-bold mb-0 text-dark">Privacy & Personal Data Protection Policy</h4>
-                        <small className="text-muted">Compliant with the Personal Data Protection Act (PDPA) No. 9 of 2022 of Sri Lanka</small>
-                      </div>
+                      <a 
+                        href="/privacy" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="btn btn-sm px-3 fw-bold text-white d-inline-flex align-items-center gap-1.5 shadow-sm"
+                        style={{ backgroundColor: '#0097B2' }}
+                      >
+                        Full Privacy Policy Page ↗
+                      </a>
                     </div>
 
                     <div className="alert alert-success border-0 p-3 rounded-3 mb-4 small d-flex align-items-start gap-2" style={{ backgroundColor: '#E8F5E9', color: '#1B5E20', borderLeft: '4px solid #2E7D32' }}>

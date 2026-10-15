@@ -24,6 +24,9 @@ import Reports from './pages/Reports';
 import Certificates from './pages/Certificates';
 import Notifications from './pages/Notifications';
 import ChitLaw from './pages/ChitLaw';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import LegalPage from './pages/LegalPage';
+import ContactPage from './pages/ContactPage';
 
 // Components
 import AppLayout from './components/AppLayout';
@@ -61,6 +64,20 @@ const MainLayout = () => {
       <Route path="/law" element={<ChitLaw />} />
       <Route path="/seettu-law" element={<ChitLaw />} />
       <Route path="/chit-law" element={<ChitLaw />} />
+      <Route path="/rules" element={<LegalPage defaultTab="rules" />} />
+      <Route path="/member-enrollment-rules" element={<LegalPage defaultTab="rules" />} />
+      <Route path="/complaints" element={<LegalPage defaultTab="complaints" />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<LegalPage defaultTab="terms" />} />
+      <Route path="/terms-and-conditions" element={<LegalPage defaultTab="terms" />} />
+      <Route path="/cancellation" element={<LegalPage defaultTab="cancellation" />} />
+      <Route path="/cancellation-policy" element={<LegalPage defaultTab="cancellation" />} />
+      <Route path="/refund" element={<LegalPage defaultTab="refund" />} />
+      <Route path="/refund-policy" element={<LegalPage defaultTab="refund" />} />
+      <Route path="/disclaimer" element={<LegalPage defaultTab="disclaimer" />} />
+      <Route path="/policies/:policyKey" element={<LegalPage />} />
 
       {/* Auth Routes */}
       <Route 

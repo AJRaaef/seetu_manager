@@ -23,15 +23,15 @@ const LandingPage = () => {
 
   // Structured Professional Quick Links (Statutory Law, Rules, Governance & Policies)
   const quickLinksList = [
-    { label: 'Chit Law & Governance', type: 'route', path: '/law' },
-    { label: 'Member Enrollment Rules', type: 'modal', key: 'rules' },
-    { label: 'Complaints & Disputes', type: 'modal', key: 'complaints' },
-    { label: 'Contact Us', type: 'hash', path: '#contact' },
-    { label: 'Privacy & Policy', type: 'modal', key: 'privacy' },
-    { label: 'Terms & Conditions', type: 'modal', key: 'terms' },
-    { label: 'Cancellation Policy', type: 'modal', key: 'cancellation' },
-    { label: 'Refund Policy', type: 'modal', key: 'refund' },
-    { label: 'Disclaimer', type: 'modal', key: 'disclaimer' },
+    { label: 'Chit Law & Governance', path: '/law' },
+    { label: 'Member Enrollment Rules', path: '/rules' },
+    { label: 'Complaints & Disputes', path: '/complaints' },
+    { label: 'Contact Us', path: '/contact' },
+    { label: 'Privacy & Policy', path: '/privacy' },
+    { label: 'Terms & Conditions', path: '/terms' },
+    { label: 'Cancellation Policy', path: '/cancellation' },
+    { label: 'Refund Policy', path: '/refund' },
+    { label: 'Disclaimer', path: '/disclaimer' },
   ];
 
   // Navigatable Hero Slides (Traditional Sri Lankan Seettu Themes)
@@ -1268,36 +1268,13 @@ const LandingPage = () => {
               <ul className="footer-quick-links-list">
                 {quickLinksList.map((item, idx) => (
                   <li key={idx}>
-                    {item.type === 'route' ? (
-                      <Link 
-                        to={item.path} 
-                        className="footer-nav-item"
-                      >
-                        <span className="footer-nav-bullet">›</span>
-                        <span>{item.label}</span>
-                      </Link>
-                    ) : item.type === 'hash' ? (
-                      <a 
-                        href={item.path} 
-                        className="footer-nav-item"
-                      >
-                        <span className="footer-nav-bullet">›</span>
-                        <span>{item.label}</span>
-                      </a>
-                    ) : (
-                      <a 
-                        href={`#${item.key}`} 
-                        role="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          openLegal(item.key);
-                        }} 
-                        className="footer-nav-item"
-                      >
-                        <span className="footer-nav-bullet">›</span>
-                        <span>{item.label}</span>
-                      </a>
-                    )}
+                    <Link 
+                      to={item.path} 
+                      className="footer-nav-item"
+                    >
+                      <span className="footer-nav-bullet">›</span>
+                      <span>{item.label}</span>
+                    </Link>
                   </li>
                 ))}
               </ul>
