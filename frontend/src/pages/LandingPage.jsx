@@ -599,7 +599,7 @@ const LandingPage = () => {
                 For generations, the traditional <strong>Seettu (සීට්ටු / சீட்டு)</strong> system has served as the financial backbone for Sri Lankan families, market traders, farmers, and self-help circles to save collectively and access interest-free lump sums.
               </p>
               <p className="text-muted mb-4" style={{ fontSize: '0.95rem', lineHeight: '1.7' }}>
-                <strong>SeettuManager</strong> was developed at the <em>Institute of Technology University of Moratuwa (ITUM)</em> to solve the vulnerabilities of handwritten exercise books, forgotten payments, and trust disputes. We provide community organizers and members with an automated digital ledger, rotation calendar, dispute resolution tracking, and an algorithmic 0–100 Financial Discipline Rating.
+                <strong>SeettuManager</strong> was engineered to solve the vulnerabilities of handwritten exercise books, forgotten payments, and trust disputes. We provide community organizers and members with an automated digital ledger, rotation calendar, dispute resolution tracking, and an algorithmic 0–100 Financial Discipline Rating.
               </p>
 
               <div className="row g-3 pt-2">
@@ -629,13 +629,13 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* Right Column: Visual Trust Card / Academic Affiliation */}
+            {/* Right Column: Visual Trust Card */}
             <div className="col-lg-6">
               <div className="fintech-card p-4 p-md-5 bg-white position-relative overflow-hidden">
                 <div className="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
                   <div>
                     <h5 className="fw-bold text-dark mb-0" style={{ color: '#0F2F3D' }}>Sri Lanka's Digital Seettu Platform</h5>
-                    <small className="text-muted">Division of Information Technology, ITUM Moratuwa</small>
+                    <small className="text-muted">Transparent Community Rotating Savings Platform</small>
                   </div>
                   <span className="badge px-3 py-2 text-white fw-bold rounded-pill" style={{ backgroundColor: '#0097B2' }}>
                     100% Free & Open
@@ -806,7 +806,7 @@ const LandingPage = () => {
                 We Are Here to Assist Your Savings Group
               </h2>
               <p className="text-muted mb-4 leading-relaxed">
-                Have questions regarding group setup, non-monetary asset evaluation, or audit compliance? Reach out to our Moratuwa project support team.
+                Have questions regarding group setup, non-monetary asset evaluation, or audit compliance? Reach out to our dedicated customer support team.
               </p>
 
               <div className="d-flex flex-column gap-3">
@@ -946,14 +946,14 @@ const LandingPage = () => {
               </ul>
             </div>
 
-            {/* Col 3: Academic / Project Details */}
+            {/* Col 3: Support & Office */}
             <div className="col-lg-4 col-md-3 col-6">
-              <h6 className="fw-bold text-white mb-3 text-uppercase fs-7" style={{ letterSpacing: '1px' }}>Project Context</h6>
+              <h6 className="fw-bold text-white mb-3 text-uppercase fs-7" style={{ letterSpacing: '1px' }}>Support & Office</h6>
               <div className="text-white-50 small leading-relaxed d-flex flex-column gap-1.5">
-                <div>Institute of Technology University of Moratuwa</div>
-                <div>Division of Information Technology</div>
-                <div>Supervised by W.M.N. Wathsala Bandara Manike</div>
-                <div className="mt-2 text-white-50">Colombo, Sri Lanka</div>
+                <div>Colombo, Sri Lanka</div>
+                <div>Helpline: +94 75 297 5632 / 4040</div>
+                <div>Email: seetumanager@gmail.com</div>
+                <div className="mt-2 text-white-50">Mon – Sat (8:30 AM – 6:00 PM)</div>
               </div>
             </div>
 
@@ -962,7 +962,7 @@ const LandingPage = () => {
           {/* Copyright & Scroll Top */}
           <div className="pt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <p className="text-white-50 small mb-0">
-              © 2026 SeettuManager. Developed for ITUM NDIT Capstone. All rights reserved.
+              © 2026 SeettuManager. All rights reserved.
             </p>
             <button 
               onClick={scrollToTop} 
