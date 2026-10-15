@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { getErrorMessage } from '../utils/errorHandler';
+import LegalPoliciesModal from '../components/LegalPoliciesModal';
 
 const Register = () => {
   const { t } = useTranslation();
@@ -21,10 +22,23 @@ const Register = () => {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [legalModalOpen, setLegalModalOpen] = useState(false);
+  const [legalModalTab, setLegalModalTab] = useState('rules');
+
+  const openLegal = (tab = 'rules') => {
+    setLegalModalTab(tab);
+    setLegalModalOpen(true);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!agreedToTerms) {
+      setError('Agreement Required: Please review and accept the Member Enrollment Agreement, Seettu Rules, and Privacy Policy before creating your account.');
+      return;
+    }
 
     if (formData.fullName.trim().length < 3) {
       setError(' Full Name Guidance: Please enter your complete name (at least 3 characters).');
@@ -186,6 +200,50 @@ const Register = () => {
                   </div>
                 </div>
 
+                {/* Member Enrollment Rules & Privacy Agreement Notice */}
+                <div className="p-3 mb-4 rounded-3 border" style={{ backgroundColor: '#F8FAFC' }}>
+                  <div className="form-check d-flex align-items-start gap-2">
+                    <input
+                      type="checkbox"
+                      id="agreeTermsCheck"
+                      className="form-check-input mt-1"
+                      checked={agreedToTerms}
+                      onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      style={{ cursor: 'pointer', accentColor: '#0097B2' }}
+                    />
+                    <label htmlFor="agreeTermsCheck" className="form-check-label small text-secondary" style={{ cursor: 'pointer', lineHeight: '1.5', fontSize: '0.82rem' }}>
+                      I agree to the{' '}
+                      <button
+                        type="button"
+                        onClick={() => openLegal('rules')}
+                        className="btn btn-link p-0 text-decoration-underline fw-bold small align-baseline"
+                        style={{ color: '#0097B2', fontSize: '0.82rem' }}
+                      >
+                        Member Enrollment Agreement
+                      </button>
+                      {', '}
+                      <button
+                        type="button"
+                        onClick={() => openLegal('chit-law')}
+                        className="btn btn-link p-0 text-decoration-underline fw-bold small align-baseline"
+                        style={{ color: '#0097B2', fontSize: '0.82rem' }}
+                      >
+                        Seettu Law & Governance
+                      </button>
+                      {', and '}
+                      <button
+                        type="button"
+                        onClick={() => openLegal('privacy')}
+                        className="btn btn-link p-0 text-decoration-underline fw-bold small align-baseline"
+                        style={{ color: '#0097B2', fontSize: '0.82rem' }}
+                      >
+                        Privacy Policy
+                      </button>
+                      . I understand my mutual obligation to maintain punctual contributions throughout all rotation cycles.
+                    </label>
+                  </div>
+                </div>
+
                 <button 
                   disabled={loading} 
                   type="submit" 
@@ -206,6 +264,14 @@ const Register = () => {
           </div>
         </div>
       </div>
+
+      {/* Legal & Compliance Policies Modal */}
+      <LegalPoliciesModal 
+        isOpen={legalModalOpen} 
+        onClose={() => setLegalModalOpen(false)} 
+        onAccept={() => setAgreedToRules(true)}
+        initialTab={legalModalTab} 
+      />
     </div>
   );
 };

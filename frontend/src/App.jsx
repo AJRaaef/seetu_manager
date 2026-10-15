@@ -23,6 +23,7 @@ import PaymentAuditTrail from './pages/PaymentAuditTrail';
 import Reports from './pages/Reports';
 import Certificates from './pages/Certificates';
 import Notifications from './pages/Notifications';
+import ChitLaw from './pages/ChitLaw';
 
 // Components
 import AppLayout from './components/AppLayout';
@@ -57,6 +58,9 @@ const MainLayout = () => {
     <Routes>
       {/* Root Public Landing Page */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/law" element={<ChitLaw />} />
+      <Route path="/seettu-law" element={<ChitLaw />} />
+      <Route path="/chit-law" element={<ChitLaw />} />
 
       {/* Auth Routes */}
       <Route 

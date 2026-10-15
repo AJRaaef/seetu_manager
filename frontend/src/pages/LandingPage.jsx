@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../hooks/useLanguage';
 import Icon from '../components/Icons';
+import LegalPoliciesModal from '../components/LegalPoliciesModal';
 
 const LandingPage = () => {
   const { user } = useAuth();
@@ -12,6 +13,26 @@ const LandingPage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [openFaq, setOpenFaq] = useState(0);
   const [contactSubmitted, setContactSubmitted] = useState(false);
+  const [legalModalOpen, setLegalModalOpen] = useState(false);
+  const [legalModalTab, setLegalModalTab] = useState('rules');
+
+  const openLegal = (tab = 'rules') => {
+    setLegalModalTab(tab);
+    setLegalModalOpen(true);
+  };
+
+  // Structured Professional Quick Links (Statutory Law, Rules, Governance & Policies)
+  const quickLinksList = [
+    { label: 'Chit Law & Governance', type: 'route', path: '/law' },
+    { label: 'Member Enrollment Rules', type: 'modal', key: 'rules' },
+    { label: 'Complaints & Disputes', type: 'modal', key: 'complaints' },
+    { label: 'Contact Us', type: 'hash', path: '#contact' },
+    { label: 'Privacy & Policy', type: 'modal', key: 'privacy' },
+    { label: 'Terms & Conditions', type: 'modal', key: 'terms' },
+    { label: 'Cancellation Policy', type: 'modal', key: 'cancellation' },
+    { label: 'Refund Policy', type: 'modal', key: 'refund' },
+    { label: 'Disclaimer', type: 'modal', key: 'disclaimer' },
+  ];
 
   // Navigatable Hero Slides (Traditional Sri Lankan Seettu Themes)
   const heroSlides = [
@@ -322,6 +343,79 @@ const LandingPage = () => {
           margin-bottom: 16px;
           border: 1px solid rgba(0, 151, 178, 0.2);
         }
+        .footer-quick-links-list {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 7px !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          list-style: none !important;
+        }
+        .footer-nav-item,
+        a.footer-nav-item,
+        button.footer-nav-item {
+          all: unset;
+          color: rgba(255, 255, 255, 0.72) !important;
+          font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+          font-size: 0.86rem !important;
+          line-height: 1.45 !important;
+          font-weight: 500 !important;
+          text-decoration: none !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          padding: 2px 0 !important;
+          background: transparent !important;
+          border: 0 !important;
+          cursor: pointer !important;
+          transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+          text-align: left !important;
+          box-sizing: border-box !important;
+          outline: none !important;
+        }
+        .footer-nav-bullet {
+          color: #0097B2 !important;
+          font-size: 0.95rem !important;
+          font-weight: 700 !important;
+          line-height: 1 !important;
+          transition: transform 0.2s ease, color 0.2s ease !important;
+          display: inline-block !important;
+        }
+        .footer-nav-item:hover,
+        a.footer-nav-item:hover,
+        button.footer-nav-item:hover {
+          color: #00E5FF !important;
+          transform: translateX(4px) !important;
+        }
+        .footer-nav-item:hover .footer-nav-bullet,
+        a.footer-nav-item:hover .footer-nav-bullet,
+        button.footer-nav-item:hover .footer-nav-bullet {
+          color: #00E5FF !important;
+          transform: translateX(2px) !important;
+        }
+        .footer-nav-item:focus {
+          outline: none !important;
+          box-shadow: none !important;
+        }
+        .footer-contact-link,
+        a.footer-contact-link {
+          color: rgba(255, 255, 255, 0.72) !important;
+          font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+          font-size: 0.86rem !important;
+          line-height: 1.45 !important;
+          font-weight: 500 !important;
+          text-decoration: none !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          padding: 2px 0 !important;
+          transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        .footer-contact-link:hover,
+        a.footer-contact-link:hover {
+          color: #00E5FF !important;
+          transform: translateX(3px) !important;
+        }
       `}</style>
 
       {/* Vertical Sticky Right Tab: BECOME AN ORGANIZER */}
@@ -606,10 +700,9 @@ const LandingPage = () => {
             <span className="text-uppercase fw-bold" style={{ color: '#0097B2', letterSpacing: '2px', fontSize: '0.85rem' }}>
               WELCOME TO
             </span>
-            <h2 className="fw-black display-6 mt-1 mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <h2 className="fw-black display-5 mt-1 mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
               <span style={{ color: '#003847', fontWeight: 900 }}>Seettu</span>
-              <span style={{ color: '#0097B2', fontWeight: 900 }}>Manager</span>{' '}
-              <span style={{ color: '#0F2F3D', fontWeight: 800 }}>Pvt. Ltd.,</span>
+              <span style={{ color: '#0097B2', fontWeight: 900 }}>Manager</span>
             </h2>
             <p className="lead text-secondary mx-auto mb-0" style={{ maxWidth: '820px', fontSize: '1.05rem', lineHeight: '1.6' }}>
               Saving and Investing is a lifelong process. The sooner you start; the better off you'll be in the long run. Smart way to save and borrow.
@@ -705,16 +798,16 @@ const LandingPage = () => {
                 style={{ minHeight: '380px', backgroundColor: '#0F2F3D' }}
               >
                 <img 
-                  src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80" 
-                  alt="SeettuManager Sri Lanka Center" 
+                  src="/sl_currency_seettu.jpg" 
+                  alt="Sri Lankan Seettu Currency & Savings" 
                   className="w-100 h-100 object-fit-cover position-absolute top-0 start-0"
-                  style={{ opacity: 0.88, objectFit: 'cover' }}
+                  style={{ opacity: 0.95, objectFit: 'cover' }}
                 />
 
-                {/* Dark Vignette & Brand Gradient Overlay */}
+                {/* Subtle Brand Gradient Overlay */}
                 <div 
                   className="position-absolute top-0 start-0 w-100 h-100" 
-                  style={{ background: 'linear-gradient(180deg, rgba(15,47,61,0.6) 0%, rgba(15,47,61,0.2) 50%, rgba(15,47,61,0.8) 100%)' }}
+                  style={{ background: 'linear-gradient(180deg, rgba(15,47,61,0.45) 0%, rgba(15,47,61,0.1) 50%, rgba(15,47,61,0.75) 100%)' }}
                 />
 
                 {/* Rooftop Signboard / Billboard (Matching Reference Style) */}
@@ -730,35 +823,77 @@ const LandingPage = () => {
                   </div>
                 </div>
 
-                {/* Center Circular Badge / Action Button (Matching Reference) */}
-                <div className="position-relative my-auto text-center" style={{ zIndex: 2 }}>
-                  <a 
-                    href="#how-it-works"
-                    className="rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg text-decoration-none"
-                    style={{
-                      width: '68px',
-                      height: '68px',
-                      backgroundColor: '#0097B2',
-                      border: '4px solid #ffffff',
-                      color: '#ffffff',
-                      transition: 'transform 0.25s ease, background-color 0.25s ease'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1.0)'}
-                    title="Watch How SeettuManager Works"
-                    aria-label="How SeettuManager Works"
-                  >
-                    <Icon name="chevron-right" size={30} style={{ marginLeft: '3px' }} />
-                  </a>
-                </div>
-
-                {/* Bottom Trust Badge */}
-                <div className="position-absolute bottom-0 start-0 w-100 p-3 text-center text-white" style={{ zIndex: 2 }}>
-                  <div className="badge px-3 py-1.5 rounded-pill fw-bold" style={{ backgroundColor: 'rgba(0, 151, 178, 0.9)', fontSize: '0.75rem', letterSpacing: '0.5px' }}>
-                    100% NON-CUSTODIAL & SECURE
+                {/* Unique Live Seettu Smart Ledger Floating Card */}
+                <div 
+                  className="position-relative my-auto mx-auto p-3.5 rounded-4 shadow-2xl text-start"
+                  style={{ 
+                    backgroundColor: 'rgba(15, 47, 61, 0.9)', 
+                    backdropFilter: 'blur(10px)',
+                    border: '1.5px solid rgba(0, 151, 178, 0.45)',
+                    maxWidth: '315px',
+                    width: '90%',
+                    color: '#ffffff',
+                    zIndex: 2,
+                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)'
+                  }}
+                >
+                  {/* Ledger Header */}
+                  <div className="d-flex align-items-center justify-content-between mb-2.5 pb-2 border-bottom border-light border-opacity-15">
+                    <div className="d-flex align-items-center gap-1.5">
+                      <span className="d-inline-block rounded-circle" style={{ width: '8px', height: '8px', backgroundColor: '#10B981', boxShadow: '0 0 8px #10B981' }} />
+                      <span className="fw-bold text-uppercase" style={{ fontSize: '0.72rem', letterSpacing: '0.8px', color: '#68B6C7' }}>
+                        LIVE SEETTU LEDGER
+                      </span>
+                    </div>
+                    <span className="badge rounded-pill fw-bold" style={{ backgroundColor: 'rgba(0, 151, 178, 0.3)', color: '#00E5FF', fontSize: '0.68rem', border: '1px solid rgba(0, 229, 255, 0.3)' }}>
+                      Cycle 05 / 12
+                    </span>
                   </div>
-                  <div className="small text-white-50 mt-1" style={{ fontSize: '0.72rem' }}>
-                    Trilingual: English • සිංහල • தமிழ்
+
+                  {/* Pooled Fund & Discipline Score Highlight */}
+                  <div className="row g-2 mb-2.5">
+                    <div className="col-6">
+                      <div className="p-2 rounded-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div className="text-white-50 text-uppercase" style={{ fontSize: '0.62rem', letterSpacing: '0.5px' }}>Pooled Payout</div>
+                        <div className="fw-black text-warning" style={{ fontSize: '1rem', fontWeight: 800 }}>LKR 500,000</div>
+                      </div>
+                    </div>
+                    <div className="col-6">
+                      <div className="p-2 rounded-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div className="text-white-50 text-uppercase" style={{ fontSize: '0.62rem', letterSpacing: '0.5px' }}>Discipline Score</div>
+                        <div className="fw-black" style={{ color: '#00E5FF', fontSize: '1rem', fontWeight: 800 }}>98 / 100</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rotation Punctuality Progress */}
+                  <div className="mb-2.5">
+                    <div className="d-flex justify-content-between text-white-50 mb-1" style={{ fontSize: '0.68rem' }}>
+                      <span>Punctual Contributions</span>
+                      <span className="fw-bold text-white">100% Complete</span>
+                    </div>
+                    <div className="progress rounded-pill" style={{ height: '6px', backgroundColor: 'rgba(255,255,255,0.15)' }}>
+                      <div 
+                        className="progress-bar rounded-pill" 
+                        style={{ width: '100%', backgroundColor: '#0097B2' }} 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Verification Pill & Explore Link */}
+                  <div className="pt-2 border-top border-light border-opacity-10 d-flex align-items-center justify-content-between">
+                    <div className="d-flex align-items-center gap-1 text-white-50" style={{ fontSize: '0.68rem' }}>
+                      <Icon name="check" size={12} color="#10B981" />
+                      <span>Bank Slip Verified</span>
+                    </div>
+                    <a 
+                      href="#how-it-works" 
+                      className="text-decoration-none fw-bold d-inline-flex align-items-center gap-1"
+                      style={{ color: '#00E5FF', fontSize: '0.72rem' }}
+                    >
+                      <span>How It Works</span>
+                      <Icon name="chevron-right" size={12} />
+                    </a>
                   </div>
                 </div>
 
@@ -1039,7 +1174,8 @@ const LandingPage = () => {
           <div className="row g-4 pb-4 border-bottom border-light border-opacity-10">
             
             {/* Col 1: Brand & Socials */}
-            <div className="col-lg-5 col-md-6">
+            {/* Col 1: Brand & Essential Links */}
+            <div className="col-lg-5 col-md-12 mb-4 mb-lg-0 pe-lg-4">
               <div className="d-flex align-items-center gap-3 mb-3" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 <img 
                   src="/logo.png" 
@@ -1064,9 +1200,20 @@ const LandingPage = () => {
                   </span>
                 </div>
               </div>
-              <p className="text-white-50 small mb-4 leading-relaxed" style={{ maxWidth: '400px' }}>
+              <p className="text-white-50 small mb-3 leading-relaxed" style={{ maxWidth: '420px' }}>
                 Sri Lanka's dedicated digital platform for rotating savings groups. Empowering organizers and members with automated payment tracking, rotation cycles, dispute protection, and verified 0–100 discipline ratings.
               </p>
+
+              {/* Essential Quick Navigation Links */}
+              <div className="d-flex flex-wrap align-items-center gap-2 small mb-3 text-white-50">
+                <a href="#about" className="text-white-50 text-decoration-none hover-white fw-semibold">About Us</a>
+                <span>•</span>
+                <a href="#how-it-works" className="text-white-50 text-decoration-none hover-white fw-semibold">How It Works</a>
+                <span>•</span>
+                <a href="#faq" className="text-white-50 text-decoration-none hover-white fw-semibold">FAQs</a>
+              </div>
+
+              {/* Social Media Links */}
               <div className="d-flex align-items-center gap-2">
                 <a 
                   href="https://www.facebook.com/share/1DbJgZK7sY/" 
@@ -1111,26 +1258,96 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* Col 2: Quick Links */}
-            <div className="col-lg-3 col-md-3 col-6">
-              <h6 className="fw-bold text-white mb-3 text-uppercase fs-7" style={{ letterSpacing: '1px' }}>Quick Navigation</h6>
-              <ul className="list-unstyled text-white-50 small mb-0 d-flex flex-column gap-2">
-                <li><a href="#about" className="text-white-50 text-decoration-none">About Us</a></li>
-                <li><a href="#how-it-works" className="text-white-50 text-decoration-none">How It Works</a></li>
-                <li><Link to="/certificates" className="text-white-50 text-decoration-none">Verify Certificate</Link></li>
-                <li><Link to="/disputes" className="text-white-50 text-decoration-none">Dispute Resolution</Link></li>
-                <li><a href="#contact" className="text-white-50 text-decoration-none">Contact Us</a></li>
+            {/* Col 2: QUICK LINKS (Legal, Governance & Policies with Red Accent Bar) */}
+            <div className="col-lg-3 col-md-6 col-6">
+              <h6 className="fw-bold text-white mb-2 text-uppercase fs-7" style={{ letterSpacing: '1.2px' }}>
+                QUICK LINKS
+              </h6>
+              {/* Red accent bar matching reference screenshot */}
+              <div style={{ width: '38px', height: '3px', backgroundColor: '#C01920', marginBottom: '16px', borderRadius: '2px' }} />
+              <ul className="footer-quick-links-list">
+                {quickLinksList.map((item, idx) => (
+                  <li key={idx}>
+                    {item.type === 'route' ? (
+                      <Link 
+                        to={item.path} 
+                        className="footer-nav-item"
+                      >
+                        <span className="footer-nav-bullet">›</span>
+                        <span>{item.label}</span>
+                      </Link>
+                    ) : item.type === 'hash' ? (
+                      <a 
+                        href={item.path} 
+                        className="footer-nav-item"
+                      >
+                        <span className="footer-nav-bullet">›</span>
+                        <span>{item.label}</span>
+                      </a>
+                    ) : (
+                      <a 
+                        href={`#${item.key}`} 
+                        role="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          openLegal(item.key);
+                        }} 
+                        className="footer-nav-item"
+                      >
+                        <span className="footer-nav-bullet">›</span>
+                        <span>{item.label}</span>
+                      </a>
+                    )}
+                  </li>
+                ))}
               </ul>
             </div>
 
-            {/* Col 3: Support & Office */}
-            <div className="col-lg-4 col-md-3 col-6">
-              <h6 className="fw-bold text-white mb-3 text-uppercase fs-7" style={{ letterSpacing: '1px' }}>Support & Office</h6>
-              <div className="text-white-50 small leading-relaxed d-flex flex-column gap-1.5">
-                <div>Colombo, Sri Lanka</div>
-                <div>Helpline: +94 75 297 5632 / 4040</div>
-                <div>Email: seetumanager@gmail.com</div>
-                <div className="mt-2 text-white-50">Mon – Sat (8:30 AM – 6:00 PM)</div>
+            {/* Col 3: SUPPORT (Same Line & Red Accent Bar as Quick Links) */}
+            <div className="col-lg-4 col-md-6 col-6">
+              <h6 className="fw-bold text-white mb-2 text-uppercase fs-7" style={{ letterSpacing: '1.2px' }}>
+                SUPPORT
+              </h6>
+              {/* Same red accent bar as Quick Links */}
+              <div style={{ width: '38px', height: '3px', backgroundColor: '#C01920', marginBottom: '16px', borderRadius: '2px' }} />
+              
+              <div className="d-flex flex-column gap-3">
+                <div>
+                  <strong className="text-white d-block mb-1" style={{ fontSize: '0.88rem' }}>Direct Helplines</strong>
+                  <div className="d-flex flex-column gap-1">
+                    <a href="tel:+94752975632" className="footer-contact-link">
+                      <Icon name="phone" size={13} color="#0097B2" />
+                      +94 75 297 5632
+                    </a>
+                    <a href="tel:+94752974040" className="footer-contact-link">
+                      <Icon name="phone" size={13} color="#0097B2" />
+                      +94 75 297 4040
+                    </a>
+                  </div>
+                </div>
+
+                <div>
+                  <strong className="text-white d-block mb-1" style={{ fontSize: '0.88rem' }}>Email Support</strong>
+                  <a href="mailto:seetumanager@gmail.com" className="footer-contact-link">
+                    <Icon name="mail" size={13} color="#0097B2" />
+                    seetumanager@gmail.com
+                  </a>
+                </div>
+
+                <div>
+                  <strong className="text-white d-block mb-1" style={{ fontSize: '0.88rem' }}>Platform Headquarters</strong>
+                  <span className="d-inline-flex align-items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.88rem' }}>
+                    <Icon name="shield" size={13} color="#0097B2" />
+                    Colombo, Western Province, Sri Lanka
+                  </span>
+                </div>
+
+                <div className="pt-2 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between flex-wrap gap-1">
+                  <span className="text-white-50" style={{ fontSize: '0.78rem' }}>Mon – Sat (8:30 AM – 6:00 PM IST)</span>
+                  <span className="badge bg-success bg-opacity-25 text-success px-2 py-1" style={{ fontSize: '0.72rem' }}>
+                    ● Online
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -1139,7 +1356,7 @@ const LandingPage = () => {
           {/* Copyright & Scroll Top */}
           <div className="pt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <p className="text-white-50 small mb-0">
-              © 2026 SeettuManager. All rights reserved.
+              © 2026 SeettuManager. All rights reserved. • Sri Lanka Digital Rotating Savings Platform
             </p>
             <button 
               onClick={scrollToTop} 
@@ -1152,6 +1369,13 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+
+      {/* Global Legal, Compliance & Member Agreements Modal */}
+      <LegalPoliciesModal 
+        isOpen={legalModalOpen} 
+        onClose={() => setLegalModalOpen(false)} 
+        initialTab={legalModalTab} 
+      />
 
     </div>
   );
