@@ -12,6 +12,7 @@ const LandingPage = () => {
   // State
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [dbGroups, setDbGroups] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [openFaq, setOpenFaq] = useState(0);
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
@@ -19,6 +20,70 @@ const LandingPage = () => {
   const [calcContribution, setCalcContribution] = useState(10000);
   const [calcMembers, setCalcMembers] = useState(12);
   const totalPot = calcContribution * calcMembers;
+
+  // Navigatable Hero Slides
+  const heroSlides = [
+    {
+      id: 0,
+      tag: 'COMMUNITY TRUST & TRANSPARENCY',
+      bannerTitle: 'HAPPY AND SATISFIED SEETTU MEMBERS',
+      mainTitle: 'Empowering Rotating Savings Groups in Sri Lanka',
+      subtitle: 'Join or manage transparent Seettu circles with automated payment ledgers, scheduled rotation payouts, and verified 0–100 discipline ratings.',
+      cta: 'Explore Seettu Schemes',
+      link: '#schemes',
+      bgImage: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=1600&q=80',
+      badgeColor: '#0097B2'
+    },
+    {
+      id: 1,
+      tag: 'SEAMLESS ROTATION MANAGEMENT',
+      bannerTitle: 'AUTOMATED PAYMENT LEDGERS & SCHEDULED PAYOUTS',
+      mainTitle: 'Digital Record-Keeping for Modern Savings Circles',
+      subtitle: 'Eliminate paper disputes with automatic cycle calendar dates, bank slip uploads, payout tracking, and member confirmation alerts.',
+      cta: 'Create a Seettu Group',
+      link: user ? '/groups/create' : '/register',
+      bgImage: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1600&q=80',
+      badgeColor: '#0F2F3D'
+    },
+    {
+      id: 2,
+      tag: 'ITUM-ALIGNED ALGORITHM',
+      bannerTitle: 'VERIFIED 0–100 FINANCIAL DISCIPLINE RATINGS',
+      mainTitle: 'Build Recognized Financial Credibility Across Groups',
+      subtitle: 'On-time monthly payments award verified discipline ratings and unlock digital completion certificates backed by ITUM research.',
+      cta: 'Try Discipline Calculator',
+      link: '#calculator',
+      bgImage: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1600&q=80',
+      badgeColor: '#0097B2'
+    },
+    {
+      id: 3,
+      tag: 'NON-MONETARY ASSET SAVINGS',
+      bannerTitle: 'GOLD, VEHICLE & APPLIANCE ROTATIONAL PLANS',
+      mainTitle: 'Diversify Savings with Physical Asset Seettu Pools',
+      subtitle: 'Organize high-value rotation pools for sovereign gold jewelry, vehicles, and home appliances with transparent valuation.',
+      cta: 'Browse Asset Plans',
+      link: '#schemes',
+      bgImage: 'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=1600&q=80',
+      badgeColor: '#FFB020'
+    }
+  ];
+
+  // Auto-advance slides every 6 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [heroSlides.length]);
+
+  const handlePrevSlide = () => {
+    setCurrentSlide((prev) => (prev === 0 ? heroSlides.length - 1 : prev - 1));
+  };
+
+  const handleNextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  };
 
   // Fetch real database groups from backend Spring Boot API
   useEffect(() => {
@@ -154,47 +219,191 @@ const LandingPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const activeSlide = heroSlides[currentSlide];
+
   return (
     <div className="landing-page bg-white min-vh-100 d-flex flex-column text-dark" style={{ backgroundColor: '#F8FAFC' }}>
       
-      {/* Custom Styles for Clean, Modern FinTech Aesthetic */}
+      {/* Custom Styles for Navigatable Hero, Project Palette & Sticky Widgets */}
       <style>{`
-        .hero-section {
-          background: radial-gradient(circle at 10% 20%, rgba(0, 151, 178, 0.08) 0%, transparent 40%),
-                      radial-gradient(circle at 90% 80%, rgba(15, 47, 61, 0.05) 0%, transparent 40%),
-                      #FFFFFF;
-          border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        /* Top Bar */
+        .top-brand-bar {
+          background-color: #0F2F3D;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .hero-badge {
-          display: inline-flex;
+        
+        /* Navigatable Hero Slider */
+        .navigatable-hero {
+          position: relative;
+          min-height: 520px;
+          background-size: cover;
+          background-position: center;
+          transition: background-image 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+          display: flex;
           align-items: center;
-          gap: 8px;
-          background-color: #E6F7F9;
-          color: #008299;
-          font-weight: 700;
-          font-size: 0.82rem;
-          padding: 6px 16px;
-          border-radius: 999px;
-          border: 1px solid rgba(0, 151, 178, 0.2);
+          overflow: hidden;
         }
-        .hero-badge .pulse-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
+        @media (min-width: 992px) {
+          .navigatable-hero {
+            min-height: 560px;
+          }
+        }
+        
+        /* Subtle Vignette Overlay for Readability */
+        .hero-vignette {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, rgba(15, 47, 61, 0.88) 0%, rgba(15, 47, 61, 0.6) 45%, rgba(15, 47, 61, 0.15) 100%);
+          z-index: 1;
+        }
+        
+        /* Big Bold Bottom-Right Banner Title (Jayapriya Reference Style) */
+        .hero-banner-title {
+          position: absolute;
+          bottom: 32px;
+          right: 48px;
+          z-index: 2;
+          color: #FFFFFF;
+          font-weight: 900;
+          font-size: 1.75rem;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+          pointer-events: none;
+        }
+        @media (max-width: 768px) {
+          .hero-banner-title {
+            display: none;
+          }
+        }
+
+        /* Navigatable Dash Indicators (Reference Image Style) */
+        .slide-indicator-bar {
+          position: absolute;
+          bottom: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 3;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .slide-dash {
+          width: 28px;
+          height: 5px;
+          border-radius: 3px;
+          background-color: rgba(255, 255, 255, 0.4);
+          border: none;
+          padding: 0;
+          transition: all 0.3s ease;
+          cursor: pointer;
+        }
+        .slide-dash.active {
+          width: 50px;
           background-color: #0097B2;
-          box-shadow: 0 0 0 3px rgba(0, 151, 178, 0.25);
+          box-shadow: 0 0 10px rgba(0, 151, 178, 0.8);
         }
-        .live-preview-card {
+
+        /* Navigation Arrows */
+        .hero-arrow-btn {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 3;
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: rgba(15, 47, 61, 0.7);
+          backdrop-filter: blur(6px);
+          color: #FFFFFF;
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.25s ease;
+        }
+        .hero-arrow-btn:hover {
+          background: #0097B2;
+          border-color: #0097B2;
+          transform: translateY(-50%) scale(1.08);
+          color: #FFFFFF;
+        }
+        .hero-arrow-prev {
+          left: 20px;
+        }
+        .hero-arrow-next {
+          right: 20px;
+        }
+
+        /* Vertical Right Sticky Tab (Jayapriya Reference in Project Theme) */
+        .vertical-organizer-tab {
+          position: fixed;
+          right: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 1040;
+          background: #0097B2;
+          color: #FFFFFF;
+          padding: 14px 10px;
+          font-weight: 800;
+          font-size: 0.78rem;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          border-radius: 8px 0 0 8px;
+          box-shadow: -4px 6px 16px rgba(0, 0, 0, 0.25);
+          text-decoration: none;
+          transition: all 0.25s ease;
+        }
+        .vertical-organizer-tab:hover {
+          background-color: #0F2F3D;
+          color: #FFFFFF;
+          padding-right: 14px;
+        }
+
+        /* Floating Call Widget on Bottom Right (Reference Image Style) */
+        .floating-call-pill {
+          position: fixed;
+          right: 75px;
+          bottom: 24px;
+          z-index: 1040;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          text-decoration: none;
+        }
+        .call-pill-icon {
+          width: 46px;
+          height: 46px;
+          border-radius: 50%;
+          background: #0097B2;
+          color: #FFFFFF;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 16px rgba(0, 151, 178, 0.4);
+          border: 2px solid #FFFFFF;
+          transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .floating-call-pill:hover .call-pill-icon {
+          transform: scale(1.1);
+          background: #0F2F3D;
+        }
+        .call-pill-content {
           background: #FFFFFF;
+          color: #0F2F3D;
+          padding: 6px 14px;
+          border-radius: 8px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
           border: 1px solid #E2E8F0;
-          box-shadow: 0 20px 40px -15px rgba(15, 47, 61, 0.12);
-          border-radius: 20px;
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          font-size: 0.78rem;
+          display: flex;
+          flex-direction: column;
         }
-        .live-preview-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 25px 50px -12px rgba(15, 47, 61, 0.18);
-        }
+
+        /* Fintech Cards & Buttons */
         .fintech-card {
           background: #FFFFFF;
           border: 1px solid #E2E8F0;
@@ -262,11 +471,86 @@ const LandingPage = () => {
         }
       `}</style>
 
+      {/* Vertical Sticky Right Tab: BECOME AN ORGANIZER */}
+      <Link to="/register" className="vertical-organizer-tab" title="Become a Seettu Organizer">
+        BECOME AN ORGANIZER
+      </Link>
+
+      {/* Floating Call Helpline Widget */}
+      <div className="floating-call-pill d-none d-md-flex">
+        <a href="tel:+94752975632" className="call-pill-icon" title="Call Helpline">
+          <Icon name="phone" size={20} />
+        </a>
+        <div className="call-pill-content">
+          <span className="text-muted fw-semibold" style={{ fontSize: '0.72rem' }}>Call to Become an Organizer</span>
+          <strong style={{ color: '#0097B2', fontSize: '0.86rem' }}>+94 75 297 5632</strong>
+        </div>
+      </div>
+
+      {/* Top Brand Header Bar (Jayapriya Reference Layout in Deep Slate Teal) */}
+      <div className="top-brand-bar text-white py-1.5 px-3 fs-7">
+        <div className="container d-flex flex-wrap justify-content-between align-items-center">
+          <div className="d-flex align-items-center gap-3 small">
+            <span className="d-flex align-items-center">
+              <Icon name="mail" size={13} className="me-1" color="#0097B2" />
+              seetumanager@gmail.com
+            </span>
+            <span className="d-none d-md-inline" style={{ opacity: 0.4 }}>|</span>
+            <span className="d-flex align-items-center">
+              <Icon name="phone" size={13} className="me-1" color="#0097B2" />
+              +94 75 297 5632 / 4040
+            </span>
+          </div>
+
+          <div className="d-flex align-items-center gap-2 ms-auto">
+            {/* Trilingual Toggle */}
+            <div className="d-flex align-items-center me-2 small">
+              <button 
+                onClick={() => changeLanguage('en')} 
+                className={`btn btn-link btn-sm text-decoration-none py-0 px-1 ${language === 'en' ? 'fw-bold text-white' : 'text-white-50'}`}
+              >
+                EN
+              </button>
+              <span className="text-white-50 small">|</span>
+              <button 
+                onClick={() => changeLanguage('si')} 
+                className={`btn btn-link btn-sm text-decoration-none py-0 px-1 ${language === 'si' ? 'fw-bold text-white' : 'text-white-50'}`}
+              >
+                සිං
+              </button>
+              <span className="text-white-50 small">|</span>
+              <button 
+                onClick={() => changeLanguage('ta')} 
+                className={`btn btn-link btn-sm text-decoration-none py-0 px-1 ${language === 'ta' ? 'fw-bold text-white' : 'text-white-50'}`}
+              >
+                தமி
+              </button>
+            </div>
+
+            {/* Direct Login / Portal Buttons */}
+            {user ? (
+              <Link to="/dashboard" className="btn btn-sm fw-bold px-3 text-white rounded-1" style={{ backgroundColor: '#0097B2', fontSize: '0.8rem' }}>
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link to="/login" className="btn btn-sm fw-bold px-3 text-dark rounded-1" style={{ backgroundColor: '#FFB020', fontSize: '0.8rem' }}>
+                  Member Login
+                </Link>
+                <Link to="/register" className="btn btn-sm fw-bold px-3 text-white rounded-1" style={{ backgroundColor: '#0097B2', fontSize: '0.8rem' }}>
+                  Organizer Portal
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Main Navigation Bar */}
-      <nav className="navbar navbar-expand-lg navbar-light sticky-top bg-white border-bottom py-3 shadow-none">
+      <nav className="navbar navbar-expand-lg navbar-light sticky-top bg-white border-bottom py-2.5 shadow-sm">
         <div className="container">
           <Link className="navbar-brand d-flex align-items-center gap-2 me-4" to="/" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} aria-label="SeettuManager Home - Sri Lanka Digital Seettu Platform">
-            <img src="/logo.png" alt="SeettuManager - Sri Lanka Digital Seettu & Savings Platform Logo" style={{ height: '38px', width: '38px', borderRadius: '50%', objectFit: 'cover' }} />
+            <img src="/logo.png" alt="SeettuManager - Sri Lanka Digital Seettu & Savings Platform Logo" style={{ height: '42px', width: '42px', borderRadius: '50%', objectFit: 'cover' }} />
             <span className="fw-extrabold fs-4 tracking-tight">
               <span style={{ color: '#0F2F3D' }}>Seettu</span>
               <span style={{ color: '#0097B2' }}>Manager</span>
@@ -295,178 +579,124 @@ const LandingPage = () => {
                 <a className="nav-link px-3 text-secondary" href="#faq">FAQs</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 text-secondary" href="#contact">Contact</a>
+                <a className="nav-link px-3 text-secondary" href="#contact">Contact Us</a>
               </li>
             </ul>
 
-            <div className="d-flex align-items-center gap-3">
-              {/* Clean Language Switcher Pill */}
-              <div className="d-flex align-items-center bg-light px-2 py-1 rounded-pill border small">
-                <button 
-                  onClick={() => changeLanguage('en')} 
-                  className={`btn btn-link btn-sm text-decoration-none px-2 py-0 ${language === 'en' ? 'fw-bold text-dark' : 'text-muted'}`}
-                >
-                  EN
-                </button>
-                <span className="text-muted" style={{ opacity: 0.4 }}>|</span>
-                <button 
-                  onClick={() => changeLanguage('si')} 
-                  className={`btn btn-link btn-sm text-decoration-none px-2 py-0 ${language === 'si' ? 'fw-bold text-dark' : 'text-muted'}`}
-                >
-                  සිං
-                </button>
-                <span className="text-muted" style={{ opacity: 0.4 }}>|</span>
-                <button 
-                  onClick={() => changeLanguage('ta')} 
-                  className={`btn btn-link btn-sm text-decoration-none px-2 py-0 ${language === 'ta' ? 'fw-bold text-dark' : 'text-muted'}`}
-                >
-                  தமி
-                </button>
-              </div>
-
-              {user ? (
-                <Link to="/dashboard" className="btn fw-bold text-white px-4 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}>
-                  <span>Dashboard</span>
-                  <Icon name="chevron-right" size={16} />
-                </Link>
-              ) : (
-                <div className="d-flex align-items-center gap-2">
-                  <Link to="/login" className="btn btn-ghost fw-bold text-dark px-3 py-2">
-                    Sign In
-                  </Link>
-                  <Link to="/register" className="btn fw-bold text-white px-4 py-2 rounded-3 shadow-sm" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}>
-                    Get Started
-                  </Link>
-                </div>
-              )}
+            <div className="d-flex align-items-center gap-2">
+              <Link to="/groups" className="btn btn-outline-dark fw-bold px-3 py-2 rounded-2" style={{ borderColor: '#CBD5E1', color: '#0F2F3D', fontSize: '0.88rem' }}>
+                Browse Circles
+              </Link>
+              <Link to={user ? '/dashboard' : '/register'} className="btn fw-bold text-white px-3 py-2 rounded-2 shadow-sm" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2', fontSize: '0.88rem' }}>
+                {user ? 'My Account' : 'Get Started'}
+              </Link>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Modern, Clean & High-Impact Split Hero Section */}
-      <header className="hero-section py-5 py-lg-6 position-relative overflow-hidden">
-        <div className="container py-3 py-lg-4">
-          <div className="row align-items-center g-5">
-            
-            {/* Left Content Column */}
-            <div className="col-lg-7">
-              <div className="hero-badge mb-3">
-                <span className="pulse-dot"></span>
-                <span>Sri Lanka's Digital Rotating Savings Platform</span>
-              </div>
+      {/* Navigatable Image Hero Section (Reference Style with Project Theme) */}
+      <header 
+        className="navigatable-hero text-white"
+        style={{
+          backgroundImage: `url(${activeSlide.bgImage})`
+        }}
+      >
+        {/* Dark Vignette Overlay for Readability */}
+        <div className="hero-vignette"></div>
+
+        {/* Previous Slide Arrow */}
+        <button 
+          onClick={handlePrevSlide} 
+          className="hero-arrow-btn hero-arrow-prev" 
+          aria-label="Previous Slide"
+          title="Previous Slide"
+        >
+          <Icon name="chevron-left" size={22} />
+        </button>
+
+        {/* Next Slide Arrow */}
+        <button 
+          onClick={handleNextSlide} 
+          className="hero-arrow-btn hero-arrow-next" 
+          aria-label="Next Slide"
+          title="Next Slide"
+        >
+          <Icon name="chevron-right" size={22} />
+        </button>
+
+        {/* Content Box */}
+        <div className="container position-relative py-5" style={{ zIndex: 2 }}>
+          <div className="row align-items-center">
+            <div className="col-lg-7 col-xl-6">
               
-              <h1 className="display-4 fw-extrabold text-dark mb-3 lh-sm" style={{ color: '#0F2F3D', letterSpacing: '-0.02em' }}>
-                Modern, Transparent <br className="d-none d-sm-inline" />
-                <span style={{ color: '#0097B2' }}>Seettu Management</span> for Everyone
+              {/* Tag Chip */}
+              <span 
+                className="badge px-3 py-2 rounded-pill fw-bold mb-3 d-inline-flex align-items-center gap-1.5"
+                style={{ backgroundColor: activeSlide.badgeColor, fontSize: '0.78rem', letterSpacing: '0.5px' }}
+              >
+                ● {activeSlide.tag}
+              </span>
+
+              {/* Main Headline */}
+              <h1 className="display-4 fw-extrabold text-white mb-3 lh-sm" style={{ letterSpacing: '-0.02em', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+                {activeSlide.mainTitle}
               </h1>
-              
-              <p className="lead text-secondary mb-4 fs-5" style={{ maxWidth: '600px', lineHeight: '1.6' }}>
-                Replace risky paper logbooks with automated cycle scheduling, verifiable payment tracking, dispute protection, and an automated 0–100 financial discipline score.
+
+              {/* Subtitle */}
+              <p className="lead text-white-50 mb-4 fs-5" style={{ maxWidth: '580px', lineHeight: '1.6', textShadow: '0 1px 6px rgba(0,0,0,0.4)' }}>
+                {activeSlide.subtitle}
               </p>
 
-              <div className="d-flex flex-wrap align-items-center gap-3 mb-4">
-                <Link 
-                  to={user ? '/groups/create' : '/register'} 
-                  className="btn btn-lg fw-bold text-white px-4 py-3 rounded-3 shadow-md d-inline-flex align-items-center gap-2"
-                  style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
-                >
-                  <span>{user ? 'Create Seettu Group' : 'Start Free Group'}</span>
-                  <Icon name="chevron-right" size={18} />
-                </Link>
-                
+              {/* Call-to-Action Buttons */}
+              <div className="d-flex flex-wrap align-items-center gap-3">
                 <a 
-                  href="#schemes" 
-                  className="btn btn-lg fw-bold btn-outline-dark px-4 py-3 rounded-3"
-                  style={{ borderColor: '#CBD5E1', color: '#1E293B' }}
+                  href={activeSlide.link}
+                  className="btn btn-lg fw-bold text-white px-4 py-3 rounded-2 shadow-lg d-inline-flex align-items-center gap-2"
+                  style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
+                  onClick={(e) => {
+                    if (activeSlide.link.startsWith('#')) {
+                      e.preventDefault();
+                      const el = document.querySelector(activeSlide.link);
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
                 >
-                  Explore Active Schemes
+                  <span>{activeSlide.cta}</span>
+                  <Icon name="chevron-right" size={18} />
                 </a>
+
+                {!user && (
+                  <Link 
+                    to="/login" 
+                    className="btn btn-lg fw-semibold btn-outline-light px-4 py-3 rounded-2"
+                    style={{ backdropFilter: 'blur(4px)', backgroundColor: 'rgba(255,255,255,0.1)' }}
+                  >
+                    Member Sign In
+                  </Link>
+                )}
               </div>
 
-              {/* Trust Tag Highlights */}
-              <div className="d-flex flex-wrap align-items-center gap-4 pt-3 border-top text-muted small fw-semibold">
-                <span className="d-flex align-items-center gap-1.5">
-                  <Icon name="check" size={16} color="#0097B2" /> 100% Transparent Ledger
-                </span>
-                <span className="d-flex align-items-center gap-1.5">
-                  <Icon name="check" size={16} color="#0097B2" /> Verified 0-100 Rating Engine
-                </span>
-                <span className="d-flex align-items-center gap-1.5">
-                  <Icon name="check" size={16} color="#0097B2" /> Monetary & Non-Monetary
-                </span>
-              </div>
             </div>
-
-            {/* Right Interactive FinTech Preview Card (Live Representation) */}
-            <div className="col-lg-5">
-              <div className="live-preview-card p-4 position-relative">
-                
-                {/* Live Card Header */}
-                <div className="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom">
-                  <div>
-                    <div className="d-flex align-items-center gap-2">
-                      <h6 className="fw-bold text-dark mb-0">Colombo Gold Savers Circle</h6>
-                      <span className="badge bg-success-subtle text-success fw-bold px-2 py-0.5 rounded-pill small">Active</span>
-                    </div>
-                    <small className="text-muted">Monthly Rotation • Cycle 4 of 12</small>
-                  </div>
-                  <div className="p-2 rounded-3 text-white" style={{ backgroundColor: '#0F2F3D' }}>
-                    <Icon name="award" size={20} />
-                  </div>
-                </div>
-
-                {/* Pot Value & Payout Target */}
-                <div className="bg-light p-3 rounded-3 mb-3 border">
-                  <div className="d-flex justify-content-between align-items-center mb-1">
-                    <span className="text-muted small fw-semibold">Total Lump-Sum Payout</span>
-                    <span className="text-muted small">LKR 20,000 / member</span>
-                  </div>
-                  <h3 className="fw-extrabold text-dark mb-2" style={{ color: '#0F2F3D' }}>
-                    LKR 240,000 <span className="fs-6 fw-normal text-muted">/ cycle</span>
-                  </h3>
-                  
-                  {/* Progress Indicator */}
-                  <div className="d-flex justify-content-between align-items-center small mb-1">
-                    <span className="text-muted">Cycle 4 Collection</span>
-                    <span className="fw-bold text-dark">9 of 12 Members Paid</span>
-                  </div>
-                  <div className="progress" style={{ height: '6px', borderRadius: '4px' }}>
-                    <div className="progress-bar" style={{ width: '75%', backgroundColor: '#0097B2' }}></div>
-                  </div>
-                </div>
-
-                {/* Recipient & Discipline Engine Showcase */}
-                <div className="row g-2 mb-3">
-                  <div className="col-6">
-                    <div className="p-2.5 rounded-3 border bg-white h-100">
-                      <div className="text-muted small">Current Recipient</div>
-                      <div className="fw-bold text-dark small">K. M. Fernando</div>
-                      <span className="badge bg-info-subtle text-info fw-bold small" style={{ fontSize: '0.7rem' }}>Payout Scheduled</span>
-                    </div>
-                  </div>
-                  <div className="col-6">
-                    <div className="p-2.5 rounded-3 border bg-white h-100">
-                      <div className="text-muted small">Discipline Rating</div>
-                      <div className="fw-bold text-success small">98 / 100 [Excellent]</div>
-                      <span className="badge bg-success-subtle text-success fw-bold small" style={{ fontSize: '0.7rem' }}>✓ ITUM Formula</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Live Audit Activity Pill */}
-                <div className="p-2.5 rounded-3 bg-light border d-flex align-items-center justify-content-between">
-                  <div className="d-flex align-items-center gap-2 small">
-                    <span className="text-success fw-bold">●</span>
-                    <span className="text-muted">Digital Certificate Generated</span>
-                  </div>
-                  <span className="text-muted small" style={{ fontSize: '0.75rem' }}>Just now</span>
-                </div>
-
-              </div>
-            </div>
-
           </div>
+        </div>
+
+        {/* Big Bold Banner Title Overlay on Bottom Right (Reference Style: HAPPY AND SATISFIED CUSTOMERS) */}
+        <div className="hero-banner-title">
+          {activeSlide.bannerTitle}
+        </div>
+
+        {/* Navigatable Dash Indicators (Reference Image Style: Red/Teal Navigatable Dashes) */}
+        <div className="slide-indicator-bar">
+          {heroSlides.map((slide, idx) => (
+            <button
+              key={slide.id}
+              onClick={() => setCurrentSlide(idx)}
+              className={`slide-dash ${currentSlide === idx ? 'active' : ''}`}
+              title={`Slide ${idx + 1}: ${slide.bannerTitle}`}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
         </div>
       </header>
 
@@ -637,7 +867,7 @@ const LandingPage = () => {
 
                   <Link 
                     to={user ? '/groups' : '/register'} 
-                    className="btn btn-outline-dark w-100 fw-bold py-2 rounded-3 mt-2"
+                    className="btn btn-outline-dark w-100 fw-bold py-2 rounded-2 mt-2"
                     style={{ borderColor: '#CBD5E1', color: '#0F2F3D' }}
                   >
                     {user ? 'View Scheme Details' : 'Join Scheme →'}
@@ -762,7 +992,7 @@ const LandingPage = () => {
 
                 <Link 
                   to={user ? '/groups/create' : '/register'} 
-                  className="btn btn-lg w-100 fw-bold text-white rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2"
+                  className="btn btn-lg w-100 fw-bold text-white rounded-2 shadow-sm d-flex align-items-center justify-content-center gap-2"
                   style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
                 >
                   <span>Start Group with this Projection</span>
@@ -886,7 +1116,7 @@ const LandingPage = () => {
                         <textarea className="form-control" rows="3" placeholder="How can we assist your Seettu circle?" required></textarea>
                       </div>
                       <div className="col-12">
-                        <button type="submit" className="btn fw-bold text-white px-4 py-2.5 rounded-3 w-100" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}>
+                        <button type="submit" className="btn fw-bold text-white px-4 py-2.5 rounded-2 w-100" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}>
                           Submit Inquiry →
                         </button>
                       </div>
