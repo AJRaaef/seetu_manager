@@ -265,8 +265,8 @@ const LandingPage = () => {
       {/* Main Navigation Bar */}
       <nav className="navbar navbar-expand-lg navbar-light sticky-top bg-white border-bottom py-3 shadow-none">
         <div className="container">
-          <Link className="navbar-brand d-flex align-items-center gap-2 me-4" to="/" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-            <img src="/logo.png" alt="SeettuManager Logo" style={{ height: '38px', width: '38px', borderRadius: '50%', objectFit: 'cover' }} />
+          <Link className="navbar-brand d-flex align-items-center gap-2 me-4" to="/" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} aria-label="SeettuManager Home - Sri Lanka Digital Seettu Platform">
+            <img src="/logo.png" alt="SeettuManager - Sri Lanka Digital Seettu & Savings Platform Logo" style={{ height: '38px', width: '38px', borderRadius: '50%', objectFit: 'cover' }} />
             <span className="fw-extrabold fs-4 tracking-tight">
               <span style={{ color: '#0F2F3D' }}>Seettu</span>
               <span style={{ color: '#0097B2' }}>Manager</span>
