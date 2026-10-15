@@ -30,10 +30,15 @@ const Topbar = ({ onToggleSidebar }) => {
 
         <Link to="/dashboard" className="topbar-brand d-flex align-items-center gap-2 text-decoration-none">
           <img src="/logo.png" alt="SeettuManager Logo" style={{ height: '38px', width: '38px', borderRadius: '50%', objectFit: 'cover' }} />
-          <span>
-            <span className="brand-seettu">Seettu</span>
-            <span className="brand-manager">Manager</span>
-          </span>
+          <div className="d-flex flex-column text-start">
+            <span className="lh-1">
+              <span className="brand-seettu">Seettu</span>
+              <span className="brand-manager">Manager</span>
+            </span>
+            <span style={{ fontSize: '0.62rem', fontWeight: 600, color: '#0097B2', letterSpacing: '0.2px', marginTop: '2px', lineHeight: '1' }}>
+              Save Together. Grow Together.
+            </span>
+          </div>
         </Link>
       </div>
 

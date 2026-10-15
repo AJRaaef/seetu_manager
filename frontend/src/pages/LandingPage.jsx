@@ -402,12 +402,27 @@ const LandingPage = () => {
       {/* Main Navigation Bar */}
       <nav className="navbar navbar-expand-lg navbar-light sticky-top bg-white border-bottom py-2.5 shadow-sm">
         <div className="container">
-          <Link className="navbar-brand d-flex align-items-center gap-2 me-4" to="/" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} aria-label="SeettuManager Home - Sri Lanka Digital Seettu Platform">
-            <img src="/logo.png" alt="SeettuManager - Sri Lanka Digital Seettu & Savings Platform Logo" style={{ height: '42px', width: '42px', borderRadius: '50%', objectFit: 'cover' }} />
-            <span className="fw-extrabold fs-4 tracking-tight">
-              <span style={{ color: '#0F2F3D' }}>Seettu</span>
-              <span style={{ color: '#0097B2' }}>Manager</span>
-            </span>
+          <Link className="navbar-brand d-flex align-items-center gap-3 me-4 text-decoration-none" to="/" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }} aria-label="SeettuManager Home - Sri Lanka Digital Seettu Platform">
+            <img 
+              src="/logo.png" 
+              alt="SeettuManager - Sri Lanka Digital Seettu & Savings Platform Logo" 
+              style={{ 
+                height: '46px', 
+                width: '46px', 
+                borderRadius: '50%', 
+                objectFit: 'cover', 
+                flexShrink: 0 
+              }} 
+            />
+            <div className="d-flex flex-column text-start justify-content-center">
+              <span className="lh-1" style={{ fontSize: '1.65rem', letterSpacing: '-0.5px' }}>
+                <span style={{ color: '#003847', fontWeight: 900 }}>Seettu</span>
+                <span style={{ color: '#0097B2', fontWeight: 900 }}>Manager</span>
+              </span>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.3px', color: '#1A4A5E', marginTop: '3px', lineHeight: '1' }}>
+                Save Together. Grow Together.
+              </span>
+            </div>
           </Link>
 
           <button className="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#landingNav">
@@ -415,21 +430,21 @@ const LandingPage = () => {
           </button>
 
           <div className="collapse navbar-collapse" id="landingNav">
-            <ul className="navbar-nav mx-auto mb-2 mb-lg-0 fw-semibold fs-6">
+            <ul className="navbar-nav mx-auto mb-2 mb-lg-0 fw-bold fs-6">
               <li className="nav-item">
                 <a className="nav-link px-3 active fw-bold" style={{ color: '#0097B2' }} href="#">Home</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 text-secondary" href="#about">About Us</a>
+                <a className="nav-link px-3 fw-bold text-dark" href="#about">About Us</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 text-secondary" href="#how-it-works">How It Works</a>
+                <a className="nav-link px-3 fw-bold text-dark" href="#how-it-works">How It Works</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 text-secondary" href="#faq">FAQs</a>
+                <a className="nav-link px-3 fw-bold text-dark" href="#faq">FAQs</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 text-secondary" href="#contact">Contact Us</a>
+                <a className="nav-link px-3 fw-bold text-dark" href="#contact">Contact Us</a>
               </li>
             </ul>
 
@@ -881,11 +896,29 @@ const LandingPage = () => {
             
             {/* Col 1: Brand & Socials */}
             <div className="col-lg-5 col-md-6">
-              <div className="d-flex align-items-center gap-2 mb-3">
-                <span className="fw-extrabold fs-4 tracking-tight">
-                  <span style={{ color: '#FFFFFF' }}>Seettu</span>
-                  <span style={{ color: '#0097B2' }}>Manager</span>
-                </span>
+              <div className="d-flex align-items-center gap-3 mb-3" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                <img 
+                  src="/logo.png" 
+                  alt="SeettuManager Logo" 
+                  style={{ 
+                    height: '44px', 
+                    width: '44px', 
+                    borderRadius: '50%', 
+                    objectFit: 'cover', 
+                    flexShrink: 0,
+                    backgroundColor: '#FFFFFF',
+                    padding: '2px'
+                  }} 
+                />
+                <div className="d-flex flex-column text-start justify-content-center">
+                  <span className="lh-1" style={{ fontSize: '1.65rem', letterSpacing: '-0.5px' }}>
+                    <span style={{ color: '#FFFFFF', fontWeight: 900 }}>Seettu</span>
+                    <span style={{ color: '#0097B2', fontWeight: 900 }}>Manager</span>
+                  </span>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.3px', color: '#68B6C7', marginTop: '3px', lineHeight: '1' }}>
+                    Save Together. Grow Together.
+                  </span>
+                </div>
               </div>
               <p className="text-white-50 small mb-4 leading-relaxed" style={{ maxWidth: '400px' }}>
                 Sri Lanka's dedicated digital platform for rotating savings groups. Empowering organizers and members with automated payment tracking, rotation cycles, dispute protection, and verified 0–100 discipline ratings.
