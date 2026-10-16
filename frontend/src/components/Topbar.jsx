@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../hooks/useLanguage';
+import { useNotification } from '../hooks/useNotification';
 import Icon from './Icons';
 
 const Topbar = ({ onToggleSidebar }) => {
   const { user, logout } = useAuth();
   const { language, changeLanguage } = useLanguage();
+  const { unreadCount } = useNotification();
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
@@ -84,6 +86,37 @@ const Topbar = ({ onToggleSidebar }) => {
           )}
         </div>
 
+        {/* Notifications Bell */}
+        <Link
+          to="/notifications"
+          className="btn btn-link p-0 text-decoration-none position-relative d-flex align-items-center justify-content-center"
+          style={{
+            width: '38px',
+            height: '38px',
+            borderRadius: '50%',
+            backgroundColor: '#F1F5F9',
+            border: '1px solid #E2E8F0',
+            transition: 'background-color 0.2s ease'
+          }}
+          title="Notification Center"
+        >
+          <Icon name="bell" size={19} color="#0F2F3D" />
+          {unreadCount > 0 && (
+            <span
+              className="position-absolute badge rounded-pill bg-danger border border-white"
+              style={{
+                top: '-3px',
+                right: '-3px',
+                fontSize: '0.65rem',
+                padding: '0.22em 0.45em',
+                lineHeight: '1'
+              }}
+            >
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </Link>
+
         {/* User Avatar Circle */}
         <div className="position-relative">
           <button
@@ -96,12 +129,25 @@ const Topbar = ({ onToggleSidebar }) => {
           </button>
 
           {showUserMenu && (
-            <div className="position-absolute end-0 mt-2 bg-white rounded-3 shadow-lg border p-2" style={{ zIndex: 1050, minWidth: '180px' }}>
+            <div className="position-absolute end-0 mt-2 bg-white rounded-3 shadow-lg border p-2" style={{ zIndex: 1050, minWidth: '190px' }}>
               <div className="px-3 py-2 border-bottom">
-                <div className="fw-bold text-truncate" style={{ maxWidth: '160px' }}>{user?.fullName || 'User'}</div>
-                <div className="small text-muted text-truncate" style={{ maxWidth: '160px' }}>{user?.email}</div>
+                <div className="fw-bold text-truncate" style={{ maxWidth: '170px' }}>{user?.fullName || 'User'}</div>
+                <div className="small text-muted text-truncate" style={{ maxWidth: '170px' }}>{user?.email}</div>
                 <span className="badge bg-light text-dark border mt-1">{user?.role || 'MEMBER'}</span>
               </div>
+              <Link
+                to="/notifications"
+                className="dropdown-item py-2 px-3 rounded-2 d-flex align-items-center justify-content-between text-dark text-decoration-none"
+                onClick={() => setShowUserMenu(false)}
+              >
+                <div className="d-flex align-items-center gap-2">
+                  <Icon name="bell" size={16} color="#0097B2" />
+                  <span>Notifications</span>
+                </div>
+                {unreadCount > 0 && (
+                  <span className="badge bg-danger rounded-pill" style={{ fontSize: '0.7rem' }}>{unreadCount}</span>
+                )}
+              </Link>
               <Link
                 to="/profile"
                 className="dropdown-item py-2 px-3 rounded-2 d-flex align-items-center gap-2 text-dark text-decoration-none"

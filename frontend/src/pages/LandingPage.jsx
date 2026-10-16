@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../hooks/useLanguage';
+import { useNotification } from '../hooks/useNotification';
 import Icon from '../components/Icons';
 import LegalPoliciesModal from '../components/LegalPoliciesModal';
 import BecomeOrganizerModal from '../components/BecomeOrganizerModal';
@@ -9,6 +10,7 @@ import BecomeOrganizerModal from '../components/BecomeOrganizerModal';
 const LandingPage = () => {
   const { user } = useAuth();
   const { language, changeLanguage } = useLanguage();
+  const { unreadCount } = useNotification();
 
   // State
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -499,6 +501,25 @@ const LandingPage = () => {
                 தமி
               </button>
             </div>
+
+            {/* Notifications Bell for Logged-In User */}
+            {user && (
+              <Link
+                to="/notifications"
+                className="btn btn-sm btn-link text-white position-relative p-1 me-2 text-decoration-none d-flex align-items-center"
+                title="Notification Center"
+              >
+                <Icon name="bell" size={17} color="#0097B2" />
+                {unreadCount > 0 && (
+                  <span
+                    className="position-absolute badge rounded-pill bg-danger border border-dark"
+                    style={{ top: '-3px', right: '-4px', fontSize: '0.62rem', padding: '0.2em 0.4em' }}
+                  >
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* Direct Login Button */}
             {user ? (

@@ -1,10 +1,12 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useNotification } from '../hooks/useNotification';
 import Icon from './Icons';
 
 const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
   const { user, logout, isOrganizer, isAdmin } = useAuth();
+  const { unreadCount } = useNotification();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -51,6 +53,26 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
               >
                 <Icon name="speedometer" size={18} />
                 <span>Dashboard</span>
+              </NavLink>
+            </li>
+
+            <li>
+              <NavLink
+                to="/notifications"
+                className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                onClick={onCloseMobile}
+              >
+                <div className="d-flex align-items-center justify-content-between w-100">
+                  <div className="d-flex align-items-center gap-2">
+                    <Icon name="bell" size={18} />
+                    <span>Notifications</span>
+                  </div>
+                  {unreadCount > 0 && (
+                    <span className="badge bg-danger rounded-pill px-2 py-0.5" style={{ fontSize: '0.68rem' }}>
+                      {unreadCount}
+                    </span>
+                  )}
+                </div>
               </NavLink>
             </li>
 
