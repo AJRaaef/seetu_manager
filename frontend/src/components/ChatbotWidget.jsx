@@ -8,7 +8,7 @@ const ChatbotWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
-      text: "Hello! I'm your Seettu Assistant 👋\n\nHow can I help you today? You can type any question or click one of the quick topics below.",
+      text: "Hello! I'm your Seettu Assistant.\n\nHow can I help you today? You can type any question or choose one of the topics below.",
       sender: 'bot',
       time: 'Just now'
     }
@@ -17,16 +17,16 @@ const ChatbotWidget = () => {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Categorized quick prompt topics for instant 1-click answers
+  // Categorized quick prompt topics with standard UI icons
   const quickTopics = [
-    { label: '💳 How to Pay', query: 'How do I make a payment or upload a deposit slip?' },
-    { label: '📊 Score Formula', query: 'How is the Financial Discipline Score calculated?' },
-    { label: '🔄 Payout Cycles', query: 'When and how are monthly payouts disbursed?' },
-    { label: '📜 Seettu Law', query: 'Is Seettu legal under Sri Lankan law?' },
-    { label: '❌ Exit Rules', query: 'What happens if a member wants to cancel or leave early?' },
-    { label: '💰 Refund Policy', query: 'How does the refund process work?' },
-    { label: '⚖️ File Dispute', query: 'How do I file a dispute or complaint?' },
-    { label: '📞 Helplines', query: 'How do I contact SeettuManager customer support?' }
+    { label: 'How to Pay', icon: 'credit-card', query: 'How do I make a payment or upload a deposit slip?' },
+    { label: 'Score Formula', icon: 'award', query: 'How is the Financial Discipline Score calculated?' },
+    { label: 'Payout Cycles', icon: 'refresh', query: 'When and how are monthly payouts disbursed?' },
+    { label: 'Seettu Law', icon: 'shield', query: 'Is Seettu legal under Sri Lankan law?' },
+    { label: 'Exit Rules', icon: 'alert-circle', query: 'What happens if a member wants to cancel or leave early?' },
+    { label: 'Refund Policy', icon: 'file-text', query: 'How does the refund process work?' },
+    { label: 'File Dispute', icon: 'scale', query: 'How do I file a dispute or complaint?' },
+    { label: 'Helplines', icon: 'phone', query: 'How do I contact SeettuManager customer support?' }
   ];
 
   useEffect(() => {
@@ -88,7 +88,7 @@ const ChatbotWidget = () => {
       } else if (lower.includes('contact') || lower.includes('phone') || lower.includes('helpline') || lower.includes('support')) {
         fallbackText = "Contact SeettuManager Support:\n• Hotline: +94 11 234 5678 / +94 77 123 4567\n• WhatsApp: +94 77 987 6543\n• Email: support@seettumanager.com\n• Colombo Head Office: Level 4, Colombo Commercial Hub, Galle Road, Colombo 03.";
       } else {
-        fallbackText = "I'm currently operating in offline mode. Please choose one of the topic chips below or email support@seettumanager.com for assistance!";
+        fallbackText = "I'm currently operating in offline mode. Please choose one of the topics below or email support@seettumanager.com for assistance!";
       }
 
       setMessages(prev => [
@@ -125,9 +125,7 @@ const ChatbotWidget = () => {
           }}
           title="Open Seettu Assistant"
         >
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
+          <Icon name="help-circle" size={24} color="#FFFFFF" />
         </button>
       )}
 
@@ -159,13 +157,7 @@ const ChatbotWidget = () => {
                 className="rounded-circle d-flex align-items-center justify-content-center"
                 style={{ width: '36px', height: '36px', backgroundColor: 'rgba(0, 229, 255, 0.15)', border: '1px solid rgba(0, 229, 255, 0.4)' }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
-                  <rect x="4" y="6" width="16" height="12" rx="2" />
-                  <circle cx="9" cy="12" r="1.5" fill="#00E5FF" />
-                  <circle cx="15" cy="12" r="1.5" fill="#00E5FF" />
-                  <path d="M9 16h6" />
-                </svg>
+                <Icon name="help-circle" size={18} color="#00E5FF" />
               </div>
               <div>
                 <div className="fw-bold fs-6 lh-1 mb-1" style={{ letterSpacing: '0.2px' }}>Seettu Assistant</div>
@@ -235,19 +227,21 @@ const ChatbotWidget = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Suggestions Chips with horizontal scroll */}
+          {/* Quick Suggestions Chips with standard icons */}
           <div className="px-3 py-2 bg-white border-top border-bottom" style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
             <div className="d-flex gap-2">
               {quickTopics.map((item, i) => (
                 <button
                   key={i}
                   onClick={() => handleSendText(item.query)}
-                  className="btn btn-sm btn-light border rounded-pill text-dark small px-2 py-1"
+                  className="btn btn-sm border rounded-pill d-inline-flex align-items-center gap-1.5 px-2.5 py-1"
                   style={{
-                    fontSize: '0.72rem',
+                    fontSize: '0.74rem',
+                    fontWeight: 500,
                     flexShrink: 0,
                     borderColor: '#E2E8F0',
                     backgroundColor: '#F8FAFC',
+                    color: '#0F2F3D',
                     transition: 'all 0.15s ease'
                   }}
                   onMouseEnter={(e) => {
@@ -261,7 +255,8 @@ const ChatbotWidget = () => {
                     e.currentTarget.style.color = '#0F2F3D';
                   }}
                 >
-                  {item.label}
+                  <Icon name={item.icon} size={13} color="#0097B2" />
+                  <span>{item.label}</span>
                 </button>
               ))}
             </div>

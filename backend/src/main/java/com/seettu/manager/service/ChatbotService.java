@@ -181,15 +181,15 @@ public class ChatbotService {
     }
 
     private String getGreetingResponse() {
-        return "Hello! Welcome to the SeettuManager Assistant 👋\n\n" +
+        return "Hello! Welcome to the SeettuManager Assistant.\n\n" +
                 "I can help you with:\n" +
-                "• 💳 How to pay installments & upload bank receipts\n" +
-                "• 📊 How the Financial Discipline Score is calculated\n" +
-                "• 🔄 Rotational payout cycles & turns\n" +
-                "• 📜 Cheetus Ordinance (Sri Lankan legal compliance)\n" +
-                "• ❌ Cancellation, exit rules & refund settlement\n" +
-                "• ⚖️ Filing disputes & member complaints\n" +
-                "• 📞 Support contact & branch details\n\n" +
+                "• How to pay installments & upload bank receipts\n" +
+                "• How the Financial Discipline Score is calculated\n" +
+                "• Rotational payout cycles & turns\n" +
+                "• Cheetus Ordinance (Sri Lankan legal compliance)\n" +
+                "• Cancellation, exit rules & refund settlement\n" +
+                "• Filing disputes & member complaints\n" +
+                "• Support contact & branch details\n\n" +
                 "Feel free to type your question or click any topic chip below!";
     }
 
@@ -274,14 +274,14 @@ public class ChatbotService {
 
         // Default friendly fallback with suggested topics
         return "I couldn't find an exact answer for that query, but here is what I can help you with:\n\n" +
-                "• 💳 How to make payments & upload bank slips\n" +
-                "• 📊 How the Financial Discipline Score is calculated\n" +
-                "• 🔄 Rotational payout cycles & receiving your turn\n" +
-                "• 📜 The Cheetus Ordinance (Sri Lankan legal rules)\n" +
-                "• ❌ Member cancellation & exit rules\n" +
-                "• 💰 Refund & overpayment policies\n" +
-                "• ⚖️ Filing disputes or reporting defaults\n" +
-                "• 📞 Support hotlines & office contacts\n\n" +
+                "• How to make payments & upload bank slips\n" +
+                "• How the Financial Discipline Score is calculated\n" +
+                "• Rotational payout cycles & receiving your turn\n" +
+                "• The Cheetus Ordinance (Sri Lankan legal rules)\n" +
+                "• Member cancellation & exit rules\n" +
+                "• Refund & overpayment policies\n" +
+                "• Filing disputes or reporting defaults\n" +
+                "• Support hotlines & office contacts\n\n" +
                 "Please click any quick topic button below or rephrase your question!";
     }
 

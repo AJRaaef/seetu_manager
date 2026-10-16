@@ -474,20 +474,15 @@ const LandingPage = () => {
               </button>
             </div>
 
-            {/* Direct Login / Portal Buttons */}
+            {/* Direct Login Button */}
             {user ? (
               <Link to="/dashboard" className="btn btn-sm fw-bold px-3 text-white rounded-1" style={{ backgroundColor: '#0097B2', fontSize: '0.8rem' }}>
                 Dashboard
               </Link>
             ) : (
-              <>
-                <Link to="/login" className="btn btn-sm fw-bold px-3 text-dark rounded-1" style={{ backgroundColor: '#FFB020', fontSize: '0.8rem' }}>
-                  Member Login
-                </Link>
-                <Link to="/register" className="btn btn-sm fw-bold px-3 text-white rounded-1" style={{ backgroundColor: '#0097B2', fontSize: '0.8rem' }}>
-                  Organizer Portal
-                </Link>
-              </>
+              <Link to="/login" className="btn btn-sm fw-bold px-3 text-white rounded-1" style={{ backgroundColor: '#0097B2', fontSize: '0.8rem' }}>
+                Login
+              </Link>
             )}
           </div>
         </div>
