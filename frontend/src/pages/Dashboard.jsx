@@ -6,6 +6,7 @@ import { getAllPayments, getPaymentsByMember, getAdvancePayments, getAllAdvanceP
 import Icon from '../components/Icons';
 import ReviewPayoutModal from '../components/ReviewPayoutModal';
 import PaymentDetailsModal from '../components/PaymentDetailsModal';
+import DashboardAnalytics from '../components/DashboardAnalytics';
 
 const Dashboard = () => {
   const { user, isAdmin, isOrganizer } = useAuth();
@@ -153,9 +154,13 @@ const Dashboard = () => {
     <div className="dashboard-container pb-4">
       {/* Welcome Heading */}
       <div className="mb-4">
-        <h2 className="dashboard-title">Welcome back, {user?.fullName || 'Organizer'}</h2>
+        <h2 className="dashboard-title">Welcome back, {user?.fullName || (isAdmin ? 'Admin' : isOrganizer ? 'Organizer' : 'Member')}</h2>
         <p className="dashboard-subtitle">
-          Here is a quick look at your current Seettu groups and member contributions for this month.
+          {isAdmin 
+            ? 'Executive overview of all Seettu circles, cash movements, and compliance metrics across Sri Lanka.'
+            : isOrganizer
+            ? 'Manage your active circles, track monthly collections, and oversee scheduled payouts.'
+            : 'Here is a quick look at your current Seettu circles, savings progress, and upcoming payouts.'}
         </p>
       </div>
 
@@ -249,6 +254,16 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Executive Analytical Graphs (Unique for Organizer & Admin Only) */}
+      {(isAdmin || isOrganizer) && (
+        <DashboardAnalytics
+          stats={stats}
+          recentPayments={recentPayments}
+          isAdmin={isAdmin}
+          isOrganizer={isOrganizer}
+        />
+      )}
 
       {/* Upcoming Payout Banner Card */}
       {hasUpcomingPayout ? (
