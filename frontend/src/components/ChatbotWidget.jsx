@@ -8,7 +8,7 @@ const ChatbotWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
-      text: "Hello! I'm your Seettu Assistant.\n\nHow can I help you today? You can type any question or choose one of the topics below.",
+      text: "Hello! I'm your Seettu Assistant.\n\nHow can I help you today? You can type any question or choose one of the quick topics below.",
       sender: 'bot',
       time: 'Just now'
     }
@@ -16,6 +16,7 @@ const ChatbotWidget = () => {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   // Categorized quick prompt topics with standard UI icons
   const quickTopics = [
@@ -35,11 +36,18 @@ const ChatbotWidget = () => {
     return () => window.removeEventListener('toggle-chatbot', handleToggle);
   }, []);
 
-  useEffect(() => {
-    if (isOpen && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
-  }, [messages, isOpen]);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(scrollToBottom, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [messages, isOpen, loading]);
 
   const handleSendText = async (textToSend) => {
     const queryText = (textToSend || input).trim();
@@ -110,6 +118,36 @@ const ChatbotWidget = () => {
 
   return (
     <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1060 }}>
+      {/* Scoped CSS to eliminate horizontal scrollbar and style vertical scrollbar */}
+      <style>{`
+        .chatbot-chips-scroll {
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+        }
+        .chatbot-chips-scroll::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        .chatbot-messages-scroll {
+          scrollbar-width: thin !important;
+          scrollbar-color: #CBD5E1 transparent !important;
+        }
+        .chatbot-messages-scroll::-webkit-scrollbar {
+          width: 5px !important;
+        }
+        .chatbot-messages-scroll::-webkit-scrollbar-track {
+          background: transparent !important;
+        }
+        .chatbot-messages-scroll::-webkit-scrollbar-thumb {
+          background-color: #CBD5E1 !important;
+          border-radius: 4px !important;
+        }
+        .chatbot-messages-scroll::-webkit-scrollbar-thumb:hover {
+          background-color: #94A3B8 !important;
+        }
+      `}</style>
+
       {/* Floating Launcher Button */}
       {!isOpen && (
         <button
@@ -149,7 +187,7 @@ const ChatbotWidget = () => {
         >
           {/* Header */}
           <div
-            className="p-3 text-white d-flex justify-content-between align-items-center"
+            className="p-3 text-white d-flex justify-content-between align-items-center flex-shrink-0"
             style={{ backgroundColor: '#0F2F3D' }}
           >
             <div className="d-flex align-items-center gap-2">
@@ -185,7 +223,8 @@ const ChatbotWidget = () => {
 
           {/* Messages Container */}
           <div
-            className="flex-grow-1 p-3 overflow-y-auto"
+            ref={messagesContainerRef}
+            className="chatbot-messages-scroll flex-grow-1 p-3 overflow-y-auto"
             style={{ backgroundColor: '#F8FAFC', display: 'flex', flexDirection: 'column', gap: '12px' }}
           >
             {messages.map((m, idx) => (
@@ -227,14 +266,24 @@ const ChatbotWidget = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Suggestions Chips with standard icons */}
-          <div className="px-3 py-2 bg-white border-top border-bottom" style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
-            <div className="d-flex gap-2">
+          {/* Quick Questions Chips Bar (Fully visible without scrollbar overlay) */}
+          <div className="bg-white border-top border-bottom py-2 flex-shrink-0">
+            <div 
+              className="chatbot-chips-scroll px-3 d-flex gap-2"
+              style={{ 
+                overflowX: 'auto', 
+                whiteSpace: 'nowrap',
+                scrollBehavior: 'smooth',
+                paddingTop: '2px',
+                paddingBottom: '2px'
+              }}
+            >
               {quickTopics.map((item, i) => (
                 <button
                   key={i}
+                  type="button"
                   onClick={() => handleSendText(item.query)}
-                  className="btn btn-sm border rounded-pill d-inline-flex align-items-center gap-1.5 px-2.5 py-1"
+                  className="btn btn-sm border rounded-pill d-inline-flex align-items-center gap-1.5 px-3 py-1.5 shadow-none"
                   style={{
                     fontSize: '0.74rem',
                     fontWeight: 500,
@@ -242,6 +291,7 @@ const ChatbotWidget = () => {
                     borderColor: '#E2E8F0',
                     backgroundColor: '#F8FAFC',
                     color: '#0F2F3D',
+                    lineHeight: '1.25',
                     transition: 'all 0.15s ease'
                   }}
                   onMouseEnter={(e) => {
@@ -263,7 +313,7 @@ const ChatbotWidget = () => {
           </div>
 
           {/* Input Bar */}
-          <div className="p-2 bg-white d-flex align-items-center gap-2">
+          <div className="p-2 bg-white d-flex align-items-center gap-2 flex-shrink-0">
             <input
               type="text"
               className="form-control rounded-pill border shadow-none px-3 small"
