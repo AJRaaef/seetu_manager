@@ -51,6 +51,15 @@ public class User implements UserDetails {
     @Column(name = "requested_role", length = 20)
     private String requestedRole; // e.g. "ORGANIZER" if member explicitly asked to become an Organizer
 
+    @Column(length = 50)
+    private String district;
+
+    @Column(length = 255)
+    private String address;
+
+    @Column(name = "organizer_application_note", columnDefinition = "TEXT")
+    private String organizerApplicationNote;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "verified_by")
     private User verifiedBy;

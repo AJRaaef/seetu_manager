@@ -197,7 +197,13 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<UserKycResponse> getPendingKycUsers() {
-        return userRepository.findByKycStatusOrderByCreatedAtDesc(User.KycStatus.PENDING).stream()
+        return userRepository.findAll().stream()
+                .filter(u -> u.getKycStatus() == User.KycStatus.PENDING || 
+                        ("ORGANIZER".equalsIgnoreCase(u.getRequestedRole()) && u.getRole() != User.Role.ORGANIZER))
+                .sorted((a, b) -> {
+                    if (a.getCreatedAt() == null || b.getCreatedAt() == null) return 0;
+                    return b.getCreatedAt().compareTo(a.getCreatedAt());
+                })
                 .map(this::toKycResponse)
                 .collect(Collectors.toList());
     }
@@ -222,6 +228,9 @@ public class UserService {
                 .kycStatus(user.getKycStatus() != null ? user.getKycStatus().name() : "UNVERIFIED")
                 .kycRejectionReason(user.getKycRejectionReason())
                 .requestedRole(user.getRequestedRole())
+                .district(user.getDistrict())
+                .address(user.getAddress())
+                .organizerApplicationNote(user.getOrganizerApplicationNote())
                 .verifiedById(verifiedBy != null ? verifiedBy.getId() : null)
                 .verifiedByName(verifiedBy != null ? verifiedBy.getFullName() : null)
                 .verifiedAt(user.getVerifiedAt())

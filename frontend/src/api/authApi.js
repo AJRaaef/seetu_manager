@@ -15,6 +15,16 @@ export const applyOrganizer = async (data) => {
   return response.data;
 };
 
+export const getOrganizerStatus = async (query) => {
+  const response = await api.get(`/auth/organizer-status?query=${encodeURIComponent(query)}`);
+  return response.data;
+};
+
+export const activateOrganizer = async (data) => {
+  const response = await api.post('/auth/activate-organizer', data);
+  return response.data;
+};
+
 export const forgotPassword = async (email) => {
   const response = await api.post(`/auth/forgot-password?email=${email}`);
   return response.data;

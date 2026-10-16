@@ -19,9 +19,22 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/apply-organizer")
-    public ResponseEntity<ApiResponse<Void>> applyOrganizer(@Valid @RequestBody OrganizerApplicationRequest request) {
-        authService.applyOrganizer(request);
-        return ResponseEntity.ok(ApiResponse.success("Your application to become a Seettu Organizer has been submitted successfully. Our team will review your application and contact you.", null));
+    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> applyOrganizer(@Valid @RequestBody OrganizerApplicationRequest request) {
+        java.util.Map<String, Object> application = authService.applyOrganizer(request);
+        return ResponseEntity.ok(ApiResponse.success("Your application to become a Seettu Organizer has been submitted successfully.", application));
+    }
+
+    @GetMapping("/organizer-status")
+    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> getOrganizerStatus(@RequestParam String query) {
+        return ResponseEntity.ok(ApiResponse.success(authService.getApplicationStatus(query)));
+    }
+
+    @PostMapping("/activate-organizer")
+    public ResponseEntity<ApiResponse<AuthResponse>> activateOrganizer(@RequestBody java.util.Map<String, String> payload) {
+        String query = payload.get("query");
+        String password = payload.get("password");
+        AuthResponse response = authService.activateOrganizer(query, password);
+        return ResponseEntity.ok(ApiResponse.success("Organizer account activated successfully. Welcome to SeettuManager!", response));
     }
 
     @PostMapping("/register")

@@ -22,6 +22,9 @@ public class UserKycResponse {
     private String kycStatus;
     private String kycRejectionReason;
     private String requestedRole;
+    private String district;
+    private String address;
+    private String organizerApplicationNote;
     private Long verifiedById;
     private String verifiedByName;
     private LocalDateTime verifiedAt;

@@ -12,6 +12,9 @@ import com.seettu.manager.repository.UserRepository;
 import com.seettu.manager.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import java.util.UUID;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.LocalDateTime;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -163,25 +166,31 @@ public class AuthService {
     }
 
     @Transactional
-    public void applyOrganizer(OrganizerApplicationRequest request) {
+    public Map<String, Object> applyOrganizer(OrganizerApplicationRequest request) {
         User user = userRepository.findByEmail(request.getEmail().trim())
                 .or(() -> userRepository.findByPhone(request.getPhone().trim()))
                 .orElse(null);
 
+        String fullAddress = (request.getAddressLine1() != null ? request.getAddressLine1().trim() : "")
+                + (request.getAddressLine2() != null && !request.getAddressLine2().trim().isEmpty() ? ", " + request.getAddressLine2().trim() : "")
+                + (request.getPostalCode() != null && !request.getPostalCode().trim().isEmpty() ? " " + request.getPostalCode().trim() : "");
+
         String districtStr = (request.getDistrict() != null && !request.getDistrict().trim().isEmpty())
-                ? " (" + request.getDistrict().trim() + ")" : "";
+                ? request.getDistrict().trim() : "";
         String msgStr = (request.getMessage() != null && !request.getMessage().trim().isEmpty())
-                ? " Message: " + request.getMessage().trim() : "";
+                ? request.getMessage().trim() : "";
 
         if (user != null) {
             user.setRequestedRole("ORGANIZER");
+            user.setKycStatus(User.KycStatus.PENDING);
+            if (!districtStr.isEmpty()) user.setDistrict(districtStr);
+            if (!fullAddress.isEmpty()) user.setAddress(fullAddress);
+            if (!msgStr.isEmpty()) user.setOrganizerApplicationNote(msgStr);
             user = userRepository.save(user);
 
             auditLogService.log(user, "ORGANIZER_APPLIED", "users", user.getId(),
-                    "Applicant/Member " + user.getFullName() + districtStr + " submitted application to become an Organizer." + msgStr);
+                    "Applicant/Member " + user.getFullName() + " (" + districtStr + ") submitted application to become an Organizer. Message: " + msgStr);
         } else {
-            // New applicant creating a preliminary member profile with requestedRole: ORGANIZER
-            // Password is generated automatically since organizer application does not require a password
             user = User.builder()
                     .fullName(request.getFullName().trim())
                     .email(request.getEmail().trim())
@@ -190,6 +199,10 @@ public class AuthService {
                     .role(User.Role.MEMBER)
                     .requestedRole("ORGANIZER")
                     .preferredLanguage(User.Language.EN)
+                    .kycStatus(User.KycStatus.PENDING)
+                    .district(districtStr)
+                    .address(fullAddress)
+                    .organizerApplicationNote(msgStr)
                     .isLocked(false)
                     .failedLoginAttempts(0)
                     .build();
@@ -197,8 +210,93 @@ public class AuthService {
             user = userRepository.save(user);
 
             auditLogService.log(user, "ORGANIZER_APPLIED", "users", user.getId(),
-                    "New Organizer application received from " + user.getFullName() + " (" + user.getEmail() + ", " + user.getPhone() + districtStr + ")." + msgStr);
+                    "New Organizer application received from " + user.getFullName() + " (" + user.getEmail() + ", " + user.getPhone() + ", " + districtStr + "). Message: " + msgStr);
         }
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("applicationId", "SEETTU-ORG-" + String.format("%05d", user.getId()));
+        resp.put("userId", user.getId());
+        resp.put("fullName", user.getFullName());
+        resp.put("email", user.getEmail());
+        resp.put("phone", user.getPhone());
+        resp.put("district", user.getDistrict());
+        resp.put("status", "PENDING");
+        resp.put("submittedAt", user.getCreatedAt() != null ? user.getCreatedAt().toString() : LocalDateTime.now().toString());
+        return resp;
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> getApplicationStatus(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email or phone number is required to look up application status.");
+        }
+        String cleanQuery = query.trim();
+        User user = userRepository.findByEmail(cleanQuery)
+                .or(() -> userRepository.findByPhone(cleanQuery))
+                .orElseThrow(() -> new ResourceNotFoundException("No organizer application found for: " + cleanQuery));
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("applicationId", "SEETTU-ORG-" + String.format("%05d", user.getId()));
+        resp.put("userId", user.getId());
+        resp.put("fullName", user.getFullName());
+        resp.put("email", user.getEmail());
+        resp.put("phone", user.getPhone());
+        resp.put("district", user.getDistrict());
+        resp.put("address", user.getAddress());
+        resp.put("role", user.getRole().name());
+        resp.put("requestedRole", user.getRequestedRole());
+        resp.put("kycStatus", user.getKycStatus() != null ? user.getKycStatus().name() : "PENDING");
+        resp.put("rejectionReason", user.getKycRejectionReason());
+        resp.put("isApprovedAsOrganizer", user.getRole() == User.Role.ORGANIZER);
+        resp.put("submittedAt", user.getCreatedAt());
+
+        if (user.getRole() == User.Role.ORGANIZER) {
+            resp.put("status", "APPROVED");
+            resp.put("statusMessage", "Congratulations! Your application has been approved by our Administration. You are an authorized Seettu Organizer.");
+        } else if (user.getKycStatus() == User.KycStatus.REJECTED) {
+            resp.put("status", "REJECTED");
+            resp.put("statusMessage", "Application review was not approved: " + (user.getKycRejectionReason() != null ? user.getKycRejectionReason() : "Please contact regional desk."));
+        } else {
+            resp.put("status", "PENDING");
+            resp.put("statusMessage", "Your application is currently under administrative compliance review. Our regional desk officer will contact you shortly.");
+        }
+        return resp;
+    }
+
+    @Transactional
+    public AuthResponse activateOrganizer(String query, String password) {
+        if (query == null || query.trim().isEmpty() || password == null || password.length() < 6) {
+            throw new IllegalArgumentException("Valid credentials and a password of at least 6 characters are required.");
+        }
+        String cleanQuery = query.trim();
+        User user = userRepository.findByEmail(cleanQuery)
+                .or(() -> userRepository.findByPhone(cleanQuery))
+                .orElseThrow(() -> new ResourceNotFoundException("No application found for: " + cleanQuery));
+
+        if (user.getRole() != User.Role.ORGANIZER) {
+            throw new IllegalArgumentException("Your application is still under review (" + user.getKycStatus() + "). Account activation unlocks upon administrator approval.");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setIsLocked(false);
+        user.setFailedLoginAttempts(0);
+        user = userRepository.save(user);
+
+        auditLogService.log(user, "ORGANIZER_ACTIVATED", "users", user.getId(),
+                "Approved Organizer " + user.getFullName() + " activated password and launched Organizer Portal.");
+
+        String token = jwtUtil.generateToken(user);
+        return AuthResponse.builder()
+                .token(token)
+                .userId(user.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .preferredLanguage(user.getPreferredLanguage().name())
+                .nicNumber(user.getNicNumber())
+                .kycStatus(user.getKycStatus() != null ? user.getKycStatus().name() : "VERIFIED")
+                .requestedRole(user.getRequestedRole())
+                .build();
     }
 
     private void handleFailedLogin(User user) {

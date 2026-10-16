@@ -320,14 +320,25 @@ const Members = () => {
                   <tr key={usr.id}>
                     <td className="fw-bold text-dark">
                       <div>{usr.fullName}</div>
-                      {usr.requestedRole === 'ORGANIZER' && (
+                      {usr.requestedRole === 'ORGANIZER' ? (
                         <div className="mt-1">
                           <span className="badge bg-teal bg-opacity-10 text-dark border border-secondary border-opacity-25 px-2 py-0.5 rounded-pill small fw-semibold d-inline-flex align-items-center gap-1" style={{ fontSize: '0.72rem', backgroundColor: '#E2F0F3', color: '#1A5265' }}>
                             <Icon name="users" size={12} color="#1A5265" />
-                            <span>Requested: Organizer</span>
+                            <span>Applicant: Seettu Organizer</span>
                           </span>
+                          {usr.district && (
+                            <div className="small text-muted mt-1 fw-normal" style={{ fontSize: '0.78rem' }}>
+                              <Icon name="map-pin" size={12} className="me-1 text-info" />
+                              <strong className="text-dark">{usr.district}</strong> {usr.address ? `(${usr.address})` : ''}
+                            </div>
+                          )}
+                          {usr.organizerApplicationNote && (
+                            <div className="small text-muted fst-italic mt-0.5 fw-normal" style={{ fontSize: '0.74rem', maxWidth: '320px', lineHeight: '1.4' }}>
+                              "{usr.organizerApplicationNote}"
+                            </div>
+                          )}
                         </div>
-                      )}
+                      ) : null}
                     </td>
                     <td className="small text-muted">
                       <div>{usr.email}</div>
@@ -335,11 +346,13 @@ const Members = () => {
                     </td>
                     <td>
                       <span className="badge bg-light text-dark border font-monospace px-2 py-1">
-                        {usr.nicNumber || 'N/A'}
+                        {usr.nicNumber || (usr.requestedRole === 'ORGANIZER' ? 'Pending GN/NIC' : 'N/A')}
                       </span>
-                      <span className="badge bg-success bg-opacity-10 text-success border border-success ms-1 small" style={{ fontSize: '0.72rem' }}>
-                        Unique NIC
-                      </span>
+                      {usr.nicNumber && (
+                        <span className="badge bg-success bg-opacity-10 text-success border border-success ms-1 small" style={{ fontSize: '0.72rem' }}>
+                          Unique NIC
+                        </span>
+                      )}
                     </td>
                     <td>
                       {usr.gnCertificateUrl ? (
@@ -354,7 +367,7 @@ const Members = () => {
                           <span>View GN Certificate</span>
                         </a>
                       ) : (
-                        <span className="text-muted small">No File</span>
+                        <span className="badge bg-light text-muted border small">No Document Uploaded</span>
                       )}
                     </td>
                     <td className="text-muted small">
@@ -362,24 +375,25 @@ const Members = () => {
                     </td>
                     <td className="text-end">
                       <div className="d-inline-flex gap-2 align-items-center justify-content-end">
-                        <button
-                          onClick={() => handleApproveKyc(usr.id, usr.fullName)}
-                          className="btn btn-sm btn-success px-3 py-1.5 shadow-sm fw-semibold d-inline-flex align-items-center gap-1.5"
-                          style={{ height: '36px', minWidth: '135px', justifyContent: 'center' }}
-                          title="Verify as Participating Member"
-                        >
-                          <Icon name="check" size={15} />
-                          <span>Verify Member</span>
-                        </button>
-                        {isAdmin && usr.requestedRole === 'ORGANIZER' && (
+                        {isAdmin && usr.requestedRole === 'ORGANIZER' ? (
                           <button
                             onClick={() => handleApproveKyc(usr.id, usr.fullName, 'ORGANIZER')}
                             className="btn btn-sm px-3 py-1.5 shadow-sm fw-semibold d-inline-flex align-items-center gap-1.5 text-white"
-                            style={{ backgroundColor: '#1A5265', height: '36px', minWidth: '175px', justifyContent: 'center' }}
-                            title="Applicant explicitly requested Organizer status. Click to approve and promote."
+                            style={{ backgroundColor: '#0097B2', height: '36px', minWidth: '165px', justifyContent: 'center' }}
+                            title="Approve applicant application and promote to Group Organizer"
                           >
                             <Icon name="user-check" size={15} />
-                            <span>Make Organizer</span>
+                            <span>Approve Organizer</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleApproveKyc(usr.id, usr.fullName)}
+                            className="btn btn-sm btn-success px-3 py-1.5 shadow-sm fw-semibold d-inline-flex align-items-center gap-1.5"
+                            style={{ height: '36px', minWidth: '135px', justifyContent: 'center' }}
+                            title="Verify as Participating Member"
+                          >
+                            <Icon name="check" size={15} />
+                            <span>Verify Member</span>
                           </button>
                         )}
                         <button
