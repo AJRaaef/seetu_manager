@@ -59,3 +59,9 @@ export const getPaymentEvidences = async (paymentId) => {
   const response = await api.get(`/payments/${paymentId}/evidence`);
   return response.data;
 };
+
+export const triggerPaymentReminders = async () => {
+  const response = await api.post('/payments/send-reminders');
+  return response.data;
+};
+

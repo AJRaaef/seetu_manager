@@ -97,4 +97,11 @@ public class PaymentController {
         paymentService.deletePayment(id);
         return ResponseEntity.ok(ApiResponse.success("Payment deleted successfully", null));
     }
+
+    @PostMapping("/send-reminders")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public ResponseEntity<ApiResponse<String>> triggerPaymentReminders() {
+        int count = paymentService.sendPaymentReminders();
+        return ResponseEntity.ok(ApiResponse.success("Payment reminders dispatched successfully", "Reminders sent: " + count));
+    }
 }

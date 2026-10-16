@@ -19,3 +19,8 @@ export const markAsRead = async (id) => {
   const response = await api.put(`/notifications/${id}/read`);
   return response.data;
 };
+
+export const markAllAsRead = async (userId) => {
+  const response = await api.put(`/notifications/user/${userId}/read-all`);
+  return response.data;
+};

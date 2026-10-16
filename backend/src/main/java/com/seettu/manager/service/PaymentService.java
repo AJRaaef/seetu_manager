@@ -23,6 +23,7 @@ public class PaymentService {
     private final UserService userService;
     private final AuditLogService auditLogService;
     private final NotificationService notificationService;
+    private final com.seettu.manager.repository.GroupMemberRepository groupMemberRepository;
 
     @Transactional
     public Payment recordPayment(PaymentRecordRequest request, User recorder) {
@@ -173,6 +174,58 @@ public class PaymentService {
                         "Your payment for cycle " + cycle.getCycleNumber() + " is overdue!", "PAYMENT_OVERDUE");
             }
         }
+    }
+
+    @Transactional
+    public int sendPaymentReminders() {
+        LocalDate today = LocalDate.now();
+        LocalDate threeDaysLater = today.plusDays(3);
+        List<PaymentCycle> activeCycles = paymentCycleService.getActiveCycles();
+        int remindersSent = 0;
+
+        for (PaymentCycle cycle : activeCycles) {
+            LocalDate dueDate = cycle.getEndDate();
+            if (dueDate != null && !dueDate.isBefore(today) && !dueDate.isAfter(threeDaysLater)) {
+                String groupName = (cycle.getGroup() != null && cycle.getGroup().getName() != null)
+                        ? cycle.getGroup().getName()
+                        : "Seettu Group";
+
+                // 1. Members with recorded PENDING payments
+                List<Payment> pendingPayments = paymentRepository.findByCycleIdAndStatus(
+                        cycle.getId(), Payment.PaymentStatus.PENDING);
+                for (Payment payment : pendingPayments) {
+                    if (payment.getMember() != null) {
+                        String msg = String.format("Payment Reminder: Your pending payment of LKR %.2f for '%s' (Cycle #%d) is due on %s. Please complete or confirm your payment.",
+                                payment.getAmount(), groupName, cycle.getCycleNumber(), dueDate.toString());
+                        notificationService.sendNotification(payment.getMember().getId(), msg, "PAYMENT_REMINDER");
+                        remindersSent++;
+                    }
+                }
+
+                // 2. Active group members who haven't paid yet for this cycle
+                if (cycle.getGroup() != null && cycle.getGroup().getId() != null) {
+                    List<GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(
+                            cycle.getGroup().getId(), GroupMember.MemberStatus.ACTIVE);
+                    java.math.BigDecimal contributionAmount = cycle.getGroup().getContributionAmount() != null
+                            ? cycle.getGroup().getContributionAmount()
+                            : java.math.BigDecimal.ZERO;
+
+                    for (GroupMember gm : activeMembers) {
+                        if (gm.getUser() != null) {
+                            Long memberUserId = gm.getUser().getId();
+                            boolean hasRecord = paymentRepository.existsByCycleIdAndMemberId(cycle.getId(), memberUserId);
+                            if (!hasRecord) {
+                                String msg = String.format("Payment Reminder: Your installment of LKR %.2f for '%s' (Cycle #%d) is due on %s. Please submit your payment before the deadline.",
+                                        contributionAmount, groupName, cycle.getCycleNumber(), dueDate.toString());
+                                notificationService.sendNotification(memberUserId, msg, "PAYMENT_REMINDER");
+                                remindersSent++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return remindersSent;
     }
 
     public PaymentResponse toPaymentResponse(Payment payment) {

@@ -36,4 +36,10 @@ public class NotificationController {
         notificationService.markAsRead(id);
         return ResponseEntity.ok(ApiResponse.success("Notification marked as read", null));
     }
+
+    @PutMapping("/user/{userId}/read-all")
+    public ResponseEntity<ApiResponse<Void>> markAllAsRead(@PathVariable Long userId) {
+        notificationService.markAllAsRead(userId);
+        return ResponseEntity.ok(ApiResponse.success("All notifications marked as read", null));
+    }
 }

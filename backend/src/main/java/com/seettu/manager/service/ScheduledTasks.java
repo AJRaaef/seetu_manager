@@ -22,7 +22,7 @@ public class ScheduledTasks {
     // Run at 9 AM every day
     @Scheduled(cron = "0 0 9 * * ?")
     public void sendPaymentReminders() {
-        // Logic to send reminders
-        System.out.println("Scheduled Task: Sent payment reminders at " + LocalDate.now());
+        int count = paymentService.sendPaymentReminders();
+        System.out.println("Scheduled Task: Sent " + count + " payment reminders at " + LocalDate.now());
     }
 }
