@@ -755,112 +755,67 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* Center Column: Central Featured Building / Community Visual with Center Action Badge */}
+            {/* Center Column: Unique High-Resolution Fintech Showcase Visual */}
             <div className="col-lg-4 col-md-12 order-first order-lg-0 mb-4 mb-lg-0">
               <div 
-                className="position-relative rounded-4 overflow-hidden shadow-lg border h-100 d-flex flex-column justify-content-center align-items-center"
-                style={{ minHeight: '380px', backgroundColor: '#0F2F3D' }}
+                className="position-relative rounded-4 overflow-hidden shadow-lg border h-100 d-flex flex-column justify-content-between align-items-center p-3 text-center"
+                style={{ 
+                  minHeight: '460px', 
+                  backgroundColor: '#0F2F3D',
+                  background: 'radial-gradient(circle at 50% 20%, rgba(0, 229, 255, 0.15) 0%, #0F2F3D 70%)',
+                  border: '1px solid rgba(0, 151, 178, 0.35)'
+                }}
               >
-                <img 
-                  src="/sl_currency_seettu.jpg" 
-                  alt="Sri Lankan Seettu Currency & Savings" 
-                  className="w-100 h-100 object-fit-cover position-absolute top-0 start-0"
-                  style={{ opacity: 0.95, objectFit: 'cover' }}
-                />
-
-                {/* Subtle Brand Gradient Overlay */}
+                {/* Top Badge: Sri Lanka Cheetus Ecosystem */}
                 <div 
-                  className="position-absolute top-0 start-0 w-100 h-100" 
-                  style={{ background: 'linear-gradient(180deg, rgba(15,47,61,0.45) 0%, rgba(15,47,61,0.1) 50%, rgba(15,47,61,0.75) 100%)' }}
-                />
-
-                {/* Rooftop Signboard / Billboard (Matching Reference Style) */}
-                <div 
-                  className="position-absolute top-0 start-50 translate-middle-x mt-3 px-3 py-1.5 rounded-2 shadow text-center text-white" 
-                  style={{ backgroundColor: '#0097B2', border: '2px solid #ffffff', zIndex: 2 }}
-                >
-                  <div className="fw-extrabold text-uppercase" style={{ fontSize: '0.78rem', letterSpacing: '1.2px' }}>
-                    SEETTUMANAGER
-                  </div>
-                  <div style={{ fontSize: '0.62rem', fontWeight: 600, opacity: 0.95 }}>
-                    DIGITAL ROTATING SAVINGS
-                  </div>
-                </div>
-
-                {/* Unique Live Seettu Smart Ledger Floating Card */}
-                <div 
-                  className="position-relative my-auto mx-auto p-3.5 rounded-4 shadow-2xl text-start"
+                  className="px-3 py-1 rounded-pill shadow-sm d-inline-flex align-items-center gap-1.5 text-white" 
                   style={{ 
-                    backgroundColor: 'rgba(15, 47, 61, 0.9)', 
-                    backdropFilter: 'blur(10px)',
-                    border: '1.5px solid rgba(0, 151, 178, 0.45)',
-                    maxWidth: '315px',
-                    width: '90%',
-                    color: '#ffffff',
+                    backgroundColor: 'rgba(0, 151, 178, 0.85)', 
+                    border: '1px solid rgba(0, 229, 255, 0.4)', 
                     zIndex: 2,
-                    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)'
+                    fontSize: '0.72rem',
+                    letterSpacing: '0.6px',
+                    fontWeight: 700
                   }}
                 >
-                  {/* Ledger Header */}
-                  <div className="d-flex align-items-center justify-content-between mb-2.5 pb-2 border-bottom border-light border-opacity-15">
-                    <div className="d-flex align-items-center gap-1.5">
-                      <span className="d-inline-block rounded-circle" style={{ width: '8px', height: '8px', backgroundColor: '#10B981', boxShadow: '0 0 8px #10B981' }} />
-                      <span className="fw-bold text-uppercase" style={{ fontSize: '0.72rem', letterSpacing: '0.8px', color: '#68B6C7' }}>
-                        LIVE SEETTU LEDGER
-                      </span>
-                    </div>
-                    <span className="badge rounded-pill fw-bold" style={{ backgroundColor: 'rgba(0, 151, 178, 0.3)', color: '#00E5FF', fontSize: '0.68rem', border: '1px solid rgba(0, 229, 255, 0.3)' }}>
-                      Cycle 05 / 12
-                    </span>
-                  </div>
-
-                  {/* Pooled Fund & Discipline Score Highlight */}
-                  <div className="row g-2 mb-2.5">
-                    <div className="col-6">
-                      <div className="p-2 rounded-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                        <div className="text-white-50 text-uppercase" style={{ fontSize: '0.62rem', letterSpacing: '0.5px' }}>Pooled Payout</div>
-                        <div className="fw-black text-warning" style={{ fontSize: '1rem', fontWeight: 800 }}>LKR 500,000</div>
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className="p-2 rounded-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                        <div className="text-white-50 text-uppercase" style={{ fontSize: '0.62rem', letterSpacing: '0.5px' }}>Discipline Score</div>
-                        <div className="fw-black" style={{ color: '#00E5FF', fontSize: '1rem', fontWeight: 800 }}>98 / 100</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Rotation Punctuality Progress */}
-                  <div className="mb-2.5">
-                    <div className="d-flex justify-content-between text-white-50 mb-1" style={{ fontSize: '0.68rem' }}>
-                      <span>Punctual Contributions</span>
-                      <span className="fw-bold text-white">100% Complete</span>
-                    </div>
-                    <div className="progress rounded-pill" style={{ height: '6px', backgroundColor: 'rgba(255,255,255,0.15)' }}>
-                      <div 
-                        className="progress-bar rounded-pill" 
-                        style={{ width: '100%', backgroundColor: '#0097B2' }} 
-                      />
-                    </div>
-                  </div>
-
-                  {/* Verification Pill & Explore Link */}
-                  <div className="pt-2 border-top border-light border-opacity-10 d-flex align-items-center justify-content-between">
-                    <div className="d-flex align-items-center gap-1 text-white-50" style={{ fontSize: '0.68rem' }}>
-                      <Icon name="check" size={12} color="#10B981" />
-                      <span>Bank Slip Verified</span>
-                    </div>
-                    <a 
-                      href="#how-it-works" 
-                      className="text-decoration-none fw-bold d-inline-flex align-items-center gap-1"
-                      style={{ color: '#00E5FF', fontSize: '0.72rem' }}
-                    >
-                      <span>How It Works</span>
-                      <Icon name="chevron-right" size={12} />
-                    </a>
-                  </div>
+                  <Icon name="shield" size={13} color="#00E5FF" />
+                  <span>SRI LANKAN ROTATING SAVINGS</span>
                 </div>
 
+                {/* Unique 3D Fintech Showcase Illustration */}
+                <div className="my-auto w-100 d-flex justify-content-center py-2">
+                  <img 
+                    src="/seettu_showcase.jpg" 
+                    alt="SeettuManager Smart Rotating Savings Ecosystem" 
+                    className="img-fluid rounded-3 shadow-md"
+                    style={{ 
+                      maxHeight: '340px', 
+                      objectFit: 'contain',
+                      filter: 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.45))'
+                    }}
+                  />
+                </div>
+
+                {/* Bottom Live Metrics Pill */}
+                <div 
+                  className="w-100 py-2 px-3 rounded-3 text-start d-flex align-items-center justify-content-between shadow-xs"
+                  style={{ 
+                    backgroundColor: 'rgba(7, 29, 39, 0.85)', 
+                    border: '1px solid rgba(0, 229, 255, 0.25)',
+                    backdropFilter: 'blur(8px)',
+                    zIndex: 2
+                  }}
+                >
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="d-inline-block rounded-circle" style={{ width: '8px', height: '8px', backgroundColor: '#10B981', boxShadow: '0 0 8px #10B981' }} />
+                    <span className="small text-white-50 fw-semibold" style={{ fontSize: '0.76rem' }}>
+                      Certified Cheetus Ledger
+                    </span>
+                  </div>
+                  <span className="fw-bold" style={{ color: '#00E5FF', fontSize: '0.8rem' }}>
+                    100% Guaranteed
+                  </span>
+                </div>
               </div>
             </div>
 
