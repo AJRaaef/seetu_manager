@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -179,30 +180,18 @@ public class PaymentService {
     @Transactional
     public int sendPaymentReminders() {
         LocalDate today = LocalDate.now();
-        LocalDate threeDaysLater = today.plusDays(3);
+        LocalDate sevenDaysLater = today.plusDays(7);
         List<PaymentCycle> activeCycles = paymentCycleService.getActiveCycles();
         int remindersSent = 0;
 
         for (PaymentCycle cycle : activeCycles) {
             LocalDate dueDate = cycle.getEndDate();
-            if (dueDate != null && !dueDate.isBefore(today) && !dueDate.isAfter(threeDaysLater)) {
+            if (dueDate != null && !dueDate.isBefore(today) && !dueDate.isAfter(sevenDaysLater)) {
                 String groupName = (cycle.getGroup() != null && cycle.getGroup().getName() != null)
                         ? cycle.getGroup().getName()
                         : "Seettu Group";
 
-                // 1. Members with recorded PENDING payments
-                List<Payment> pendingPayments = paymentRepository.findByCycleIdAndStatus(
-                        cycle.getId(), Payment.PaymentStatus.PENDING);
-                for (Payment payment : pendingPayments) {
-                    if (payment.getMember() != null) {
-                        String msg = String.format("Payment Reminder: Your pending payment of LKR %.2f for '%s' (Cycle #%d) is due on %s. Please complete or confirm your payment.",
-                                payment.getAmount(), groupName, cycle.getCycleNumber(), dueDate.toString());
-                        notificationService.sendNotification(payment.getMember().getId(), msg, "PAYMENT_REMINDER");
-                        remindersSent++;
-                    }
-                }
-
-                // 2. Active group members who haven't paid yet for this cycle
+                // Notify active members of this group who haven't fully settled payment for this cycle
                 if (cycle.getGroup() != null && cycle.getGroup().getId() != null) {
                     List<GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(
                             cycle.getGroup().getId(), GroupMember.MemberStatus.ACTIVE);
@@ -213,9 +202,11 @@ public class PaymentService {
                     for (GroupMember gm : activeMembers) {
                         if (gm.getUser() != null) {
                             Long memberUserId = gm.getUser().getId();
-                            boolean hasRecord = paymentRepository.existsByCycleIdAndMemberId(cycle.getId(), memberUserId);
-                            if (!hasRecord) {
-                                String msg = String.format("Payment Reminder: Your installment of LKR %.2f for '%s' (Cycle #%d) is due on %s. Please submit your payment before the deadline.",
+                            Optional<Payment> existingPayment = paymentRepository.findByCycleIdAndMemberId(cycle.getId(), memberUserId);
+                            boolean isSettled = existingPayment.isPresent() && existingPayment.get().getStatus() == Payment.PaymentStatus.PAID;
+
+                            if (!isSettled) {
+                                String msg = String.format("Payment Reminder: Your installment of LKR %.2f for '%s' (Cycle #%d) is due on %s. Please ensure your payment is settled on time.",
                                         contributionAmount, groupName, cycle.getCycleNumber(), dueDate.toString());
                                 notificationService.sendNotification(memberUserId, msg, "PAYMENT_REMINDER");
                                 remindersSent++;
