@@ -11,6 +11,7 @@ const LandingPage = () => {
   const { language, changeLanguage } = useLanguage();
 
   // State
+  const [currentSlide, setCurrentSlide] = useState(0);
   const [openFaq, setOpenFaq] = useState(0);
   const [faqCategory, setFaqCategory] = useState('ALL');
   const [faqSearch, setFaqSearch] = useState('');
