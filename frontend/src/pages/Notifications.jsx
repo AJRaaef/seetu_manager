@@ -161,7 +161,8 @@ const Notifications = () => {
               className="btn btn-outline-primary btn-sm fw-bold d-flex align-items-center gap-1 shadow-sm"
               onClick={handleMarkAllAsRead}
             >
-              <span>✓ Mark All Read</span>
+              <Icon name="check" size={14} />
+              <span>Mark All Read</span>
             </button>
           )}
 
@@ -185,19 +186,21 @@ const Notifications = () => {
           <div className="btn-group btn-group-sm shadow-sm" role="group">
             <button
               type="button"
-              className={`btn ${scope === 'MINE' ? 'btn-teal fw-bold text-white' : 'btn-outline-secondary'}`}
+              className={`btn d-inline-flex align-items-center gap-1.5 ${scope === 'MINE' ? 'btn-teal fw-bold text-white' : 'btn-outline-secondary'}`}
               style={scope === 'MINE' ? { backgroundColor: '#0097B2', borderColor: '#0097B2' } : {}}
               onClick={() => setScope('MINE')}
             >
-              👤 My Notifications
+              <Icon name="user" size={14} color={scope === 'MINE' ? '#FFFFFF' : 'currentColor'} />
+              <span>My Notifications</span>
             </button>
             <button
               type="button"
-              className={`btn ${scope === 'ALL_SYSTEM' ? 'btn-teal fw-bold text-white' : 'btn-outline-secondary'}`}
+              className={`btn d-inline-flex align-items-center gap-1.5 ${scope === 'ALL_SYSTEM' ? 'btn-teal fw-bold text-white' : 'btn-outline-secondary'}`}
               style={scope === 'ALL_SYSTEM' ? { backgroundColor: '#0F2F3D', borderColor: '#0F2F3D' } : {}}
               onClick={() => setScope('ALL_SYSTEM')}
             >
-              🌐 All System Notifications ({scope === 'ALL_SYSTEM' ? notifications.length : 'All Users'})
+              <Icon name="globe" size={14} color={scope === 'ALL_SYSTEM' ? '#FFFFFF' : 'currentColor'} />
+              <span>All System Notifications ({scope === 'ALL_SYSTEM' ? notifications.length : 'All Users'})</span>
             </button>
           </div>
         </div>
@@ -275,12 +278,14 @@ const Notifications = () => {
                         </span>
                       )}
                       {scope === 'ALL_SYSTEM' && n.user && (
-                        <span className="badge bg-secondary-subtle text-dark border px-2 py-0.5 small">
-                          👤 Sent to: {n.user.fullName || n.user.email || `User #${n.user.id}`}
+                        <span className="badge bg-secondary-subtle text-dark border px-2 py-0.5 small d-inline-flex align-items-center">
+                          <Icon name="user" size={12} color="#475569" className="me-1" />
+                          <span>Sent to: {n.user.fullName || n.user.email || `User #${n.user.id}`}</span>
                         </span>
                       )}
-                      <small className="text-muted ms-auto">
-                        🕒 {n.createdAt ? new Date(n.createdAt).toLocaleString() : 'Just now'}
+                      <small className="text-muted ms-auto d-inline-flex align-items-center">
+                        <Icon name="clock" size={12} color="#94A3B8" className="me-1" />
+                        <span>{n.createdAt ? new Date(n.createdAt).toLocaleString() : 'Just now'}</span>
                       </small>
                     </div>
 
@@ -291,12 +296,13 @@ const Notifications = () => {
 
                   {unread && scope === 'MINE' && (
                     <button
-                      className="btn btn-sm btn-outline-primary fw-bold ms-3 flex-shrink-0"
+                      className="btn btn-sm btn-outline-primary fw-bold ms-3 flex-shrink-0 d-inline-flex align-items-center gap-1"
                       style={{ color: '#0097B2', borderColor: '#0097B2' }}
                       onClick={() => handleMarkAsRead(n.id)}
                       title="Mark as read"
                     >
-                      ✓ Mark Read
+                      <Icon name="check" size={13} color="#0097B2" />
+                      <span>Mark Read</span>
                     </button>
                   )}
                 </div>
