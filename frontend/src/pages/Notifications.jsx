@@ -7,6 +7,7 @@ import Icon from '../components/Icons';
 const Notifications = () => {
   const { user, isAdmin, isOrganizer } = useAuth();
   const [notifications, setNotifications] = useState([]);
+  const [scope, setScope] = useState('MINE'); // 'MINE' or 'ALL_SYSTEM'
   const [filter, setFilter] = useState('ALL');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -19,14 +20,19 @@ const Notifications = () => {
     if (currentUserId) {
       fetchNotifications();
     }
-  }, [currentUserId]);
+  }, [currentUserId, scope]);
 
   const fetchNotifications = async () => {
     if (!currentUserId) return;
     try {
       setLoading(true);
       setError('');
-      const res = await notificationApi.getNotificationsByUser(currentUserId);
+      let res;
+      if (scope === 'ALL_SYSTEM' && (isAdmin || isOrganizer)) {
+        res = await notificationApi.getAllNotifications();
+      } else {
+        res = await notificationApi.getNotificationsByUser(currentUserId);
+      }
       setNotifications(res.data || []);
     } catch (err) {
       console.error(err);
@@ -100,6 +106,9 @@ const Notifications = () => {
     if (t.includes('KYC') || t.includes('ORGANIZER')) {
       return { label: 'Verification', badgeBg: 'bg-info text-dark', icon: 'shield', iconColor: '#0097B2' };
     }
+    if (t.includes('JOIN')) {
+      return { label: 'Join Request', badgeBg: 'bg-primary text-white', icon: 'groups', iconColor: '#0097B2' };
+    }
     if (t.includes('GROUP')) {
       return { label: 'Group Notice', badgeBg: 'bg-primary text-white', icon: 'groups', iconColor: '#0097B2' };
     }
@@ -127,7 +136,11 @@ const Notifications = () => {
               </span>
             )}
           </h2>
-          <p className="text-muted mb-0">Stay informed about payment dues, automated reminders, cycle auctions, and group notices</p>
+          <p className="text-muted mb-0">
+            {scope === 'ALL_SYSTEM'
+              ? 'Viewing all system-wide notification activities across all users and circles'
+              : `Personal notifications for ${user?.fullName || 'your account'} (${user?.email || ''})`}
+          </p>
         </div>
 
         <div className="d-flex flex-wrap gap-2">
@@ -143,7 +156,7 @@ const Notifications = () => {
             </button>
           )}
 
-          {unreadCount > 0 && (
+          {unreadCount > 0 && scope === 'MINE' && (
             <button
               className="btn btn-outline-primary btn-sm fw-bold d-flex align-items-center gap-1 shadow-sm"
               onClick={handleMarkAllAsRead}
@@ -164,6 +177,31 @@ const Notifications = () => {
 
       {error && <div className="alert alert-danger shadow-sm mb-4">{error}</div>}
       {successMsg && <div className="alert alert-success shadow-sm mb-4">{successMsg}</div>}
+
+      {/* Scope Selector (For Admins & Organizers to view My Notifications vs All System) */}
+      {(isAdmin || isOrganizer) && (
+        <div className="d-flex align-items-center gap-2 mb-3">
+          <span className="small text-muted fw-bold text-uppercase">View Mode:</span>
+          <div className="btn-group btn-group-sm shadow-sm" role="group">
+            <button
+              type="button"
+              className={`btn ${scope === 'MINE' ? 'btn-teal fw-bold text-white' : 'btn-outline-secondary'}`}
+              style={scope === 'MINE' ? { backgroundColor: '#0097B2', borderColor: '#0097B2' } : {}}
+              onClick={() => setScope('MINE')}
+            >
+              👤 My Notifications
+            </button>
+            <button
+              type="button"
+              className={`btn ${scope === 'ALL_SYSTEM' ? 'btn-teal fw-bold text-white' : 'btn-outline-secondary'}`}
+              style={scope === 'ALL_SYSTEM' ? { backgroundColor: '#0F2F3D', borderColor: '#0F2F3D' } : {}}
+              onClick={() => setScope('ALL_SYSTEM')}
+            >
+              🌐 All System Notifications ({scope === 'ALL_SYSTEM' ? notifications.length : 'All Users'})
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Filter Tabs */}
       <div className="card shadow-sm border-0 mb-4 bg-white p-2 rounded-3">
@@ -198,8 +236,8 @@ const Notifications = () => {
           <h5 className="fw-bold mt-2" style={{ color: '#0F2F3D' }}>No Notifications Found</h5>
           <p className="text-muted mb-0">
             {filter === 'UNREAD'
-              ? 'Great news! You have read all your notifications.'
-              : 'You do not have any notification records yet.'}
+              ? 'Great news! You have read all notifications in this view.'
+              : 'There are no notification records matching your selection.'}
           </p>
         </div>
       ) : (
@@ -218,7 +256,7 @@ const Notifications = () => {
                 }`}
                 style={unread ? { borderLeftColor: '#0097B2' } : {}}
               >
-                <div className="d-flex gap-3 align-items-start">
+                <div className="d-flex gap-3 align-items-start w-100">
                   <div
                     className="p-2 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-1"
                     style={{ backgroundColor: unread ? 'rgba(0, 151, 178, 0.12)' : '#F1F5F9' }}
@@ -226,7 +264,7 @@ const Notifications = () => {
                     <Icon name={meta.icon} size={20} color={meta.iconColor} />
                   </div>
 
-                  <div>
+                  <div className="flex-grow-1">
                     <div className="d-flex flex-wrap align-items-center gap-2 mb-1">
                       <span className={`badge rounded-pill ${meta.badgeBg} small fw-bold px-2 py-1`}>
                         {meta.label}
@@ -234,6 +272,11 @@ const Notifications = () => {
                       {unread && (
                         <span className="badge rounded-pill bg-danger small px-2 py-1">
                           NEW
+                        </span>
+                      )}
+                      {scope === 'ALL_SYSTEM' && n.user && (
+                        <span className="badge bg-secondary-subtle text-dark border px-2 py-0.5 small">
+                          👤 Sent to: {n.user.fullName || n.user.email || `User #${n.user.id}`}
                         </span>
                       )}
                       <small className="text-muted ms-auto">
@@ -245,18 +288,18 @@ const Notifications = () => {
                       {n.message}
                     </p>
                   </div>
-                </div>
 
-                {unread && (
-                  <button
-                    className="btn btn-sm btn-outline-primary fw-bold ms-3 flex-shrink-0"
-                    style={{ color: '#0097B2', borderColor: '#0097B2' }}
-                    onClick={() => handleMarkAsRead(n.id)}
-                    title="Mark as read"
-                  >
-                    ✓ Mark Read
-                  </button>
-                )}
+                  {unread && scope === 'MINE' && (
+                    <button
+                      className="btn btn-sm btn-outline-primary fw-bold ms-3 flex-shrink-0"
+                      style={{ color: '#0097B2', borderColor: '#0097B2' }}
+                      onClick={() => handleMarkAsRead(n.id)}
+                      title="Mark as read"
+                    >
+                      ✓ Mark Read
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })}

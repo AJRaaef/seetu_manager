@@ -16,6 +16,11 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<Notification>>> getAllNotifications() {
+        return ResponseEntity.ok(ApiResponse.success(notificationService.getAllNotifications()));
+    }
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<List<Notification>>> getNotificationsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(ApiResponse.success(notificationService.getNotificationsByUser(userId)));
