@@ -11,8 +11,9 @@ const LandingPage = () => {
   const { language, changeLanguage } = useLanguage();
 
   // State
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [openFaq, setOpenFaq] = useState(0);
+  const [faqCategory, setFaqCategory] = useState('ALL');
+  const [faqSearch, setFaqSearch] = useState('');
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [legalModalOpen, setLegalModalOpen] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState('rules');
@@ -102,24 +103,88 @@ const LandingPage = () => {
 
   const faqs = [
     {
-      q: 'How does SeettuManager modernize traditional Seettu groups?',
-      a: 'SeettuManager preserves the trusted communal nature of Sri Lankan Seettu while replacing error-prone paper logs with automated payment tracking, scheduled rotation cycles, digital dispute records, and algorithmic discipline ratings.'
+      category: 'BASICS',
+      categoryLabel: 'Basics & Legal',
+      q: 'What is a Seettu (Chit Fund / ROSCA)?',
+      a: 'A Seettu (internationally termed a Chit Fund or Rotating Savings and Credit Association — ROSCA) is a traditional community savings mechanism where members pool fixed contributions at regular intervals (daily, weekly, or monthly). In each cycle, the pooled sum is awarded to one member via fixed rotation, auction bidding, or fair lottery, continuing until every participant receives their complete payout.'
     },
     {
-      q: 'What is the Financial Discipline Score and how is it calculated?',
-      a: 'The Discipline Score is a 0 to 100 rating computed per member based on payment punctuality: Score = max(0, 100 - [(Late × 5) + (Missed × 10) + (AvgDelayDays × 0.5)]). On-time payments maintain a 100 score and qualify members for verified completion certificates.'
+      category: 'BASICS',
+      categoryLabel: 'Basics & Legal',
+      q: 'What is the difference between a Bank Loan and a Seettu?',
+      a: 'Unlike traditional bank loans that charge high compounding interest, require mortgaged collateral, and involve rigid banking bureaucracy, a Seettu is a community-funded financial circle. Non-bidded members use Seettu as a high-yield savings tool earning monthly dividend deductions, while bidded members access rapid lump-sum capital without exploitative interest rates.'
     },
     {
-      q: 'Are financial transactions handled directly inside the app?',
-      a: 'No. Actual cash deposits and bank transfers remain between group members and organizers. SeettuManager functions as an impartial, transparent digital record-keeper and auditable tracking ledger.'
+      category: 'BASICS',
+      categoryLabel: 'Basics & Legal',
+      q: 'Is Seettu legal and registered in Sri Lanka?',
+      a: 'Yes. SeettuManager operates in strict compliance with The Cheetus Ordinance No. 61 of 1935 (the statutory law governing rotating savings in Sri Lanka). Every group maintains a digital Seettu Agreement with verified terms, administrative organizer vetting, deduplicated Sri Lankan NICs, and full transaction audit trails.'
     },
     {
-      q: 'How does rotation cycle scheduling work?',
-      a: 'Upon group initiation, SeettuManager automatically creates all cycle dates based on member count and frequency (weekly, bi-weekly, or monthly). Organizers assign payout recipients and mark cycles completed upon payout distribution.'
+      category: 'BASICS',
+      categoryLabel: 'Basics & Legal',
+      q: 'Who is the Organizer (Foreman) and who is the Member (Subscriber)?',
+      a: 'The Organizer (Foreman) is the certified group leader responsible for creating the circle, scheduling cycles, verifying bank deposit slips, and executing on-time payouts. The Member (Subscriber) commits to timely installment payments and participates in rotation or auctions to receive the pooled lump-sum.'
     },
     {
-      q: 'Can we manage Non-Monetary asset-based Seettu groups?',
-      a: 'Yes! In addition to cash Seettu, the platform fully supports non-monetary Seettu for physical goods such as gold jewelry, kitchen appliances, furniture, and vehicles with transparent item valuation.'
+      category: 'AUCTIONS',
+      categoryLabel: 'Auctions & Payouts',
+      q: 'What is the Gross Seettu Amount vs. Net Payout Amount?',
+      a: 'The Gross Seettu Amount is the total capital collected in a single cycle (e.g., 10 members × LKR 50,000 = LKR 500,000). In an auction Seettu, the Net Payout Amount is the lump-sum given to the winning bidder after deducting their bid discount. The discount amount is redistributed back to all other members as a dividend, reducing their next installment.'
+    },
+    {
+      category: 'AUCTIONS',
+      categoryLabel: 'Auctions & Payouts',
+      q: 'What types of Seettu groups are supported?',
+      a: 'SeettuManager supports 4 distinct models: (1) Fixed Rotational Seettu (predetermined schedule), (2) Auction & Bidding Seettu (competitive discount bidding for early liquidity), (3) Random Draw / Lottery (fair algorithmic turn selection), and (4) Non-Monetary Asset Seettu (for physical items like gold jewelry, consumer electronics, and machinery with certified market valuation).'
+    },
+    {
+      category: 'AUCTIONS',
+      categoryLabel: 'Auctions & Payouts',
+      q: 'What is the bidding procedure and how does an auction work?',
+      a: 'During the cycle bidding window, members who need funds submit a discount bid representing the amount they are willing to forego to receive the payout early. The member who places the highest discount bid wins the cycle pool. The discounted surplus is shared equally among all non-bidded subscribers as a monthly dividend.'
+    },
+    {
+      category: 'AUCTIONS',
+      categoryLabel: 'Auctions & Payouts',
+      q: 'Who is a Bidded Subscriber vs. a Non-Bidded Subscriber?',
+      a: 'A Bidded Subscriber is a member who has already won an auction and received their pooled payout in a previous cycle; they are legally bound to continue paying full installments on time until the group closes. A Non-Bidded Subscriber has not yet taken a payout and enjoys monthly dividend deductions that lower their out-of-pocket contributions.'
+    },
+    {
+      category: 'PAYMENTS',
+      categoryLabel: 'Payments & Discipline',
+      q: 'What is the Financial Discipline Score (0–100) and why is it important?',
+      a: 'The Financial Discipline Score is an automated algorithmic credit metric (Score ∈ [0, 100]) engineered in SeettuManager as per SRS REQ-SCR-01. Prompt payments maintain a 100 score. Delays or missed contributions trigger algorithmic penalties: max(0, 100 - [(Late × 5) + (Missed × 10) + (AvgDelayDays × 0.5)]). High scores qualify members for larger capital circles and verified financial certificates.'
+    },
+    {
+      category: 'PAYMENTS',
+      categoryLabel: 'Payments & Discipline',
+      q: 'What modes of payment are accepted on the platform?',
+      a: 'Members can fulfill installments through three methods: (1) Bank Deposit Slip Upload (uploading a clear receipt photo for organizer review), (2) Direct Online Bank Transfer with transaction reference, or (3) Verified Offline Cash Handover with immediate digital receipt generation in the audit ledger.'
+    },
+    {
+      category: 'PAYMENTS',
+      categoryLabel: 'Payments & Discipline',
+      q: 'What happens when a member delays or defaults on an installment?',
+      a: 'Delinquent payments trigger an immediate drop in the member\'s Discipline Score and automated SMS/email alerts. To ensure the winning member receives their payout on time, the circle\'s Emergency Relief Reserve covers the shortfall. Habitual defaulters face circle disqualification, administrative lockouts, and legal recovery under The Cheetus Ordinance.'
+    },
+    {
+      category: 'PAYMENTS',
+      categoryLabel: 'Payments & Discipline',
+      q: 'Why is identity verification (NIC & Grama Niladhari Certificate) mandatory?',
+      a: 'To eradicate synthetic fraud, duplicate memberships, and default flight risk, SeettuManager enforces mandatory Sri Lankan National Identity Card (NIC) validation (9-digit with V/X or 12-digit format) and Grama Niladhari residency character certificates before large-value payouts can be disbursed.'
+    },
+    {
+      category: 'BASICS',
+      categoryLabel: 'Basics & Legal',
+      q: 'Can I take multiple tickets or slots in the same Seettu group?',
+      a: 'Yes. Eligible members with an established Financial Discipline Score can subscribe to multiple tickets/slots in the same group (e.g., 2 slots in a 12-member group). Each ticket is treated independently with separate contribution obligations and two distinct rotation payout opportunities.'
+    },
+    {
+      category: 'AUCTIONS',
+      categoryLabel: 'Auctions & Payouts',
+      q: 'What if a subscriber needs to cancel or leave a Seettu early?',
+      a: 'Under standard Seettu agreements, if an un-bidded subscriber encounters genuine hardship, the Organizer facilitates a "Vacant Chit Transfer" to an approved replacement member from the waitlist, refunding the original member\'s contributions according to group bylaws.'
     }
   ];
 
@@ -977,29 +1042,102 @@ const LandingPage = () => {
             </p>
           </div>
 
+          {/* FAQ Controls: Category Pills and Live Search */}
+          <div className="row justify-content-center mb-4">
+            <div className="col-lg-9">
+              <div className="d-flex flex-column flex-md-row gap-3 justify-content-between align-items-center">
+                {/* Category Pills */}
+                <div className="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start">
+                  {[
+                    { id: 'ALL', label: 'All Questions' },
+                    { id: 'BASICS', label: 'Basics & Legal' },
+                    { id: 'AUCTIONS', label: 'Auctions & Payouts' },
+                    { id: 'PAYMENTS', label: 'Payments & Discipline' }
+                  ].map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => { setFaqCategory(cat.id); setOpenFaq(null); }}
+                      className={`btn btn-sm px-3 py-1.5 rounded-pill fw-semibold border-0 ${faqCategory === cat.id ? 'text-white shadow-sm' : 'text-dark bg-white border'}`}
+                      style={{
+                        backgroundColor: faqCategory === cat.id ? '#0097B2' : '#FFFFFF',
+                        fontSize: '0.82rem',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Live Search */}
+                <div className="position-relative" style={{ minWidth: '220px', width: '100%', maxWidth: '280px' }}>
+                  <input
+                    type="text"
+                    value={faqSearch}
+                    onChange={(e) => { setFaqSearch(e.target.value); setOpenFaq(null); }}
+                    placeholder="Search questions (e.g. loan, bidding)..."
+                    className="form-control form-control-sm rounded-pill pe-4 ps-3 bg-white"
+                    style={{ fontSize: '0.82rem', border: '1px solid #CBD5E1' }}
+                  />
+                  {faqSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setFaqSearch('')}
+                      className="btn btn-link btn-sm text-muted position-absolute end-0 top-50 translate-middle-y border-0 p-1 me-2 text-decoration-none"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="row justify-content-center">
-            <div className="col-lg-8">
+            <div className="col-lg-9">
               <div className="d-flex flex-column gap-3">
-                {faqs.map((faq, index) => {
-                  const isOpen = openFaq === index;
-                  return (
-                    <div key={index} className="fintech-card overflow-hidden">
-                      <button 
-                        className="w-100 text-start p-4 border-0 bg-white d-flex align-items-center justify-content-between fw-bold text-dark"
-                        onClick={() => setOpenFaq(isOpen ? null : index)}
-                        style={{ cursor: 'pointer', fontSize: '1.02rem', color: '#0F2F3D' }}
-                      >
-                        <span>{faq.q}</span>
-                        <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={18} color="#0097B2" />
-                      </button>
-                      {isOpen && (
-                        <div className="px-4 pb-4 pt-1 text-muted border-top bg-light small leading-relaxed" style={{ fontSize: '0.94rem' }}>
-                          {faq.a}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                {faqs
+                  .filter((f) => {
+                    const matchesCategory = faqCategory === 'ALL' || f.category === faqCategory;
+                    const matchesSearch = !faqSearch.trim() || 
+                      f.q.toLowerCase().includes(faqSearch.toLowerCase()) || 
+                      f.a.toLowerCase().includes(faqSearch.toLowerCase());
+                    return matchesCategory && matchesSearch;
+                  })
+                  .map((faq, index) => {
+                    const isOpen = openFaq === index;
+                    return (
+                      <div key={index} className="fintech-card overflow-hidden">
+                        <button 
+                          className="w-100 text-start p-3.5 p-md-4 border-0 bg-white d-flex align-items-center justify-content-between text-dark"
+                          onClick={() => setOpenFaq(isOpen ? null : index)}
+                          style={{ cursor: 'pointer', fontSize: '0.98rem', color: '#0F2F3D' }}
+                        >
+                          <div className="d-flex align-items-center gap-2.5 pe-3">
+                            <span 
+                              className="badge rounded-pill fw-bold flex-shrink-0" 
+                              style={{ 
+                                backgroundColor: 'rgba(0, 151, 178, 0.1)', 
+                                color: '#0097B2', 
+                                fontSize: '0.68rem',
+                                letterSpacing: '0.5px' 
+                              }}
+                            >
+                              {faq.categoryLabel}
+                            </span>
+                            <span className="fw-bold text-dark">{faq.q}</span>
+                          </div>
+                          <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} size={18} color="#0097B2" />
+                        </button>
+                        {isOpen && (
+                          <div className="px-4 pb-4 pt-1 text-muted border-top bg-light small leading-relaxed" style={{ fontSize: '0.92rem', lineHeight: '1.65' }}>
+                            {faq.a}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
               </div>
             </div>
           </div>
