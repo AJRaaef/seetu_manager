@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../hooks/useLanguage';
 import Icon from '../components/Icons';
 import LegalPoliciesModal from '../components/LegalPoliciesModal';
+import BecomeOrganizerModal from '../components/BecomeOrganizerModal';
 
 const LandingPage = () => {
   const { user } = useAuth();
@@ -15,6 +16,7 @@ const LandingPage = () => {
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [legalModalOpen, setLegalModalOpen] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState('rules');
+  const [showOrganizerModal, setShowOrganizerModal] = useState(false);
 
   const openLegal = (tab = 'rules') => {
     setLegalModalTab(tab);
@@ -273,45 +275,7 @@ const LandingPage = () => {
           padding-right: 14px;
         }
 
-        /* Floating Call Widget on Bottom Right (Reference Image Style) */
-        .floating-call-pill {
-          position: fixed;
-          right: 75px;
-          bottom: 24px;
-          z-index: 1040;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          text-decoration: none;
-        }
-        .call-pill-icon {
-          width: 46px;
-          height: 46px;
-          border-radius: 50%;
-          background: #0097B2;
-          color: #FFFFFF;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 16px rgba(0, 151, 178, 0.4);
-          border: 2px solid #FFFFFF;
-          transition: transform 0.2s ease, background 0.2s ease;
-        }
-        .floating-call-pill:hover .call-pill-icon {
-          transform: scale(1.1);
-          background: #0F2F3D;
-        }
-        .call-pill-content {
-          background: #FFFFFF;
-          color: #0F2F3D;
-          padding: 6px 14px;
-          border-radius: 8px;
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-          border: 1px solid #E2E8F0;
-          font-size: 0.78rem;
-          display: flex;
-          flex-direction: column;
-        }
+
 
         /* Fintech Cards */
         .fintech-card {
@@ -419,20 +383,16 @@ const LandingPage = () => {
       `}</style>
 
       {/* Vertical Sticky Right Tab: BECOME AN ORGANIZER */}
-      <Link to="/register" className="vertical-organizer-tab" title="Become a Seettu Organizer">
+      <button 
+        type="button" 
+        onClick={() => setShowOrganizerModal(true)} 
+        className="vertical-organizer-tab border-0" 
+        title="Become a Seettu Organizer Application"
+      >
         BECOME AN ORGANIZER
-      </Link>
+      </button>
 
-      {/* Floating Call Helpline Widget */}
-      <div className="floating-call-pill d-none d-md-flex">
-        <a href="tel:+94752975632" className="call-pill-icon" title="Call Helpline">
-          <Icon name="phone" size={20} />
-        </a>
-        <div className="call-pill-content">
-          <span className="text-muted fw-semibold" style={{ fontSize: '0.72rem' }}>Call to Become an Organizer</span>
-          <strong style={{ color: '#0097B2', fontSize: '0.86rem' }}>+94 75 297 5632</strong>
-        </div>
-      </div>
+
 
       {/* Top Brand Header Bar (Jayapriya Reference Layout in Deep Slate Teal) */}
       <div className="top-brand-bar text-white py-1.5 px-3 fs-7">
@@ -756,6 +716,15 @@ const LandingPage = () => {
                     <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
                       Your community calling: create private or village circles, set custom rules, and lead your circle with automated rotations.
                     </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowOrganizerModal(true)}
+                      className="btn btn-sm btn-link text-decoration-none p-0 fw-bold mt-1.5 d-inline-flex align-items-center gap-1"
+                      style={{ color: '#0097B2', fontSize: '0.84rem' }}
+                    >
+                      <span>Apply Online as an Organizer</span>
+                      <Icon name="chevron-right" size={14} />
+                    </button>
                   </div>
                 </div>
 
@@ -1347,6 +1316,12 @@ const LandingPage = () => {
         isOpen={legalModalOpen} 
         onClose={() => setLegalModalOpen(false)} 
         initialTab={legalModalTab} 
+      />
+
+      {/* Become an Organizer Application Popup Modal */}
+      <BecomeOrganizerModal
+        show={showOrganizerModal}
+        onHide={() => setShowOrganizerModal(false)}
       />
 
     </div>

@@ -26,4 +26,10 @@ public class RegisterRequest {
 
     private String preferredLanguage = "EN";
     private String role = "MEMBER";
+    private String requestedRole;
+    private String addressLine1;
+    private String addressLine2;
+    private String district;
+    private String postalCode;
+    private String message;
 }

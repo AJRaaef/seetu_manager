@@ -49,3 +49,8 @@ export const verifyMemberKyc = async (userId, status, rejectionReason = '', role
   const response = await api.put(`/users/${userId}/kyc/verify`, payload);
   return response.data;
 };
+
+export const requestOrganizer = async (data = {}) => {
+  const response = await api.post('/users/request-organizer', data);
+  return response.data;
+};

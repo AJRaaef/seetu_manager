@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -247,5 +248,24 @@ public class UserService {
     public void deleteUser(Long id) {
         User user = getUserById(id);
         userRepository.delete(user);
+    }
+
+    @Transactional
+    public void requestOrganizerRole(Long userId, Map<String, String> payload) {
+        User user = getUserById(userId);
+        user.setRequestedRole("ORGANIZER");
+        userRepository.save(user);
+
+        String note = (payload != null && payload.containsKey("message") && payload.get("message") != null)
+                ? " Note: " + payload.get("message") : "";
+        String location = (payload != null && payload.containsKey("district") && payload.get("district") != null)
+                ? " (District: " + payload.get("district") + ")" : "";
+
+        auditLogService.log(user, "ORGANIZER_REQUESTED", "users", user.getId(),
+                "Member " + user.getFullName() + location + " applied to become a Group Organizer." + note);
+
+        notificationService.sendNotification(user.getId(),
+                "Your application to become a Seettu Organizer has been submitted. In accordance with The Cheetus Ordinance, our administration will verify your member credentials shortly.",
+                "ORGANIZER_REQUEST_SUBMITTED");
     }
 }

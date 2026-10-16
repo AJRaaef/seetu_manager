@@ -20,6 +20,7 @@ public class AuthResponse {
     private String kycStatus;
     private String gnCertificateUrl;
     private String kycRejectionReason;
+    private String requestedRole;
 
     public Long getId() {
         return userId;

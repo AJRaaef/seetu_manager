@@ -3,6 +3,7 @@ package com.seettu.manager.controller;
 import com.seettu.manager.dto.ApiResponse;
 import com.seettu.manager.dto.AuthResponse;
 import com.seettu.manager.dto.LoginRequest;
+import com.seettu.manager.dto.OrganizerApplicationRequest;
 import com.seettu.manager.dto.RegisterRequest;
 import com.seettu.manager.service.AuthService;
 import jakarta.validation.Valid;
@@ -16,6 +17,12 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+
+    @PostMapping("/apply-organizer")
+    public ResponseEntity<ApiResponse<Void>> applyOrganizer(@Valid @RequestBody OrganizerApplicationRequest request) {
+        authService.applyOrganizer(request);
+        return ResponseEntity.ok(ApiResponse.success("Your application to become a Seettu Organizer has been submitted successfully. Our team will review your application and contact you.", null));
+    }
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthResponse>> register(@Valid @RequestBody RegisterRequest request) {

@@ -2,6 +2,7 @@ package com.seettu.manager.service;
 
 import com.seettu.manager.dto.AuthResponse;
 import com.seettu.manager.dto.LoginRequest;
+import com.seettu.manager.dto.OrganizerApplicationRequest;
 import com.seettu.manager.dto.RegisterRequest;
 import com.seettu.manager.entity.User;
 import com.seettu.manager.exception.DuplicateResourceException;
@@ -10,6 +11,7 @@ import com.seettu.manager.exception.UnauthorizedException;
 import com.seettu.manager.repository.UserRepository;
 import com.seettu.manager.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import java.util.UUID;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -50,13 +52,15 @@ public class AuthService {
                 .phone(request.getPhone())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(role)
+                .requestedRole(request.getRequestedRole() != null && !request.getRequestedRole().trim().isEmpty() ? request.getRequestedRole().trim().toUpperCase() : null)
                 .preferredLanguage(User.Language.valueOf(request.getPreferredLanguage()))
                 .isLocked(false)
                 .failedLoginAttempts(0)
                 .build();
 
         user = userRepository.save(user);
-        auditLogService.log(user, "USER_REGISTERED", "users", user.getId(), "New user registered: " + user.getEmail());
+        String reqRoleMsg = user.getRequestedRole() != null ? " (Requested role: " + user.getRequestedRole() + ")" : "";
+        auditLogService.log(user, "USER_REGISTERED", "users", user.getId(), "New user registered: " + user.getEmail() + reqRoleMsg);
 
         String token = jwtUtil.generateToken(user);
         return AuthResponse.builder()
@@ -70,6 +74,7 @@ public class AuthService {
                 .kycStatus(user.getKycStatus() != null ? user.getKycStatus().name() : "UNVERIFIED")
                 .gnCertificateUrl(user.getGnCertificateUrl())
                 .kycRejectionReason(user.getKycRejectionReason())
+                .requestedRole(user.getRequestedRole())
                 .build();
     }
 
@@ -109,6 +114,7 @@ public class AuthService {
                 .kycStatus(user.getKycStatus() != null ? user.getKycStatus().name() : "UNVERIFIED")
                 .gnCertificateUrl(user.getGnCertificateUrl())
                 .kycRejectionReason(user.getKycRejectionReason())
+                .requestedRole(user.getRequestedRole())
                 .build();
     }
 
@@ -154,6 +160,45 @@ public class AuthService {
         userRepository.save(user);
 
         auditLogService.log(user, "PASSWORD_CHANGED", "users", user.getId(), "Password changed for: " + user.getEmail());
+    }
+
+    @Transactional
+    public void applyOrganizer(OrganizerApplicationRequest request) {
+        User user = userRepository.findByEmail(request.getEmail().trim())
+                .or(() -> userRepository.findByPhone(request.getPhone().trim()))
+                .orElse(null);
+
+        String districtStr = (request.getDistrict() != null && !request.getDistrict().trim().isEmpty())
+                ? " (" + request.getDistrict().trim() + ")" : "";
+        String msgStr = (request.getMessage() != null && !request.getMessage().trim().isEmpty())
+                ? " Message: " + request.getMessage().trim() : "";
+
+        if (user != null) {
+            user.setRequestedRole("ORGANIZER");
+            user = userRepository.save(user);
+
+            auditLogService.log(user, "ORGANIZER_APPLIED", "users", user.getId(),
+                    "Applicant/Member " + user.getFullName() + districtStr + " submitted application to become an Organizer." + msgStr);
+        } else {
+            // New applicant creating a preliminary member profile with requestedRole: ORGANIZER
+            // Password is generated automatically since organizer application does not require a password
+            user = User.builder()
+                    .fullName(request.getFullName().trim())
+                    .email(request.getEmail().trim())
+                    .phone(request.getPhone().trim())
+                    .passwordHash(passwordEncoder.encode(UUID.randomUUID().toString()))
+                    .role(User.Role.MEMBER)
+                    .requestedRole("ORGANIZER")
+                    .preferredLanguage(User.Language.EN)
+                    .isLocked(false)
+                    .failedLoginAttempts(0)
+                    .build();
+
+            user = userRepository.save(user);
+
+            auditLogService.log(user, "ORGANIZER_APPLIED", "users", user.getId(),
+                    "New Organizer application received from " + user.getFullName() + " (" + user.getEmail() + ", " + user.getPhone() + districtStr + ")." + msgStr);
+        }
     }
 
     private void handleFailedLogin(User user) {

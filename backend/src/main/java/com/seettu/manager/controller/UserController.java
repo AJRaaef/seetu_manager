@@ -85,6 +85,14 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(msg, response));
     }
 
+    @PostMapping("/request-organizer")
+    public ResponseEntity<ApiResponse<String>> requestOrganizerRole(
+            @RequestBody(required = false) Map<String, String> payload,
+            @AuthenticationPrincipal User currentUser) {
+        userService.requestOrganizerRole(currentUser.getId(), payload != null ? payload : Collections.emptyMap());
+        return ResponseEntity.ok(ApiResponse.success("Your request to become an Organizer has been submitted for administrative verification.", "SUCCESS"));
+    }
+
     @GetMapping("/{id}/profile")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getUserProfileStats(@PathVariable Long id) {
         User user = userService.getUserById(id);

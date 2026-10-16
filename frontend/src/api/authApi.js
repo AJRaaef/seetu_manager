@@ -10,6 +10,11 @@ export const register = async (data) => {
   return response.data;
 };
 
+export const applyOrganizer = async (data) => {
+  const response = await api.post('/auth/apply-organizer', data);
+  return response.data;
+};
+
 export const forgotPassword = async (email) => {
   const response = await api.post(`/auth/forgot-password?email=${email}`);
   return response.data;
