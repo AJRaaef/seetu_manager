@@ -16,6 +16,8 @@ import java.util.List;
 public class PaymentCycleService {
 
     private final PaymentCycleRepository cycleRepository;
+    private final NotificationService notificationService;
+    private final AuditLogService auditLogService;
 
     public List<PaymentCycle> getCyclesByGroup(Long groupId) {
         return cycleRepository.findByGroupIdOrderByCycleNumberAsc(groupId);
@@ -72,7 +74,24 @@ public class PaymentCycleService {
     public PaymentCycle assignPayoutMember(Long cycleId, com.seettu.manager.entity.User member) {
         PaymentCycle cycle = getCycleById(cycleId);
         cycle.setPayoutMember(member);
-        return cycleRepository.save(cycle);
+        PaymentCycle saved = cycleRepository.save(cycle);
+
+        if (member != null) {
+            String groupName = cycle.getGroup() != null ? cycle.getGroup().getName() : "Seettu Group";
+            notificationService.sendNotification(
+                    member.getId(),
+                    "Congratulations! You have been allocated the payout for Cycle #" + cycle.getCycleNumber() + " in group \"" + groupName + "\".",
+                    "PAYOUT"
+            );
+            auditLogService.log(
+                    member,
+                    "PAYOUT_ALLOCATED",
+                    "payment_cycles",
+                    cycle.getId(),
+                    "Payout allocated to " + member.getFullName() + " for Cycle #" + cycle.getCycleNumber()
+            );
+        }
+        return saved;
     }
 
     public List<PaymentCycle> getActiveCycles() {
