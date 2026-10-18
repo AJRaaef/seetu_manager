@@ -140,7 +140,7 @@ const CreateGroup = () => {
                 </div>
                 <div className="col-md-6">
                   <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
-                    Seettu Model (REQ-GRP-01, 09) <span className="text-danger">*</span>
+                    Seettu Model <span className="text-danger">*</span>
                   </label>
                   <select 
                     className="form-select fw-semibold" 
