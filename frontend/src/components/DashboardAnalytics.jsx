@@ -210,7 +210,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                   Total collected installments vs disbursed pot payouts
                 </span>
               </div>
-              <span className="badge text-teal bg-light border px-2 py-1 rounded" style={{ fontSize: '0.72rem' }}>
+              <span className="badge border px-2.5 py-1 rounded fw-semibold" style={{ fontSize: '0.75rem', backgroundColor: '#E0F2FE', color: '#0369A1', borderColor: '#BAE6FD' }}>
                 Live Database Ledger
               </span>
             </div>

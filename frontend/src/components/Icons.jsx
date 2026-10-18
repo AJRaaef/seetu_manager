@@ -46,7 +46,8 @@ import {
   Clock,
   RefreshCw,
   Filter,
-  Download
+  Download,
+  Printer
 } from 'lucide-react';
 
 export const Icon = ({ name, size = 18, className = '', color = 'currentColor', ...props }) => {
@@ -75,6 +76,9 @@ export const Icon = ({ name, size = 18, className = '', color = 'currentColor', 
     case 'zap':
       return <Zap {...iconProps} />;
     case 'emergency':
+    case 'warning':
+    case 'alert':
+    case 'danger':
     case 'alert-triangle':
       return <AlertTriangle {...iconProps} />;
     case 'certificates':
@@ -162,6 +166,9 @@ export const Icon = ({ name, size = 18, className = '', color = 'currentColor', 
       return <Filter {...iconProps} />;
     case 'download':
       return <Download {...iconProps} />;
+    case 'print':
+    case 'printer':
+      return <Printer {...iconProps} />;
     case 'facebook':
       return (
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
@@ -198,7 +205,7 @@ export const Icon = ({ name, size = 18, className = '', color = 'currentColor', 
         </svg>
       );
     default:
-      return null;
+      return <Info {...iconProps} />;
   }
 };
 
