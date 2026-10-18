@@ -14,6 +14,7 @@ const CreateGroup = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    groupModel: 'FIXED_ROTATION',
     contributionAmount: '',
     memberCount: '',
     cycleFrequency: 'MONTHLY',
@@ -26,6 +27,17 @@ const CreateGroup = () => {
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const handleModelChange = (model) => {
+    const isNonMonetary = model === 'NON_MONETARY';
+    setFormData(prev => ({
+      ...prev,
+      groupModel: model,
+      category: isNonMonetary ? 'GOLD' : 'GENERAL',
+      seettuTypeId: isNonMonetary ? '2' : '1',
+      shopId: isNonMonetary ? prev.shopId : ''
+    }));
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,12 +72,26 @@ const CreateGroup = () => {
     setLoading(true);
     const creatorId = user?.userId || user?.id;
     try {
+      const modelPrefix = {
+        FIXED_ROTATION: '[Fixed Rotation] ',
+        AUCTION: '[Auction / Bidding] ',
+        RANDOM_DRAW: '[Random Draw] ',
+        NON_MONETARY: '[Non-Monetary Asset] '
+      }[formData.groupModel] || '';
+
+      const finalDescription = formData.description 
+        ? `${modelPrefix}${formData.description}` 
+        : modelPrefix.trim();
+
       await createGroup({
-        ...formData,
+        name: formData.name,
+        description: finalDescription,
+        category: formData.groupModel,
         contributionAmount: parseFloat(formData.contributionAmount),
         memberCount: parseInt(formData.memberCount),
-        seettuTypeId: formData.seettuTypeId ? parseInt(formData.seettuTypeId) : null,
-        shopId: formData.shopId ? parseInt(formData.shopId) : null
+        cycleFrequency: formData.cycleFrequency,
+        seettuTypeId: formData.groupModel === 'NON_MONETARY' ? 2 : 1,
+        shopId: formData.groupModel === 'NON_MONETARY' && formData.shopId ? parseInt(formData.shopId) : null
       }, creatorId);
       navigate('/groups');
     } catch (err) {
@@ -98,9 +124,10 @@ const CreateGroup = () => {
             )}
             
             <form onSubmit={handleSubmit}>
+              {/* Group Name & Seettu Model */}
               <div className="row mb-3">
                 <div className="col-md-6 mb-3 mb-md-0">
-                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Group Name</label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Group Name <span className="text-danger">*</span></label>
                   <input
                     type="text"
                     className="form-control"
@@ -112,53 +139,80 @@ const CreateGroup = () => {
                   />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Category</label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
+                    Seettu Model (REQ-GRP-01, 09) <span className="text-danger">*</span>
+                  </label>
+                  <select 
+                    className="form-select fw-semibold" 
+                    value={formData.groupModel} 
+                    onChange={e => handleModelChange(e.target.value)}
+                    style={{ borderRadius: '8px', border: '1px solid #235665', backgroundColor: '#F0F9FA' }}
+                  >
+                    <option value="FIXED_ROTATION">📋 Fixed Rotation Seettu (Predetermined queue)</option>
+                    <option value="AUCTION">🏷️ Auction / Bidding Seettu (Discount bidding & dividends)</option>
+                    <option value="RANDOM_DRAW">🎲 Random Draw / Lottery (Algorithmic lot selection)</option>
+                    <option value="NON_MONETARY">🎁 Non-Monetary Asset Seettu (Physical goods & shops)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Dynamic Model Guidance Banner */}
+              <div className="alert alert-info py-2 px-3 mb-3 small border-0 bg-info-subtle text-info-emphasis rounded-3">
+                {formData.groupModel === 'FIXED_ROTATION' && (
+                  <span><strong>📋 Fixed Rotation Seettu:</strong> Members take turns in a predetermined rotational order to receive the standard pooled lump-sum.</span>
+                )}
+                {formData.groupModel === 'AUCTION' && (
+                  <span><strong>🏷️ Auction / Bidding Seettu:</strong> Members submit competitive discount bids for early pot access. The discount is redistributed as monthly dividends to reduce other subscribers' installments.</span>
+                )}
+                {formData.groupModel === 'RANDOM_DRAW' && (
+                  <span><strong>🎲 Random Draw / Lottery:</strong> Neutral algorithmic lot selection chooses the winning payout recipient fairly each cycle from eligible non-prizewinners.</span>
+                )}
+                {formData.groupModel === 'NON_MONETARY' && (
+                  <span><strong>🎁 Non-Monetary Asset Seettu:</strong> Rotating savings pool for tangible high-value physical goods (jewelry, electronics, machinery) backed by a registered partner merchant shop.</span>
+                )}
+              </div>
+
+              {/* Category & Shop Configuration */}
+              <div className="row mb-3">
+                <div className="col-md-6 mb-3 mb-md-0">
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
+                    {formData.groupModel === 'NON_MONETARY' ? 'Physical Asset Category' : 'Group Category'}
+                  </label>
                   <select 
                     className="form-select" 
                     value={formData.category} 
                     onChange={e => setFormData({...formData, category: e.target.value})}
                     style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                   >
-                    <option value="GENERAL">General Monetary</option>
-                    <option value="GOLD">Gold & Jewelry</option>
-                    <option value="FURNITURE">Furniture & Home</option>
-                    <option value="VEHICLE">Vehicle Savings</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="row mb-3">
-                <div className="col-md-6 mb-3 mb-md-0">
-                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Seettu Type (Monetary / Non-Monetary)</label>
-                  <select
-                    className="form-select"
-                    value={formData.seettuTypeId}
-                    onChange={e => setFormData({...formData, seettuTypeId: e.target.value})}
-                    style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
-                    required
-                  >
-                    {seettuTypes.map(st => (
-                      <option key={st.id} value={st.id}>
-                        {st.name} ({st.description})
-                      </option>
-                    ))}
-                    {seettuTypes.length === 0 && (
+                    {formData.groupModel === 'NON_MONETARY' ? (
                       <>
-                        <option value="1">Monetary (Traditional cash-based Seettu when...</option>
-                        <option value="2">Non-Monetary (Item-based Seettu)</option>
+                        <option value="GOLD">Gold & Jewelry (Sovereign)</option>
+                        <option value="FURNITURE">Furniture & Home Goods</option>
+                        <option value="VEHICLE">Vehicle & Auto Equipment</option>
+                        <option value="APPLIANCES">Electronics & Appliances</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="GENERAL">General Monetary</option>
+                        <option value="EMERGENCY">Emergency Liquidity Pool</option>
+                        <option value="BUSINESS">Business Working Capital</option>
+                        <option value="COMMUNITY">Community Self-Help Circle</option>
                       </>
                     )}
                   </select>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Associated Shop (Optional)</label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
+                    {formData.groupModel === 'NON_MONETARY' ? 'Partner Merchant Shop (Mandatory)' : 'Associated Shop (Optional)'}
+                  </label>
                   <select
                     className="form-select"
                     value={formData.shopId}
                     onChange={e => setFormData({...formData, shopId: e.target.value})}
                     style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
+                    required={formData.groupModel === 'NON_MONETARY'}
                   >
-                    <option value="">None / Independent Group</option>
+                    <option value="">{formData.groupModel === 'NON_MONETARY' ? '-- Select Partner Merchant Shop --' : 'None / Independent Group'}</option>
                     {shops.map(shop => (
                       <option key={shop.id} value={shop.id}>
                         {shop.name} {shop.address ? `(${shop.address})` : ''}

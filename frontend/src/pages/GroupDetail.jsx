@@ -153,6 +153,15 @@ const GroupDetail = () => {
   const totalPool = (group.contributionAmount || 0) * (group.memberCount || 1);
   const activeCycle = group.cycles?.find(c => c.status === 'ACTIVE') || group.cycles?.[0];
 
+  const formatModelLabel = (cat, typeObj) => {
+    if (cat === 'AUCTION') return { label: '🏷️ Auction / Bidding Seettu', cls: 'bg-warning text-dark border' };
+    if (cat === 'RANDOM_DRAW') return { label: '🎲 Random Draw / Lottery', cls: 'bg-primary-subtle text-primary border border-primary' };
+    if (cat === 'NON_MONETARY' || typeObj?.name === 'Non-Monetary') return { label: '🎁 Non-Monetary Asset Seettu', cls: 'bg-success text-white' };
+    return { label: '📋 Fixed Rotation Seettu', cls: 'bg-secondary-subtle text-dark border' };
+  };
+
+  const modelInfo = formatModelLabel(group.category, group.seettuType);
+
   return (
     <div className="py-2">
       {/* Header Banner */}
@@ -161,7 +170,7 @@ const GroupDetail = () => {
           <div className="d-flex align-items-center gap-2 mb-1 flex-wrap">
             <h2 className="fw-bold text-dark mb-0">{group.name}</h2>
             <span className="badge bg-primary fs-6">{group.status || 'ACTIVE'}</span>
-            <span className="badge bg-secondary-subtle text-dark border">{group.category}</span>
+            <span className={`badge ${modelInfo.cls}`}>{modelInfo.label}</span>
             <span className="badge bg-info-subtle text-info border">Cycle Frequency: {group.cycleFrequency}</span>
           </div>
           <p className="text-muted mb-0">{group.description || 'Seettu group management space'}</p>
@@ -341,6 +350,9 @@ const GroupDetail = () => {
                                   onClick={() => {
                                     setSelectedCycle(c);
                                     resetPayoutModal();
+                                    if (group.category === 'AUCTION') setPayoutMode('auction');
+                                    else if (group.category === 'RANDOM_DRAW') setPayoutMode('random');
+                                    else setPayoutMode('direct');
                                     if (c.payoutMember?.id || c.payoutMemberId) {
                                       setSelectedPayoutMemberId(String(c.payoutMember?.id || c.payoutMemberId));
                                     }
