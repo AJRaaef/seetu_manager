@@ -89,12 +89,12 @@ const CreateGroup = () => {
     setError('');
 
     if (parseFloat(formData.contributionAmount) <= 0) {
-      setError('⚠️ Contribution Amount Guidance: Contribution amount must be greater than 0 LKR.');
+      setError('Contribution amount must be greater than 0 LKR.');
       return;
     }
 
     if (parseInt(formData.memberCount) < 2) {
-      setError('⚠️ Member Count Guidance: Seettu groups require at least 2 members.');
+      setError('Seettu groups require at least 2 members.');
       return;
     }
 
@@ -120,12 +120,12 @@ const CreateGroup = () => {
         memberCount: parseInt(formData.memberCount),
         cycleFrequency: formData.cycleFrequency,
         seettuTypeId: formData.groupModel === 'NON_MONETARY' ? 2 : 1,
-        shopId: formData.groupModel === 'NON_MONETARY' && formData.shopId ? parseInt(formData.shopId) : null
+        shopId: formData.shopId ? parseInt(formData.shopId) : null
       }, creatorId);
       navigate('/groups');
     } catch (err) {
       const guidance = getErrorMessage(err, 'Failed to create group. Please check form parameters.');
-      setError(`⚠️ Group Creation Error Guidance: ${guidance}`);
+      setError(`Group Creation Error: ${guidance}`);
     } finally {
       setLoading(false);
     }

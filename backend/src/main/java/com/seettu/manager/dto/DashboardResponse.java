@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -29,4 +30,15 @@ public class DashboardResponse {
     private Double overallCompletionRate;
     private Map<String, Long> paymentStatusDistribution;
     private Map<String, Long> groupStatusDistribution;
+    private List<MonthlyCashflowDTO> monthlyCashflow;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MonthlyCashflowDTO {
+        private String month;
+        private double inflow;
+        private double outflow;
+    }
 }

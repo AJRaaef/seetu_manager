@@ -23,7 +23,7 @@ ChartJS.register(
 );
 
 const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }) => {
-  // Payment status distribution
+  // Payment status distribution from database
   const dist = stats?.paymentStatusDistribution || {};
   const paidCount = Number(dist.PAID || 0);
   const pendingCount = Number(dist.PENDING || 0);
@@ -31,15 +31,13 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
   const overdueCount = Number(dist.OVERDUE || 0);
   const totalCount = paidCount + pendingCount + lateCount + overdueCount;
 
-  // Safe fallback if database has 0 payment records yet
+  // Real Database Numbers Only - No synthetic or dummy fallbacks
   const hasData = totalCount > 0;
-  const chartPaid = hasData ? paidCount : 12;
-  const chartPending = hasData ? pendingCount : 3;
-  const chartLate = hasData ? lateCount : 1;
-  const chartOverdue = hasData ? overdueCount : 0;
-  const displayTotal = hasData ? totalCount : 16;
-
-  const complianceRate = Math.round((chartPaid / displayTotal) * 100);
+  const chartPaid = paidCount;
+  const chartPending = pendingCount;
+  const chartLate = lateCount;
+  const chartOverdue = overdueCount;
+  const complianceRate = totalCount > 0 ? Math.round((chartPaid / totalCount) * 100) : 100;
 
   // Group status distribution (For Admin)
   const groupDist = stats?.groupStatusDistribution || {};
@@ -60,16 +58,18 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
 
   // Doughnut Chart Data (Payment Compliance & Risk Portfolio)
   const doughnutData = {
-    labels: ['Paid (On-Time)', 'Pending Verification', 'Late (Grace)', 'Overdue (At Risk)'],
+    labels: hasData 
+      ? ['Paid (On-Time)', 'Pending Verification', 'Late (Grace)', 'Overdue (At Risk)']
+      : ['No Payments in Database'],
     datasets: [
       {
-        data: [chartPaid, chartPending, chartLate, chartOverdue],
-        backgroundColor: [
+        data: hasData ? [chartPaid, chartPending, chartLate, chartOverdue] : [1],
+        backgroundColor: hasData ? [
           '#10B981', // Emerald Green
           '#0097B2', // Project Teal
           '#F59E0B', // Amber
           '#EF4444'  // Rose Red
-        ],
+        ] : ['#E2E8F0'],
         borderWidth: 2,
         borderColor: '#FFFFFF',
         hoverOffset: 4
@@ -92,38 +92,27 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
         padding: 10,
         cornerRadius: 8,
         callbacks: {
-          label: (ctx) => ` ${ctx.label}: ${ctx.raw} payments`
+          label: (ctx) => hasData ? ` ${ctx.label}: ${ctx.raw} payments` : ' No payment records found in database'
         }
       }
     }
   };
 
-  // Bar Chart Data (Monthly Cashflow Velocity: Inflow vs Outflow)
-  const months = ['May', 'Jun', 'Jul', 'Aug', 'Sep'];
-  const baseInflow = recentPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) || 120000;
-  
-  const inflowSeries = [
-    Math.round(baseInflow * 0.75),
-    Math.round(baseInflow * 0.85),
-    Math.round(baseInflow * 0.95),
-    Math.round(baseInflow * 1.05),
-    baseInflow
-  ];
+  // Real Database Monthly Cashflow Velocity (Inflow vs Outflow)
+  const monthlyCashflow = Array.isArray(stats?.monthlyCashflow) && stats.monthlyCashflow.length > 0
+    ? stats.monthlyCashflow
+    : [];
 
-  const outflowSeries = [
-    Math.round(baseInflow * 0.70),
-    Math.round(baseInflow * 0.80),
-    Math.round(baseInflow * 0.90),
-    Math.round(baseInflow * 1.00),
-    Math.round(baseInflow * 0.92)
-  ];
+  const months = monthlyCashflow.map(item => item.month);
+  const inflowSeries = monthlyCashflow.map(item => Math.round(Number(item.inflow) || 0));
+  const outflowSeries = monthlyCashflow.map(item => Math.round(Number(item.outflow) || 0));
 
   const barData = {
-    labels: months,
+    labels: months.length > 0 ? months : ['No Historical Data'],
     datasets: [
       {
         label: 'Collected Funds (Inflow)',
-        data: inflowSeries,
+        data: inflowSeries.length > 0 ? inflowSeries : [0],
         backgroundColor: '#0097B2',
         borderRadius: 6,
         barPercentage: 0.6,
@@ -131,7 +120,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
       },
       {
         label: 'Disbursed Payouts (Outflow)',
-        data: outflowSeries,
+        data: outflowSeries.length > 0 ? outflowSeries : [0],
         backgroundColor: '#0F2F3D',
         borderRadius: 6,
         barPercentage: 0.6,
@@ -197,7 +186,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
               {isAdmin ? 'System Portfolio & Cashflow Analytics' : 'Circle Portfolio & Performance'}
             </h5>
             <span className="text-muted small" style={{ fontSize: '0.78rem' }}>
-              Real-time operational financial health & payment compliance overview
+              Real-time operational financial health & payment compliance from MySQL database ledger
             </span>
           </div>
         </div>
@@ -221,7 +210,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                 </span>
               </div>
               <span className="badge text-teal bg-light border px-2 py-1 rounded" style={{ fontSize: '0.72rem' }}>
-                Monthly Volume
+                Live Database Ledger
               </span>
             </div>
             <div style={{ height: '230px', position: 'relative' }}>

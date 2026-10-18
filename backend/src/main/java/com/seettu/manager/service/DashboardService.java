@@ -11,7 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +64,11 @@ public class DashboardService {
             nextDueDays = (int) Math.max(0, daysBetween);
         }
 
+        // Calculate real monthly cashflow for the last 5 months
+        List<Payment> allPayments = paymentRepository.findAll();
+        List<PaymentCycle> allCycles = paymentCycleRepository.findAll();
+        List<DashboardResponse.MonthlyCashflowDTO> monthlyCashflow = calculateMonthlyCashflow(allPayments, allCycles);
+
         return DashboardResponse.builder()
                 .totalGroups(totalGroups)
                 .activeGroups(activeGroups)
@@ -76,6 +84,7 @@ public class DashboardService {
                 .nextPaymentDueDays(nextDueDays)
                 .groupStatusDistribution(groupStatusDistribution)
                 .paymentStatusDistribution(paymentStatusDistribution)
+                .monthlyCashflow(monthlyCashflow)
                 .build();
     }
     
@@ -126,6 +135,11 @@ public class DashboardService {
         paymentStatusDistribution.put("LATE", latePayments);
         paymentStatusDistribution.put("OVERDUE", overduePayments);
 
+        List<PaymentCycle> userCycles = userGroups.stream()
+                .flatMap(g -> paymentCycleRepository.findByGroupIdOrderByCycleNumberAsc(g.getId()).stream())
+                .toList();
+        List<DashboardResponse.MonthlyCashflowDTO> userMonthlyCashflow = calculateMonthlyCashflow(userPayments, userCycles);
+
         return DashboardResponse.builder()
                 .totalGroups(totalGroupsJoined)
                 .activeGroups(activeGroups)
@@ -139,6 +153,48 @@ public class DashboardService {
                 .nextPaymentDueDays(nextDueDays)
                 .overallCompletionRate(completionRate)
                 .paymentStatusDistribution(paymentStatusDistribution)
+                .monthlyCashflow(userMonthlyCashflow)
                 .build();
+    }
+
+    private List<DashboardResponse.MonthlyCashflowDTO> calculateMonthlyCashflow(List<Payment> payments, List<PaymentCycle> cycles) {
+        List<DashboardResponse.MonthlyCashflowDTO> result = new ArrayList<>();
+        LocalDate now = LocalDate.now();
+        DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MMM yyyy");
+
+        for (int i = 4; i >= 0; i--) {
+            YearMonth ym = YearMonth.from(now.minusMonths(i));
+            String label = ym.format(monthFormatter);
+
+            double inflow = payments.stream()
+                    .filter(p -> p.getStatus() == Payment.PaymentStatus.PAID)
+                    .filter(p -> {
+                        LocalDate d = p.getPaymentDate() != null ? p.getPaymentDate() : (p.getCreatedAt() != null ? p.getCreatedAt().toLocalDate() : null);
+                        return d != null && YearMonth.from(d).equals(ym);
+                    })
+                    .mapToDouble(p -> p.getAmount() != null ? p.getAmount().doubleValue() : 0.0)
+                    .sum();
+
+            double outflow = cycles.stream()
+                    .filter(c -> c.getPayoutMember() != null)
+                    .filter(c -> {
+                        LocalDate d = c.getStartDate() != null ? c.getStartDate() : null;
+                        return d != null && YearMonth.from(d).equals(ym);
+                    })
+                    .mapToDouble(c -> {
+                        if (c.getGroup() != null && c.getGroup().getContributionAmount() != null && c.getGroup().getMemberCount() != null) {
+                            return c.getGroup().getContributionAmount().doubleValue() * c.getGroup().getMemberCount();
+                        }
+                        return 0.0;
+                    })
+                    .sum();
+
+            result.add(DashboardResponse.MonthlyCashflowDTO.builder()
+                    .month(label)
+                    .inflow(inflow)
+                    .outflow(outflow)
+                    .build());
+        }
+        return result;
     }
 }
