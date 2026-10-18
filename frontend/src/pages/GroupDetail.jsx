@@ -17,10 +17,24 @@ const GroupDetail = () => {
   const [showAssignPayoutModal, setShowAssignPayoutModal] = useState(false);
   const [selectedCycle, setSelectedCycle] = useState(null);
   const [selectedPayoutMemberId, setSelectedPayoutMemberId] = useState('');
+  const [payoutMode, setPayoutMode] = useState('direct'); // 'direct', 'random', 'auction'
+  const [bidDiscount, setBidDiscount] = useState('');
+  const [isRolling, setIsRolling] = useState(false);
+  const [rolledName, setRolledName] = useState('');
+  const [drawWinner, setDrawWinner] = useState(null);
   const [memberUserId, setMemberUserId] = useState('');
   const [verifiedMembers, setVerifiedMembers] = useState([]);
   const [actionMsg, setActionMsg] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+
+  const resetPayoutModal = () => {
+    setSelectedPayoutMemberId('');
+    setPayoutMode('direct');
+    setBidDiscount('');
+    setIsRolling(false);
+    setRolledName('');
+    setDrawWinner(null);
+  };
 
   const handleDeleteGroup = async () => {
     if (!window.confirm(`Are you sure you want to delete the group "${group?.name}"? All associated cycle and membership records will be deleted.`)) {
@@ -91,10 +105,16 @@ const GroupDetail = () => {
     setErrorMsg('');
     try {
       await api.put(`/payment-cycles/${selectedCycle.id}/payout-member?memberId=${selectedPayoutMemberId}`);
-      setActionMsg(`✓ Payout for Cycle #${selectedCycle.cycleNumber} assigned successfully!`);
+      let modeNote = '';
+      if (payoutMode === 'random') modeNote = ' via Fair Random Lot Draw';
+      else if (payoutMode === 'auction') {
+        const disc = parseFloat(bidDiscount) || 0;
+        modeNote = ` via Auction (Bid Discount: LKR ${disc.toLocaleString()})`;
+      }
+      setActionMsg(`✓ Payout for Cycle #${selectedCycle.cycleNumber} assigned successfully${modeNote}!`);
       setShowAssignPayoutModal(false);
+      resetPayoutModal();
       setSelectedCycle(null);
-      setSelectedPayoutMemberId('');
       fetchGroup();
     } catch (err) {
       setErrorMsg(getErrorMessage(err, 'Failed to assign payout member.'));
@@ -320,6 +340,10 @@ const GroupDetail = () => {
                                   className="btn btn-sm btn-outline-primary fw-bold"
                                   onClick={() => {
                                     setSelectedCycle(c);
+                                    resetPayoutModal();
+                                    if (c.payoutMember?.id || c.payoutMemberId) {
+                                      setSelectedPayoutMemberId(String(c.payoutMember?.id || c.payoutMemberId));
+                                    }
                                     setShowAssignPayoutModal(true);
                                   }}
                                 >
@@ -453,43 +477,256 @@ const GroupDetail = () => {
         );
       })()}
 
-      {/* Assign Payout Member Modal */}
-      {showAssignPayoutModal && selectedCycle && (
-        <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header bg-primary text-white">
-                <h5 className="modal-title fw-bold">Select Payout Recipient for Cycle #{selectedCycle.cycleNumber}</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setShowAssignPayoutModal(false)}></button>
-              </div>
-              <form onSubmit={handleAssignPayout}>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label">Select Group Member to Receive Payout (LKR {totalPool.toLocaleString()})</label>
-                    <select
-                      className="form-select"
-                      value={selectedPayoutMemberId}
-                      onChange={(e) => setSelectedPayoutMemberId(e.target.value)}
-                      required
+      {/* Multi-Model Assign Payout Member Modal */}
+      {showAssignPayoutModal && selectedCycle && (() => {
+        const alreadyAwardedIds = (group.cycles || [])
+          .filter(c => (c.payoutMember?.id || c.payoutMemberId) && c.id !== selectedCycle.id)
+          .map(c => String(c.payoutMember?.id || c.payoutMemberId));
+
+        const eligibleMembers = (group.members || []).filter(
+          m => !alreadyAwardedIds.includes(String(m.userId || m.id))
+        );
+
+        const discountVal = parseFloat(bidDiscount) || 0;
+        const netPayout = Math.max(0, totalPool - discountVal);
+        const otherMembersCount = Math.max(1, (group.memberCount || group.members?.length || 2) - 1);
+        const dividendPerMember = discountVal / otherMembersCount;
+
+        const handleRunRandomDraw = () => {
+          if (eligibleMembers.length === 0) return;
+          setIsRolling(true);
+          setDrawWinner(null);
+          let counter = 0;
+          const interval = setInterval(() => {
+            const randomTemp = eligibleMembers[Math.floor(Math.random() * eligibleMembers.length)];
+            setRolledName(randomTemp.fullName);
+            counter++;
+            if (counter > 12) {
+              clearInterval(interval);
+              const finalWinner = eligibleMembers[Math.floor(Math.random() * eligibleMembers.length)];
+              setIsRolling(false);
+              setDrawWinner(finalWinner);
+              setRolledName(finalWinner.fullName);
+              setSelectedPayoutMemberId(String(finalWinner.userId || finalWinner.id));
+            }
+          }, 90);
+        };
+
+        return (
+          <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-dialog-centered modal-lg">
+              <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '14px', overflow: 'hidden' }}>
+                <div className="modal-header text-white" style={{ backgroundColor: '#235665' }}>
+                  <div>
+                    <h5 className="modal-title fw-bold mb-0">
+                      Cycle #{selectedCycle.cycleNumber} Payout Selection
+                    </h5>
+                    <small className="text-white-50">
+                      Select recipient via Fixed Rotation, Fair Random Draw, or Auction Bidding
+                    </small>
+                  </div>
+                  <button type="button" className="btn-close btn-close-white" onClick={() => setShowAssignPayoutModal(false)}></button>
+                </div>
+
+                {/* 3 Payout Allocation Modes */}
+                <div className="bg-light border-bottom p-2 px-3">
+                  <div className="nav nav-pills nav-fill gap-2">
+                    <button
+                      type="button"
+                      className={`nav-link py-2 fw-bold text-nowrap rounded-3 ${payoutMode === 'direct' ? 'active shadow-sm' : 'text-secondary'}`}
+                      style={payoutMode === 'direct' ? { backgroundColor: '#235665', color: '#fff' } : {}}
+                      onClick={() => setPayoutMode('direct')}
                     >
-                      <option value="">-- Choose Member --</option>
-                      {group.members?.map((m) => (
-                        <option key={m.id || m.userId} value={m.userId || m.id}>
-                          {m.fullName} ({m.email})
-                        </option>
-                      ))}
-                    </select>
+                      📋 Fixed Rotation
+                    </button>
+                    <button
+                      type="button"
+                      className={`nav-link py-2 fw-bold text-nowrap rounded-3 ${payoutMode === 'random' ? 'active shadow-sm' : 'text-secondary'}`}
+                      style={payoutMode === 'random' ? { backgroundColor: '#235665', color: '#fff' } : {}}
+                      onClick={() => setPayoutMode('random')}
+                    >
+                      🎲 Fair Random Draw
+                    </button>
+                    <button
+                      type="button"
+                      className={`nav-link py-2 fw-bold text-nowrap rounded-3 ${payoutMode === 'auction' ? 'active shadow-sm' : 'text-secondary'}`}
+                      style={payoutMode === 'auction' ? { backgroundColor: '#235665', color: '#fff' } : {}}
+                      onClick={() => setPayoutMode('auction')}
+                    >
+                      🏷️ Auction / Bidding
+                    </button>
                   </div>
                 </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowAssignPayoutModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-primary fw-bold">Confirm Payout Assignment</button>
-                </div>
-              </form>
+
+                <form onSubmit={handleAssignPayout}>
+                  <div className="modal-body p-4">
+                    {/* MODE 1: FIXED ROTATION */}
+                    {payoutMode === 'direct' && (
+                      <div>
+                        <div className="alert alert-info py-2 px-3 mb-3 small border-0 bg-info-subtle text-info-emphasis rounded-3">
+                          <strong>Fixed Rotation:</strong> Assign the next predetermined member in order to receive the standard lump-sum of <strong>LKR {totalPool.toLocaleString()}</strong>.
+                        </div>
+                        <div className="mb-3">
+                          <label className="form-label fw-bold small text-secondary">Select Recipient Member <span className="text-danger">*</span></label>
+                          <select
+                            className="form-select"
+                            value={selectedPayoutMemberId}
+                            onChange={(e) => setSelectedPayoutMemberId(e.target.value)}
+                            required
+                          >
+                            <option value="">-- Choose Member --</option>
+                            {group.members?.map((m) => {
+                              const isAwarded = alreadyAwardedIds.includes(String(m.userId || m.id));
+                              return (
+                                <option key={m.id || m.userId} value={m.userId || m.id}>
+                                  {m.fullName} ({m.email}) {isAwarded ? '• (Already received payout)' : ''}
+                                </option>
+                              );
+                            })}
+                          </select>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* MODE 2: RANDOM DRAW / LOTTERY */}
+                    {payoutMode === 'random' && (
+                      <div>
+                        <div className="alert alert-info py-2 px-3 mb-3 small border-0 bg-info-subtle text-info-emphasis rounded-3">
+                          <strong>Fair Random Draw:</strong> Neutral algorithmic lot selection among non-prizewinning members.
+                        </div>
+
+                        <div className="p-4 text-center rounded-3 mb-3 border bg-light">
+                          <div className="text-secondary small fw-bold mb-2">ELIGIBLE MEMBERS IN LOTTERY POOL: {eligibleMembers.length}</div>
+                          
+                          {isRolling ? (
+                            <div className="py-3">
+                              <div className="spinner-border text-primary mb-2" role="status"></div>
+                              <h4 className="fw-bold font-monospace text-primary">{rolledName || 'Drawing...'}</h4>
+                              <small className="text-muted">Shuffling participant lots...</small>
+                            </div>
+                          ) : drawWinner ? (
+                            <div className="py-2">
+                              <span className="badge bg-success fs-6 px-3 py-2 mb-2 rounded-pill">🏆 LOTTERY WINNER CHOSEN</span>
+                              <h3 className="fw-bold text-dark mt-1">{drawWinner.fullName}</h3>
+                              <div className="text-muted small">{drawWinner.email} • ID #{drawWinner.userId || drawWinner.id}</div>
+                              <div className="text-success small fw-semibold mt-1">Lump-sum Pot: LKR {totalPool.toLocaleString()}</div>
+                            </div>
+                          ) : (
+                            <div className="py-2">
+                              <p className="text-muted small mb-3">
+                                {eligibleMembers.length > 0
+                                  ? `${eligibleMembers.length} active member(s) have not received a payout yet.`
+                                  : 'All enrolled members have already received a payout!'}
+                              </p>
+                              <button
+                                type="button"
+                                className="btn btn-primary px-4 py-2 fw-bold shadow-sm"
+                                style={{ backgroundColor: '#235665', borderColor: '#235665' }}
+                                onClick={handleRunRandomDraw}
+                                disabled={eligibleMembers.length === 0}
+                              >
+                                🎲 Run Algorithmic Draw
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {drawWinner && (
+                          <div className="d-flex justify-content-end">
+                            <button
+                              type="button"
+                              className="btn btn-outline-secondary btn-sm"
+                              onClick={handleRunRandomDraw}
+                            >
+                              ↺ Re-Draw Lot
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* MODE 3: AUCTION / BIDDING */}
+                    {payoutMode === 'auction' && (
+                      <div>
+                        <div className="alert alert-info py-2 px-3 mb-3 small border-0 bg-info-subtle text-info-emphasis rounded-3">
+                          <strong>Auction / Bidding:</strong> Competitive discount bidding. The highest discount bidder takes the pot; their discount is redistributed as a dividend to reduce all other members' installment.
+                        </div>
+
+                        <div className="row g-3 mb-3">
+                          <div className="col-md-7">
+                            <label className="form-label fw-bold small text-secondary">Winning Bidder <span className="text-danger">*</span></label>
+                            <select
+                              className="form-select"
+                              value={selectedPayoutMemberId}
+                              onChange={(e) => setSelectedPayoutMemberId(e.target.value)}
+                              required
+                            >
+                              <option value="">-- Select Highest Bidder --</option>
+                              {eligibleMembers.map((m) => (
+                                <option key={m.id || m.userId} value={m.userId || m.id}>
+                                  {m.fullName} ({m.email})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="col-md-5">
+                            <label className="form-label fw-bold small text-secondary">Winning Bid Discount (LKR) <span className="text-danger">*</span></label>
+                            <input
+                              type="number"
+                              className="form-control"
+                              placeholder="e.g. 15000"
+                              min="0"
+                              max={totalPool}
+                              value={bidDiscount}
+                              onChange={(e) => setBidDiscount(e.target.value)}
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {/* Financial Ledger Breakdown */}
+                        <div className="p-3 rounded-3 border bg-light">
+                          <div className="row text-center g-2">
+                            <div className="col-4 border-end">
+                              <small className="text-muted d-block">Gross Pool</small>
+                              <strong className="text-dark">LKR {totalPool.toLocaleString()}</strong>
+                            </div>
+                            <div className="col-4 border-end">
+                              <small className="text-muted d-block">Bid Discount</small>
+                              <strong className="text-danger">- LKR {discountVal.toLocaleString()}</strong>
+                            </div>
+                            <div className="col-4">
+                              <small className="text-muted d-block">Net Payout</small>
+                              <strong className="text-success fs-6">LKR {netPayout.toLocaleString()}</strong>
+                            </div>
+                          </div>
+                          <div className="mt-2 pt-2 border-top text-center">
+                            <span className="badge bg-success-subtle text-success border small">
+                              Dividend to {otherMembersCount} other members: LKR {dividendPerMember.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} each
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="modal-footer border-top p-3 bg-white">
+                    <button type="button" className="btn btn-secondary px-3" onClick={() => setShowAssignPayoutModal(false)}>Cancel</button>
+                    <button
+                      type="submit"
+                      className="btn btn-primary px-4 fw-bold shadow-sm"
+                      style={{ backgroundColor: '#235665', borderColor: '#235665' }}
+                      disabled={!selectedPayoutMemberId || isRolling}
+                    >
+                      Confirm Payout Assignment
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };
