@@ -180,7 +180,7 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
         {(channel === 'WhatsApp' || channel === 'SMS') && (
           <div className="mb-3">
             <label className="form-label text-dark fw-semibold small mb-1">
-              Member Mobile Number <span className="text-muted fw-normal">(Sri Lanka: 07x xxx xxxx)</span>
+              Member Mobile Number
             </label>
             <div className="input-group">
               <span className="input-group-text bg-light text-muted small border-end-0">+94</span>
@@ -191,11 +191,6 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
               />
-            </div>
-            <div className="form-text text-muted mt-1" style={{ fontSize: '0.75rem' }}>
-              {channel === 'WhatsApp' 
-                ? '📱 Recommended: Opens WhatsApp Web on PC or WhatsApp App on Mobile with the message pre-filled.'
-                : '✉️ Opens native SMS app on smartphones or Windows Phone Link on PC. (Per SRS Section 3.4, no paid telecom SMS gateway is used).'}
             </div>
           </div>
         )}
@@ -213,9 +208,6 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
               value={emailAddress}
               onChange={(e) => setEmailAddress(e.target.value)}
             />
-            <div className="form-text text-muted mt-1" style={{ fontSize: '0.75rem' }}>
-              ✉️ Opens Gmail / Mail client with the subject and reminder content pre-filled for 1-click delivery to the member's inbox.
-            </div>
           </div>
         )}
 
