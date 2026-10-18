@@ -75,7 +75,9 @@ const PaymentTracking = () => {
         status: (p.status || 'PAID').toUpperCase(),
         recordedBy: p.recordedByName || (p.status === 'PAID' ? 'Organizer' : '—'),
         method: p.paymentMethod || 'Cash (Offline)',
-        notes: p.notes || ''
+        notes: p.notes || '',
+        memberPhone: p.memberPhone,
+        memberEmail: p.memberEmail
       }));
       setPayments(formatted);
     } catch (err) {

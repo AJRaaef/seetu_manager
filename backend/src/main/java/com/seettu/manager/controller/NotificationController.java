@@ -47,4 +47,14 @@ public class NotificationController {
         notificationService.markAllAsRead(userId);
         return ResponseEntity.ok(ApiResponse.success("All notifications marked as read", null));
     }
+
+    @PostMapping("/send")
+    public ResponseEntity<ApiResponse<Notification>> sendDirectNotification(@RequestBody com.seettu.manager.dto.SendNotificationRequest request) {
+        Notification notification = notificationService.sendNotification(
+                request.getUserId(),
+                request.getMessage(),
+                request.getType() != null ? request.getType() : "PAYMENT_REMINDER"
+        );
+        return ResponseEntity.ok(ApiResponse.success("Notification dispatched successfully", notification));
+    }
 }

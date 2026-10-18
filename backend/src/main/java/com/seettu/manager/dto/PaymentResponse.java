@@ -27,4 +27,6 @@ public class PaymentResponse {
     private String paymentMethod;
     private LocalDateTime createdAt;
     private String groupName;
+    private String memberPhone;
+    private String memberEmail;
 }

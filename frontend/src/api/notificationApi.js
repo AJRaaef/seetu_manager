@@ -29,3 +29,9 @@ export const markAllAsRead = async (userId) => {
   const response = await api.put(`/notifications/user/${userId}/read-all`);
   return response.data;
 };
+
+export const sendDirectNotification = async (data) => {
+  const response = await api.post('/notifications/send', data);
+  return response.data;
+};
+

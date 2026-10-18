@@ -234,6 +234,8 @@ public class PaymentService {
                 .paymentMethod(payment.getPaymentMethod() != null ? payment.getPaymentMethod() : "Cash (Offline)")
                 .createdAt(payment.getCreatedAt())
                 .groupName(payment.getCycle().getGroup().getName())
+                .memberPhone(payment.getMember() != null ? payment.getMember().getPhone() : null)
+                .memberEmail(payment.getMember() != null ? payment.getMember().getEmail() : null)
                 .build();
     }
 

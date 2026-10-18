@@ -137,6 +137,14 @@ const Dashboard = () => {
     setShowPaymentModal(true);
   };
 
+  const getDisciplineBadge = (score) => {
+    if (score >= 90) return { label: 'Excellent', bg: '#DCFCE7', color: '#166534', border: '#BBF7D0' };
+    if (score >= 75) return { label: 'Good', bg: '#E0F2FE', color: '#0369A1', border: '#BAE6FD' };
+    if (score >= 60) return { label: 'Fair', bg: '#FEF3C7', color: '#B45309', border: '#FDE68A' };
+    if (score >= 40) return { label: 'Poor', bg: '#FFEDD5', color: '#C2410C', border: '#FED7AA' };
+    return { label: 'High Risk', bg: '#FEE2E2', color: '#991B1B', border: '#FECACA' };
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'PAID':
@@ -231,7 +239,20 @@ const Dashboard = () => {
                   <Icon name="award" size={26} color="#059669" />
                 </div>
               </div>
-              <div className="metric-subtext">On-time payment rating</div>
+              <div className="d-flex align-items-center justify-content-between mt-2 pt-1 border-top">
+                <div className="metric-subtext mb-0">On-time rating</div>
+                {(() => {
+                  const badge = getDisciplineBadge(disciplineScore);
+                  return (
+                    <span
+                      className="badge rounded-pill fw-semibold px-2 py-0.5"
+                      style={{ backgroundColor: badge.bg, color: badge.color, border: `1px solid ${badge.border}`, fontSize: '0.72rem' }}
+                    >
+                      {badge.label}
+                    </span>
+                  );
+                })()}
+              </div>
             </div>
           </div>
         )}

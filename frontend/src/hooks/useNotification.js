@@ -8,10 +8,11 @@ export const useNotification = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchNotifications = useCallback(async () => {
-    if (user) {
+    const targetUserId = user?.userId || user?.id;
+    if (targetUserId) {
       try {
-        const listRes = await getUnreadNotifications(user.userId);
-        const countRes = await getUnreadCount(user.userId);
+        const listRes = await getUnreadNotifications(targetUserId);
+        const countRes = await getUnreadCount(targetUserId);
         setNotifications(listRes.data || []);
         setUnreadCount(countRes.data || 0);
       } catch (error) {
@@ -22,8 +23,20 @@ export const useNotification = () => {
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 60000); // Check every minute
-    return () => clearInterval(interval);
+
+    // 1. Smart Real-Time Polling: Poll every 10 seconds for live updates
+    const interval = setInterval(fetchNotifications, 10000);
+
+    // 2. Reactive Event Listener: Instant wakeup whenever any action dispatches an alert
+    const handleImmediateRefresh = () => {
+      fetchNotifications();
+    };
+    window.addEventListener('refresh-notifications', handleImmediateRefresh);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('refresh-notifications', handleImmediateRefresh);
+    };
   }, [fetchNotifications]);
 
   const readNotification = async (id) => {
