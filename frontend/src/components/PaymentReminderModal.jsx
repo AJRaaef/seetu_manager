@@ -155,23 +155,28 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
         {/* Channel Selection Buttons */}
         <div className="mb-3">
           <label className="form-label text-dark fw-semibold small mb-2">Select Notification Channel</label>
-          <div className="d-flex flex-wrap gap-2">
+          <div className="row g-2">
             {[
               { id: 'WhatsApp', label: 'WhatsApp', icon: 'phone', color: '#25D366' },
               { id: 'Email', label: 'Email', icon: 'reports', color: '#059669' },
-              { id: 'In-App', label: 'In-App Bell', icon: 'bell', color: '#E11D48' },
-              { id: 'SMS', label: 'SMS Text', icon: 'clock', color: '#0284C7' }
+              { id: 'In-App', label: 'In-App', icon: 'bell', color: '#E11D48' },
+              { id: 'SMS', label: 'SMS', icon: 'clock', color: '#0284C7' }
             ].map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                className={`btn flex-fill py-2 d-flex align-items-center justify-content-center gap-2 rounded-2 ${channel === c.id ? 'fw-bold' : 'btn-light border text-muted'}`}
-                style={channel === c.id ? { borderColor: '#1A5265', color: '#1A5265', backgroundColor: '#E6EFF2', boxShadow: '0 0 0 1px #1A5265' } : {}}
-                onClick={() => setChannel(c.id)}
-              >
-                <Icon name={c.icon} size={15} color={channel === c.id ? '#1A5265' : '#64748B'} />
-                <span>{c.label}</span>
-              </button>
+              <div key={c.id} className="col-3">
+                <button
+                  type="button"
+                  className={`btn w-100 py-2 px-1 d-flex align-items-center justify-content-center gap-1 rounded-2 ${channel === c.id ? 'fw-bold' : 'btn-light border text-muted'}`}
+                  style={{
+                    fontSize: '0.82rem',
+                    whiteSpace: 'nowrap',
+                    ...(channel === c.id ? { borderColor: '#1A5265', color: '#1A5265', backgroundColor: '#E6EFF2', boxShadow: '0 0 0 1px #1A5265' } : {})
+                  }}
+                  onClick={() => setChannel(c.id)}
+                >
+                  <Icon name={c.icon} size={14} color={channel === c.id ? '#1A5265' : '#64748B'} />
+                  <span>{c.label}</span>
+                </button>
+              </div>
             ))}
           </div>
         </div>
