@@ -154,10 +154,10 @@ const GroupDetail = () => {
   const activeCycle = group.cycles?.find(c => c.status === 'ACTIVE') || group.cycles?.[0];
 
   const formatModelLabel = (cat, typeObj) => {
-    if (cat === 'AUCTION') return { label: '🏷️ Auction / Bidding Seettu', cls: 'bg-warning text-dark border' };
-    if (cat === 'RANDOM_DRAW') return { label: '🎲 Random Draw / Lottery', cls: 'bg-primary-subtle text-primary border border-primary' };
-    if (cat === 'NON_MONETARY' || typeObj?.name === 'Non-Monetary') return { label: '🎁 Non-Monetary Asset Seettu', cls: 'bg-success text-white' };
-    return { label: '📋 Fixed Rotation Seettu', cls: 'bg-secondary-subtle text-dark border' };
+    if (cat === 'AUCTION') return { label: 'Auction / Bidding Seettu', cls: 'bg-warning text-dark border' };
+    if (cat === 'RANDOM_DRAW') return { label: 'Random Draw / Lottery', cls: 'bg-primary-subtle text-primary border border-primary' };
+    if (cat === 'NON_MONETARY' || typeObj?.name === 'Non-Monetary') return { label: 'Non-Monetary Asset Seettu', cls: 'bg-success text-white' };
+    return { label: 'Fixed Rotation Seettu', cls: 'bg-secondary-subtle text-dark border' };
   };
 
   const modelInfo = formatModelLabel(group.category, group.seettuType);
@@ -549,7 +549,7 @@ const GroupDetail = () => {
                       style={payoutMode === 'direct' ? { backgroundColor: '#235665', color: '#fff' } : {}}
                       onClick={() => setPayoutMode('direct')}
                     >
-                      📋 Fixed Rotation
+                      Fixed Rotation
                     </button>
                     <button
                       type="button"
@@ -557,7 +557,7 @@ const GroupDetail = () => {
                       style={payoutMode === 'random' ? { backgroundColor: '#235665', color: '#fff' } : {}}
                       onClick={() => setPayoutMode('random')}
                     >
-                      🎲 Fair Random Draw
+                      Random Draw
                     </button>
                     <button
                       type="button"
@@ -565,7 +565,7 @@ const GroupDetail = () => {
                       style={payoutMode === 'auction' ? { backgroundColor: '#235665', color: '#fff' } : {}}
                       onClick={() => setPayoutMode('auction')}
                     >
-                      🏷️ Auction / Bidding
+                      Auction Bidding
                     </button>
                   </div>
                 </div>
@@ -618,7 +618,7 @@ const GroupDetail = () => {
                             </div>
                           ) : drawWinner ? (
                             <div className="py-2">
-                              <span className="badge bg-success fs-6 px-3 py-2 mb-2 rounded-pill">🏆 LOTTERY WINNER CHOSEN</span>
+                              <span className="badge bg-success fs-6 px-3 py-2 mb-2 rounded-pill">WINNER SELECTED</span>
                               <h3 className="fw-bold text-dark mt-1">{drawWinner.fullName}</h3>
                               <div className="text-muted small">{drawWinner.email} • ID #{drawWinner.userId || drawWinner.id}</div>
                               <div className="text-success small fw-semibold mt-1">Lump-sum Pot: LKR {totalPool.toLocaleString()}</div>
@@ -637,7 +637,7 @@ const GroupDetail = () => {
                                 onClick={handleRunRandomDraw}
                                 disabled={eligibleMembers.length === 0}
                               >
-                                🎲 Run Algorithmic Draw
+                                Run Random Draw
                               </button>
                             </div>
                           )}
@@ -650,7 +650,7 @@ const GroupDetail = () => {
                               className="btn btn-outline-secondary btn-sm"
                               onClick={handleRunRandomDraw}
                             >
-                              ↺ Re-Draw Lot
+                              Re-Draw Lot
                             </button>
                           </div>
                         )}

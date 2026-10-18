@@ -148,10 +148,10 @@ const CreateGroup = () => {
                     onChange={e => handleModelChange(e.target.value)}
                     style={{ borderRadius: '8px', border: '1px solid #235665', backgroundColor: '#F0F9FA' }}
                   >
-                    <option value="FIXED_ROTATION">📋 Fixed Rotation Seettu (Predetermined queue)</option>
-                    <option value="AUCTION">🏷️ Auction / Bidding Seettu (Discount bidding & dividends)</option>
-                    <option value="RANDOM_DRAW">🎲 Random Draw / Lottery (Algorithmic lot selection)</option>
-                    <option value="NON_MONETARY">🎁 Non-Monetary Asset Seettu (Physical goods & shops)</option>
+                    <option value="FIXED_ROTATION">Fixed Rotation Seettu (Predetermined queue)</option>
+                    <option value="AUCTION">Auction / Bidding Seettu (Discount bidding & dividends)</option>
+                    <option value="RANDOM_DRAW">Random Draw / Lottery (Algorithmic lot selection)</option>
+                    <option value="NON_MONETARY">Non-Monetary Asset Seettu (Physical goods & shops)</option>
                   </select>
                 </div>
               </div>
@@ -159,16 +159,16 @@ const CreateGroup = () => {
               {/* Dynamic Model Guidance Banner */}
               <div className="alert alert-info py-2 px-3 mb-3 small border-0 bg-info-subtle text-info-emphasis rounded-3">
                 {formData.groupModel === 'FIXED_ROTATION' && (
-                  <span><strong>📋 Fixed Rotation Seettu:</strong> Members take turns in a predetermined rotational order to receive the standard pooled lump-sum.</span>
+                  <span><strong>Fixed Rotation Seettu:</strong> Members take turns in a predetermined rotational order to receive the standard pooled lump-sum.</span>
                 )}
                 {formData.groupModel === 'AUCTION' && (
-                  <span><strong>🏷️ Auction / Bidding Seettu:</strong> Members submit competitive discount bids for early pot access. The discount is redistributed as monthly dividends to reduce other subscribers' installments.</span>
+                  <span><strong>Auction / Bidding Seettu:</strong> Members submit competitive discount bids for early pot access. The discount is redistributed as monthly dividends to reduce other subscribers' installments.</span>
                 )}
                 {formData.groupModel === 'RANDOM_DRAW' && (
-                  <span><strong>🎲 Random Draw / Lottery:</strong> Neutral algorithmic lot selection chooses the winning payout recipient fairly each cycle from eligible non-prizewinners.</span>
+                  <span><strong>Random Draw / Lottery:</strong> Neutral algorithmic lot selection chooses the winning payout recipient fairly each cycle from eligible non-prizewinners.</span>
                 )}
                 {formData.groupModel === 'NON_MONETARY' && (
-                  <span><strong>🎁 Non-Monetary Asset Seettu:</strong> Rotating savings pool for tangible high-value physical goods (jewelry, electronics, machinery) backed by a registered partner merchant shop.</span>
+                  <span><strong>Non-Monetary Asset Seettu:</strong> Rotating savings pool for tangible high-value physical goods (jewelry, electronics, machinery) backed by a registered partner merchant shop.</span>
                 )}
               </div>
 
