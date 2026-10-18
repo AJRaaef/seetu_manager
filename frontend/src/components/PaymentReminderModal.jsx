@@ -4,8 +4,10 @@ import Icon from './Icons';
 import { sendDirectNotification } from '../api/notificationApi';
 
 const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
-  const [channel, setChannel] = useState('WhatsApp');
+  const [channel, setChannel] = useState('WhatsApp'); // 'WhatsApp', 'Email', 'In-App', 'SMS'
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [emailAddress, setEmailAddress] = useState('');
+  const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
@@ -17,12 +19,17 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
       const cycle = payment.cycle || 'Upcoming Cycle';
       const group = payment.group || 'Seettu Group';
       
-      // Auto-populate member phone
+      // Auto-populate member phone and email
       const rawPhone = payment.memberPhone || payment.phone || '';
+      const rawEmail = payment.memberEmail || payment.email || '';
       setPhoneNumber(rawPhone);
+      setEmailAddress(rawEmail);
+
+      const reminderSubject = `[SeettuManager] Payment Reminder: ${cycle} (${group})`;
+      setSubject(reminderSubject);
 
       setMessage(
-        `Dear ${name}, your Seettu contribution of ${amount} for ${cycle} (${group}) is currently overdue. Please settle your contribution promptly to protect your Financial Discipline Score.`
+        `Dear ${name},\n\nYour Seettu contribution of ${amount} for ${cycle} (${group}) is currently pending/overdue.\n\nPlease settle your contribution promptly and upload your deposit slip to protect your Financial Discipline Score.\n\nThank you,\nSeettu Group Organizer`
       );
       setStatusMsg('');
     }
@@ -52,13 +59,14 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
 
     const formattedPhone = formatSriLankaPhone(phoneNumber);
     const encodedMessage = encodeURIComponent(message);
+    const encodedSubject = encodeURIComponent(subject);
 
     try {
       // 1. In-App Notification (Always record in database for audit trail & in-app bell)
       if (payment.memberId) {
         await sendDirectNotification({
           userId: payment.memberId,
-          message: `[${channel} Reminder] ${message}`,
+          message: `[${channel} Reminder] Your contribution of ${payment.amount ? payment.amount.toLocaleString() : '5,000'} LKR for ${payment.cycle || 'Cycle'} is due.`,
           type: 'PAYMENT_REMINDER'
         }).catch((err) => console.warn('In-app notification log failed:', err));
         
@@ -72,6 +80,15 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
           ? `https://wa.me/${formattedPhone}?text=${encodedMessage}`
           : `https://wa.me/?text=${encodedMessage}`;
         window.open(waUrl, '_blank', 'noopener,noreferrer');
+      } else if (channel === 'Email') {
+        // Open Gmail Web composer directly in browser (with mailto fallback)
+        const recipient = emailAddress.trim();
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(recipient)}&su=${encodedSubject}&body=${encodedMessage}`;
+        const newWin = window.open(gmailUrl, '_blank', 'noopener,noreferrer');
+        // If popup blocked or user prefers mailto
+        if (!newWin || newWin.closed || typeof newWin.closed === 'undefined') {
+          window.location.href = `mailto:${recipient}?subject=${encodedSubject}&body=${encodedMessage}`;
+        }
       } else if (channel === 'SMS') {
         const smsUrl = formattedPhone
           ? `sms:+${formattedPhone}?body=${encodedMessage}`
@@ -80,7 +97,7 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
       }
 
       if (onSend) {
-        onSend({ payment, channel, message, phone: formattedPhone });
+        onSend({ payment, channel, message, phone: formattedPhone, email: emailAddress });
       }
 
       setStatusMsg(`Reminder successfully dispatched via ${channel}!`);
@@ -108,7 +125,7 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
           </div>
           <div>
             <h5 className="fw-bold mb-0 text-dark" style={{ fontSize: '1.05rem' }}>Send Payment Reminder</h5>
-            <div className="text-muted small" style={{ fontSize: '0.75rem' }}>Multi-Channel Real-Time Dispatch (In-App, WhatsApp, SMS)</div>
+            <div className="text-muted small" style={{ fontSize: '0.75rem' }}>Multi-Channel Dispatch (WhatsApp, Email, In-App, SMS)</div>
           </div>
         </div>
         <button className="btn btn-link text-muted p-0 border-0" onClick={onHide}>
@@ -137,12 +154,13 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
 
         {/* Channel Selection Buttons */}
         <div className="mb-3">
-          <label className="form-label text-dark fw-semibold small mb-2">Notification Channel</label>
-          <div className="d-flex gap-2">
+          <label className="form-label text-dark fw-semibold small mb-2">Select Notification Channel</label>
+          <div className="d-flex flex-wrap gap-2">
             {[
               { id: 'WhatsApp', label: 'WhatsApp', icon: 'phone', color: '#25D366' },
-              { id: 'SMS', label: 'SMS Text', icon: 'clock', color: '#0284C7' },
-              { id: 'In-App', label: 'In-App Bell', icon: 'bell', color: '#E11D48' }
+              { id: 'Email', label: 'Email', icon: 'reports', color: '#059669' },
+              { id: 'In-App', label: 'In-App Bell', icon: 'bell', color: '#E11D48' },
+              { id: 'SMS', label: 'SMS Text', icon: 'clock', color: '#0284C7' }
             ].map((c) => (
               <button
                 key={c.id}
@@ -158,7 +176,7 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
           </div>
         </div>
 
-        {/* Member Phone Number Field (for WhatsApp and SMS) */}
+        {/* Member Mobile Number Field (for WhatsApp and SMS) */}
         {(channel === 'WhatsApp' || channel === 'SMS') && (
           <div className="mb-3">
             <label className="form-label text-dark fw-semibold small mb-1">
@@ -176,9 +194,41 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
             </div>
             <div className="form-text text-muted mt-1" style={{ fontSize: '0.75rem' }}>
               {channel === 'WhatsApp' 
-                ? '📱 Recommended: Opens WhatsApp Web on PC or WhatsApp App on Mobile with the message pre-filled to send directly to the member.'
+                ? '📱 Recommended: Opens WhatsApp Web on PC or WhatsApp App on Mobile with the message pre-filled.'
                 : '✉️ Opens native SMS app on smartphones or Windows Phone Link on PC. (Per SRS Section 3.4, no paid telecom SMS gateway is used).'}
             </div>
+          </div>
+        )}
+
+        {/* Member Email Address Field (for Email channel) */}
+        {channel === 'Email' && (
+          <div className="mb-3">
+            <label className="form-label text-dark fw-semibold small mb-1">
+              Member Registered Email Address
+            </label>
+            <input
+              type="email"
+              className="form-control"
+              placeholder="member@example.com"
+              value={emailAddress}
+              onChange={(e) => setEmailAddress(e.target.value)}
+            />
+            <div className="form-text text-muted mt-1" style={{ fontSize: '0.75rem' }}>
+              ✉️ Opens Gmail / Mail client with the subject and reminder content pre-filled for 1-click delivery to the member's inbox.
+            </div>
+          </div>
+        )}
+
+        {/* Email Subject Line (for Email channel) */}
+        {channel === 'Email' && (
+          <div className="mb-3">
+            <label className="form-label text-dark fw-semibold small mb-1">Email Subject Line</label>
+            <input
+              type="text"
+              className="form-control"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            />
           </div>
         )}
 
@@ -187,7 +237,7 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
           <label className="form-label text-dark fw-semibold small">Reminder Message Content</label>
           <textarea
             className="form-control"
-            rows="3"
+            rows={channel === 'Email' ? 5 : 3}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
           />
