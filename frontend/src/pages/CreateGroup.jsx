@@ -28,6 +28,12 @@ const CreateGroup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const [showAddShopModal, setShowAddShopModal] = useState(false);
+  const [newShopName, setNewShopName] = useState('');
+  const [newShopAddress, setNewShopAddress] = useState('');
+  const [savingShop, setSavingShop] = useState(false);
+  const [shopError, setShopError] = useState('');
+
   const handleModelChange = (model) => {
     const isNonMonetary = model === 'NON_MONETARY';
     setFormData(prev => ({
@@ -37,6 +43,29 @@ const CreateGroup = () => {
       seettuTypeId: isNonMonetary ? '2' : '1',
       shopId: isNonMonetary ? prev.shopId : ''
     }));
+  };
+
+  const handleCreateShop = async (e) => {
+    e.preventDefault();
+    if (!newShopName.trim()) return;
+    setSavingShop(true);
+    setShopError('');
+    try {
+      const ownerId = user?.userId || user?.id || 2;
+      const res = await api.post(`/shops?name=${encodeURIComponent(newShopName.trim())}&address=${encodeURIComponent(newShopAddress.trim())}&ownerId=${ownerId}`);
+      const created = res.data?.data || res.data;
+      if (created && created.id) {
+        setShops(prev => [...prev, created]);
+        setFormData(prev => ({ ...prev, shopId: String(created.id) }));
+        setShowAddShopModal(false);
+        setNewShopName('');
+        setNewShopAddress('');
+      }
+    } catch (err) {
+      setShopError('Failed to register partner merchant shop. Please try again.');
+    } finally {
+      setSavingShop(false);
+    }
   };
 
   useEffect(() => {
@@ -202,9 +231,19 @@ const CreateGroup = () => {
                   </select>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
-                    {formData.groupModel === 'NON_MONETARY' ? 'Partner Merchant Shop (Mandatory)' : 'Associated Shop (Optional)'}
-                  </label>
+                  <div className="d-flex justify-content-between align-items-center mb-1">
+                    <label className="form-label text-secondary fw-medium mb-0" style={{ fontSize: '0.875rem' }}>
+                      {formData.groupModel === 'NON_MONETARY' ? 'Partner Merchant Shop (Mandatory)' : 'Associated Shop (Optional)'}
+                    </label>
+                    <button 
+                      type="button" 
+                      className="btn btn-link btn-sm p-0 text-decoration-none fw-semibold"
+                      style={{ fontSize: '0.8rem', color: '#235665' }}
+                      onClick={() => setShowAddShopModal(true)}
+                    >
+                      + Register Shop
+                    </button>
+                  </div>
                   <select
                     className="form-select"
                     value={formData.shopId}
@@ -286,6 +325,66 @@ const CreateGroup = () => {
           </div>
         </div>
       </div>
+
+      {/* Register Partner Merchant Shop Modal */}
+      {showAddShopModal && (
+        <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+              <div className="modal-header text-white" style={{ backgroundColor: '#235665' }}>
+                <div>
+                  <h5 className="modal-title fw-bold mb-0">Register Partner Merchant Shop</h5>
+                  <small className="text-white-50">Onboard verified retail merchant for Non-Monetary Asset Seettu</small>
+                </div>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setShowAddShopModal(false)}></button>
+              </div>
+              <form onSubmit={handleCreateShop}>
+                <div className="modal-body p-4">
+                  {shopError && (
+                    <div className="alert alert-danger py-2 px-3 mb-3 small border-0 rounded-3">
+                      {shopError}
+                    </div>
+                  )}
+                  <div className="mb-3">
+                    <label className="form-label text-secondary fw-medium small">Shop / Merchant Showroom Name <span className="text-danger">*</span></label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Lalitha Jewellery (Pvt) Ltd, Singer Mega"
+                      value={newShopName}
+                      onChange={e => setNewShopName(e.target.value)}
+                      required
+                      autoFocus
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label text-secondary fw-medium small">Showroom / Branch Address</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. No. 125, Sea Street, Colombo 11"
+                      value={newShopAddress}
+                      onChange={e => setNewShopAddress(e.target.value)}
+                    />
+                    <small className="text-muted" style={{ fontSize: '0.75rem' }}>Members collect physical assets and official commercial warranties at this address.</small>
+                  </div>
+                </div>
+                <div className="modal-footer border-top p-3 bg-light">
+                  <button type="button" className="btn btn-secondary px-3" onClick={() => setShowAddShopModal(false)}>Cancel</button>
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary px-4 fw-bold shadow-sm"
+                    style={{ backgroundColor: '#235665', borderColor: '#235665' }}
+                    disabled={savingShop || !newShopName.trim()}
+                  >
+                    {savingShop ? 'Registering...' : 'Register Shop'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

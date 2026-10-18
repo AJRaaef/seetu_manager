@@ -23,7 +23,9 @@ public class GroupResponse {
     private String status;
     private String seettuTypeName;
     private String category;
+    private Long shopId;
     private String shopName;
+    private String shopAddress;
     private String createdByName;
     private Long createdById;
     private LocalDateTime createdAt;
@@ -54,6 +56,7 @@ public class GroupResponse {
         private Integer cycleNumber;
         private String startDate;
         private String endDate;
+        private Long payoutMemberId;
         private String payoutMemberName;
         private String status;
     }

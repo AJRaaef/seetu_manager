@@ -22,6 +22,8 @@ const GroupDetail = () => {
   const [isRolling, setIsRolling] = useState(false);
   const [rolledName, setRolledName] = useState('');
   const [drawWinner, setDrawWinner] = useState(null);
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
+  const [voucherCycle, setVoucherCycle] = useState(null);
   const [memberUserId, setMemberUserId] = useState('');
   const [verifiedMembers, setVerifiedMembers] = useState([]);
   const [actionMsg, setActionMsg] = useState('');
@@ -225,6 +227,16 @@ const GroupDetail = () => {
                   <span className="text-muted">Created By</span>
                   <strong className="text-dark">{group.createdByName || 'Organizer'}</strong>
                 </li>
+                {group.shopName && (
+                  <li className="list-group-item p-3 bg-light border-top">
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <small className="text-secondary fw-bold text-uppercase" style={{ fontSize: '0.72rem' }}>Partner Merchant Shop</small>
+                      <span className="badge bg-success-subtle text-success border border-success" style={{ fontSize: '0.7rem' }}>Verified Partner</span>
+                    </div>
+                    <div className="fw-bold text-dark">{group.shopName}</div>
+                    {group.shopAddress && <div className="text-muted small mt-0.5">{group.shopAddress}</div>}
+                  </li>
+                )}
               </ul>
             </div>
           </div>
@@ -343,42 +355,56 @@ const GroupDetail = () => {
                             </span>
                           </td>
                           <td>
-                            {(isOrganizer || isAdmin) && (
-                              <div className="d-flex gap-1 flex-wrap">
+                            <div className="d-flex gap-1 flex-wrap">
+                              {(isOrganizer || isAdmin) && (
+                                <>
+                                  <button
+                                    className="btn btn-sm btn-outline-primary fw-bold"
+                                    onClick={() => {
+                                      setSelectedCycle(c);
+                                      resetPayoutModal();
+                                      if (group.category === 'AUCTION') setPayoutMode('auction');
+                                      else if (group.category === 'RANDOM_DRAW') setPayoutMode('random');
+                                      else setPayoutMode('direct');
+                                      if (c.payoutMember?.id || c.payoutMemberId) {
+                                        setSelectedPayoutMemberId(String(c.payoutMember?.id || c.payoutMemberId));
+                                      }
+                                      setShowAssignPayoutModal(true);
+                                    }}
+                                  >
+                                     Select Payout
+                                  </button>
+                                  {c.status === 'ACTIVE' && (
+                                    <button
+                                      className="btn btn-sm btn-success fw-bold"
+                                      onClick={() => handleCycleStatusChange(c.id, 'COMPLETED')}
+                                    >
+                                      ✓ Complete Cycle
+                                    </button>
+                                  )}
+                                  {c.status === 'PENDING' && (
+                                    <button
+                                      className="btn btn-sm btn-warning text-dark fw-bold"
+                                      onClick={() => handleCycleStatusChange(c.id, 'ACTIVE')}
+                                    >
+                                       Start Cycle
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                              {(c.payoutMemberName && c.payoutMemberName !== 'Unassigned' && c.payoutMemberName !== 'Pending Rotation Selection') && group.shopName && (
                                 <button
-                                  className="btn btn-sm btn-outline-primary fw-bold"
+                                  className="btn btn-sm btn-outline-success fw-bold"
                                   onClick={() => {
-                                    setSelectedCycle(c);
-                                    resetPayoutModal();
-                                    if (group.category === 'AUCTION') setPayoutMode('auction');
-                                    else if (group.category === 'RANDOM_DRAW') setPayoutMode('random');
-                                    else setPayoutMode('direct');
-                                    if (c.payoutMember?.id || c.payoutMemberId) {
-                                      setSelectedPayoutMemberId(String(c.payoutMember?.id || c.payoutMemberId));
-                                    }
-                                    setShowAssignPayoutModal(true);
+                                    setVoucherCycle(c);
+                                    setShowVoucherModal(true);
                                   }}
+                                  title="View Physical Asset Redemption Voucher"
                                 >
-                                   Select Payout
+                                  Asset Voucher
                                 </button>
-                                {c.status === 'ACTIVE' && (
-                                  <button
-                                    className="btn btn-sm btn-success fw-bold"
-                                    onClick={() => handleCycleStatusChange(c.id, 'COMPLETED')}
-                                  >
-                                    ✓ Complete Cycle
-                                  </button>
-                                )}
-                                {c.status === 'PENDING' && (
-                                  <button
-                                    className="btn btn-sm btn-warning text-dark fw-bold"
-                                    onClick={() => handleCycleStatusChange(c.id, 'ACTIVE')}
-                                  >
-                                     Start Cycle
-                                  </button>
-                                )}
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -739,6 +765,85 @@ const GroupDetail = () => {
           </div>
         );
       })()}
+
+      {/* Non-Monetary Asset Collection Voucher Modal */}
+      {showVoucherModal && voucherCycle && (
+        <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+          <div className="modal-dialog modal-dialog-centered modal-lg">
+            <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '16px', overflow: 'hidden' }}>
+              <div className="p-4 text-white position-relative" style={{ backgroundColor: '#134A5A' }}>
+                <div className="d-flex justify-content-between align-items-start">
+                  <div>
+                    <span className="badge bg-success-subtle text-success border border-success mb-2 px-3 py-1 font-monospace" style={{ fontSize: '0.75rem' }}>
+                      NON-MONETARY ASSET REDEMPTION VOUCHER
+                    </span>
+                    <h3 className="fw-bold mb-1 text-white">Physical Asset Collection Order</h3>
+                    <p className="mb-0 text-white-50 small">
+                      The Cheetus Ordinance No. 61 of 1935 (Section 3) • SeettuManager Official Document
+                    </p>
+                  </div>
+                  <button type="button" className="btn-close btn-close-white" onClick={() => setShowVoucherModal(false)}></button>
+                </div>
+              </div>
+
+              <div className="modal-body p-4 bg-white">
+                <div className="row g-4 mb-4">
+                  {/* Beneficiary */}
+                  <div className="col-md-6 border-end">
+                    <small className="text-secondary fw-bold text-uppercase" style={{ fontSize: '0.72rem' }}>Beneficiary Subscriber (Prizewinner)</small>
+                    <h4 className="fw-bold text-dark mt-1 mb-1">{voucherCycle.payoutMemberName || voucherCycle.payoutMember?.fullName}</h4>
+                    <div className="text-muted small">Cycle Turn: <strong>Cycle #{voucherCycle.cycleNumber}</strong></div>
+                    <div className="text-muted small">Asset Category: <strong>{group.category || 'Physical Goods'}</strong></div>
+                    <div className="text-muted small">Validity Period: {voucherCycle.startDate} to {voucherCycle.endDate}</div>
+
+                    <div className="mt-3 p-3 bg-light rounded-3 border">
+                      <small className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Authorized Lump-Sum Asset Value</small>
+                      <h4 className="fw-bold text-success mb-0">LKR {totalPool.toLocaleString()}</h4>
+                    </div>
+                  </div>
+
+                  {/* Partner Merchant Showroom */}
+                  <div className="col-md-6">
+                    <small className="text-secondary fw-bold text-uppercase" style={{ fontSize: '0.72rem' }}>Partner Merchant Showroom</small>
+                    <h4 className="fw-bold text-dark mt-1 mb-1">{group.shopName || 'Registered Partner Merchant'}</h4>
+                    {group.shopAddress && (
+                      <p className="text-muted small mb-2">{group.shopAddress}</p>
+                    )}
+                    <span className="badge bg-info-subtle text-info border">Verified Partner Merchant</span>
+
+                    <div className="mt-3 p-3 bg-light rounded-3 border font-monospace">
+                      <small className="text-muted d-block" style={{ fontSize: '0.75rem' }}>Voucher Serial Code</small>
+                      <strong className="text-dark">VCH-SEETTU-{group.id}-{voucherCycle.cycleNumber}-REDM</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Redemption Instructions & Terms */}
+                <div className="alert alert-light border small text-secondary rounded-3 p-3 mb-0">
+                  <div className="fw-bold text-dark mb-1">Redemption Instructions & Legal Notice:</div>
+                  <ul className="mb-0 ps-3">
+                    <li>Present this digital voucher along with your registered Sri Lankan National Identity Card (NIC) at the partner showroom address.</li>
+                    <li>The partner merchant will release the physical goods and provide an official commercial tax invoice and manufacturer warranty.</li>
+                    <li>The pooled sum of <strong>LKR {totalPool.toLocaleString()}</strong> is settled directly with the merchant by the group organizer.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="modal-footer border-top p-3 bg-light">
+                <button type="button" className="btn btn-secondary px-3" onClick={() => setShowVoucherModal(false)}>Close</button>
+                <button 
+                  type="button" 
+                  className="btn btn-teal px-4 fw-bold text-white shadow-sm"
+                  style={{ backgroundColor: '#235665' }}
+                  onClick={() => window.print()}
+                >
+                  Print Voucher
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
