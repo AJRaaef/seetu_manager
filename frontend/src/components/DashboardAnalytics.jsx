@@ -30,6 +30,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
   const lateCount = Number(dist.LATE || 0);
   const overdueCount = Number(dist.OVERDUE || 0);
   const totalCount = paidCount + pendingCount + lateCount + overdueCount;
+  const displayTotal = totalCount;
 
   // Real Database Numbers Only - No synthetic or dummy fallbacks
   const hasData = totalCount > 0;
