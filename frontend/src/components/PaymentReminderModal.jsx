@@ -174,10 +174,10 @@ const PaymentReminderModal = ({ show, onHide, payment, onSend }) => {
                 onChange={(e) => setPhoneNumber(e.target.value)}
               />
             </div>
-            <div className="form-text text-muted" style={{ fontSize: '0.75rem' }}>
+            <div className="form-text text-muted mt-1" style={{ fontSize: '0.75rem' }}>
               {channel === 'WhatsApp' 
-                ? 'Will open WhatsApp Web or App with pre-filled message.'
-                : 'Will open standard mobile SMS messaging with pre-filled message.'}
+                ? '📱 Recommended: Opens WhatsApp Web on PC or WhatsApp App on Mobile with the message pre-filled to send directly to the member.'
+                : '✉️ Opens native SMS app on smartphones or Windows Phone Link on PC. (Per SRS Section 3.4, no paid telecom SMS gateway is used).'}
             </div>
           </div>
         )}
