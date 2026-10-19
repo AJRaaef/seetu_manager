@@ -7,6 +7,7 @@ import EditPaymentModal from '../components/EditPaymentModal';
 import DeletePaymentModal from '../components/DeletePaymentModal';
 import PaymentReminderModal from '../components/PaymentReminderModal';
 import SettlePaymentModal from '../components/SettlePaymentModal';
+import LegalNoticeModal from '../components/LegalNoticeModal';
 import {
   getAllPayments,
   getPaymentsByMember,
@@ -45,6 +46,7 @@ const PaymentTracking = () => {
   const [deletePayment, setDeletePayment] = useState(null);
   const [reminderPayment, setReminderPayment] = useState(null);
   const [settlePayment, setSettlePayment] = useState(null);
+  const [legalNoticePayment, setLegalNoticePayment] = useState(null);
 
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -940,6 +942,21 @@ const PaymentTracking = () => {
                             </button>
                           )}
 
+                          {p.status === 'OVERDUE' && (
+                            <button
+                              className="btn btn-sm btn-outline-danger px-2 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-xs"
+                              style={{ fontSize: '0.75rem', borderRadius: '6px' }}
+                              title="Issue Formal Statutory Notice of Default & Legal Demand (The Cheetus Ordinance No. 61 of 1935)"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setLegalNoticePayment(p);
+                              }}
+                            >
+                              <Icon name="warning" size={13} color="#DC3545" />
+                              <span>Legal LOD</span>
+                            </button>
+                          )}
+
                           <div className="btn-group btn-group-sm border rounded bg-white shadow-xs">
                             {p.status !== 'PAID' && p.status !== 'LATE' && (
                               <button
@@ -1033,6 +1050,13 @@ const PaymentTracking = () => {
         onHide={() => setSettlePayment(null)}
         payment={settlePayment}
         onSettle={handleConfirmSettle}
+      />
+
+      <LegalNoticeModal
+        show={!!legalNoticePayment}
+        onHide={() => setLegalNoticePayment(null)}
+        payment={legalNoticePayment}
+        organizerName={user?.fullName || 'Circle Organizer'}
       />
     </div>
   );
