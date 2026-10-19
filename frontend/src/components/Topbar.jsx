@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../hooks/useLanguage';
@@ -11,7 +11,34 @@ const Topbar = ({ onToggleSidebar }) => {
   const { unreadCount } = useNotification();
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef(null);
+  const langMenuRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target)) {
+        setShowLangMenu(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setShowUserMenu(false);
+        setShowLangMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -52,7 +79,7 @@ const Topbar = ({ onToggleSidebar }) => {
         </div>
 
         {/* Language Dropdown */}
-        <div className="position-relative">
+        <div className="position-relative" ref={langMenuRef}>
           <button
             onClick={() => { setShowLangMenu(!showLangMenu); setShowUserMenu(false); }}
             className="btn btn-link text-decoration-none text-dark p-1 d-flex align-items-center gap-1 fw-semibold"
@@ -118,7 +145,7 @@ const Topbar = ({ onToggleSidebar }) => {
         </Link>
 
         {/* User Avatar Circle */}
-        <div className="position-relative">
+        <div className="position-relative" ref={userMenuRef}>
           <button
             onClick={() => { setShowUserMenu(!showUserMenu); setShowLangMenu(false); }}
             className="btn btn-link p-0 text-decoration-none rounded-circle border d-flex align-items-center justify-content-center"
@@ -130,10 +157,21 @@ const Topbar = ({ onToggleSidebar }) => {
 
           {showUserMenu && (
             <div className="position-absolute end-0 mt-2 bg-white rounded-3 shadow-lg border p-2" style={{ zIndex: 1050, minWidth: '190px' }}>
-              <div className="px-3 py-2 border-bottom">
-                <div className="fw-bold text-truncate" style={{ maxWidth: '170px' }}>{user?.fullName || 'User'}</div>
-                <div className="small text-muted text-truncate" style={{ maxWidth: '170px' }}>{user?.email}</div>
-                <span className="badge bg-light text-dark border mt-1">{user?.role || 'MEMBER'}</span>
+              <div className="px-3 py-2 border-bottom d-flex justify-content-between align-items-start">
+                <div>
+                  <div className="fw-bold text-truncate" style={{ maxWidth: '140px' }}>{user?.fullName || 'User'}</div>
+                  <div className="small text-muted text-truncate" style={{ maxWidth: '140px' }}>{user?.email}</div>
+                  <span className="badge bg-light text-dark border mt-1">{user?.role || 'MEMBER'}</span>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-link text-muted p-0 border-0 ms-1"
+                  onClick={() => setShowUserMenu(false)}
+                  title="Close popup"
+                  style={{ lineHeight: 1 }}
+                >
+                  <Icon name="close" size={14} color="#6C757D" />
+                </button>
               </div>
               <Link
                 to="/notifications"
