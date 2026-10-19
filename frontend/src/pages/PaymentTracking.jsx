@@ -252,11 +252,12 @@ const PaymentTracking = () => {
           console.error('Failed to attach digital slip', fileErr);
         }
       }
-      alert(`✓ Payment for ${updated.member} settled successfully as ${updated.status === 'LATE' ? 'Paid (Late)' : updated.status}!`);
+      alert(`Payment for ${updated.member} settled successfully as ${updated.status === 'LATE' ? 'Paid (Late)' : updated.status}!`);
       await fetchPayments();
     } catch (err) {
       console.error('Failed to settle payment in database', err);
-      alert('Error settling payment. Please try again.');
+      const msg = err.response?.data?.message || err.message || 'Error settling payment. Please try again.';
+      alert(`Error settling payment: ${msg}`);
       fetchPayments();
     }
   };
