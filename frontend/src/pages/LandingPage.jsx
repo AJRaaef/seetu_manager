@@ -1409,8 +1409,32 @@ const LandingPage = () => {
 
           </div>
 
+          {/* Statutory Legal & Regulatory Compliance Notice */}
+          <div className="pt-3 pb-3 border-top border-light border-opacity-10 small text-white-50">
+            <div className="row g-2 align-items-center">
+              <div className="col-12 col-lg-8">
+                <p className="mb-0" style={{ fontSize: '0.78rem', lineHeight: '1.5' }}>
+                  <strong className="text-white">Statutory & Legal Notice:</strong> SeettuManager is an administrative digital record-keeping and rotation management software operating in alignment with <strong>The Cheetus Ordinance No. 61 of 1935 (Chapter 190)</strong>, the <strong>Electronic Transactions Act No. 19 of 2006</strong>, and the <strong>Personal Data Protection Act No. 9 of 2022</strong> of Sri Lanka. SeettuManager does not accept public deposits, act as a banking institution, or provide loan facilities. All financial pooling is peer-to-peer and executed between enrolled circle members and verified organizers.
+                </p>
+              </div>
+              <div className="col-12 col-lg-4 text-lg-end">
+                <div className="d-inline-flex flex-wrap gap-2 text-white-50" style={{ fontSize: '0.78rem' }}>
+                  <Link to="/law" className="text-white-50 text-decoration-none hover-white">Statutory Law</Link>
+                  <span>•</span>
+                  <Link to="/rules" className="text-white-50 text-decoration-none hover-white">Enrollment Rules</Link>
+                  <span>•</span>
+                  <Link to="/terms" className="text-white-50 text-decoration-none hover-white">Terms</Link>
+                  <span>•</span>
+                  <Link to="/privacy" className="text-white-50 text-decoration-none hover-white">Privacy</Link>
+                  <span>•</span>
+                  <Link to="/disclaimer" className="text-white-50 text-decoration-none hover-white">Disclaimer</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Copyright & Scroll Top */}
-          <div className="pt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div className="pt-2 d-flex justify-content-between align-items-center flex-wrap gap-2 border-top border-light border-opacity-10">
             <p className="text-white-50 small mb-0">
               © 2026 SeettuManager. All rights reserved. • Sri Lanka Digital Rotating Savings Platform
             </p>
