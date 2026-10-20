@@ -121,19 +121,46 @@ const Topbar = ({ onToggleSidebar }) => {
         <div className="position-relative">
           <button
             onClick={() => { setShowUserMenu(!showUserMenu); setShowLangMenu(false); }}
-            className="btn btn-link p-0 text-decoration-none rounded-circle border d-flex align-items-center justify-content-center"
+            className="btn btn-link p-0 text-decoration-none rounded-circle border d-flex align-items-center justify-content-center overflow-hidden"
             style={{ width: '38px', height: '38px', backgroundColor: '#F1F5F9' }}
             title={user?.fullName || 'User Profile'}
           >
-            <Icon name="user" size={20} color="#1A5265" />
+            {user?.profilePictureUrl ? (
+              <img
+                src={`http://localhost:8081${user.profilePictureUrl}`}
+                alt={user?.fullName || 'User'}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : (
+              <Icon name="user" size={20} color="#1A5265" />
+            )}
           </button>
 
           {showUserMenu && (
-            <div className="position-absolute end-0 mt-2 bg-white rounded-3 shadow-lg border p-2" style={{ zIndex: 1050, minWidth: '190px' }}>
-              <div className="px-3 py-2 border-bottom">
-                <div className="fw-bold text-truncate" style={{ maxWidth: '170px' }}>{user?.fullName || 'User'}</div>
-                <div className="small text-muted text-truncate" style={{ maxWidth: '170px' }}>{user?.email}</div>
-                <span className="badge bg-light text-dark border mt-1">{user?.role || 'MEMBER'}</span>
+            <div className="position-absolute end-0 mt-2 bg-white rounded-3 shadow-lg border p-2" style={{ zIndex: 1050, minWidth: '220px' }}>
+              <div className="px-3 py-2 border-bottom d-flex align-items-center gap-2">
+                <div
+                  className="rounded-circle overflow-hidden border d-flex align-items-center justify-content-center flex-shrink-0"
+                  style={{ width: '36px', height: '36px', backgroundColor: '#3E7B8E', color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}
+                >
+                  {user?.profilePictureUrl ? (
+                    <img
+                      src={`http://localhost:8081${user.profilePictureUrl}`}
+                      alt={user?.fullName}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    (user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U')
+                  )}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div className="fw-bold text-truncate" style={{ maxWidth: '145px' }}>{user?.fullName || 'User'}</div>
+                  <div className="small text-muted text-truncate" style={{ maxWidth: '145px' }}>{user?.email}</div>
+                  <span className="badge bg-light text-dark border mt-0.5">{user?.role || 'MEMBER'}</span>
+                </div>
               </div>
               <Link
                 to="/notifications"

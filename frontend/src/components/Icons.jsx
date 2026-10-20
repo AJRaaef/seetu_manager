@@ -46,7 +46,8 @@ import {
   Clock,
   RefreshCw,
   Filter,
-  Download
+  Download,
+  Camera
 } from 'lucide-react';
 
 export const Icon = ({ name, size = 18, className = '', color = 'currentColor', ...props }) => {
@@ -129,6 +130,8 @@ export const Icon = ({ name, size = 18, className = '', color = 'currentColor', 
       return <Trash2 {...iconProps} />;
     case 'bell':
       return <Bell {...iconProps} />;
+    case 'camera':
+      return <Camera {...iconProps} />;
     case 'upload':
       return <Upload {...iconProps} />;
     case 'globe':

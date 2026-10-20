@@ -15,6 +15,7 @@ CREATE TABLE users (
     phone VARCHAR(15) NOT NULL,
     nic_number VARCHAR(20) NULL UNIQUE,
     gn_certificate_url VARCHAR(500) NULL,
+    profile_picture_url VARCHAR(500) NULL,
     kyc_status ENUM('UNVERIFIED', 'PENDING', 'VERIFIED', 'REJECTED') NOT NULL DEFAULT 'UNVERIFIED',
     kyc_rejection_reason TEXT NULL,
     verified_by BIGINT NULL,

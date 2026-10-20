@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import Icon from '../components/Icons';
-import { getUserProfileStats, updateUserProfile, submitKyc, getMyKycStatus } from '../api/userApi';
+import { getUserProfileStats, updateUserProfile, submitKyc, getMyKycStatus, uploadProfilePicture, deleteProfilePicture } from '../api/userApi';
 import { getErrorMessage } from '../utils/errorHandler';
 
 const Profile = () => {
@@ -17,6 +17,8 @@ const Profile = () => {
   const [profileData, setProfileData] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [actionMsg, setActionMsg] = useState('');
+  const [uploadingPic, setUploadingPic] = useState(false);
+  const fileInputRef = useRef(null);
 
   // KYC Verification state
   const [nicInput, setNicInput] = useState('');
@@ -168,6 +170,76 @@ const Profile = () => {
     }
   };
 
+  const handlePictureChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setErrorMsg('Please select a valid image file (JPG, PNG, or WEBP).');
+      return;
+    }
+
+    // Validate file size: 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg('Profile picture must be smaller than 5MB.');
+      return;
+    }
+
+    try {
+      setUploadingPic(true);
+      setErrorMsg('');
+      const res = await uploadProfilePicture(currentUserId, file);
+      const updatedUser = res?.data || res;
+      const newPicUrl = updatedUser?.profilePictureUrl;
+
+      if (updateUser) {
+        updateUser({ profilePictureUrl: newPicUrl });
+      }
+
+      setProfileData((prev) => prev ? {
+        ...prev,
+        user: { ...prev.user, profilePictureUrl: newPicUrl }
+      } : prev);
+
+      setActionMsg('✓ Profile picture updated successfully!');
+      await fetchProfile();
+    } catch (err) {
+      console.error('Failed to upload profile picture:', err);
+      setErrorMsg(getErrorMessage(err, 'Failed to upload profile picture.'));
+    } finally {
+      setUploadingPic(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDeletePicture = async () => {
+    if (!window.confirm('Are you sure you want to remove your profile picture?')) return;
+    try {
+      setUploadingPic(true);
+      setErrorMsg('');
+      await deleteProfilePicture(currentUserId);
+
+      if (updateUser) {
+        updateUser({ profilePictureUrl: null });
+      }
+
+      setProfileData((prev) => prev ? {
+        ...prev,
+        user: { ...prev.user, profilePictureUrl: null }
+      } : prev);
+
+      setActionMsg('✓ Profile picture removed successfully.');
+      await fetchProfile();
+    } catch (err) {
+      console.error('Failed to remove profile picture:', err);
+      setErrorMsg(getErrorMessage(err, 'Failed to remove profile picture.'));
+    } finally {
+      setUploadingPic(false);
+    }
+  };
+
   const groups = profileData?.groups || [];
   const totalContributed = Number(profileData?.totalContributed || 0);
   const groupsParticipated = profileData?.groupsParticipated ?? groups.length;
@@ -200,19 +272,104 @@ const Profile = () => {
         {/* Left Column: User Profile Card & KYC Verification */}
         <div className="col-12 col-lg-4 d-flex flex-column gap-4">
           <div className="ui-card p-4 text-center shadow-sm">
-            {/* Avatar Circle with Initials */}
-            <div
-              className="rounded-circle text-white d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm"
-              style={{
-                width: '100px',
-                height: '100px',
-                backgroundColor: '#3E7B8E',
-                fontSize: '2rem',
-                fontWeight: 700
-              }}
-            >
-              {getInitials(fullName || userInfo?.fullName)}
+            {/* Avatar Circle with Initials or Profile Picture + Camera Upload Badge */}
+            <div className="position-relative d-inline-block mx-auto mb-3">
+              <div
+                className="rounded-circle text-white d-flex align-items-center justify-content-center overflow-hidden position-relative shadow-sm"
+                style={{
+                  width: '104px',
+                  height: '104px',
+                  backgroundColor: '#3E7B8E',
+                  fontSize: '2rem',
+                  fontWeight: 700,
+                  border: '3px solid #E2E8F0'
+                }}
+              >
+                {(userInfo?.profilePictureUrl || user?.profilePictureUrl) ? (
+                  <img
+                    src={`http://localhost:8081${userInfo?.profilePictureUrl || user?.profilePictureUrl}`}
+                    alt={fullName || userInfo?.fullName || 'User'}
+                    className="w-100 h-100"
+                    style={{ objectFit: 'cover' }}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      if (e.currentTarget.nextElementSibling) {
+                        e.currentTarget.nextElementSibling.style.display = 'flex';
+                      }
+                    }}
+                  />
+                ) : null}
+                <div
+                  className="d-flex align-items-center justify-content-center w-100 h-100"
+                  style={{
+                    display: (userInfo?.profilePictureUrl || user?.profilePictureUrl) ? 'none' : 'flex'
+                  }}
+                >
+                  {getInitials(fullName || userInfo?.fullName)}
+                </div>
+
+                {uploadingPic && (
+                  <div
+                    className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                    style={{ backgroundColor: 'rgba(15, 47, 61, 0.72)', zIndex: 3 }}
+                  >
+                    <div className="spinner-border spinner-border-sm text-white" role="status"></div>
+                  </div>
+                )}
+              </div>
+
+              {/* Camera Icon Overlay Trigger */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingPic}
+                className="btn btn-sm position-absolute bottom-0 end-0 rounded-circle p-0 d-flex align-items-center justify-content-center shadow"
+                style={{
+                  width: '34px',
+                  height: '34px',
+                  backgroundColor: '#0097B2',
+                  color: '#ffffff',
+                  border: '2px solid #ffffff',
+                  cursor: 'pointer',
+                  zIndex: 4,
+                  transition: 'all 0.2s ease'
+                }}
+                title="Change Profile Picture"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.1)';
+                  e.currentTarget.style.backgroundColor = '#007A90';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.backgroundColor = '#0097B2';
+                }}
+              >
+                <Icon name="camera" size={16} color="#ffffff" />
+              </button>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                style={{ display: 'none' }}
+                onChange={handlePictureChange}
+              />
             </div>
+
+            {/* Quick Remove Photo Option if Photo is Set */}
+            {(userInfo?.profilePictureUrl || user?.profilePictureUrl) && !uploadingPic && (
+              <div className="mb-2">
+                <button
+                  type="button"
+                  onClick={handleDeletePicture}
+                  className="btn btn-link btn-sm text-danger text-decoration-none p-0 d-inline-flex align-items-center gap-1"
+                  style={{ fontSize: '0.78rem' }}
+                >
+                  <Icon name="trash" size={12} color="#DC2626" />
+                  <span>Remove Picture</span>
+                </button>
+              </div>
+            )}
 
             <h4 className="fw-bold text-dark mb-1">{fullName || userInfo?.fullName || 'User'}</h4>
             <div className="text-muted small mb-3 text-uppercase">{userInfo?.role || 'MEMBER'}</div>
@@ -227,6 +384,38 @@ const Profile = () => {
 
             {isEditing ? (
               <form onSubmit={handleSaveProfile} className="text-start border-top pt-3">
+                {/* Photo Change Controls inside Edit Form */}
+                <div className="mb-3 p-2 rounded-2" style={{ backgroundColor: '#F8FAFC', border: '1px dashed #CBD5E1' }}>
+                  <label className="form-label small text-muted d-block mb-1 fw-semibold">Profile Photo</label>
+                  <div className="d-flex align-items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingPic}
+                      className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1.5"
+                      style={{ fontSize: '0.8rem' }}
+                    >
+                      <Icon name="upload" size={13} />
+                      <span>{(userInfo?.profilePictureUrl || user?.profilePictureUrl) ? 'Change Photo' : 'Upload Photo'}</span>
+                    </button>
+                    {(userInfo?.profilePictureUrl || user?.profilePictureUrl) && (
+                      <button
+                        type="button"
+                        onClick={handleDeletePicture}
+                        disabled={uploadingPic}
+                        className="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1.5"
+                        style={{ fontSize: '0.8rem' }}
+                      >
+                        <Icon name="trash" size={13} />
+                        <span>Remove</span>
+                      </button>
+                    )}
+                  </div>
+                  <div className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>
+                    Supported: JPG, PNG, WEBP (Max 5MB)
+                  </div>
+                </div>
+
                 <div className="mb-3">
                   <label className="form-label small text-muted">Full Name</label>
                   <input
@@ -247,7 +436,7 @@ const Profile = () => {
                     required
                   />
                 </div>
-                <button type="submit" className="btn btn-teal w-100 py-2 fw-semibold" disabled={saving}>
+                <button type="submit" className="btn btn-teal w-100 py-2 fw-semibold" disabled={saving || uploadingPic}>
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
               </form>

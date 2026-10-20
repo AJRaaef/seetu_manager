@@ -145,10 +145,19 @@ const Navbar = () => {
                 aria-expanded="false"
               >
                 <div
-                  className="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white font-weight-bold"
+                  className="rounded-circle overflow-hidden bg-primary d-flex align-items-center justify-content-center text-white font-weight-bold"
                   style={{ width: '32px', height: '32px', fontSize: '14px' }}
                 >
-                  {user?.fullName?.charAt(0) || 'U'}
+                  {user?.profilePictureUrl ? (
+                    <img
+                      src={`http://localhost:8081${user.profilePictureUrl}`}
+                      alt={user?.fullName || 'User'}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  ) : (
+                    user?.fullName?.charAt(0) || 'U'
+                  )}
                 </div>
                 <span>{user?.fullName || 'User'}</span>
                 <span className="badge bg-primary-subtle text-primary border ms-1">{user?.role || 'MEMBER'}</span>

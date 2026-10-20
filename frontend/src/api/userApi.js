@@ -54,3 +54,17 @@ export const requestOrganizer = async (data = {}) => {
   const response = await api.post('/users/request-organizer', data);
   return response.data;
 };
+
+export const uploadProfilePicture = async (id, file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  const response = await api.post(`/users/${id}/profile-picture`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  });
+  return response.data;
+};
+
+export const deleteProfilePicture = async (id) => {
+  const response = await api.delete(`/users/${id}/profile-picture`);
+  return response.data;
+};

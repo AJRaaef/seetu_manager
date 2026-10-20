@@ -231,6 +231,7 @@ const Members = () => {
         nicNumber: m.user?.nicNumber || '-',
         kycStatus: m.user?.kycStatus || 'UNVERIFIED',
         gnCertificateUrl: m.user?.gnCertificateUrl,
+        profilePictureUrl: m.user?.profilePictureUrl,
         groupName: m.group?.name || 'General Group',
         joinedDate: dateStr,
         score: scoreVal,
@@ -552,7 +553,26 @@ const Members = () => {
                         #{member.userId || member.id}
                       </span>
                     </td>
-                    <td className="py-3 px-3 fw-semibold text-dark">{member.name}</td>
+                    <td className="py-3 px-3 fw-semibold text-dark">
+                      <div className="d-flex align-items-center gap-2">
+                        <div
+                          className="rounded-circle overflow-hidden d-flex align-items-center justify-content-center text-white flex-shrink-0"
+                          style={{ width: '28px', height: '28px', backgroundColor: '#3E7B8E', fontSize: '0.75rem', fontWeight: 600 }}
+                        >
+                          {member.profilePictureUrl ? (
+                            <img
+                              src={`http://localhost:8081${member.profilePictureUrl}`}
+                              alt={member.name}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                          ) : (
+                            member.name ? member.name.charAt(0).toUpperCase() : 'M'
+                          )}
+                        </div>
+                        <span>{member.name}</span>
+                      </div>
+                    </td>
                     <td className="py-3 px-3 text-muted small">{member.email}</td>
                     <td className="py-3 px-3 text-muted small">{member.phone}</td>
                     <td className="py-3 px-3 text-dark small">{member.groupName}</td>
