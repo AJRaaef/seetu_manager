@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import * as notificationApi from '../api/notificationApi';
 import { triggerPaymentReminders } from '../api/paymentApi';
 import Icon from '../components/Icons';
 
 const Notifications = () => {
+  const { t } = useTranslation();
   const { user, isAdmin, isOrganizer } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [scope, setScope] = useState('MINE'); // 'MINE' or 'ALL_SYSTEM'
@@ -129,7 +131,7 @@ const Notifications = () => {
         <div>
           <h2 className="fw-bold mb-1 d-flex align-items-center gap-2">
             <Icon name="bell" size={26} color="#0097B2" />
-            <span style={{ color: '#0F2F3D' }}>Notification Center</span>
+            <span style={{ color: '#0F2F3D' }}>{t('notifications_page.title')}</span>
             {unreadCount > 0 && (
               <span className="badge rounded-pill bg-danger fs-6 align-middle ms-2">
                 {unreadCount} unread
@@ -162,7 +164,7 @@ const Notifications = () => {
               onClick={handleMarkAllAsRead}
             >
               <Icon name="check" size={14} />
-              <span>Mark All Read</span>
+              <span>{t('notifications_page.mark_all_read')}</span>
             </button>
           )}
 

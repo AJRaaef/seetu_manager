@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import Icon from './Icons';
 import { getAllGroups } from '../api/groupApi';
 
 const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
+  const { t } = useTranslation();
   const [groupId, setGroupId] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -37,7 +39,7 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!groupId) {
-      alert('Please select a group.');
+      alert(t('modals.invite_member.select_group', 'Please select a group.'));
       return;
     }
     setLoading(true);
@@ -61,7 +63,7 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
   return (
     <Modal show={show} onHide={onHide} centered contentClassName="custom-modal-content">
       <div className="custom-modal-header">
-        <h5 className="fw-bold mb-0 text-dark">Invite New Member</h5>
+        <h5 className="fw-bold mb-0 text-dark">{t('modals.invite_member.title', 'Invite New Member')}</h5>
         <button className="btn btn-link text-muted p-0 border-0" onClick={onHide}>
           <Icon name="x" size={20} />
         </button>
@@ -70,7 +72,9 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
       <form onSubmit={handleSubmit}>
         <div className="custom-modal-body">
           <div className="mb-3">
-            <label className="form-label text-dark fw-semibold small">Select Seettu Group <span className="text-danger">*</span></label>
+            <label className="form-label text-dark fw-semibold small">
+              {t('modals.invite_member.select_group', 'Select Seettu Group')} <span className="text-danger">*</span>
+            </label>
             <select
               className="form-select"
               value={groupId}
@@ -79,12 +83,12 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
               disabled={loadingGroups}
             >
               {loadingGroups ? (
-                <option value="">Loading Seettu groups...</option>
+                <option value="">{t('modals.invite_member.loading_groups', 'Loading Seettu groups...')}</option>
               ) : activeGroups.length === 0 ? (
-                <option value="">No Seettu groups available</option>
+                <option value="">{t('modals.invite_member.no_groups', 'No Seettu groups available')}</option>
               ) : (
                 <>
-                  <option value="">-- Choose Seettu Group --</option>
+                  <option value="">{t('modals.invite_member.choose_group', '-- Choose Seettu Group --')}</option>
                   {activeGroups.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name} (LKR {Number(g.contributionAmount || 0).toLocaleString()} • {g.cycleFrequency || 'Monthly'})
@@ -95,13 +99,13 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
             </select>
             {selectedGroup && (
               <small className="text-muted d-block mt-1">
-                Selected Group: <strong>{selectedGroup.name}</strong> • Contribution: LKR {Number(selectedGroup.contributionAmount || 0).toLocaleString()}
+                {t('modals.invite_member.selected_group', 'Selected Group')}: <strong>{selectedGroup.name}</strong> • {t('modals.invite_member.contribution', 'Contribution')}: LKR {Number(selectedGroup.contributionAmount || 0).toLocaleString()}
               </small>
             )}
           </div>
 
           <div className="mb-3">
-            <label className="form-label text-dark fw-semibold small">Full Name</label>
+            <label className="form-label text-dark fw-semibold small">{t('modals.invite_member.full_name', 'Full Name')}</label>
             <input
               type="text"
               className="form-control"
@@ -113,7 +117,7 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
           </div>
 
           <div className="mb-3">
-            <label className="form-label text-dark fw-semibold small">Email Address</label>
+            <label className="form-label text-dark fw-semibold small">{t('modals.invite_member.email', 'Email Address')}</label>
             <input
               type="email"
               className="form-control"
@@ -125,7 +129,7 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
           </div>
 
           <div className="mb-2">
-            <label className="form-label text-dark fw-semibold small">Phone Number</label>
+            <label className="form-label text-dark fw-semibold small">{t('modals.invite_member.phone', 'Phone Number')}</label>
             <input
               type="tel"
               className="form-control"
@@ -139,10 +143,10 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
 
         <div className="custom-modal-footer">
           <button type="button" className="btn btn-link text-muted text-decoration-none px-4" onClick={onHide} disabled={loading}>
-            Cancel
+            {t('modals.invite_member.cancel', 'Cancel')}
           </button>
           <button type="submit" className="btn btn-teal px-4" disabled={loading}>
-            {loading ? 'Adding...' : 'Add Member'}
+            {loading ? t('modals.invite_member.adding', 'Adding...') : t('modals.invite_member.add_member', 'Add Member')}
           </button>
         </div>
       </form>

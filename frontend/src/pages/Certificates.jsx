@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/axios';
 import * as groupApi from '../api/groupApi';
 import Icon from '../components/Icons';
 
 const Certificates = () => {
+  const { t } = useTranslation();
   const { user, isAdmin, isOrganizer } = useAuth();
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -96,16 +98,16 @@ const Certificates = () => {
         <div>
           <div className="d-flex align-items-center gap-2 mb-1">
             <Icon name="certificates" size={24} color="#235665" />
-            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>Seettu Completion Certificates</h2>
+            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('certificates_page.title')}</h2>
           </div>
-          <p className="text-muted mb-0">Official completion badges awarded upon successfully finishing full group payment cycles</p>
+          <p className="text-muted mb-0">{t('certificates_page.subtitle')}</p>
         </div>
         {(isAdmin || isOrganizer) && (
           <button 
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
             onClick={() => setShowIssueModal(true)}
           >
-            <span>+</span> Issue Certificate
+            <span>+</span> {t('certificates_page.download_btn', 'Issue Certificate')}
           </button>
         )}
       </div>
@@ -142,7 +144,7 @@ const Certificates = () => {
                   <small className="text-muted d-block">Issued: {c.issuedAt ? new Date(c.issuedAt).toLocaleDateString() : new Date().toLocaleDateString()}</small>
                 </div>
                 <button className="btn btn-teal w-100 fw-semibold" onClick={() => setPreviewCert(c)}>
-                  Preview / Print Certificate
+                  {t('certificates_page.download_btn')}
                 </button>
               </div>
             </div>

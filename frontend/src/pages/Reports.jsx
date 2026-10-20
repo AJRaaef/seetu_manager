@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import * as reportApi from '../api/reportApi';
 import { getAllGroups } from '../api/groupApi';
@@ -6,6 +7,7 @@ import { getAllPayments } from '../api/paymentApi';
 import Icon from '../components/Icons';
 
 const Reports = () => {
+  const { t } = useTranslation();
   const { user, isOrganizer, isAdmin } = useAuth();
   const [reports, setReports] = useState([]);
   const [reportGroups, setReportGroups] = useState([]);
@@ -176,15 +178,15 @@ const Reports = () => {
         <div>
           <div className="d-flex align-items-center gap-2 mb-1">
             <Icon name="reports" size={24} color="#235665" />
-            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>Analytics & System Reports</h2>
+            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('reports_page.title')}</h2>
           </div>
-          <p className="text-muted mb-0">Generate, review, and print audit summaries for financial groups</p>
+          <p className="text-muted mb-0">{t('reports_page.subtitle')}</p>
         </div>
         <button 
           className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
           onClick={() => setShowModal(true)}
         >
-          <span>+</span> Generate New Report
+          <span>+</span> {t('reports_page.generate_btn')}
         </button>
       </div>
 
@@ -244,7 +246,7 @@ const Reports = () => {
                       className="btn btn-outline-primary w-100 btn-sm py-2 fw-semibold"
                       onClick={() => openModalWithTemplate(tpl)}
                     >
-                      Generate This Report
+                      {t('reports_page.generate_btn')}
                     </button>
                   </div>
                 </div>
@@ -275,7 +277,7 @@ const Reports = () => {
                     className="btn btn-outline-primary w-100 fw-semibold" 
                     onClick={() => setSelectedReport(r)}
                   >
-                    View / Print Report
+                    {t('reports_page.export_pdf', 'View / Print Report')}
                   </button>
                 </div>
               </div>
@@ -290,7 +292,7 @@ const Reports = () => {
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
               <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#134A5A' }}>
-                <h5 className="modal-title fw-bold">Generate New Report</h5>
+                <h5 className="modal-title fw-bold">{t('reports_page.generate_btn')}</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleCreate}>

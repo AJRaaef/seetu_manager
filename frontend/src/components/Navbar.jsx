@@ -63,30 +63,30 @@ const Navbar = () => {
             {(isAdmin || isOrganizer) && (
               <li className="nav-item">
                 <Link className={`nav-link ${isActive('/advance-payments')}`} to="/advance-payments">
-                  <Icon name="advance" size={16} className="me-1" /> Advance
+                  <Icon name="advance" size={16} className="me-1" /> {t('sidebar.advance', 'Advance')}
                 </Link>
               </li>
             )}
             <li className="nav-item">
               <Link className={`nav-link ${isActive('/emergency')}`} to="/emergency">
-                <Icon name="emergency" size={16} className="me-1" /> Emergency
+                <Icon name="emergency" size={16} className="me-1" /> {t('emergency', 'Emergency')}
               </Link>
             </li>
             <li className="nav-item">
               <Link className={`nav-link ${isActive('/disputes')}`} to="/disputes">
-                <Icon name="disputes" size={16} className="me-1" /> {t('disputes') || 'Disputes'}
+                <Icon name="disputes" size={16} className="me-1" /> {t('disputes', 'Disputes')}
               </Link>
             </li>
             {(isAdmin || isOrganizer) && (
               <li className="nav-item">
                 <Link className={`nav-link ${isActive('/reports')}`} to="/reports">
-                  <Icon name="reports" size={16} className="me-1" /> {t('reports') || 'Reports'}
+                  <Icon name="reports" size={16} className="me-1" /> {t('reports', 'Reports')}
                 </Link>
               </li>
             )}
             <li className="nav-item">
               <Link className={`nav-link ${isActive('/certificates')}`} to="/certificates">
-                <Icon name="certificates" size={16} className="me-1" /> Certificates
+                <Icon name="certificates" size={16} className="me-1" /> {t('certificates', 'Certificates')}
               </Link>
             </li>
           </ul>
@@ -166,9 +166,9 @@ const Navbar = () => {
                 <li className="dropdown-header">Logged in as {user?.email}</li>
                 <li><hr className="dropdown-divider" /></li>
                 <li><Link className="dropdown-item" to="/profile"><Icon name="user" size={14} className="me-2" />{t('profile') || 'My Profile'}</Link></li>
-                <li><Link className="dropdown-item" to="/certificates"><Icon name="certificates" size={14} className="me-2" />Certificates</Link></li>
+                <li><Link className="dropdown-item" to="/certificates"><Icon name="certificates" size={14} className="me-2" />{t('certificates', 'Certificates')}</Link></li>
                 <li><hr className="dropdown-divider" /></li>
-                <li><button className="dropdown-item text-danger fw-bold" onClick={handleLogout}><Icon name="logout" size={14} className="me-2 text-danger" />{t('logout') || 'Logout'}</button></li>
+                <li><button className="dropdown-item text-danger fw-bold" onClick={handleLogout}><Icon name="logout" size={14} className="me-2 text-danger" />{t('logout', 'Logout')}</button></li>
               </ul>
             </li>
 
@@ -179,7 +179,7 @@ const Navbar = () => {
                 onClick={handleLogout}
                 title="Logout from system"
               >
-                <Icon name="logout" size={14} /> Logout
+                <Icon name="logout" size={14} /> {t('logout', 'Logout')}
               </button>
             </li>
           </ul>

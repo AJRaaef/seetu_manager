@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../hooks/useLanguage';
 import { getErrorMessage } from '../utils/errorHandler';
 import Icon from '../components/Icons';
 
 const Login = () => {
+  const { t } = useTranslation();
+  const { language, changeLanguage } = useLanguage();
   const { login } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -36,6 +40,36 @@ const Login = () => {
   return (
     <div className="auth-page-wrapper">
       <div className="auth-card">
+        {/* Language Switcher Pill */}
+        <div className="d-flex justify-content-end mb-3">
+          <div className="btn-group btn-group-sm p-0.5 rounded-pill border bg-light shadow-none">
+            <button
+              type="button"
+              className={`btn btn-sm rounded-pill px-2.5 py-0.5 border-0 ${language === 'en' ? 'btn-primary text-white fw-bold' : 'btn-light text-secondary'}`}
+              style={{ fontSize: '0.75rem' }}
+              onClick={() => changeLanguage('en')}
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm rounded-pill px-2.5 py-0.5 border-0 ${language === 'si' ? 'btn-primary text-white fw-bold' : 'btn-light text-secondary'}`}
+              style={{ fontSize: '0.75rem' }}
+              onClick={() => changeLanguage('si')}
+            >
+              සිංහල
+            </button>
+            <button
+              type="button"
+              className={`btn btn-sm rounded-pill px-2.5 py-0.5 border-0 ${language === 'ta' ? 'btn-primary text-white fw-bold' : 'btn-light text-secondary'}`}
+              style={{ fontSize: '0.75rem' }}
+              onClick={() => changeLanguage('ta')}
+            >
+              தமிழ்
+            </button>
+          </div>
+        </div>
+
         <div className="text-center mb-2">
           <img src="/logo.png" alt="SeettuManager Logo" style={{ height: '70px', width: '70px', borderRadius: '50%', objectFit: 'cover' }} />
         </div>
@@ -43,7 +77,7 @@ const Login = () => {
           <span className="brand-seettu">Seettu</span>
           <span className="brand-manager">Manager</span>
         </h2>
-        <p className="auth-subtitle">Digital Financial Discipline for Seettu Group</p>
+        <p className="auth-subtitle">{t('auth.login_subtitle', 'Digital Financial Discipline for Seettu Group')}</p>
 
         {error && (
           <div className="alert alert-danger py-2 px-3 mb-3 small rounded-3 border-0">
@@ -53,7 +87,7 @@ const Login = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-3 text-start">
-            <label className="form-label fw-semibold text-dark small mb-1">Email / Username</label>
+            <label className="form-label fw-semibold text-dark small mb-1">{t('email', 'Email Address')}</label>
             <div className="input-with-icon">
               <span className="input-icon-left">
                 <Icon name="mail" size={18} />
@@ -61,7 +95,7 @@ const Login = () => {
               <input
                 type="text"
                 className="form-control"
-                placeholder="Enter your email"
+                placeholder={t('auth.email_placeholder', 'Enter your email')}
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
@@ -70,7 +104,7 @@ const Login = () => {
           </div>
 
           <div className="mb-4 text-start">
-            <label className="form-label fw-semibold text-dark small mb-1">Password</label>
+            <label className="form-label fw-semibold text-dark small mb-1">{t('password', 'Password')}</label>
             <div className="input-with-icon">
               <span className="input-icon-left">
                 <Icon name="lock" size={18} />
@@ -78,7 +112,7 @@ const Login = () => {
               <input
                 type={showPassword ? 'text' : 'password'}
                 className="form-control"
-                placeholder="Enter your password"
+                placeholder={t('auth.password_placeholder', 'Enter your password')}
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
@@ -93,7 +127,7 @@ const Login = () => {
             </div>
             <div className="text-end mt-1.5">
               <Link to="/forgot-password" className="small text-decoration-none fw-medium text-muted hover-teal" style={{ fontSize: '0.8rem' }}>
-                Forgot Password?
+                {t('forgot_password', 'Forgot Password?')}
               </Link>
             </div>
           </div>
@@ -103,13 +137,13 @@ const Login = () => {
             disabled={loading}
             className="btn btn-teal w-100 py-2 fw-semibold fs-6 mb-3"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? t('auth.signing_in', 'Logging in...') : t('login', 'Login')}
           </button>
 
           <div className="text-center mb-0">
-            <span className="small text-muted">Don't have an account? </span>
+            <span className="small text-muted">{t('auth.no_account', "Don't have an account?")} </span>
             <Link to="/register" className="small fw-semibold text-decoration-none" style={{ color: '#1A5265' }}>
-              Register New Account
+              {t('auth.register_here', 'Register New Account')}
             </Link>
           </div>
         </form>

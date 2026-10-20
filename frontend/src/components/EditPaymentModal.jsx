@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import Icon from './Icons';
 
 const EditPaymentModal = ({ show, onHide, payment, onSave }) => {
+  const { t } = useTranslation();
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
   const [status, setStatus] = useState('PAID');
@@ -37,7 +39,7 @@ const EditPaymentModal = ({ show, onHide, payment, onSave }) => {
     <Modal show={show} onHide={onHide} centered contentClassName="custom-modal-content">
       <div className="custom-modal-header">
         <div className="d-flex align-items-center gap-2">
-          <h5 className="fw-bold mb-0 text-dark">Edit Payment Record</h5>
+          <h5 className="fw-bold mb-0 text-dark">{t('modals.edit_payment.title', 'Edit Payment Record')}</h5>
           <span className="badge bg-light text-muted border small">
             {payment.id ? `#PAY-${payment.id}` : '#PAY-1789493164511'}
           </span>
@@ -51,17 +53,17 @@ const EditPaymentModal = ({ show, onHide, payment, onSave }) => {
         <div className="custom-modal-body">
           <div className="row g-3 mb-3">
             <div className="col-6">
-              <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>MEMBER</div>
+              <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.edit_payment.member', 'MEMBER')}</div>
               <div className="fw-bold text-dark">{payment.member || payment.memberName || 'Member'}</div>
             </div>
             <div className="col-6">
-              <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>GROUP</div>
+              <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.edit_payment.group', 'GROUP')}</div>
               <div className="fw-bold text-dark">{payment.group || "Village Women's"} ({payment.cycle || 'Cycle 3'})</div>
             </div>
           </div>
 
           <div className="mb-3">
-            <label className="form-label text-dark fw-semibold small">Amount</label>
+            <label className="form-label text-dark fw-semibold small">{t('modals.edit_payment.amount', 'Amount')}</label>
             <input
               type="number"
               className="form-control"
@@ -72,7 +74,7 @@ const EditPaymentModal = ({ show, onHide, payment, onSave }) => {
           </div>
 
           <div className="mb-3">
-            <label className="form-label text-dark fw-semibold small">Date</label>
+            <label className="form-label text-dark fw-semibold small">{t('modals.edit_payment.date', 'Date')}</label>
             <input
               type="date"
               className="form-control"
@@ -83,21 +85,21 @@ const EditPaymentModal = ({ show, onHide, payment, onSave }) => {
           </div>
 
           <div className="mb-3">
-            <label className="form-label text-dark fw-semibold small">Status</label>
+            <label className="form-label text-dark fw-semibold small">{t('modals.edit_payment.status', 'Status')}</label>
             <select
               className="form-select"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             >
-              <option value="PAID">Paid</option>
-              <option value="PENDING">Pending</option>
-              <option value="OVERDUE">Overdue</option>
-              <option value="PARTIAL">Partial</option>
+              <option value="PAID">{t('status.PAID', 'Paid')}</option>
+              <option value="PENDING">{t('status.PENDING', 'Pending')}</option>
+              <option value="OVERDUE">{t('status.OVERDUE', 'Overdue')}</option>
+              <option value="PARTIAL">{t('status.PARTIAL', 'Partial')}</option>
             </select>
           </div>
 
           <div className="mb-2">
-            <label className="form-label text-dark fw-semibold small">Notes / Remarks</label>
+            <label className="form-label text-dark fw-semibold small">{t('modals.edit_payment.notes', 'Notes / Remarks')}</label>
             <textarea
               className="form-control"
               rows="3"
@@ -109,10 +111,10 @@ const EditPaymentModal = ({ show, onHide, payment, onSave }) => {
 
         <div className="custom-modal-footer">
           <button type="button" className="btn btn-light px-4 border" onClick={onHide}>
-            Cancel
+            {t('modals.edit_payment.cancel', 'Cancel')}
           </button>
           <button type="submit" className="btn btn-teal px-4">
-            Save Changes
+            {t('modals.edit_payment.save_changes', 'Save Changes')}
           </button>
         </div>
       </form>

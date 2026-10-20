@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import Icon from '../components/Icons';
 import { getUserProfileStats, updateUserProfile, submitKyc, getMyKycStatus, uploadProfilePicture, deleteProfilePicture } from '../api/userApi';
 import { getErrorMessage } from '../utils/errorHandler';
 
 const Profile = () => {
+  const { t } = useTranslation();
   const { user, updateUser, isAdmin } = useAuth();
   const navigate = useNavigate();
 
@@ -250,7 +252,7 @@ const Profile = () => {
   return (
     <div className="profile-page-container pb-4">
       {/* Title */}
-      <h2 className="fw-bold mb-4" style={{ color: '#0F2F3D' }}>My Profile</h2>
+      <h2 className="fw-bold mb-4" style={{ color: '#0F2F3D' }}>{t('profile_page.title')}</h2>
 
       {actionMsg && (
         <div className="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
@@ -366,7 +368,7 @@ const Profile = () => {
                   style={{ fontSize: '0.78rem' }}
                 >
                   <Icon name="trash" size={12} color="#DC2626" />
-                  <span>Remove Picture</span>
+                  <span>{t('profile_page.remove_photo')}</span>
                 </button>
               </div>
             )}
@@ -379,14 +381,14 @@ const Profile = () => {
               className="btn btn-teal px-4 py-2 w-100 mb-4 fw-semibold"
               style={{ backgroundColor: '#3E7B8E' }}
             >
-              {isEditing ? 'Cancel Edit' : 'Edit Profile'}
+              {isEditing ? t('common.cancel') : t('common.edit')}
             </button>
 
             {isEditing ? (
               <form onSubmit={handleSaveProfile} className="text-start border-top pt-3">
                 {/* Photo Change Controls inside Edit Form */}
                 <div className="mb-3 p-2 rounded-2" style={{ backgroundColor: '#F8FAFC', border: '1px dashed #CBD5E1' }}>
-                  <label className="form-label small text-muted d-block mb-1 fw-semibold">Profile Photo</label>
+                  <label className="form-label small text-muted d-block mb-1 fw-semibold">{t('profile_page.upload_photo')}</label>
                   <div className="d-flex align-items-center gap-2">
                     <button
                       type="button"
@@ -396,7 +398,7 @@ const Profile = () => {
                       style={{ fontSize: '0.8rem' }}
                     >
                       <Icon name="upload" size={13} />
-                      <span>{(userInfo?.profilePictureUrl || user?.profilePictureUrl) ? 'Change Photo' : 'Upload Photo'}</span>
+                      <span>{(userInfo?.profilePictureUrl || user?.profilePictureUrl) ? t('profile_page.upload_photo') : t('profile_page.upload_photo')}</span>
                     </button>
                     {(userInfo?.profilePictureUrl || user?.profilePictureUrl) && (
                       <button
@@ -407,7 +409,7 @@ const Profile = () => {
                         style={{ fontSize: '0.8rem' }}
                       >
                         <Icon name="trash" size={13} />
-                        <span>Remove</span>
+                        <span>{t('common.delete')}</span>
                       </button>
                     )}
                   </div>
@@ -417,7 +419,7 @@ const Profile = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label small text-muted">Full Name</label>
+                  <label className="form-label small text-muted">{t('profile_page.full_name')}</label>
                   <input
                     type="text"
                     className="form-control"
@@ -427,7 +429,7 @@ const Profile = () => {
                   />
                 </div>
                 <div className="mb-3">
-                  <label className="form-label small text-muted">Phone Number</label>
+                  <label className="form-label small text-muted">{t('profile_page.phone')}</label>
                   <input
                     type="tel"
                     className="form-control"
@@ -437,7 +439,7 @@ const Profile = () => {
                   />
                 </div>
                 <button type="submit" className="btn btn-teal w-100 py-2 fw-semibold" disabled={saving || uploadingPic}>
-                  {saving ? 'Saving...' : 'Save Changes'}
+                  {saving ? t('profile_page.saving') : t('profile_page.save_changes')}
                 </button>
               </form>
             ) : (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { getAdminDashboard, getUserDashboard } from '../api/dashboardApi';
 import { getAllPayments, getPaymentsByMember, getAdvancePayments, getAllAdvancePayments } from '../api/paymentApi';
@@ -9,6 +10,7 @@ import PaymentDetailsModal from '../components/PaymentDetailsModal';
 import DashboardAnalytics from '../components/DashboardAnalytics';
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const { user, isAdmin, isOrganizer } = useAuth();
   const canManagePayout = isAdmin || isOrganizer;
   const [stats, setStats] = useState(null);
@@ -138,37 +140,45 @@ const Dashboard = () => {
   };
 
   const getDisciplineBadge = (score) => {
-    if (score >= 90) return { label: 'Excellent', bg: '#DCFCE7', color: '#166534', border: '#BBF7D0' };
-    if (score >= 75) return { label: 'Good', bg: '#E0F2FE', color: '#0369A1', border: '#BAE6FD' };
-    if (score >= 60) return { label: 'Fair', bg: '#FEF3C7', color: '#B45309', border: '#FDE68A' };
-    if (score >= 40) return { label: 'Poor', bg: '#FFEDD5', color: '#C2410C', border: '#FED7AA' };
-    return { label: 'High Risk', bg: '#FEE2E2', color: '#991B1B', border: '#FECACA' };
+    if (score >= 90) return { label: t('dashboard_page.badges.excellent', 'Excellent'), bg: '#DCFCE7', color: '#166534', border: '#BBF7D0' };
+    if (score >= 75) return { label: t('dashboard_page.badges.good', 'Good'), bg: '#E0F2FE', color: '#0369A1', border: '#BAE6FD' };
+    if (score >= 60) return { label: t('dashboard_page.badges.fair', 'Fair'), bg: '#FEF3C7', color: '#B45309', border: '#FDE68A' };
+    if (score >= 40) return { label: t('dashboard_page.badges.poor', 'Poor'), bg: '#FFEDD5', color: '#C2410C', border: '#FED7AA' };
+    return { label: t('dashboard_page.badges.high_risk', 'High Risk'), bg: '#FEE2E2', color: '#991B1B', border: '#FECACA' };
   };
 
   const getStatusBadge = (status) => {
     switch (status) {
       case 'PAID':
-        return <span className="badge-paid">Paid</span>;
+        return <span className="badge-paid">{t('status.PAID', 'Paid')}</span>;
       case 'PENDING':
-        return <span className="badge-pending">Pending</span>;
+        return <span className="badge-pending">{t('status.PENDING', 'Pending')}</span>;
       case 'OVERDUE':
-        return <span className="badge-overdue">Overdue</span>;
+        return <span className="badge-overdue">{t('status.OVERDUE', 'Overdue')}</span>;
       default:
-        return <span className="badge-paid">{status}</span>;
+        return <span className="badge-paid">{t(`status.${status}`, status)}</span>;
     }
   };
+
+  const currentRoleName = isAdmin 
+    ? t('dashboard_page.roles.admin', 'Admin') 
+    : isOrganizer 
+    ? t('dashboard_page.roles.organizer', 'Organizer') 
+    : t('dashboard_page.roles.member', 'Member');
 
   return (
     <div className="dashboard-container pb-4">
       {/* Welcome Heading */}
       <div className="mb-4">
-        <h2 className="dashboard-title">Welcome back, {user?.fullName || (isAdmin ? 'Admin' : isOrganizer ? 'Organizer' : 'Member')}</h2>
+        <h2 className="dashboard-title">
+          {t('dashboard_page.welcome', 'Welcome back')}, {user?.fullName || currentRoleName}
+        </h2>
         <p className="dashboard-subtitle">
           {isAdmin 
-            ? 'Executive overview of all Seettu circles, cash movements, and compliance metrics across Sri Lanka.'
+            ? t('dashboard_page.subtitles.admin', 'Executive overview of all Seettu circles, cash movements, and compliance metrics across Sri Lanka.')
             : isOrganizer
-            ? 'Manage your active circles, track monthly collections, and oversee scheduled payouts.'
-            : 'Here is a quick look at your current Seettu circles, savings progress, and upcoming payouts.'}
+            ? t('dashboard_page.subtitles.organizer', 'Manage your active circles, track monthly collections, and oversee scheduled payouts.')
+            : t('dashboard_page.subtitles.member', 'Here is a quick look at your current Seettu circles, savings progress, and upcoming payouts.')}
         </p>
       </div>
 
@@ -180,13 +190,13 @@ const Dashboard = () => {
             <div className="d-flex justify-content-between align-items-start w-100 mb-2">
               <div>
                 <div className="metric-value">{activeGroupsCount}</div>
-                <div className="metric-label">Active Groups</div>
+                <div className="metric-label">{t('dashboard_page.metrics.active_groups', 'Active Groups')}</div>
               </div>
               <div className="text-dark opacity-75">
                 <Icon name="users" size={26} color="#0F2F3D" />
               </div>
             </div>
-            <div className="metric-subtext">Total active Seettu groups</div>
+            <div className="metric-subtext">{t('dashboard_page.metrics.active_groups_sub', 'Total active Seettu groups')}</div>
           </div>
         </div>
 
@@ -196,13 +206,17 @@ const Dashboard = () => {
             <div className="d-flex justify-content-between align-items-start w-100 mb-2">
               <div>
                 <div className="metric-value">{totalMembersCount}</div>
-                <div className="metric-label">{isAdmin ? 'Total Members' : 'Group Members'}</div>
+                <div className="metric-label">
+                  {isAdmin 
+                    ? t('dashboard_page.metrics.total_members', 'Total Members') 
+                    : t('dashboard_page.metrics.group_members', 'Group Members')}
+                </div>
               </div>
               <div className="text-dark opacity-75">
                 <Icon name="user-check" size={26} color="#0F2F3D" />
               </div>
             </div>
-            <div className="metric-subtext">{isAdmin ? 'Registered system participants' : 'Participants across your groups'}</div>
+            <div className="metric-subtext">{t('dashboard_page.metrics.members_sub', 'Enrolled participants')}</div>
           </div>
         </div>
 
@@ -212,7 +226,7 @@ const Dashboard = () => {
               <div className="d-flex justify-content-between align-items-start w-100 mb-2">
                 <div>
                   <div className="metric-value">{completionRate}%</div>
-                  <div className="metric-label">Completion Rate</div>
+                  <div className="metric-label">{t('dashboard_page.metrics.completion_rate', 'Completion Rate')}</div>
                 </div>
                 <div className="text-dark opacity-75">
                   <Icon name="check-square" size={26} color="#0F2F3D" />
@@ -233,14 +247,14 @@ const Dashboard = () => {
                   <div className="metric-value" style={{ fontSize: '1.4rem', color: disciplineScore >= 90 ? '#059669' : disciplineScore >= 75 ? '#D97706' : '#DC2626' }}>
                     {disciplineScore}<span style={{ fontSize: '0.85rem', color: '#64748B' }}> / 100</span>
                   </div>
-                  <div className="metric-label">Discipline Score</div>
+                  <div className="metric-label">{t('dashboard_page.metrics.discipline_score', 'Discipline Score')}</div>
                 </div>
                 <div className="text-success opacity-75">
                   <Icon name="award" size={26} color="#059669" />
                 </div>
               </div>
               <div className="d-flex align-items-center justify-content-between mt-2 pt-1 border-top">
-                <div className="metric-subtext mb-0">On-time rating</div>
+                <div className="metric-subtext mb-0">{t('dashboard_page.metrics.discipline_sub', 'Reputation & trust index')}</div>
                 {(() => {
                   const badge = getDisciplineBadge(disciplineScore);
                   return (
@@ -265,13 +279,13 @@ const Dashboard = () => {
                 <div className="metric-value" style={{ fontSize: '1.4rem' }}>
                   {advanceTotal.toLocaleString()} LKR
                 </div>
-                <div className="metric-label">Advance Contributions</div>
+                <div className="metric-label">{t('dashboard_page.metrics.advance_disbursed', 'Advance Contributions')}</div>
               </div>
               <div className="text-teal opacity-75">
                 <Icon name="advance" size={26} color="#008CA7" />
               </div>
             </div>
-            <div className="metric-subtext">Pre-paid cycle balance</div>
+            <div className="metric-subtext">{t('dashboard_page.metrics.advance_sub', 'Pre-paid cycle balance')}</div>
           </div>
         </div>
       </div>
@@ -293,7 +307,9 @@ const Dashboard = () => {
             <div className="d-flex align-items-center gap-2 mb-2">
               <Icon name={payoutApproved ? 'check-circle' : 'megaphone'} size={20} color={payoutApproved ? '#34D399' : '#FACC15'} />
               <span className="fw-bold fs-6" style={{ color: payoutApproved ? '#34D399' : '#FFFFFF' }}>
-                {payoutApproved ? 'Payout Approved & Disbursed' : 'Upcoming Payout'}
+                {payoutApproved 
+                  ? t('dashboard_page.payout_card.approved_btn', 'Payout Approved & Disbursed') 
+                  : t('dashboard_page.payout_card.title', 'Upcoming Rotational Payout')}
               </span>
             </div>
             <div className="small text-white-50 mb-1" style={{ fontSize: '0.8rem' }}>
@@ -301,10 +317,10 @@ const Dashboard = () => {
             </div>
             <h3 className="fw-bold mb-1 text-white">{upcomingPayout.recipient}</h3>
             <div className="small text-white-50 mb-2">
-              Date : {upcomingPayout.date}
+              {t('common.date', 'Date')} : {upcomingPayout.date}
             </div>
             <div className="fw-bold small" style={{ color: payoutApproved ? '#34D399' : '#FACC15' }}>
-              {payoutApproved ? 'Disbursed to Member' : upcomingPayout.daysRemaining}
+              {payoutApproved ? t('dashboard_page.payout_card.approved_btn', 'Disbursed to Member') : upcomingPayout.daysRemaining}
             </div>
           </div>
 
@@ -314,7 +330,7 @@ const Dashboard = () => {
             </div>
             {payoutApproved ? (
               <div className="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-success text-white fw-semibold small shadow-sm">
-                <span>✓</span> Approved & Disbursed
+                <span>✓</span> {t('dashboard_page.payout_card.approved_btn', 'Approved & Disbursed')}
               </div>
             ) : (
               <button
@@ -322,7 +338,9 @@ const Dashboard = () => {
                 className="btn btn-light rounded-pill px-4 py-2 fw-semibold text-dark shadow-sm border-0"
                 style={{ fontSize: '0.9rem' }}
               >
-                {canManagePayout ? 'Review Payout' : 'View Payout Details'}
+                {canManagePayout 
+                  ? t('dashboard_page.payout_card.review_btn', 'Review Payout') 
+                  : t('common.view', 'View Payout Details')}
               </button>
             )}
           </div>
@@ -340,7 +358,7 @@ const Dashboard = () => {
       {/* Recent Payment Table Card */}
       <div className="table-card shadow-sm">
         <div className="table-card-header d-flex justify-content-between align-items-center">
-          <span>Recent Payment</span>
+          <span>{t('dashboard_page.recent_payments.title', 'Recent Payments')}</span>
           <span className="badge bg-light text-dark fw-normal border">Live Records</span>
         </div>
 
@@ -348,10 +366,18 @@ const Dashboard = () => {
           <table className="table table-hover align-middle mb-0">
             <thead style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E2E8F0' }}>
               <tr>
-                <th className="py-3 px-4 text-muted fw-semibold" style={{ fontSize: '0.85rem' }}>Member</th>
-                <th className="py-3 px-4 text-muted fw-semibold" style={{ fontSize: '0.85rem' }}>Amount</th>
-                <th className="py-3 px-4 text-muted fw-semibold text-center" style={{ fontSize: '0.85rem' }}>Status</th>
-                <th className="py-3 px-4 text-muted fw-semibold text-end" style={{ fontSize: '0.85rem' }}>Date</th>
+                <th className="py-3 px-4 text-muted fw-semibold" style={{ fontSize: '0.85rem' }}>
+                  {t('dashboard_page.recent_payments.col_member', 'Member')}
+                </th>
+                <th className="py-3 px-4 text-muted fw-semibold" style={{ fontSize: '0.85rem' }}>
+                  {t('dashboard_page.recent_payments.col_amount', 'Amount')}
+                </th>
+                <th className="py-3 px-4 text-muted fw-semibold text-center" style={{ fontSize: '0.85rem' }}>
+                  {t('dashboard_page.recent_payments.col_status', 'Status')}
+                </th>
+                <th className="py-3 px-4 text-muted fw-semibold text-end" style={{ fontSize: '0.85rem' }}>
+                  {t('dashboard_page.recent_payments.col_date', 'Date')}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -359,13 +385,13 @@ const Dashboard = () => {
                 <tr>
                   <td colSpan="4" className="text-center py-4 text-muted small">
                     <div className="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
-                    Loading recent payments...
+                    {t('common.loading', 'Loading recent payments...')}
                   </td>
                 </tr>
               ) : recentPayments.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="text-center py-4 text-muted small">
-                    No recent payments found.
+                    {t('dashboard_page.recent_payments.no_payments', 'No recent payments found.')}
                   </td>
                 </tr>
               ) : (

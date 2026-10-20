@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import Icon from '../components/Icons';
 import PaymentDetailsModal from '../components/PaymentDetailsModal';
@@ -20,6 +21,7 @@ import {
 import { getAllGroups, getGroupsByUser, getGroupMembers } from '../api/groupApi';
 
 const PaymentTracking = () => {
+  const { t } = useTranslation();
   const { user, isAdmin, isOrganizer } = useAuth();
   const userId = user?.userId || user?.id;
 
@@ -347,7 +349,7 @@ const PaymentTracking = () => {
     <div className="payment-management-container pb-4">
       {/* Title */}
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-        <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>Payment Management</h2>
+        <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('payments_page.title')}</h2>
         <div className="d-flex align-items-center gap-2">
           {isAdmin && (
             <Link
@@ -375,7 +377,7 @@ const PaymentTracking = () => {
         <div className="col-6 col-lg-3">
           <div className="metric-card h-100 flex-column justify-content-between p-3">
             <div>
-              <div className="text-muted small" style={{ fontSize: '0.8rem' }}>Total Collected</div>
+              <div className="text-muted small" style={{ fontSize: '0.8rem' }}>{t('payments_page.total_collected', 'Total Collected')}</div>
               <div className="fw-bold fs-4 text-dark mt-1">{totalCollected.toLocaleString()} LKR</div>
             </div>
             <div className="text-muted small mt-2" style={{ fontSize: '0.75rem' }}>

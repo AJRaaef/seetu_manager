@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import Icon from './Icons';
 import { uploadPaymentEvidence, getPaymentEvidences } from '../api/paymentApi';
 
 const PaymentDetailsModal = ({ show, onHide, payment }) => {
+  const { t } = useTranslation();
   const [attachedFiles, setAttachedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
 
@@ -48,15 +50,15 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
   const getStatusBadge = (status) => {
     switch (status?.toUpperCase()) {
       case 'PAID':
-        return <span className="badge-paid">Paid</span>;
+        return <span className="badge-paid">{t('status.PAID', 'Paid')}</span>;
       case 'PENDING':
-        return <span className="badge-pending">Pending</span>;
+        return <span className="badge-pending">{t('status.PENDING', 'Pending')}</span>;
       case 'OVERDUE':
-        return <span className="badge-overdue">Overdue</span>;
+        return <span className="badge-overdue">{t('status.OVERDUE', 'Overdue')}</span>;
       case 'PARTIAL':
-        return <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 rounded-2" style={{ fontSize: '0.75rem' }}>Partial</span>;
+        return <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 rounded-2" style={{ fontSize: '0.75rem' }}>{t('status.PARTIAL', 'Partial')}</span>;
       default:
-        return <span className="badge-paid">{status || 'Paid'}</span>;
+        return <span className="badge-paid">{t(`status.${status}`, status || 'Paid')}</span>;
     }
   };
 
@@ -78,7 +80,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
 
       <div className="custom-modal-header no-print">
         <div className="d-flex align-items-center gap-2">
-          <h5 className="fw-bold mb-0 text-dark">Payment Details</h5>
+          <h5 className="fw-bold mb-0 text-dark">{t('modals.payment_details.title', 'Payment Details')}</h5>
           <span className="badge bg-light text-muted border small">
             {payment.id ? `#PAY-${payment.id}` : '#PAY-101'}
           </span>
@@ -96,7 +98,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
         >
           <div>
             <div className="text-uppercase small fw-bold text-muted" style={{ fontSize: '0.725rem', letterSpacing: '0.5px' }}>
-              AMOUNT
+              {t('modals.payment_details.amount', 'AMOUNT')}
             </div>
             <div className="fs-3 fw-bold text-dark mt-1">
               {payment.amount ? `${payment.amount.toLocaleString()} LKR` : '1,000 LKR'}
@@ -110,27 +112,27 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
         {/* 2-Column Info Grid */}
         <div className="row g-3 mb-3">
           <div className="col-6">
-            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>MEMBER</div>
+            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.member', 'MEMBER')}</div>
             <div className="fw-bold text-dark">{payment.member || payment.memberName || 'Kamala'}</div>
           </div>
           <div className="col-6">
-            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>GROUP</div>
+            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.group', 'GROUP')}</div>
             <div className="fw-bold text-dark">{payment.group || payment.groupName || "Village Women's"}</div>
           </div>
           <div className="col-6">
-            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>CYCLE</div>
+            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.cycle', 'CYCLE')}</div>
             <div className="fw-semibold text-dark">{payment.cycle || 'Cycle 3'}</div>
           </div>
           <div className="col-6">
-            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>DATE</div>
+            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.date', 'DATE')}</div>
             <div className="fw-semibold text-dark">{payment.date || '2026-03-15'}</div>
           </div>
           <div className="col-6">
-            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>RECORDED BY</div>
+            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.recorded_by', 'RECORDED BY')}</div>
             <div className="fw-semibold text-dark">{payment.recordedBy || (isPaid ? 'Organizer' : '—')}</div>
           </div>
           <div className="col-6">
-            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>PAYMENT METHOD</div>
+            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.payment_method', 'PAYMENT METHOD')}</div>
             <div className="fw-semibold text-dark">{payment.method || 'Cash (Offline)'}</div>
           </div>
         </div>
@@ -138,10 +140,10 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
         {/* Notes / Remarks Box */}
         <div className="bg-light p-3 rounded-3 border mb-3">
           <div className="text-uppercase text-muted small fw-bold mb-1" style={{ fontSize: '0.725rem' }}>
-            NOTES / REMARKS
+            {t('modals.payment_details.notes', 'NOTES / REMARKS')}
           </div>
           <div className="small text-muted">
-            {payment.notes || 'No extra notes recorded for this transaction.'}
+            {payment.notes || t('modals.payment_details.no_notes', 'No extra notes recorded for this transaction.')}
           </div>
         </div>
 
@@ -149,10 +151,10 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
         <div className="bg-white p-3 rounded-3 border mb-3">
           <div className="d-flex justify-content-between align-items-center mb-2">
             <span className="text-uppercase text-muted small fw-bold" style={{ fontSize: '0.725rem' }}>
-              PAYMENT EVIDENCE / BANK SLIP
+              {t('modals.payment_details.evidence', 'PAYMENT EVIDENCE / BANK SLIP')}
             </span>
             <span className={`badge ${attachedFiles.length > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-light text-muted border'} px-2 py-0.5 rounded-pill`} style={{ fontSize: '0.7rem' }}>
-              {attachedFiles.length > 0 ? `${attachedFiles.length} Slip(s) Attached` : 'No Slip Attached'}
+              {attachedFiles.length > 0 ? t('modals.payment_details.slips_attached', { count: attachedFiles.length, defaultValue: `${attachedFiles.length} Slip(s) Attached` }) : t('modals.payment_details.no_slip_attached', 'No Slip Attached')}
             </span>
           </div>
 
@@ -166,15 +168,15 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
                       {fn}
                     </span>
                   </div>
-                  <span className="badge bg-success-subtle text-success small">Verified</span>
+                  <span className="badge bg-success-subtle text-success small">{t('modals.payment_details.verified', 'Verified')}</span>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-muted small py-2 px-3 bg-light rounded-2 border fst-italic">
               {(payment.method || '').toLowerCase().includes('cash') && isPaid
-                ? 'Handled via offline cash payment. No digital slip required.'
-                : 'No digital payment slip attached yet.'}
+                ? t('modals.payment_details.cash_note', 'Handled via offline cash payment. No digital slip required.')
+                : t('modals.payment_details.no_slip_yet', 'No digital payment slip attached yet.')}
             </div>
           )}
 
@@ -182,7 +184,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
             <div className="mt-2 text-end">
               <label className="btn btn-sm btn-outline-primary py-1 px-3 no-print cursor-pointer mb-0">
                 <Icon name="paperclip" size={14} className="me-1" />
-                <span>{uploading ? 'Uploading...' : 'Attach Payment Slip'}</span>
+                <span>{uploading ? t('modals.payment_details.uploading', 'Uploading...') : t('modals.payment_details.attach_slip', 'Attach Payment Slip')}</span>
                 <input 
                   type="file" 
                   accept="image/*,.pdf" 
@@ -201,12 +203,12 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           style={{ backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' }}
         >
           <div className="fw-bold small text-primary mb-1">
-            Financial Discipline Impact
+            {t('modals.payment_details.discipline_impact', 'Financial Discipline Impact')}
           </div>
           <div className="small text-primary" style={{ fontSize: '0.8rem' }}>
             {isPaid
-              ? 'On-time payment recorded. Maintains member discipline score in EXCELLENT tier.'
-              : 'Pending / Overdue contribution. Reminders can be issued by group organizer.'}
+              ? t('modals.payment_details.on_time_impact', 'On-time payment recorded. Maintains member discipline score in EXCELLENT tier.')
+              : t('modals.payment_details.pending_impact', 'Pending / Overdue contribution. Reminders can be issued by group organizer.')}
           </div>
         </div>
 
@@ -219,14 +221,14 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
 
       <div className="custom-modal-footer no-print">
         <button type="button" className="btn btn-light px-4 border" onClick={onHide}>
-          Close
+          {t('modals.payment_details.close', 'Close')}
         </button>
         <button
           type="button"
           className="btn btn-teal px-4"
           onClick={() => window.print()}
         >
-          Print Receipt
+          {t('modals.payment_details.print_receipt', 'Print Receipt')}
         </button>
       </div>
     </Modal>

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/axios';
 import * as groupApi from '../api/groupApi';
 import Icon from '../components/Icons';
 
 const AdvancePayments = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const isAdminOrOrg = user?.role === 'ADMIN' || user?.role === 'ORGANIZER';
 
@@ -135,16 +137,16 @@ const AdvancePayments = () => {
         <div>
           <div className="d-flex align-items-center gap-2 mb-1">
             <Icon name="advance" size={24} color="#235665" />
-            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>Advance Contributions</h2>
+            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('advance_page.title')}</h2>
           </div>
-          <p className="text-muted mb-0">Record and track advance installment payments before cycle due dates</p>
+          <p className="text-muted mb-0">{t('advance_page.subtitle')}</p>
         </div>
         {isAdminOrOrg && (
           <button 
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
             onClick={() => setShowModal(true)}
           >
-            <span>+</span> Record Advance Payment
+            <span>+</span> {t('advance_page.apply_btn')}
           </button>
         )}
       </div>
@@ -157,7 +159,7 @@ const AdvancePayments = () => {
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <span className="text-white-50 text-uppercase fw-semibold" style={{ fontSize: '0.8rem', letterSpacing: '0.5px' }}>
-              Total Advance Deposited
+              {t('advance_page.total_disbursed')}
             </span>
             <h2 className="display-6 fw-bold mb-0 mt-1">LKR {totalAdvance.toLocaleString()}</h2>
           </div>
@@ -190,18 +192,18 @@ const AdvancePayments = () => {
       ) : (
         <div className="ui-card shadow-sm border-0 overflow-hidden">
           <div className="card-header bg-white border-bottom fw-bold text-dark py-3">
-            Advance Contribution History ({advancePayments.length})
+            {t('advance_page.title')} ({advancePayments.length})
           </div>
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
               <thead style={{ backgroundColor: '#DCE7EB' }}>
                 <tr>
-                  <th>Record ID</th>
-                  <th>Member</th>
-                  <th>Advance Amount</th>
-                  <th>Notes</th>
-                  <th>Recorded Date</th>
-                  {isAdminOrOrg && <th className="text-end pe-3">Actions</th>}
+                  <th>ID</th>
+                  <th>{t('common.member')}</th>
+                  <th>{t('advance_page.col_amount')}</th>
+                  <th>{t('common.notes')}</th>
+                  <th>{t('common.date')}</th>
+                  {isAdminOrOrg && <th className="text-end pe-3">{t('common.actions')}</th>}
                 </tr>
               </thead>
               <tbody>

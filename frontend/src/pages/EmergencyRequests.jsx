@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/axios';
 import * as groupApi from '../api/groupApi';
 import Icon from '../components/Icons';
 
 const EmergencyRequests = () => {
+  const { t } = useTranslation();
   const { user, isAdmin, isOrganizer } = useAuth();
   const [requests, setRequests] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -80,7 +82,7 @@ const EmergencyRequests = () => {
         <div>
           <div className="d-flex align-items-center gap-2 mb-1">
             <Icon name="emergency" size={24} color="#DC3545" />
-            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>Emergency Payout Requests</h2>
+            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('emergency_page.title')}</h2>
           </div>
           <p className="text-muted mb-0">
             {isAdmin 
@@ -93,7 +95,7 @@ const EmergencyRequests = () => {
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
             onClick={() => setShowModal(true)}
           >
-            <span>+</span> Submit Emergency Request
+            <span>+</span> {t('emergency_page.request_btn')}
           </button>
         )}
       </div>
@@ -126,7 +128,7 @@ const EmergencyRequests = () => {
           {!isAdmin && (
             <div>
               <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
-                Submit Emergency Request
+                {t('emergency_page.request_btn')}
               </button>
             </div>
           )}

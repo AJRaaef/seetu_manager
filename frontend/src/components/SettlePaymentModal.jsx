@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import Icon from './Icons';
 
 const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
+  const { t } = useTranslation();
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [method, setMethod] = useState('Cash (Offline)');
@@ -66,9 +68,9 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
           </div>
           <div>
             <h5 className="fw-bold mb-0 text-dark" style={{ fontSize: '1.05rem' }}>
-              Confirm Payment Settlement
+              {t('modals.settle_payment.title', 'Confirm Payment Settlement')}
             </h5>
-            <span className="text-muted small">Record ID: #PAY-{payment.id}</span>
+            <span className="text-muted small">{t('modals.settle_payment.record_id', 'Record ID')}: #PAY-{payment.id}</span>
           </div>
         </div>
         <button className="btn btn-link text-muted p-0 border-0" onClick={onHide}>
@@ -82,11 +84,11 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
           <div className="p-3 mb-3 rounded-3" style={{ backgroundColor: '#F1F5F7', border: '1px solid #DCE7EB' }}>
             <div className="row g-2">
               <div className="col-6">
-                <span className="text-uppercase text-muted fw-semibold" style={{ fontSize: '0.72rem' }}>MEMBER</span>
+                <span className="text-uppercase text-muted fw-semibold" style={{ fontSize: '0.72rem' }}>{t('modals.settle_payment.member', 'MEMBER')}</span>
                 <div className="fw-bold text-dark">{payment.member || 'Member'}</div>
               </div>
               <div className="col-6">
-                <span className="text-uppercase text-muted fw-semibold" style={{ fontSize: '0.72rem' }}>GROUP & CYCLE</span>
+                <span className="text-uppercase text-muted fw-semibold" style={{ fontSize: '0.72rem' }}>{t('modals.settle_payment.group', 'GROUP')} & {t('modals.settle_payment.cycle', 'CYCLE')}</span>
                 <div className="fw-bold text-dark">{payment.group} ({payment.cycle})</div>
               </div>
             </div>
@@ -106,7 +108,7 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
             {/* Amount Received */}
             <div className="col-12 col-sm-6">
               <label className="form-label text-dark fw-semibold small mb-1">
-                Amount Received (LKR) <span className="text-danger">*</span>
+                {t('modals.settle_payment.amount', 'Amount to Settle (LKR)')} <span className="text-danger">*</span>
               </label>
               <input
                 type="number"
@@ -121,7 +123,7 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
             {/* Settlement Date */}
             <div className="col-12 col-sm-6">
               <label className="form-label text-dark fw-semibold small mb-1">
-                Settlement Date <span className="text-danger">*</span>
+                {t('modals.settle_payment.date', 'Settlement Date')} <span className="text-danger">*</span>
               </label>
               <input
                 type="date"
@@ -137,7 +139,7 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
             {/* Settlement Method */}
             <div className="col-12 col-sm-6">
               <label className="form-label text-dark fw-semibold small mb-1">
-                Payment Method <span className="text-danger">*</span>
+                {t('modals.settle_payment.method', 'Payment Method')} <span className="text-danger">*</span>
               </label>
               <select
                 className="form-select bg-white"
@@ -155,7 +157,7 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
             {/* Record Status */}
             <div className="col-12 col-sm-6">
               <label className="form-label text-dark fw-semibold small mb-1">
-                Record Status <span className="text-danger">*</span>
+                {t('modals.settle_payment.status', 'Payment Status')} <span className="text-danger">*</span>
               </label>
               <select
                 className="form-select bg-white"
@@ -173,7 +175,7 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
           {/* Optional Deposit Slip Upload */}
           <div className="mb-3">
             <label className="form-label text-dark fw-semibold small mb-1">
-              Attach Deposit Slip / Proof (Optional)
+              {t('modals.settle_payment.evidence', 'Payment Slip / Bank Transfer Receipt (Optional)')}
             </label>
             <input
               type="file"
@@ -185,7 +187,7 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
 
           {/* Notes / Reference */}
           <div className="mb-2">
-            <label className="form-label text-dark fw-semibold small mb-1">Notes / Remarks</label>
+            <label className="form-label text-dark fw-semibold small mb-1">{t('modals.settle_payment.notes', 'Notes / Remarks')}</label>
             <textarea
               className="form-control"
               rows="2"
@@ -198,18 +200,18 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
 
         <div className="custom-modal-footer bg-light px-4 py-3 d-flex justify-content-end gap-2 border-top">
           <button type="button" className="btn btn-outline-secondary px-3" onClick={onHide} disabled={submitting}>
-            Cancel
+            {t('modals.settle_payment.cancel', 'Cancel')}
           </button>
           <button type="submit" className="btn btn-teal px-4 d-inline-flex align-items-center gap-2" disabled={submitting}>
             {submitting ? (
               <>
                 <span className="spinner-border spinner-border-sm" role="status"></span>
-                <span>Saving...</span>
+                <span>{t('modals.settle_payment.submitting', 'Settling...')}</span>
               </>
             ) : (
               <>
                 <Icon name="check" size={16} />
-                <span>Confirm Settlement</span>
+                <span>{t('modals.settle_payment.confirm_btn', 'Confirm Settlement')}</span>
               </>
             )}
           </button>

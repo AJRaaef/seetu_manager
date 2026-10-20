@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
 import Icon from './Icons';
 
-const getScoreMeta = (scoreNum) => {
+const getScoreMeta = (scoreNum, t) => {
   const num = Number(scoreNum);
-  if (num >= 90) return { label: 'Excellent', color: '#188754' };
-  if (num >= 75) return { label: 'Good', color: '#0D6EFD' };
-  if (num >= 60) return { label: 'Fair', color: '#FFB020' };
-  return { label: 'Poor', color: '#DC3545' };
+  if (num >= 90) return { label: t ? t('dashboard_page.badges.excellent', 'Excellent') : 'Excellent', color: '#188754' };
+  if (num >= 75) return { label: t ? t('dashboard_page.badges.good', 'Good') : 'Good', color: '#0D6EFD' };
+  if (num >= 60) return { label: t ? t('dashboard_page.badges.fair', 'Fair') : 'Fair', color: '#FFB020' };
+  return { label: t ? t('dashboard_page.badges.poor', 'Poor') : 'Poor', color: '#DC3545' };
 };
 
 const EditMemberModal = ({ show, onHide, member, onSave }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -32,11 +34,11 @@ const EditMemberModal = ({ show, onHide, member, onSave }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim()) {
-      alert('Please enter member name.');
+      alert(t('common.required', 'Please enter member name.'));
       return;
     }
     const scoreNum = Math.min(100, Math.max(0, Number(score) || 0));
-    const { label: scoreLabel, color: scoreColor } = getScoreMeta(scoreNum);
+    const { label: scoreLabel, color: scoreColor } = getScoreMeta(scoreNum, t);
 
     if (onSave) {
       onSave({
@@ -56,13 +58,13 @@ const EditMemberModal = ({ show, onHide, member, onSave }) => {
 
   if (!member) return null;
 
-  const scoreMeta = getScoreMeta(score);
+  const scoreMeta = getScoreMeta(score, t);
 
   return (
     <Modal show={show} onHide={onHide} centered contentClassName="custom-modal-content">
       <div className="custom-modal-header">
         <div className="d-flex align-items-center gap-2">
-          <h5 className="fw-bold mb-0 text-dark">Edit Member Details</h5>
+          <h5 className="fw-bold mb-0 text-dark">{t('modals.edit_member.title', 'Edit Member Details')}</h5>
           <span className="badge bg-light text-muted border small">
             #MBR-{member.id}
           </span>
@@ -75,7 +77,7 @@ const EditMemberModal = ({ show, onHide, member, onSave }) => {
       <form onSubmit={handleSubmit}>
         <div className="custom-modal-body">
           <div className="mb-3">
-            <label className="form-label text-dark fw-semibold small">Full Name</label>
+            <label className="form-label text-dark fw-semibold small">{t('modals.edit_member.full_name', 'Full Name')}</label>
             <input
               type="text"
               className="form-control"
@@ -87,7 +89,7 @@ const EditMemberModal = ({ show, onHide, member, onSave }) => {
 
           <div className="row g-3 mb-3">
             <div className="col-12 col-md-6">
-              <label className="form-label text-dark fw-semibold small">Email Address</label>
+              <label className="form-label text-dark fw-semibold small">{t('modals.edit_member.email', 'Email Address')}</label>
               <input
                 type="email"
                 className="form-control"
@@ -97,7 +99,7 @@ const EditMemberModal = ({ show, onHide, member, onSave }) => {
               />
             </div>
             <div className="col-12 col-md-6">
-              <label className="form-label text-dark fw-semibold small">Phone Number</label>
+              <label className="form-label text-dark fw-semibold small">{t('modals.edit_member.phone', 'Phone Number')}</label>
               <input
                 type="tel"
                 className="form-control"
@@ -110,7 +112,7 @@ const EditMemberModal = ({ show, onHide, member, onSave }) => {
 
           <div className="row g-3 mb-3">
             <div className="col-12 col-md-6">
-              <label className="form-label text-dark fw-semibold small">Group</label>
+              <label className="form-label text-dark fw-semibold small">{t('modals.edit_member.group', 'Assigned Group')}</label>
               <select
                 className="form-select"
                 value={group}
@@ -122,13 +124,13 @@ const EditMemberModal = ({ show, onHide, member, onSave }) => {
               </select>
             </div>
             <div className="col-12 col-md-6">
-              <label className="form-label text-dark fw-semibold small">Status</label>
+              <label className="form-label text-dark fw-semibold small">{t('modals.edit_member.status', 'Member Status')}</label>
               <select
                 className="form-select"
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
               >
-                <option value="Active">Active</option>
+                <option value="Active">{t('status.ACTIVE', 'Active')}</option>
                 <option value="Inactive">Inactive</option>
               </select>
             </div>
@@ -136,7 +138,7 @@ const EditMemberModal = ({ show, onHide, member, onSave }) => {
 
           <div className="mb-2">
             <div className="d-flex justify-content-between align-items-center mb-1">
-              <label className="form-label text-dark fw-semibold small mb-0">Discipline Score</label>
+              <label className="form-label text-dark fw-semibold small mb-0">{t('modals.edit_member.score', 'Discipline Score')}</label>
               <span className="small fw-bold" style={{ color: scoreMeta.color }}>
                 {score} ({scoreMeta.label})
               </span>
@@ -155,10 +157,10 @@ const EditMemberModal = ({ show, onHide, member, onSave }) => {
 
         <div className="custom-modal-footer">
           <button type="button" className="btn btn-light px-4 border" onClick={onHide}>
-            Cancel
+            {t('modals.edit_member.cancel', 'Cancel')}
           </button>
           <button type="submit" className="btn btn-teal px-4">
-            Save Changes
+            {t('modals.edit_member.save_changes', 'Save Changes')}
           </button>
         </div>
       </form>

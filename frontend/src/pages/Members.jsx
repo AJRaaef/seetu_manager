@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Icon from '../components/Icons';
 import InviteMemberModal from '../components/InviteMemberModal';
 import EditMemberModal from '../components/EditMemberModal';
@@ -37,6 +38,7 @@ const calculateScore = (member) => {
 import { getPendingJoinRequests, approveJoinRequest, rejectJoinRequest } from '../api/joinRequestApi';
 
 const Members = () => {
+  const { t } = useTranslation();
   const { isOrganizer, isAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [groupFilter, setGroupFilter] = useState('All');
@@ -258,8 +260,8 @@ const Members = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>Members</h2>
-          <p className="text-muted small mb-0">Manage registered members across all Seettu groups</p>
+          <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('members_page.title')}</h2>
+          <p className="text-muted small mb-0">{t('members_page.subtitle')}</p>
         </div>
         {(isOrganizer || isAdmin) && (
           <button
@@ -267,7 +269,7 @@ const Members = () => {
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2"
           >
             <Icon name="user-plus" size={18} />
-            <span>Invite Members</span>
+            <span>{t('members_page.invite_btn')}</span>
           </button>
         )}
       </div>
@@ -477,7 +479,7 @@ const Members = () => {
             <input
               type="text"
               className="form-control border-0 shadow-none ps-1"
-              placeholder="Search by name, email or phone..."
+              placeholder={t('members_page.search_placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -490,7 +492,7 @@ const Members = () => {
             value={groupFilter}
             onChange={(e) => setGroupFilter(e.target.value)}
           >
-            <option value="All">All Groups</option>
+            <option value="All">{t('members_page.filter_group')}</option>
             {groups.map((g) => (
               <option key={g.id} value={g.name}>{g.name}</option>
             ))}
@@ -503,7 +505,7 @@ const Members = () => {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="All">All Status</option>
+            <option value="All">{t('common.all')}</option>
             <option value="Active">Active</option>
             <option value="REMOVED">Removed</option>
             <option value="Inactive">Inactive</option>
@@ -517,16 +519,16 @@ const Members = () => {
           <table className="table table-hover align-middle mb-0">
             <thead style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E5E7EB' }}>
               <tr>
-                <th className="py-3 px-3 text-muted fw-semibold small">Member ID</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">Member Name</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">ID</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('members_page.col_name')}</th>
                 <th className="py-3 px-3 text-muted fw-semibold small">Email</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">Phone</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">Group</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">Joined Date</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-center">Identity (NIC & GN)</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-center">Discipline Score</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-center">Status</th>
-                {(isOrganizer || isAdmin) && <th className="py-3 px-3 text-muted fw-semibold small text-end">Actions</th>}
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('auth.phone_label')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.group')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.date')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('members_page.col_kyc')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('members_page.col_score')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('common.status')}</th>
+                {(isOrganizer || isAdmin) && <th className="py-3 px-3 text-muted fw-semibold small text-end">{t('members_page.col_actions')}</th>}
               </tr>
             </thead>
             <tbody>
@@ -541,8 +543,8 @@ const Members = () => {
                 <tr>
                   <td colSpan={(isOrganizer || isAdmin) ? "10" : "9"} className="text-center py-5">
                     <Icon name="users" size={36} color="#94A3B8" className="mb-2" />
-                    <h6 className="fw-bold text-dark">No members found</h6>
-                    <p className="text-muted small mb-0">No active members match the current filters or no members are registered yet.</p>
+                    <h6 className="fw-bold text-dark">{t('members_page.no_members')}</h6>
+                    <p className="text-muted small mb-0">{t('members_page.no_members')}</p>
                   </td>
                 </tr>
               ) : (

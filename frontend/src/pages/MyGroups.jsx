@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { getGroupsByUser, getAllGroups, deleteGroup } from '../api/groupApi';
 import { createJoinRequest } from '../api/joinRequestApi';
 import Icon from '../components/Icons';
 
 const MyGroups = () => {
+  const { t } = useTranslation();
   const { user, isOrganizer, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
@@ -157,10 +159,12 @@ const MyGroups = () => {
     <div className="my-groups-container pb-4">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>My Groups</h2>
+        <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>
+          {t('my_groups_page.title', 'My Groups')}
+        </h2>
         {isOrganizer || isAdmin ? (
           <Link to="/groups/create" className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2">
-            <span>+</span> Create New Group
+            <span>+</span> {t('my_groups_page.create_new', 'Create New Group')}
           </Link>
         ) : (
           <button 
@@ -174,7 +178,7 @@ const MyGroups = () => {
             }} 
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm"
           >
-            <span>+</span> Join Group
+            <span>+</span> {t('my_groups_page.join_group', 'Join Group')}
           </button>
         )}
       </div>
@@ -183,14 +187,14 @@ const MyGroups = () => {
       {loading ? (
         <div className="text-center py-5 text-muted">
           <div className="spinner-border text-teal mb-2" role="status"></div>
-          <p className="small mb-0">Loading your Seettu groups...</p>
+          <p className="small mb-0">{t('my_groups_page.loading', 'Loading your Seettu groups...')}</p>
         </div>
       ) : groups.length === 0 ? (
         <div className="ui-card p-5 text-center shadow-sm">
           <Icon name="groups" size={42} className="text-muted opacity-50 mb-3" />
-          <h5 className="fw-bold text-dark mb-1">No Seettu Groups Joined Yet</h5>
+          <h5 className="fw-bold text-dark mb-1">{t('my_groups_page.empty_title', 'No Seettu Groups Joined Yet')}</h5>
           <p className="text-muted small mb-3" style={{ maxWidth: '420px', margin: '0 auto' }}>
-            You are not currently enrolled in any Seettu group circles. Submit your NIC & Grama Niladhari verification to request joining open groups.
+            {t('my_groups_page.empty_desc', 'You are not currently enrolled in any Seettu group circles. Submit your NIC & Grama Niladhari verification to request joining open groups.')}
           </p>
           {!isOrganizer && !isAdmin && (
             <button 
@@ -204,7 +208,7 @@ const MyGroups = () => {
               }}
               className="btn btn-teal px-4 py-2 fw-semibold"
             >
-              Explore & Join a Group
+              {t('my_groups_page.explore_btn', 'Explore & Join a Group')}
             </button>
           )}
         </div>
@@ -230,7 +234,7 @@ const MyGroups = () => {
                   {/* Members Progress */}
                   <div className="mb-3">
                     <div className="d-flex justify-content-between align-items-center small text-muted mb-1">
-                      <span>Members</span>
+                      <span>{t('my_groups_page.members_enrolled', 'Members')}</span>
                       <span className="fw-semibold text-dark">{group.membersCount}/{group.maxMembers}</span>
                     </div>
                     <div className="custom-progress">
@@ -240,19 +244,19 @@ const MyGroups = () => {
 
                   {/* Contribution & Cycle info */}
                   <div className="mb-2 small">
-                    <span className="fw-bold text-dark">Contribution: </span>
+                    <span className="fw-bold text-dark">{t('amount', 'Contribution')}: </span>
                     <span className="text-muted">{group.contributionAmount}</span>
                   </div>
 
                   <div className="mb-3 small">
-                    <span className="fw-bold text-dark">Current: </span>
+                    <span className="fw-bold text-dark">{t('common.cycle', 'Current')}: </span>
                     <span className="text-muted">Cycle {group.currentCycle} of {group.totalCycles}</span>
                   </div>
 
                   {/* Completion Progress */}
                   <div className="mb-3">
                     <div className="d-flex justify-content-between align-items-center small text-muted mb-1">
-                      <span>Completion</span>
+                      <span>{t('my_groups_page.completion', 'Completion')}</span>
                       <span className="fw-semibold text-dark">{group.completionRate}%</span>
                     </div>
                     <div className="custom-progress">
@@ -263,7 +267,7 @@ const MyGroups = () => {
                   {/* Active Status Badge */}
                   <div className="mb-4">
                     <span className="badge-mint">
-                      {group.status}
+                      {t(`status.${group.status?.toUpperCase()}`, group.status)}
                     </span>
                   </div>
                 </div>
@@ -275,7 +279,7 @@ const MyGroups = () => {
                     className="btn flex-grow-1 fw-semibold py-1 rounded-2"
                     style={{ border: '1px solid #188754', color: '#188754', backgroundColor: '#FFFFFF', fontSize: '0.9rem' }}
                   >
-                    View
+                    {t('common.view', 'View')}
                   </button>
 
                   {(isOrganizer || isAdmin) && (

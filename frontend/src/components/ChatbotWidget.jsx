@@ -218,7 +218,7 @@ const ChatbotWidget = () => {
               style={{ transition: 'color 0.2s ease' }}
               onMouseEnter={(e) => e.currentTarget.style.color = '#FFFFFF'}
               onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.5)'}
-              title="Close Chat"
+              title={t('chatbot_widget.close', 'Close Chat')}
             >
               <Icon name="x" size={18} />
             </button>
@@ -264,7 +264,7 @@ const ChatbotWidget = () => {
             {loading && (
               <div className="d-flex align-items-center gap-2 text-muted small p-2">
                 <div className="spinner-border spinner-border-sm text-secondary" role="status"></div>
-                <span style={{ fontSize: '0.8rem' }}>Assistant is typing...</span>
+                <span style={{ fontSize: '0.8rem' }}>{t('chatbot_widget.typing', 'Assistant is typing...')}</span>
               </div>
             )}
 

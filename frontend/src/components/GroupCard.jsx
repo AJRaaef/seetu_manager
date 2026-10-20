@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const GroupCard = ({ 
   group, 
@@ -10,6 +11,7 @@ const GroupCard = ({
   onRecordPayment, 
   onGenerateReport 
 }) => {
+  const { t } = useTranslation();
   const isOrganizer = userRole === 'ORGANIZER' || group.createdById === userId;
   const isMember = group.members?.some(m => (m.userId === userId || m.id === userId) && m.status === 'ACTIVE');
   
@@ -36,7 +38,7 @@ const GroupCard = ({
             {group.category || 'GENERAL'}
           </span>
           <span className={`badge ${statusBadgeClass} text-white fw-bold px-3 py-1 rounded-pill`}>
-            {group.status || 'ACTIVE'}
+            {t(`status.${group.status}`, group.status || 'ACTIVE')}
           </span>
         </div>
 
@@ -44,24 +46,26 @@ const GroupCard = ({
         <div className="card-body px-4 py-3">
           <h5 className="card-title fw-bold text-dark mb-2">{group.name}</h5>
           <p className="card-text text-muted small mb-3 text-truncate-2" style={{ minHeight: '38px' }}>
-            {group.description || 'No description provided.'}
+            {group.description || t('group_card.no_description', 'No description provided.')}
           </p>
 
           <div className="p-3 bg-light rounded-3 mb-3 border">
             <div className="d-flex justify-content-between mb-2">
-              <span className="text-muted small">Contribution Amount:</span>
+              <span className="text-muted small">{t('group_card.contribution_amount', 'Contribution Amount:')}</span>
               <strong className="text-primary fw-bold">LKR {(group.contributionAmount || 0).toLocaleString()}</strong>
             </div>
             <div className="d-flex justify-content-between mb-2">
-              <span className="text-muted small">Cycle Frequency:</span>
+              <span className="text-muted small">{t('group_card.cycle_frequency', 'Cycle Frequency:')}</span>
               <span className="badge bg-outline-secondary text-dark border">{group.cycleFrequency || 'MONTHLY'}</span>
             </div>
             <div className="d-flex justify-content-between mb-2">
-              <span className="text-muted small">Cycle Progress:</span>
-              <strong className="text-dark small">Cycle {currentCycle} of {totalCycles}</strong>
+              <span className="text-muted small">{t('group_card.cycle_progress', 'Cycle Progress:')}</span>
+              <strong className="text-dark small">
+                {t('group_card.cycle_x_of_y', { current: currentCycle, total: totalCycles, defaultValue: `Cycle ${currentCycle} of ${totalCycles}` })}
+              </strong>
             </div>
             <div className="d-flex justify-content-between align-items-center">
-              <span className="text-muted small">Members Capacity:</span>
+              <span className="text-muted small">{t('group_card.members_capacity', 'Members Capacity:')}</span>
               <span className="fw-bold text-dark small">{activeMembersCount} / {targetMembersCount}</span>
             </div>
             <div className="progress mt-2" style={{ height: '6px' }}>
@@ -79,43 +83,43 @@ const GroupCard = ({
           {isOrganizer ? (
             <div className="d-flex flex-column gap-2">
               <Link to={`/groups/${group.id}`} className="btn btn-primary w-100 fw-bold">
-                 View Details
+                 {t('group_card.view_details', 'View Details')}
               </Link>
               <div className="d-flex gap-2">
                 <button
                   className="btn btn-outline-success btn-sm w-50 fw-bold"
                   onClick={() => onRecordPayment && onRecordPayment(group)}
                 >
-                  Record Payment
+                  {t('group_card.record_payment', 'Record Payment')}
                 </button>
                 <button
                   className="btn btn-outline-info btn-sm w-50 fw-bold"
                   onClick={() => onGenerateReport && onGenerateReport(group)}
                 >
-                  Report
+                  {t('group_card.report', 'Report')}
                 </button>
               </div>
             </div>
           ) : isMember ? (
             <Link to={`/groups/${group.id}`} className="btn btn-outline-primary w-100 fw-bold">
-                View Details
+                {t('group_card.view_details', 'View Details')}
             </Link>
           ) : (
             <div>
               {joinRequestStatus === 'PENDING' ? (
                 <button className="btn btn-warning w-100 fw-bold text-dark" disabled>
-                    Request Pending
+                    {t('group_card.request_pending', 'Request Pending')}
                 </button>
               ) : joinRequestStatus === 'APPROVED' ? (
                 <Link to={`/groups/${group.id}`} className="btn btn-outline-primary w-100 fw-bold">
-                   View Details
+                   {t('group_card.view_details', 'View Details')}
                 </Link>
               ) : (
                 <button
                   className="btn btn-success w-100 fw-bold"
                   onClick={() => onRequestJoin && onRequestJoin(group)}
                 >
-                  ️ Request to Join
+                  ️ {t('group_card.request_to_join', 'Request to Join')}
                 </button>
               )}
             </div>

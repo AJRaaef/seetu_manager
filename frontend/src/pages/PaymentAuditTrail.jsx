@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import Icon from '../components/Icons';
 import { getPaymentAuditLogs, getAllAuditLogs } from '../api/auditApi';
 
 const PaymentAuditTrail = () => {
+  const { t } = useTranslation();
   const { user, isAdmin, isOrganizer } = useAuth();
   
   const [auditLogs, setAuditLogs] = useState([]);
