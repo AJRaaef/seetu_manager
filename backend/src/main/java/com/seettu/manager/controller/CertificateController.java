@@ -47,4 +47,24 @@ public class CertificateController {
     public ResponseEntity<ApiResponse<List<Certificate>>> getCertificatesByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(ApiResponse.success(certificateService.getCertificatesByUser(userId)));
     }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<org.springframework.core.io.Resource> downloadCertificate(@PathVariable Long id) {
+        Certificate cert = certificateService.getCertificateById(id);
+        String fileName = "CERT_" + cert.getCertificateUuid() + ".pdf";
+        java.io.File file = new java.io.File("./certificates/" + fileName);
+        if (!file.exists()) {
+            try {
+                certificateService.buildPdfFile(cert.getCertificateUuid(), cert.getUser(), cert.getGroup());
+            } catch (Exception ignored) {}
+        }
+        if (!file.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+        org.springframework.core.io.Resource resource = new org.springframework.core.io.FileSystemResource(file);
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                .body(resource);
+    }
 }
