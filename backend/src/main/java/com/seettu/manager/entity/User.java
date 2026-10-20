@@ -65,7 +65,7 @@ public class User implements UserDetails {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "verified_by")
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "verifiedBy"})
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private User verifiedBy;
 
     @Column(name = "verified_at")
