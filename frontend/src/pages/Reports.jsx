@@ -25,69 +25,69 @@ const Reports = () => {
 
   const templates = (isAdmin || isOrganizer)
     ? [
-        {
-          name: 'Group Summary Audit',
-          icon: 'users',
-          bgColor: '#E0F2FE',
-          iconColor: '#0284C7',
-          type: 'GROUP_SUMMARY',
-          title: 'Monthly Group Summary Audit',
-          content: 'Audit report summarizing total active groups, registered member headcount, pot balances, and draw rotation statuses.',
-          desc: 'High-level audit of group health, rotation cycles, and collected funds.'
-        },
-        {
-          name: 'Payment Audit Trail',
-          icon: 'payments',
-          bgColor: '#ECFDF5',
-          iconColor: '#059669',
-          type: 'PAYMENT_AUDIT',
-          title: 'System Payment Audit Trail',
-          content: 'Detailed ledger of all verified member payments, pending installments, and overdue fines across groups.',
-          desc: 'Complete payment reconciliation across all group cycles.'
-        },
-        {
-          name: 'Discipline Score Summary',
-          icon: 'award',
-          bgColor: '#FEF3C7',
-          iconColor: '#D97706',
-          type: 'DISCIPLINE_SCORE_SUMMARY',
-          title: 'Member Discipline Score Summary',
-          content: 'Performance rankings and compliance ratings identifying on-time contributors and frequent default risks.',
-          desc: 'Comprehensive reliability scores and payment discipline analytics.'
-        }
-      ]
+      {
+        name: 'Group Summary Audit',
+        icon: 'users',
+        bgColor: '#E0F2FE',
+        iconColor: '#0284C7',
+        type: 'GROUP_SUMMARY',
+        title: 'Monthly Group Summary Audit',
+        content: 'Audit report summarizing total active groups, registered member headcount, pot balances, and draw rotation statuses.',
+        desc: 'High-level audit of group health, rotation cycles, and collected funds.'
+      },
+      {
+        name: 'Payment Audit Trail',
+        icon: 'payments',
+        bgColor: '#ECFDF5',
+        iconColor: '#059669',
+        type: 'PAYMENT_AUDIT',
+        title: 'System Payment Audit Trail',
+        content: 'Detailed ledger of all verified member payments, pending installments, and overdue fines across groups.',
+        desc: 'Complete payment reconciliation across all group cycles.'
+      },
+      {
+        name: 'Discipline Score Summary',
+        icon: 'award',
+        bgColor: '#FEF3C7',
+        iconColor: '#D97706',
+        type: 'DISCIPLINE_SCORE_SUMMARY',
+        title: 'Member Discipline Score Summary',
+        content: 'Performance rankings and compliance ratings identifying on-time contributors and frequent default risks.',
+        desc: 'Comprehensive reliability scores and payment discipline analytics.'
+      }
+    ]
     : [
-        {
-          name: 'Personal Payment History',
-          icon: 'payments',
-          bgColor: '#ECFDF5',
-          iconColor: '#059669',
-          type: 'PERSONAL_PAYMENT_HISTORY',
-          title: `Personal Payment History & Receipts - ${user?.fullName || 'Member'}`,
-          content: `Comprehensive contribution statement detailing all verified offline & online monthly installments, payment cycles, and receipt references for ${user?.fullName || 'Member'}.`,
-          desc: 'Official statement of all your completed contributions and advance balances.'
-        },
-        {
-          name: 'Discipline Scorecard',
-          icon: 'award',
-          bgColor: '#FEF3C7',
-          iconColor: '#D97706',
-          type: 'DISCIPLINE_SCORE_SUMMARY',
-          title: `Personal Discipline Scorecard - ${user?.fullName || 'Member'}`,
-          content: `Financial discipline certification confirming on-time payment track record (100% completion rate), zero default history, and high reliability rating across Seettu groups.`,
-          desc: 'Proof of your reliable credit standing, zero default rate, and 100% on-time score.'
-        },
-        {
-          name: 'Group Activity & Payout Schedule',
-          icon: 'users',
-          bgColor: '#E0F2FE',
-          iconColor: '#0284C7',
-          type: 'GROUP_SUMMARY',
-          title: `Group Activity & Payout Schedule - ${user?.fullName || 'Member'}`,
-          content: `Summary of active Seettu groups joined by ${user?.fullName || 'Member'}, assigned contribution turns, and scheduled payout distribution dates.`,
-          desc: 'Overview of all your enrolled Seettu groups and scheduled payout turns.'
-        }
-      ];
+      {
+        name: 'Personal Payment History',
+        icon: 'payments',
+        bgColor: '#ECFDF5',
+        iconColor: '#059669',
+        type: 'PERSONAL_PAYMENT_HISTORY',
+        title: `Personal Payment History & Receipts - ${user?.fullName || 'Member'}`,
+        content: `Comprehensive contribution statement detailing all verified offline & online monthly installments, payment cycles, and receipt references for ${user?.fullName || 'Member'}.`,
+        desc: 'Official statement of all your completed contributions and advance balances.'
+      },
+      {
+        name: 'Discipline Scorecard',
+        icon: 'award',
+        bgColor: '#FEF3C7',
+        iconColor: '#D97706',
+        type: 'DISCIPLINE_SCORE_SUMMARY',
+        title: `Personal Discipline Scorecard - ${user?.fullName || 'Member'}`,
+        content: `Financial discipline certification confirming on-time payment track record (100% completion rate), zero default history, and high reliability rating across Seettu groups.`,
+        desc: 'Proof of your reliable credit standing, zero default rate, and 100% on-time score.'
+      },
+      {
+        name: 'Group Activity & Payout Schedule',
+        icon: 'users',
+        bgColor: '#E0F2FE',
+        iconColor: '#0284C7',
+        type: 'GROUP_SUMMARY',
+        title: `Group Activity & Payout Schedule - ${user?.fullName || 'Member'}`,
+        content: `Summary of active Seettu groups joined by ${user?.fullName || 'Member'}, assigned contribution turns, and scheduled payout distribution dates.`,
+        desc: 'Overview of all your enrolled Seettu groups and scheduled payout turns.'
+      }
+    ];
 
   const openModalWithTemplate = (tpl) => {
     setFormData({
@@ -123,13 +123,13 @@ const Reports = () => {
         const raw = gRes?.data ?? gRes;
         const gList = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
         setReportGroups(gList);
-      }).catch(() => {});
+      }).catch(() => { });
 
       getAllPayments().then((pRes) => {
         const raw = pRes?.data ?? pRes;
         const pList = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
         setReportPayments(pList);
-      }).catch(() => {});
+      }).catch(() => { });
     } catch (err) {
       console.error(err);
       // Fallback for user if getAllReports endpoint fails
@@ -360,8 +360,8 @@ const Reports = () => {
           </div>
           <p className="text-muted mb-0">Generate, review, and print audit summaries for financial groups</p>
         </div>
-        <button 
-          className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
+        <button
+          className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2"
           onClick={() => setShowModal(true)}
         >
           <span>+</span> Generate New Report
@@ -388,8 +388,8 @@ const Reports = () => {
                 : 'Select one of the recommended member report templates below or create a custom report.'}
             </p>
             <div>
-              <button 
-                className="btn btn-teal px-4 py-2" 
+              <button
+                className="btn btn-teal px-4 py-2"
                 onClick={() => {
                   setFormData({
                     title: (isAdmin || isOrganizer) ? 'Monthly Group Summary Audit' : `Personal Payment History & Receipts - ${user?.fullName || 'Member'}`,
@@ -451,8 +451,8 @@ const Reports = () => {
                       <strong>Generated On:</strong> {r.createdAt ? new Date(r.createdAt).toLocaleString() : 'N/A'}
                     </small>
                   </div>
-                  <button 
-                    className="btn btn-outline-primary w-100 fw-semibold" 
+                  <button
+                    className="btn btn-outline-primary w-100 fw-semibold"
                     onClick={() => setSelectedReport(r)}
                   >
                     View / Print Report
