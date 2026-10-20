@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../hooks/useLanguage';
@@ -8,6 +9,7 @@ import LegalPoliciesModal from '../components/LegalPoliciesModal';
 import BecomeOrganizerModal from '../components/BecomeOrganizerModal';
 
 const LandingPage = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { language, changeLanguage } = useLanguage();
   const { unreadCount } = useNotification();
@@ -44,44 +46,44 @@ const LandingPage = () => {
   const heroSlides = [
     {
       id: 0,
-      tag: 'TRADITIONAL SRI LANKAN SEETTU (සීට්ටු / சீட்டு)',
-      bannerTitle: 'HAPPY AND SATISFIED SEETTU MEMBERS',
-      mainTitle: 'Traditional Community Savings, Powered by Digital Trust',
-      subtitle: 'Digitize your village or neighborhood Seettu (සීට්ටු / சீட்டு) circle with transparent contribution logs, automated rotation cycles, and mutual financial discipline.',
-      cta: 'Explore How It Works',
+      tag: t('landing.slide_0_tag', 'TRADITIONAL SRI LANKAN SEETTU (සීට්ටු / சீட்டு)'),
+      bannerTitle: t('landing.slide_0_banner', 'HAPPY AND SATISFIED SEETTU MEMBERS'),
+      mainTitle: t('landing.slide_0_title', 'Traditional Community Savings, Powered by Digital Trust'),
+      subtitle: t('landing.slide_0_sub', 'Digitize your village or neighborhood Seettu (සීට්ටු / சீட்டு) circle with transparent contribution logs, automated rotation cycles, and mutual financial discipline.'),
+      cta: t('landing.slide_0_cta', 'Explore How It Works'),
       link: '#how-it-works',
       bgImage: 'https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?auto=format&fit=crop&w=1600&q=80',
       badgeColor: '#0097B2'
     },
     {
       id: 1,
-      tag: 'LOCAL TRADERS & COMMUNITY MERCHANTS',
-      bannerTitle: 'TRANSPARENT ROTATIONS & SCHEDULED PAYOUTS',
-      mainTitle: 'Automated Record-Keeping for Sri Lankan Savings Groups',
-      subtitle: 'Eliminate forgotten payments and handwritten notebook disputes. Manage cash handovers, bank slip verifications, and scheduled lump-sum payouts seamlessly.',
-      cta: 'Create a Seettu Group',
+      tag: t('landing.slide_1_tag', 'LOCAL TRADERS & COMMUNITY MERCHANTS'),
+      bannerTitle: t('landing.slide_1_banner', 'TRANSPARENT ROTATIONS & SCHEDULED PAYOUTS'),
+      mainTitle: t('landing.slide_1_title', 'Automated Record-Keeping for Sri Lankan Savings Groups'),
+      subtitle: t('landing.slide_1_sub', 'Eliminate forgotten payments and handwritten notebook disputes. Manage cash handovers, bank slip verifications, and scheduled lump-sum payouts seamlessly.'),
+      cta: t('landing.slide_1_cta', 'Create a Seettu Group'),
       link: user ? '/groups/create' : '/register',
       bgImage: 'https://images.unsplash.com/photo-1556742044-3c52d6e88c62?auto=format&fit=crop&w=1600&q=80',
       badgeColor: '#0F2F3D'
     },
     {
       id: 2,
-      tag: 'TRADITIONAL GOLD SEETTU (රන් සීට්ටු / தங்கச் சீட்டு)',
-      bannerTitle: 'GOLD & VALUABLE ASSET-BASED SEETTU',
-      mainTitle: 'Preserve Family Wealth with Traditional Gold Rotations',
-      subtitle: 'Organize high-value rotation pools for sovereign gold jewelry, farming equipment, and vehicles with verified item valuation.',
-      cta: 'Learn About Asset Seettu',
+      tag: t('landing.slide_2_tag', 'TRADITIONAL GOLD SEETTU (රන් සීට්ටු / தங்கச் சீட்டு)'),
+      bannerTitle: t('landing.slide_2_banner', 'GOLD & VALUABLE ASSET-BASED SEETTU'),
+      mainTitle: t('landing.slide_2_title', 'Preserve Family Wealth with Traditional Gold Rotations'),
+      subtitle: t('landing.slide_2_sub', 'Organize high-value rotation pools for sovereign gold jewelry, farming equipment, and vehicles with verified item valuation.'),
+      cta: t('landing.slide_2_cta', 'Learn About Asset Seettu'),
       link: '#about',
       bgImage: 'https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?auto=format&fit=crop&w=1600&q=80',
       badgeColor: '#FFB020'
     },
     {
       id: 3,
-      tag: 'VERIFIED DISCIPLINE SCORING',
-      bannerTitle: 'VERIFIED 0–100 FINANCIAL DISCIPLINE RATINGS',
-      mainTitle: 'Build Community Trust with Tamper-Proof Discipline Scores',
-      subtitle: 'On-time monthly contributions award recognized discipline scores and unlock verified completion certificates for all group members.',
-      cta: 'About Our System',
+      tag: t('landing.slide_3_tag', 'VERIFIED DISCIPLINE SCORING'),
+      bannerTitle: t('landing.slide_3_banner', 'VERIFIED 0–100 FINANCIAL DISCIPLINE RATINGS'),
+      mainTitle: t('landing.slide_3_title', 'Build Community Trust with Tamper-Proof Discipline Scores'),
+      subtitle: t('landing.slide_3_sub', 'On-time monthly contributions award recognized discipline scores and unlock verified completion certificates for all group members.'),
+      cta: t('landing.slide_3_cta', 'About Our System'),
       link: '#about',
       bgImage: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1600&q=80',
       badgeColor: '#0097B2'
@@ -568,19 +570,19 @@ const LandingPage = () => {
           <div className="collapse navbar-collapse" id="landingNav">
             <ul className="navbar-nav mx-auto mb-2 mb-lg-0 fw-bold fs-6">
               <li className="nav-item">
-                <a className="nav-link px-3 active fw-bold" style={{ color: '#0097B2' }} href="#">Home</a>
+                <a className="nav-link px-3 active fw-bold" style={{ color: '#0097B2' }} href="#">{t('landing.nav_home', 'Home')}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 fw-bold text-dark" href="#about">About Us</a>
+                <a className="nav-link px-3 fw-bold text-dark" href="#about">{t('landing.nav_about', 'About Us')}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 fw-bold text-dark" href="#how-it-works">How It Works</a>
+                <a className="nav-link px-3 fw-bold text-dark" href="#how-it-works">{t('landing.nav_how_it_works', 'How It Works')}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 fw-bold text-dark" href="#faq">FAQs</a>
+                <a className="nav-link px-3 fw-bold text-dark" href="#faq">{t('landing.nav_faq', 'FAQs')}</a>
               </li>
               <li className="nav-item">
-                <a className="nav-link px-3 fw-bold text-dark" href="#contact">Contact Us</a>
+                <a className="nav-link px-3 fw-bold text-dark" href="#contact">{t('landing.nav_contact', 'Contact Us')}</a>
               </li>
             </ul>
 
@@ -589,7 +591,7 @@ const LandingPage = () => {
                 Create Circle
               </Link>
               <Link to={user ? '/dashboard' : '/register'} className="btn fw-bold text-white px-3 py-2 rounded-2 shadow-sm" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2', fontSize: '0.88rem' }}>
-                {user ? 'My Account' : 'Get Started'}
+                {user ? t('landing.nav_my_account', 'My Account') : t('landing.nav_get_started', 'Get Started')}
               </Link>
             </div>
           </div>
