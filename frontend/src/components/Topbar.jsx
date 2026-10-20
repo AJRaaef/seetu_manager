@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
@@ -13,7 +13,34 @@ const Topbar = ({ onToggleSidebar }) => {
   const { unreadCount } = useNotification();
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef(null);
+  const langMenuRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target)) {
+        setShowLangMenu(false);
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setShowUserMenu(false);
+        setShowLangMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -54,7 +81,7 @@ const Topbar = ({ onToggleSidebar }) => {
         </div>
 
         {/* Language Dropdown */}
-        <div className="position-relative">
+        <div className="position-relative" ref={langMenuRef}>
           <button
             onClick={() => { setShowLangMenu(!showLangMenu); setShowUserMenu(false); }}
             className="btn btn-link text-decoration-none text-dark p-1 d-flex align-items-center gap-1.5 fw-semibold"
@@ -129,7 +156,7 @@ const Topbar = ({ onToggleSidebar }) => {
         </Link>
 
         {/* User Avatar Circle */}
-        <div className="position-relative">
+        <div className="position-relative" ref={userMenuRef}>
           <button
             onClick={() => { setShowUserMenu(!showUserMenu); setShowLangMenu(false); }}
             className="btn btn-link p-0 text-decoration-none rounded-circle border d-flex align-items-center justify-content-center overflow-hidden"
@@ -152,26 +179,37 @@ const Topbar = ({ onToggleSidebar }) => {
 
           {showUserMenu && (
             <div className="position-absolute end-0 mt-2 bg-white rounded-3 shadow-lg border p-2" style={{ zIndex: 1050, minWidth: '220px' }}>
-              <div className="px-3 py-2 border-bottom d-flex align-items-center gap-2">
-                <div
-                  className="rounded-circle overflow-hidden border d-flex align-items-center justify-content-center flex-shrink-0"
-                  style={{ width: '36px', height: '36px', backgroundColor: '#3E7B8E', color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}
+              <div className="px-3 py-2 border-bottom d-flex align-items-center justify-content-between">
+                <div className="d-flex align-items-center gap-2" style={{ minWidth: 0 }}>
+                  <div
+                    className="rounded-circle overflow-hidden border d-flex align-items-center justify-content-center flex-shrink-0"
+                    style={{ width: '36px', height: '36px', backgroundColor: '#3E7B8E', color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}
+                  >
+                    {user?.profilePictureUrl ? (
+                      <img
+                        src={`http://localhost:8081${user.profilePictureUrl}`}
+                        alt={user?.fullName}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      (user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U')
+                    )}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="fw-bold text-truncate" style={{ maxWidth: '120px' }}>{user?.fullName || 'User'}</div>
+                    <div className="small text-muted text-truncate" style={{ maxWidth: '120px' }}>{user?.email}</div>
+                    <span className="badge bg-light text-dark border mt-0.5">{user?.role || 'MEMBER'}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-link text-muted p-0 border-0 ms-2"
+                  onClick={() => setShowUserMenu(false)}
+                  title="Close popup"
+                  style={{ lineHeight: 1 }}
                 >
-                  {user?.profilePictureUrl ? (
-                    <img
-                      src={`http://localhost:8081${user.profilePictureUrl}`}
-                      alt={user?.fullName}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                  ) : (
-                    (user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U')
-                  )}
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div className="fw-bold text-truncate" style={{ maxWidth: '145px' }}>{user?.fullName || 'User'}</div>
-                  <div className="small text-muted text-truncate" style={{ maxWidth: '145px' }}>{user?.email}</div>
-                  <span className="badge bg-light text-dark border mt-0.5">{user?.role || 'MEMBER'}</span>
-                </div>
+                  <Icon name="close" size={14} color="#6C757D" />
+                </button>
               </div>
               <Link
                 to="/notifications"

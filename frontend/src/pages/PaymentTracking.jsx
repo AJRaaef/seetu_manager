@@ -171,7 +171,7 @@ const PaymentTracking = () => {
         }
       }
 
-      alert(`✓ Payment ${(isAdmin || isOrganizer) ? 'recorded' : 'evidence submitted'} successfully${evidenceFile ? ' with attached payment slip' : ''}!`);
+      alert(`Payment ${(isAdmin || isOrganizer) ? 'recorded' : 'evidence submitted'} successfully${evidenceFile ? ' with attached payment slip' : ''}!`);
       setAmountInput('');
       setEvidenceFile(null);
       fetchPayments();
@@ -192,7 +192,7 @@ const PaymentTracking = () => {
         status: 'PAID',
         notes: 'Marked as Paid by Organizer'
       });
-      alert(`✓ Payment for ${payment.member} marked as Paid in database!`);
+      alert(`Payment for ${payment.member} marked as Paid in database!`);
       await fetchPayments();
     } catch (err) {
       console.error('Error updating payment status', err);
@@ -1042,7 +1042,7 @@ const PaymentTracking = () => {
         onHide={() => setReminderPayment(null)}
         payment={reminderPayment}
         onSend={(data) => {
-          alert(`✓ Payment reminder sent to ${data.payment.member} via ${data.channel}!`);
+          alert(`Payment reminder sent to ${data.payment.member} via ${data.channel}!`);
         }}
       />
 

@@ -80,7 +80,7 @@ const AdvancePayments = () => {
       if (formData.groupId) params.append('groupId', formData.groupId);
 
       await api.post(`/advance-payments?${params.toString()}`);
-      alert('✓ Advance payment recorded successfully!');
+      alert('Advance payment recorded successfully!');
       setShowModal(false);
       setFormData({ groupId: '', memberId: '', amount: '', notes: '' });
       fetchData();
@@ -106,7 +106,7 @@ const AdvancePayments = () => {
         notes: editFormData.notes || ''
       });
       await api.put(`/advance-payments/${editRecord.id}?${params.toString()}`);
-      alert('✓ Advance payment updated successfully!');
+      alert('Advance payment updated successfully!');
       setEditRecord(null);
       fetchData();
     } catch (err) {
@@ -120,7 +120,7 @@ const AdvancePayments = () => {
     }
     try {
       await api.delete(`/advance-payments/${id}`);
-      alert(`✓ Advance payment #ADV-${id} deleted successfully!`);
+      alert(`Advance payment #ADV-${id} deleted successfully!`);
       fetchData();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to delete advance payment.');

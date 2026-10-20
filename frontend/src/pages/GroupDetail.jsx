@@ -91,7 +91,7 @@ const GroupDetail = () => {
     setErrorMsg('');
     try {
       await addMember(id, memberUserId);
-      setActionMsg('✓ Member added successfully to group!');
+      setActionMsg('Member added successfully to group!');
       setShowAddMemberModal(false);
       setMemberUserId('');
       fetchGroup();
@@ -113,7 +113,7 @@ const GroupDetail = () => {
         const disc = parseFloat(bidDiscount) || 0;
         modeNote = ` via Auction (Bid Discount: LKR ${disc.toLocaleString()})`;
       }
-      setActionMsg(`✓ Payout for Cycle #${selectedCycle.cycleNumber} assigned successfully${modeNote}!`);
+      setActionMsg(`Payout for Cycle #${selectedCycle.cycleNumber} assigned successfully${modeNote}!`);
       setShowAssignPayoutModal(false);
       resetPayoutModal();
       setSelectedCycle(null);
@@ -128,7 +128,7 @@ const GroupDetail = () => {
     setErrorMsg('');
     try {
       await api.put(`/payment-cycles/${cycleId}/status?status=${status}`);
-      setActionMsg(`✓ Cycle status updated to ${status}!`);
+      setActionMsg(`Cycle status updated to ${status}!`);
       fetchGroup();
     } catch (err) {
       setErrorMsg(getErrorMessage(err, 'Failed to update cycle status.'));

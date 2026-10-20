@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/chatbot/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/*/profile-picture").permitAll()
                         .requestMatchers("/favicon.ico", "/favicon.svg").permitAll()
                         .anyRequest().authenticated()
                 )

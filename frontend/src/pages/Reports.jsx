@@ -521,7 +521,10 @@ const Reports = () => {
                     {/* Official Audit Verification Footer */}
                     <div className="pt-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2 text-muted small">
                       <div>
-                        <div>✓ Official automated financial statement generated from verified ledger.</div>
+                        <div className="d-flex align-items-center gap-1.5">
+                          <Icon name="check" size={13} color="#10B981" />
+                          <span>Official automated financial statement generated from verified ledger.</span>
+                        </div>
                         <small style={{ fontSize: '0.72rem' }}>SeettuManager • Sri Lankan Community Finance Platform</small>
                       </div>
                       <div className="text-end">

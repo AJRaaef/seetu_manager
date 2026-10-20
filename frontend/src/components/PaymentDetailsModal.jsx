@@ -35,11 +35,11 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
         await uploadPaymentEvidence(payment.id, file.name);
       }
       setAttachedFiles((prev) => [...prev, file.name]);
-      alert(`✓ Digital payment evidence "${file.name}" attached successfully!`);
+      alert(`Digital payment evidence "${file.name}" attached successfully!`);
     } catch (err) {
       console.error('Evidence upload failed', err);
       setAttachedFiles((prev) => [...prev, file.name]);
-      alert(`✓ Payment slip "${file.name}" attached.`);
+      alert(`Payment slip "${file.name}" attached.`);
     } finally {
       setUploading(false);
     }
