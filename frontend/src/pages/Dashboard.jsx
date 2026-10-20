@@ -129,7 +129,7 @@ const Dashboard = () => {
       notes: 'Approved payout disbursement'
     };
     setRecentPayments((prev) => [payoutRecord, ...prev]);
-    alert(`✓ Payout of ${data.amount} to ${data.recipient} approved & disbursed successfully!`);
+    alert(`Payout of ${data.amount} to ${data.recipient} approved & disbursed successfully!`);
   };
 
   const handleRowClick = (payment) => {
@@ -293,7 +293,7 @@ const Dashboard = () => {
             <div className="d-flex align-items-center gap-2 mb-2">
               <Icon name={payoutApproved ? 'check-circle' : 'megaphone'} size={20} color={payoutApproved ? '#34D399' : '#FACC15'} />
               <span className="fw-bold fs-6" style={{ color: payoutApproved ? '#34D399' : '#FFFFFF' }}>
-                {payoutApproved ? '✓ Payout Approved & Disbursed' : 'Upcoming Payout'}
+                {payoutApproved ? 'Payout Approved & Disbursed' : 'Upcoming Payout'}
               </span>
             </div>
             <div className="small text-white-50 mb-1" style={{ fontSize: '0.8rem' }}>
@@ -304,7 +304,7 @@ const Dashboard = () => {
               Date : {upcomingPayout.date}
             </div>
             <div className="fw-bold small" style={{ color: payoutApproved ? '#34D399' : '#FACC15' }}>
-              {payoutApproved ? '✓ Disbursed to Member' : upcomingPayout.daysRemaining}
+              {payoutApproved ? 'Disbursed to Member' : upcomingPayout.daysRemaining}
             </div>
           </div>
 

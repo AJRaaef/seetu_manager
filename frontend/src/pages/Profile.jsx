@@ -92,7 +92,7 @@ const Profile = () => {
     try {
       const requestedRole = wantsOrganizer ? 'ORGANIZER' : null;
       const res = await submitKyc(cleanNic, certFile, requestedRole);
-      setKycSuccess('✓ NIC and Grama Niladhari Certificate submitted successfully! System Admin has been notified for verification.');
+      setKycSuccess('NIC and Grama Niladhari Certificate submitted successfully! System Admin has been notified for verification.');
       setCertFile(null);
       if (updateUser) {
         updateUser({
@@ -160,7 +160,7 @@ const Profile = () => {
         });
       }
 
-      setActionMsg('✓ Profile updated successfully!');
+      setActionMsg('Profile updated successfully!');
       setIsEditing(false);
       await fetchProfile();
     } catch (err) {
@@ -203,7 +203,7 @@ const Profile = () => {
         user: { ...prev.user, profilePictureUrl: newPicUrl }
       } : prev);
 
-      setActionMsg('✓ Profile picture updated successfully!');
+      setActionMsg('Profile picture updated successfully!');
       await fetchProfile();
     } catch (err) {
       console.error('Failed to upload profile picture:', err);
@@ -230,7 +230,7 @@ const Profile = () => {
         user: { ...prev.user, profilePictureUrl: null }
       } : prev);
 
-      setActionMsg('✓ Profile picture removed successfully.');
+      setActionMsg('Profile picture removed successfully.');
       await fetchProfile();
     } catch (err) {
       console.error('Failed to remove profile picture:', err);

@@ -131,7 +131,7 @@ const Members = () => {
       setErrorMsg('');
       await verifyMemberKyc(userId, 'VERIFIED', '', role);
       const roleText = role === 'ORGANIZER' ? ' and promoted to Group Organizer' : '';
-      setActionMsg(`✓ Member ${memberName} identity & Grama Niladhari Certificate successfully verified${roleText}!`);
+      setActionMsg(`Member ${memberName} identity & Grama Niladhari Certificate successfully verified${roleText}!`);
       await fetchData();
     } catch (err) {
       setErrorMsg(getErrorMessage(err, 'Failed to verify member identity.'));
@@ -158,7 +158,7 @@ const Members = () => {
       setActionMsg('');
       setErrorMsg('');
       await inviteMember(groupId, { fullName, email, phone });
-      setActionMsg(`✓ Member ${fullName} added successfully to group!`);
+      setActionMsg(`Member ${fullName} added successfully to group!`);
       await fetchData();
     } catch (err) {
       setErrorMsg(getErrorMessage(err, 'Failed to add member.'));

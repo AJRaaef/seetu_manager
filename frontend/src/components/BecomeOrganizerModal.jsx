@@ -342,7 +342,7 @@ const BecomeOrganizerModal = ({ show, onHide }) => {
                         {/* Step 1 */}
                         <div className="d-flex align-items-start gap-2.5">
                           <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white" style={{ width: '24px', height: '24px', backgroundColor: '#10B981', fontSize: '0.75rem' }}>
-                            ✓
+                            <Icon name="check" size={13} color="#FFFFFF" />
                           </div>
                           <div>
                             <strong className="text-dark d-block">Step 1: Application Received & Queued</strong>

@@ -409,7 +409,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                   </div>
                 </div>
                 <span className={`badge ${openDisputesCount === 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle'} px-2 py-1 rounded`} style={{ fontSize: '0.72rem' }}>
-                  {openDisputesCount === 0 ? '✓ 100% Cleared' : `${openDisputesCount} Active Issue`}
+                  {openDisputesCount === 0 ? '100% Cleared' : `${openDisputesCount} Active Issue`}
                 </span>
               </div>
 

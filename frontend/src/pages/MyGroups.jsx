@@ -126,7 +126,7 @@ const MyGroups = () => {
     setSubmittingJoin(true);
     try {
       await createJoinRequest(selectedJoinGroup, userId);
-      alert('✓ Request to join Seettu group submitted successfully! The group organizer will review your request.');
+      alert('Request to join Seettu group submitted successfully! The group organizer will review your request.');
       setShowJoinModal(false);
       setSelectedJoinGroup('');
       setJoinMsg('');
