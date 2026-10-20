@@ -45,6 +45,17 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", updated));
     }
 
+    @GetMapping("/{id}/profile-picture")
+    public ResponseEntity<?> getProfilePicture(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        if (user.getProfilePictureUrl() != null && !user.getProfilePictureUrl().isBlank()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FOUND)
+                    .location(java.net.URI.create(user.getProfilePictureUrl()))
+                    .build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @PostMapping("/{id}/profile-picture")
     public ResponseEntity<ApiResponse<User>> uploadProfilePicture(
             @PathVariable Long id,
