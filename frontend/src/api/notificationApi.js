@@ -1,0 +1,37 @@
+import api from './axios';
+
+export const getAllNotifications = async () => {
+  const response = await api.get('/notifications');
+  return response.data;
+};
+
+export const getNotificationsByUser = async (userId) => {
+  const response = await api.get(`/notifications/user/${userId}`);
+  return response.data;
+};
+
+export const getUnreadNotifications = async (userId) => {
+  const response = await api.get(`/notifications/user/${userId}/unread`);
+  return response.data;
+};
+
+export const getUnreadCount = async (userId) => {
+  const response = await api.get(`/notifications/user/${userId}/unread-count`);
+  return response.data;
+};
+
+export const markAsRead = async (id) => {
+  const response = await api.put(`/notifications/${id}/read`);
+  return response.data;
+};
+
+export const markAllAsRead = async (userId) => {
+  const response = await api.put(`/notifications/user/${userId}/read-all`);
+  return response.data;
+};
+
+export const sendDirectNotification = async (data) => {
+  const response = await api.post('/notifications/send', data);
+  return response.data;
+};
+

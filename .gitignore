@@ -1,0 +1,30 @@
+# Backend
+backend/target/
+*.class
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+
+# Generated Runtime Files & Uploads
+*.pdf
+certificates/
+reports/
+uploads/
+backend/certificates/
+backend/reports/
+backend/uploads/
