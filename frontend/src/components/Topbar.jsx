@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../hooks/useLanguage';
 import { useNotification } from '../hooks/useNotification';
 import Icon from './Icons';
 
 const Topbar = ({ onToggleSidebar }) => {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const { language, changeLanguage } = useLanguage();
   const { unreadCount } = useNotification();
@@ -38,7 +40,7 @@ const Topbar = ({ onToggleSidebar }) => {
               <span className="brand-manager">Manager</span>
             </span>
             <span style={{ fontSize: '0.62rem', fontWeight: 600, color: '#0097B2', letterSpacing: '0.2px', marginTop: '2px', lineHeight: '1' }}>
-              Save Together. Grow Together.
+              {t('topbar.tagline', 'Save Together. Grow Together.')}
             </span>
           </div>
         </Link>
@@ -48,39 +50,48 @@ const Topbar = ({ onToggleSidebar }) => {
         {/* Search Box */}
         <div className="topbar-search-box d-none d-md-flex">
           <Icon name="search" size={16} color="#FFFFFF" />
-          <input type="text" placeholder="Search" />
+          <input type="text" placeholder={t('topbar.search', 'Search')} />
         </div>
 
         {/* Language Dropdown */}
         <div className="position-relative">
           <button
             onClick={() => { setShowLangMenu(!showLangMenu); setShowUserMenu(false); }}
-            className="btn btn-link text-decoration-none text-dark p-1 d-flex align-items-center gap-1 fw-semibold"
-            style={{ fontSize: '0.9rem' }}
+            className="btn btn-link text-decoration-none text-dark p-1 d-flex align-items-center gap-1.5 fw-semibold"
+            style={{ fontSize: '0.88rem' }}
+            title="Change Language"
           >
-            <span>{language.toUpperCase()}</span>
+            <span className="badge rounded-pill bg-light text-secondary border px-2 py-0.5" style={{ fontSize: '0.72rem', letterSpacing: '0.5px' }}>
+              {language.toUpperCase()}
+            </span>
+            <span className="d-none d-sm-inline">
+              {language === 'si' ? 'සිංහල' : language === 'ta' ? 'தமிழ்' : 'English'}
+            </span>
             <Icon name="chevron-down" size={13} className="text-muted" />
           </button>
 
           {showLangMenu && (
-            <div className="position-absolute end-0 mt-2 bg-white rounded-3 shadow-lg border p-2" style={{ zIndex: 1050, minWidth: '150px' }}>
+            <div className="position-absolute end-0 mt-2 bg-white rounded-3 shadow-lg border p-2" style={{ zIndex: 1050, minWidth: '165px' }}>
               <button
-                className={`dropdown-item py-1 px-3 rounded-2 text-start w-100 btn btn-link text-decoration-none ${language === 'en' ? 'fw-bold text-primary' : 'text-dark'}`}
+                className={`dropdown-item py-1.5 px-3 rounded-2 text-start w-100 btn btn-link text-decoration-none d-flex align-items-center justify-content-between ${language === 'en' ? 'fw-bold text-primary bg-light' : 'text-dark'}`}
                 onClick={() => { changeLanguage('en'); setShowLangMenu(false); }}
               >
-                English (EN)
+                <span>English</span>
+                <span className="badge bg-secondary bg-opacity-10 text-secondary ms-2" style={{ fontSize: '0.7rem' }}>EN</span>
               </button>
               <button
-                className={`dropdown-item py-1 px-3 rounded-2 text-start w-100 btn btn-link text-decoration-none ${language === 'si' ? 'fw-bold text-primary' : 'text-dark'}`}
+                className={`dropdown-item py-1.5 px-3 rounded-2 text-start w-100 btn btn-link text-decoration-none d-flex align-items-center justify-content-between ${language === 'si' ? 'fw-bold text-primary bg-light' : 'text-dark'}`}
                 onClick={() => { changeLanguage('si'); setShowLangMenu(false); }}
               >
-                Sinhala (SI)
+                <span>සිංහල</span>
+                <span className="badge bg-secondary bg-opacity-10 text-secondary ms-2" style={{ fontSize: '0.7rem' }}>SI</span>
               </button>
               <button
-                className={`dropdown-item py-1 px-3 rounded-2 text-start w-100 btn btn-link text-decoration-none ${language === 'ta' ? 'fw-bold text-primary' : 'text-dark'}`}
+                className={`dropdown-item py-1.5 px-3 rounded-2 text-start w-100 btn btn-link text-decoration-none d-flex align-items-center justify-content-between ${language === 'ta' ? 'fw-bold text-primary bg-light' : 'text-dark'}`}
                 onClick={() => { changeLanguage('ta'); setShowLangMenu(false); }}
               >
-                Tamil (TA)
+                <span>தமிழ்</span>
+                <span className="badge bg-secondary bg-opacity-10 text-secondary ms-2" style={{ fontSize: '0.7rem' }}>TA</span>
               </button>
             </div>
           )}
@@ -169,7 +180,7 @@ const Topbar = ({ onToggleSidebar }) => {
               >
                 <div className="d-flex align-items-center gap-2">
                   <Icon name="bell" size={16} color="#0097B2" />
-                  <span>Notifications</span>
+                  <span>{t('topbar.notifications', 'Notifications')}</span>
                 </div>
                 {unreadCount > 0 && (
                   <span className="badge bg-danger rounded-pill" style={{ fontSize: '0.7rem' }}>{unreadCount}</span>
@@ -181,7 +192,7 @@ const Topbar = ({ onToggleSidebar }) => {
                 onClick={() => setShowUserMenu(false)}
               >
                 <Icon name="user" size={16} />
-                <span>My Profile</span>
+                <span>{t('topbar.my_profile', 'My Profile')}</span>
               </Link>
               <div className="border-top my-1"></div>
               <button
@@ -189,7 +200,7 @@ const Topbar = ({ onToggleSidebar }) => {
                 className="dropdown-item py-2 px-3 rounded-2 d-flex align-items-center gap-2 text-danger w-100 btn btn-link text-decoration-none"
               >
                 <Icon name="logout" size={16} color="#DC2626" />
-                <span>Logout</span>
+                <span>{t('topbar.logout', 'Logout')}</span>
               </button>
             </div>
           )}

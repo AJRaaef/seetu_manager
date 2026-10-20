@@ -138,10 +138,12 @@ const CreateGroup = () => {
           {/* Header Banner matching theme color pattern */}
           <div className="p-4" style={{ backgroundColor: '#235665', color: '#FFFFFF' }}>
             <div className="d-flex align-items-center mb-1">
-              <h4 className="mb-0 fw-bold text-white" style={{ fontSize: '1.25rem' }}>Create Group</h4>
+              <h4 className="mb-0 fw-bold text-white" style={{ fontSize: '1.25rem' }}>
+                {t('create_group_page.title', 'Create Group')}
+              </h4>
             </div>
             <p className="mb-0 text-white-50" style={{ fontSize: '0.85rem' }}>
-              Configure contribution terms, member capacity, Seettu type, and shop details
+              {t('create_group_page.subtitle', 'Configure contribution terms, member capacity, Seettu type, and shop details')}
             </p>
           </div>
 
@@ -156,11 +158,13 @@ const CreateGroup = () => {
               {/* Group Name & Seettu Model */}
               <div className="row mb-3">
                 <div className="col-md-6 mb-3 mb-md-0">
-                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Group Name <span className="text-danger">*</span></label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
+                    {t('create_group_page.group_name', 'Group Name')} <span className="text-danger">*</span>
+                  </label>
                   <input
                     type="text"
                     className="form-control"
-                    placeholder="e.g. Gold Saver Circle Q4"
+                    placeholder={t('create_group_page.group_name_placeholder', 'e.g. Gold Saver Circle Q4')}
                     value={formData.name}
                     onChange={e => setFormData({...formData, name: e.target.value})}
                     style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
@@ -169,7 +173,7 @@ const CreateGroup = () => {
                 </div>
                 <div className="col-md-6">
                   <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
-                    Seettu Model <span className="text-danger">*</span>
+                    {t('create_group_page.seettu_model', 'Seettu Model')} <span className="text-danger">*</span>
                   </label>
                   <select 
                     className="form-select fw-semibold" 
@@ -177,10 +181,10 @@ const CreateGroup = () => {
                     onChange={e => handleModelChange(e.target.value)}
                     style={{ borderRadius: '8px', border: '1px solid #235665', backgroundColor: '#F0F9FA' }}
                   >
-                    <option value="FIXED_ROTATION">Fixed Rotation Seettu (Predetermined queue)</option>
-                    <option value="AUCTION">Auction / Bidding Seettu (Discount bidding & dividends)</option>
-                    <option value="RANDOM_DRAW">Random Draw / Lottery (Algorithmic lot selection)</option>
-                    <option value="NON_MONETARY">Non-Monetary Asset Seettu (Physical goods & shops)</option>
+                    <option value="FIXED_ROTATION">{t('create_group_page.models.fixed_rotation', 'Fixed Rotation Seettu (Predetermined queue)')}</option>
+                    <option value="AUCTION">{t('create_group_page.models.auction', 'Auction / Bidding Seettu (Discount bidding & dividends)')}</option>
+                    <option value="RANDOM_DRAW">{t('create_group_page.models.random_draw', 'Random Draw / Lottery (Algorithmic lot selection)')}</option>
+                    <option value="NON_MONETARY">{t('create_group_page.models.non_monetary', 'Non-Monetary Asset Seettu (Physical goods & shops)')}</option>
                   </select>
                 </div>
               </div>
@@ -188,16 +192,16 @@ const CreateGroup = () => {
               {/* Dynamic Model Guidance Banner */}
               <div className="alert alert-info py-2 px-3 mb-3 small border-0 bg-info-subtle text-info-emphasis rounded-3">
                 {formData.groupModel === 'FIXED_ROTATION' && (
-                  <span><strong>Fixed Rotation Seettu:</strong> Members take turns in a predetermined rotational order to receive the standard pooled lump-sum.</span>
+                  <span>{t('create_group_page.guidance.fixed_rotation', 'Fixed Rotation Seettu: Members take turns in a predetermined rotational order to receive the standard pooled lump-sum.')}</span>
                 )}
                 {formData.groupModel === 'AUCTION' && (
-                  <span><strong>Auction / Bidding Seettu:</strong> Members submit competitive discount bids for early pot access. The discount is redistributed as monthly dividends to reduce other subscribers' installments.</span>
+                  <span>{t('create_group_page.guidance.auction', 'Auction / Bidding Seettu: Members submit competitive discount bids for early pot access. The discount is redistributed as monthly dividends to reduce other subscribers\' installments.')}</span>
                 )}
                 {formData.groupModel === 'RANDOM_DRAW' && (
-                  <span><strong>Random Draw / Lottery:</strong> Neutral algorithmic lot selection chooses the winning payout recipient fairly each cycle from eligible non-prizewinners.</span>
+                  <span>{t('create_group_page.guidance.random_draw', 'Random Draw / Lottery: Neutral algorithmic lot selection chooses the winning payout recipient fairly each cycle from eligible non-prizewinners.')}</span>
                 )}
                 {formData.groupModel === 'NON_MONETARY' && (
-                  <span><strong>Non-Monetary Asset Seettu:</strong> Rotating savings pool for tangible high-value physical goods (jewelry, electronics, machinery) backed by a registered partner merchant shop.</span>
+                  <span>{t('create_group_page.guidance.non_monetary', 'Non-Monetary Asset Seettu: Rotating savings pool for tangible high-value physical goods (jewelry, electronics, machinery) backed by a registered partner merchant shop.')}</span>
                 )}
               </div>
 
@@ -205,7 +209,9 @@ const CreateGroup = () => {
               <div className="row mb-3">
                 <div className="col-md-6 mb-3 mb-md-0">
                   <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
-                    {formData.groupModel === 'NON_MONETARY' ? 'Physical Asset Category' : 'Group Category'}
+                    {formData.groupModel === 'NON_MONETARY' 
+                      ? t('create_group_page.physical_asset_category', 'Physical Asset Category') 
+                      : t('create_group_page.group_category', 'Group Category')}
                   </label>
                   <select 
                     className="form-select" 
@@ -215,17 +221,17 @@ const CreateGroup = () => {
                   >
                     {formData.groupModel === 'NON_MONETARY' ? (
                       <>
-                        <option value="GOLD">Gold & Jewelry (Sovereign)</option>
-                        <option value="FURNITURE">Furniture & Home Goods</option>
-                        <option value="VEHICLE">Vehicle & Auto Equipment</option>
-                        <option value="APPLIANCES">Electronics & Appliances</option>
+                        <option value="GOLD">{t('create_group_page.categories.gold', 'Gold & Jewelry (Sovereign)')}</option>
+                        <option value="FURNITURE">{t('create_group_page.categories.furniture', 'Furniture & Home Goods')}</option>
+                        <option value="VEHICLE">{t('create_group_page.categories.vehicle', 'Vehicle & Auto Equipment')}</option>
+                        <option value="APPLIANCES">{t('create_group_page.categories.appliances', 'Electronics & Appliances')}</option>
                       </>
                     ) : (
                       <>
-                        <option value="GENERAL">General Monetary</option>
-                        <option value="EMERGENCY">Emergency Liquidity Pool</option>
-                        <option value="BUSINESS">Business Working Capital</option>
-                        <option value="COMMUNITY">Community Self-Help Circle</option>
+                        <option value="GENERAL">{t('create_group_page.categories.general', 'General Monetary')}</option>
+                        <option value="EMERGENCY">{t('create_group_page.categories.emergency', 'Emergency Liquidity Pool')}</option>
+                        <option value="BUSINESS">{t('create_group_page.categories.business', 'Business Working Capital')}</option>
+                        <option value="COMMUNITY">{t('create_group_page.categories.community', 'Community Self-Help Circle')}</option>
                       </>
                     )}
                   </select>
@@ -233,7 +239,9 @@ const CreateGroup = () => {
                 <div className="col-md-6">
                   <div className="d-flex justify-content-between align-items-center mb-1">
                     <label className="form-label text-secondary fw-medium mb-0" style={{ fontSize: '0.875rem' }}>
-                      {formData.groupModel === 'NON_MONETARY' ? 'Partner Merchant Shop (Mandatory)' : 'Associated Shop (Optional)'}
+                      {formData.groupModel === 'NON_MONETARY' 
+                        ? t('create_group_page.partner_merchant_shop', 'Partner Merchant Shop (Mandatory)') 
+                        : t('create_group_page.associated_shop', 'Associated Shop (Optional)')}
                     </label>
                     <button 
                       type="button" 
@@ -241,7 +249,7 @@ const CreateGroup = () => {
                       style={{ fontSize: '0.8rem', color: '#235665' }}
                       onClick={() => setShowAddShopModal(true)}
                     >
-                      + Register Shop
+                      {t('create_group_page.register_shop', '+ Register Shop')}
                     </button>
                   </div>
                   <select
@@ -251,7 +259,11 @@ const CreateGroup = () => {
                     style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                     required={formData.groupModel === 'NON_MONETARY'}
                   >
-                    <option value="">{formData.groupModel === 'NON_MONETARY' ? '-- Select Partner Merchant Shop --' : 'None / Independent Group'}</option>
+                    <option value="">
+                      {formData.groupModel === 'NON_MONETARY' 
+                        ? t('create_group_page.select_partner_shop', '-- Select Partner Merchant Shop --') 
+                        : t('create_group_page.none_independent', 'None / Independent Group')}
+                    </option>
                     {shops.map(shop => (
                       <option key={shop.id} value={shop.id}>
                         {shop.name} {shop.address ? `(${shop.address})` : ''}
@@ -262,11 +274,13 @@ const CreateGroup = () => {
               </div>
               
               <div className="mb-3">
-                <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Description</label>
+                <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
+                  {t('create_group_page.description', 'Description')}
+                </label>
                 <textarea
                   className="form-control"
                   rows="3"
-                  placeholder="Explain group rules, auction conditions, or purpose..."
+                  placeholder={t('create_group_page.desc_placeholder', 'Explain group rules, auction conditions, or purpose...')}
                   value={formData.description}
                   onChange={e => setFormData({...formData, description: e.target.value})}
                   style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
@@ -275,11 +289,13 @@ const CreateGroup = () => {
               
               <div className="row mb-4">
                 <div className="col-md-4 mb-3 mb-md-0">
-                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Contribution Amount (LKR)</label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
+                    {t('create_group_page.contribution_amount', 'Contribution Amount (LKR)')}
+                  </label>
                   <input
                     type="number"
                     className="form-control"
-                    placeholder="e.g. 10000"
+                    placeholder={t('create_group_page.amount_placeholder', 'e.g. 10000')}
                     value={formData.contributionAmount}
                     onChange={e => setFormData({...formData, contributionAmount: e.target.value})}
                     style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
@@ -287,11 +303,13 @@ const CreateGroup = () => {
                   />
                 </div>
                 <div className="col-md-4 mb-3 mb-md-0">
-                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Member Count</label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
+                    {t('create_group_page.member_count', 'Member Count')}
+                  </label>
                   <input
                     type="number"
                     className="form-control"
-                    placeholder="e.g. 12"
+                    placeholder={t('create_group_page.member_placeholder', 'e.g. 12')}
                     value={formData.memberCount}
                     onChange={e => setFormData({...formData, memberCount: e.target.value})}
                     style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
@@ -299,16 +317,18 @@ const CreateGroup = () => {
                   />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Cycle Frequency</label>
+                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
+                    {t('create_group_page.cycle_frequency', 'Cycle Frequency')}
+                  </label>
                   <select 
                     className="form-select" 
                     value={formData.cycleFrequency} 
                     onChange={e => setFormData({...formData, cycleFrequency: e.target.value})}
                     style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                   >
-                    <option value="MONTHLY">Monthly</option>
-                    <option value="WEEKLY">Weekly</option>
-                    <option value="BI_WEEKLY">Bi-Weekly</option>
+                    <option value="MONTHLY">{t('create_group_page.frequencies.monthly', 'Monthly')}</option>
+                    <option value="WEEKLY">{t('create_group_page.frequencies.weekly', 'Weekly')}</option>
+                    <option value="BI_WEEKLY">{t('create_group_page.frequencies.bi_weekly', 'Bi-Weekly')}</option>
                   </select>
                 </div>
               </div>
@@ -319,7 +339,9 @@ const CreateGroup = () => {
                 disabled={loading}
                 style={{ backgroundColor: '#235665', borderRadius: '8px', fontSize: '1rem' }}
               >
-                {loading ? 'Creating Group...' : 'Submit'}
+                {loading 
+                  ? t('create_group_page.creating', 'Creating Group...') 
+                  : t('create_group_page.submit', 'Submit')}
               </button>
             </form>
           </div>
@@ -333,8 +355,12 @@ const CreateGroup = () => {
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
               <div className="modal-header text-white" style={{ backgroundColor: '#235665' }}>
                 <div>
-                  <h5 className="modal-title fw-bold mb-0">Register Partner Merchant Shop</h5>
-                  <small className="text-white-50">Onboard verified retail merchant for Non-Monetary Asset Seettu</small>
+                  <h5 className="modal-title fw-bold mb-0">
+                    {t('create_group_page.register_shop_modal.title', 'Register Partner Merchant Shop')}
+                  </h5>
+                  <small className="text-white-50">
+                    {t('create_group_page.register_shop_modal.subtitle', 'Onboard verified retail merchant for Non-Monetary Asset Seettu')}
+                  </small>
                 </div>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowAddShopModal(false)}></button>
               </div>
@@ -346,11 +372,13 @@ const CreateGroup = () => {
                     </div>
                   )}
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium small">Shop / Merchant Showroom Name <span className="text-danger">*</span></label>
+                    <label className="form-label text-secondary fw-medium small">
+                      {t('create_group_page.register_shop_modal.shop_name', 'Shop / Merchant Showroom Name')} <span className="text-danger">*</span>
+                    </label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="e.g. Lalitha Jewellery (Pvt) Ltd, Singer Mega"
+                      placeholder={t('create_group_page.register_shop_modal.shop_name_placeholder', 'e.g. Lalitha Jewellery (Pvt) Ltd, Singer Mega')}
                       value={newShopName}
                       onChange={e => setNewShopName(e.target.value)}
                       required
@@ -358,26 +386,34 @@ const CreateGroup = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium small">Showroom / Branch Address</label>
+                    <label className="form-label text-secondary fw-medium small">
+                      {t('create_group_page.register_shop_modal.address', 'Showroom / Branch Address')}
+                    </label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="e.g. No. 125, Sea Street, Colombo 11"
+                      placeholder={t('create_group_page.register_shop_modal.address_placeholder', 'e.g. No. 125, Sea Street, Colombo 11')}
                       value={newShopAddress}
                       onChange={e => setNewShopAddress(e.target.value)}
                     />
-                    <small className="text-muted" style={{ fontSize: '0.75rem' }}>Members collect physical assets and official commercial warranties at this address.</small>
+                    <small className="text-muted" style={{ fontSize: '0.75rem' }}>
+                      {t('create_group_page.register_shop_modal.address_hint', 'Members collect physical assets and official commercial warranties at this address.')}
+                    </small>
                   </div>
                 </div>
                 <div className="modal-footer border-top p-3 bg-light">
-                  <button type="button" className="btn btn-secondary px-3" onClick={() => setShowAddShopModal(false)}>Cancel</button>
+                  <button type="button" className="btn btn-secondary px-3" onClick={() => setShowAddShopModal(false)}>
+                    {t('create_group_page.cancel', 'Cancel')}
+                  </button>
                   <button 
                     type="submit" 
                     className="btn btn-primary px-4 fw-bold shadow-sm"
                     style={{ backgroundColor: '#235665', borderColor: '#235665' }}
                     disabled={savingShop || !newShopName.trim()}
                   >
-                    {savingShop ? 'Registering...' : 'Register Shop'}
+                    {savingShop 
+                      ? t('create_group_page.register_shop_modal.registering', 'Registering...') 
+                      : t('create_group_page.register_shop_modal.register_shop', 'Register Shop')}
                   </button>
                 </div>
               </form>

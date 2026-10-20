@@ -1,10 +1,12 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useNotification } from '../hooks/useNotification';
 import Icon from './Icons';
 
 const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
+  const { t } = useTranslation();
   const { user, logout, isOrganizer, isAdmin } = useAuth();
   const { unreadCount } = useNotification();
   const navigate = useNavigate();
@@ -19,7 +21,11 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
     window.dispatchEvent(new CustomEvent('toggle-chatbot'));
   };
 
-  const portalLabel = isAdmin ? 'ADMIN PORTAL' : isOrganizer ? 'ORGANIZER PORTAL' : 'MEMBER PORTAL';
+  const portalLabel = isAdmin 
+    ? t('sidebar.admin_portal', 'ADMIN PORTAL') 
+    : isOrganizer 
+    ? t('sidebar.organizer_portal', 'ORGANIZER PORTAL') 
+    : t('sidebar.member_portal', 'MEMBER PORTAL');
 
   return (
     <>
@@ -40,7 +46,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
           {/* Portal Title Header */}
           <div className="px-2 mb-3">
             <div className="sidebar-portal-title">{portalLabel}</div>
-            <div className="sidebar-portal-sub">Manage your Seettu</div>
+            <div className="sidebar-portal-sub">{t('sidebar.manage_seettu', 'Manage your Seettu')}</div>
           </div>
 
           {/* Navigation Links */}
@@ -52,7 +58,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 onClick={onCloseMobile}
               >
                 <Icon name="speedometer" size={18} />
-                <span>Dashboard</span>
+                <span>{t('sidebar.dashboard', 'Dashboard')}</span>
               </NavLink>
             </li>
 
@@ -65,7 +71,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 <div className="d-flex align-items-center justify-content-between w-100">
                   <div className="d-flex align-items-center gap-2">
                     <Icon name="bell" size={18} />
-                    <span>Notifications</span>
+                    <span>{t('sidebar.notifications', 'Notifications')}</span>
                   </div>
                   {unreadCount > 0 && (
                     <span className="badge bg-danger rounded-pill px-2 py-0.5" style={{ fontSize: '0.68rem' }}>
@@ -83,7 +89,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 onClick={onCloseMobile}
               >
                 <Icon name="groups" size={18} />
-                <span>My Groups</span>
+                <span>{t('sidebar.my_groups', 'My Groups')}</span>
               </NavLink>
             </li>
 
@@ -94,7 +100,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 onClick={onCloseMobile}
               >
                 <Icon name="members" size={18} />
-                <span>Members</span>
+                <span>{t('sidebar.members', 'Members')}</span>
               </NavLink>
             </li>
 
@@ -105,7 +111,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 onClick={onCloseMobile}
               >
                 <Icon name="payments" size={18} />
-                <span>Payments</span>
+                <span>{t('sidebar.payments', 'Payments')}</span>
               </NavLink>
             </li>
 
@@ -116,7 +122,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 onClick={onCloseMobile}
               >
                 <Icon name="advance" size={18} />
-                <span>Advance</span>
+                <span>{t('sidebar.advance', 'Advance')}</span>
               </NavLink>
             </li>
 
@@ -128,7 +134,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                   onClick={onCloseMobile}
                 >
                   <Icon name="shield" size={18} />
-                  <span>Audit Trail</span>
+                  <span>{t('sidebar.audit_trail', 'Audit Trail')}</span>
                 </NavLink>
               </li>
             )}
@@ -140,7 +146,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 onClick={onCloseMobile}
               >
                 <Icon name="emergency" size={18} />
-                <span>Emergency</span>
+                <span>{t('sidebar.emergency', 'Emergency')}</span>
               </NavLink>
             </li>
 
@@ -151,7 +157,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 onClick={onCloseMobile}
               >
                 <Icon name="reports" size={18} />
-                <span>Reports</span>
+                <span>{t('sidebar.reports', 'Reports')}</span>
               </NavLink>
             </li>
 
@@ -162,7 +168,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 onClick={onCloseMobile}
               >
                 <Icon name="disputes" size={18} />
-                <span>Disputes</span>
+                <span>{t('sidebar.disputes', 'Disputes')}</span>
               </NavLink>
             </li>
 
@@ -173,7 +179,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 onClick={onCloseMobile}
               >
                 <Icon name="certificates" size={18} />
-                <span>Certificates</span>
+                <span>{t('sidebar.certificates', 'Certificates')}</span>
               </NavLink>
             </li>
 
@@ -184,7 +190,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 onClick={onCloseMobile}
               >
                 <Icon name="settings" size={18} />
-                <span>Settings</span>
+                <span>{t('sidebar.settings', 'Settings')}</span>
               </NavLink>
             </li>
           </ul>
@@ -199,7 +205,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
               onClick={handleHelpCenter}
             >
               <Icon name="help" size={18} />
-              <span>Help Center</span>
+              <span>{t('sidebar.help_center', 'Help Center')}</span>
             </button>
           )}
 
@@ -211,7 +217,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
             className="sidebar-link logout-link btn btn-link text-start w-100 border-0"
           >
             <Icon name="logout" size={18} color="#DC3545" />
-            <span>Logout</span>
+            <span>{t('sidebar.logout', 'Logout')}</span>
           </button>
         </div>
       </aside>

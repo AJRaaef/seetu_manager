@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { queryChatbot } from '../api/chatbotApi';
 import Icon from './Icons';
 
 const ChatbotWidget = () => {
+  const { t } = useTranslation();
   const { isAdmin } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
+      isWelcome: true,
       text: "Hello! I'm your Seettu Assistant.\n\nHow can I help you today? You can type any question or choose one of the quick topics below.",
       sender: 'bot',
       time: 'Just now'
@@ -20,14 +23,14 @@ const ChatbotWidget = () => {
 
   // Categorized quick prompt topics with standard UI icons
   const quickTopics = [
-    { label: 'How to Pay', icon: 'credit-card', query: 'How do I make a payment or upload a deposit slip?' },
-    { label: 'Score Formula', icon: 'award', query: 'How is the Financial Discipline Score calculated?' },
-    { label: 'Payout Cycles', icon: 'refresh', query: 'When and how are monthly payouts disbursed?' },
-    { label: 'Seettu Law', icon: 'shield', query: 'Is Seettu legal under Sri Lankan law?' },
-    { label: 'Exit Rules', icon: 'alert-circle', query: 'What happens if a member wants to cancel or leave early?' },
-    { label: 'Refund Policy', icon: 'file-text', query: 'How does the refund process work?' },
-    { label: 'File Dispute', icon: 'scale', query: 'How do I file a dispute or complaint?' },
-    { label: 'Helplines', icon: 'phone', query: 'How do I contact SeettuManager customer support?' }
+    { key: 'how_to_pay', label: 'How to Pay', icon: 'credit-card', query: 'How do I make a payment or upload a deposit slip?' },
+    { key: 'score_formula', label: 'Score Formula', icon: 'award', query: 'How is the Financial Discipline Score calculated?' },
+    { key: 'payout_cycles', label: 'Payout Cycles', icon: 'refresh', query: 'When and how are monthly payouts disbursed?' },
+    { key: 'seettu_law', label: 'Seettu Law', icon: 'shield', query: 'Is Seettu legal under Sri Lankan law?' },
+    { key: 'exit_rules', label: 'Exit Rules', icon: 'alert-circle', query: 'What happens if a member wants to cancel or leave early?' },
+    { key: 'refund_policy', label: 'Refund Policy', icon: 'file-text', query: 'How does the refund process work?' },
+    { key: 'file_dispute', label: 'File Dispute', icon: 'scale', query: 'How do I file a dispute or complaint?' },
+    { key: 'helplines', label: 'Helplines', icon: 'phone', query: 'How do I contact SeettuManager customer support?' }
   ];
 
   useEffect(() => {
@@ -198,13 +201,13 @@ const ChatbotWidget = () => {
                 <Icon name="help-circle" size={18} color="#00E5FF" />
               </div>
               <div>
-                <div className="fw-bold fs-6 lh-1 mb-1" style={{ letterSpacing: '0.2px' }}>Seettu Assistant</div>
+                <div className="fw-bold fs-6 lh-1 mb-1" style={{ letterSpacing: '0.2px' }}>{t('chatbot_widget.title', 'Seettu Assistant')}</div>
                 <div className="d-flex align-items-center gap-1 small text-white-50" style={{ fontSize: '0.75rem' }}>
                   <span
                     className="rounded-circle d-inline-block"
                     style={{ width: '7px', height: '7px', backgroundColor: '#10B981' }}
                   ></span>
-                  <span>Instant Help & FAQ</span>
+                  <span>{t('chatbot_widget.status', 'Instant Help & FAQ')}</span>
                 </div>
               </div>
             </div>
@@ -248,7 +251,9 @@ const ChatbotWidget = () => {
                     fontSize: '0.85rem'
                   }}
                 >
-                  {m.text}
+                  {m.isWelcome 
+                    ? t('chatbot_widget.welcome', "Hello! I'm your Seettu Assistant.\n\nHow can I help you today? You can type any question or choose one of the quick topics below.")
+                    : m.text}
                 </div>
                 <span className="text-muted mt-1 px-1" style={{ fontSize: '0.675rem' }}>
                   {m.time}
@@ -306,7 +311,7 @@ const ChatbotWidget = () => {
                   }}
                 >
                   <Icon name={item.icon} size={13} color="#0097B2" />
-                  <span>{item.label}</span>
+                  <span>{t(`chatbot_widget.topics.${item.key}`, item.label)}</span>
                 </button>
               ))}
             </div>
@@ -317,7 +322,7 @@ const ChatbotWidget = () => {
             <input
               type="text"
               className="form-control rounded-pill border shadow-none px-3 small"
-              placeholder="Ask anything (e.g. payout, score, rules)..."
+              placeholder={t('chatbot_widget.placeholder', 'Ask anything (e.g. payout, score, rules)...')}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendText()}
@@ -335,7 +340,7 @@ const ChatbotWidget = () => {
                 opacity: (!input.trim() || loading) ? 0.6 : 1,
                 cursor: (!input.trim() || loading) ? 'not-allowed' : 'pointer'
               }}
-              title="Send Message"
+              title={t('chatbot_widget.send', 'Send')}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13" />

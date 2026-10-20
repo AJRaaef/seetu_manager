@@ -117,8 +117,8 @@ const Navbar = () => {
               </a>
               <ul className="dropdown-menu dropdown-menu-end shadow border-0">
                 <li><button className="dropdown-item" onClick={() => changeLanguage('en')}>English (EN)</button></li>
-                <li><button className="dropdown-item" onClick={() => changeLanguage('si')}>Sinhala (SI)</button></li>
-                <li><button className="dropdown-item" onClick={() => changeLanguage('ta')}>Tamil (TA)</button></li>
+                <li><button className="dropdown-item" onClick={() => changeLanguage('si')}>සිංහල (SI)</button></li>
+                <li><button className="dropdown-item" onClick={() => changeLanguage('ta')}>தமிழ் (TA)</button></li>
               </ul>
             </li>
 

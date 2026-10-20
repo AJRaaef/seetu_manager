@@ -1,5 +1,6 @@
 {
   "app_name": "SeettuManager",
+  "tagline": "Save Together. Grow Together.",
   "login": "Login",
   "register": "Register",
   "email": "Email Address",
@@ -27,6 +28,9 @@
   "notes": "Notes",
   "submit": "Submit",
   "cancel": "Cancel",
+  "emergency": "Emergency Requests",
+  "chatbot": "Chat Assistant",
+  "search": "Search",
   "status": {
     "PAID": "Paid",
     "PENDING": "Pending",
@@ -34,6 +38,115 @@
     "OVERDUE": "Overdue",
     "MISSED": "Missed"
   },
-  "emergency": "Emergency Requests",
-  "chatbot": "Chat Assistant"
+  "sidebar": {
+    "admin_portal": "ADMIN PORTAL",
+    "organizer_portal": "ORGANIZER PORTAL",
+    "member_portal": "MEMBER PORTAL",
+    "manage_seettu": "Manage your Seettu",
+    "dashboard": "Dashboard",
+    "notifications": "Notifications",
+    "my_groups": "My Groups",
+    "members": "Members",
+    "payments": "Payments",
+    "advance": "Advance",
+    "audit_trail": "Audit Trail",
+    "emergency": "Emergency",
+    "reports": "Reports",
+    "disputes": "Disputes",
+    "certificates": "Certificates",
+    "settings": "Settings",
+    "help_center": "Help Center",
+    "logout": "Logout"
+  },
+  "topbar": {
+    "search": "Search",
+    "notifications": "Notifications",
+    "my_profile": "My Profile",
+    "logout": "Logout",
+    "tagline": "Save Together. Grow Together.",
+    "english": "English (EN)",
+    "sinhala": "Sinhala (සිංහල - SI)",
+    "tamil": "Tamil (தமிழ் - TA)"
+  },
+  "create_group_page": {
+    "title": "Create Group",
+    "subtitle": "Configure contribution terms, member capacity, Seettu type, and shop details",
+    "group_name": "Group Name",
+    "group_name_placeholder": "e.g. Gold Saver Circle Q4",
+    "seettu_model": "Seettu Model",
+    "models": {
+      "fixed_rotation": "Fixed Rotation Seettu (Predetermined queue)",
+      "auction": "Auction / Bidding Seettu (Discount bidding & dividends)",
+      "random_draw": "Random Draw / Lottery (Algorithmic lot selection)",
+      "non_monetary": "Non-Monetary Asset Seettu (Physical goods & shops)"
+    },
+    "guidance": {
+      "fixed_rotation": "Fixed Rotation Seettu: Members take turns in a predetermined rotational order to receive the standard pooled lump-sum.",
+      "auction": "Auction / Bidding Seettu: Members submit competitive discount bids for early pot access. The discount is redistributed as monthly dividends to reduce other subscribers' installments.",
+      "random_draw": "Random Draw / Lottery: Neutral algorithmic lot selection chooses the winning payout recipient fairly each cycle from eligible non-prizewinners.",
+      "non_monetary": "Non-Monetary Asset Seettu: Rotating savings pool for tangible high-value physical goods (jewelry, electronics, machinery) backed by a registered partner merchant shop."
+    },
+    "group_category": "Group Category",
+    "physical_asset_category": "Physical Asset Category",
+    "categories": {
+      "general": "General Monetary",
+      "emergency": "Emergency Liquidity Pool",
+      "business": "Business Working Capital",
+      "community": "Community Self-Help Circle",
+      "gold": "Gold & Jewelry (Sovereign)",
+      "furniture": "Furniture & Home Goods",
+      "vehicle": "Vehicle & Auto Equipment",
+      "appliances": "Electronics & Appliances"
+    },
+    "partner_merchant_shop": "Partner Merchant Shop (Mandatory)",
+    "associated_shop": "Associated Shop (Optional)",
+    "register_shop": "+ Register Shop",
+    "select_partner_shop": "-- Select Partner Merchant Shop --",
+    "none_independent": "None / Independent Group",
+    "description": "Description",
+    "desc_placeholder": "Explain group rules, auction conditions, or purpose...",
+    "contribution_amount": "Contribution Amount (LKR)",
+    "amount_placeholder": "e.g. 10000",
+    "member_count": "Member Count",
+    "member_placeholder": "e.g. 12",
+    "cycle_frequency": "Cycle Frequency",
+    "frequencies": {
+      "monthly": "Monthly",
+      "weekly": "Weekly",
+      "bi_weekly": "Bi-Weekly"
+    },
+    "creating": "Creating Group...",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "register_shop_modal": {
+      "title": "Register Partner Merchant Shop",
+      "subtitle": "Onboard verified retail merchant for Non-Monetary Asset Seettu",
+      "shop_name": "Shop / Merchant Showroom Name",
+      "shop_name_placeholder": "e.g. Lalitha Jewellery (Pvt) Ltd, Singer Mega",
+      "address": "Showroom / Branch Address",
+      "address_placeholder": "e.g. No. 125, Sea Street, Colombo 11",
+      "address_hint": "Members collect physical assets and official commercial warranties at this address.",
+      "cancel": "Cancel",
+      "registering": "Registering...",
+      "register_shop": "Register Shop"
+    }
+  },
+  "chatbot_widget": {
+    "title": "Seettu Assistant",
+    "status": "Instant Help & FAQ",
+    "welcome": "Hello! I'm your Seettu Assistant.\n\nHow can I help you today? You can type any question or choose one of the quick topics below.",
+    "placeholder": "Ask a question in English, Sinhala, or Tamil...",
+    "send": "Send",
+    "quick_topics_title": "Quick Topics",
+    "topics": {
+      "how_to_pay": "How to Pay",
+      "score_formula": "Score Formula",
+      "payout_cycles": "Payout Cycles",
+      "seettu_law": "Seettu Law",
+      "exit_rules": "Exit Rules",
+      "refund_policy": "Refund Policy",
+      "file_dispute": "File Dispute",
+      "helplines": "Helplines"
+    }
+  }
 }
