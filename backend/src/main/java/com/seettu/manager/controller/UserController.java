@@ -45,6 +45,29 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("Profile updated successfully", updated));
     }
 
+    @PostMapping("/{id}/profile-picture")
+    public ResponseEntity<ApiResponse<User>> uploadProfilePicture(
+            @PathVariable Long id,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @AuthenticationPrincipal User authUser) throws java.io.IOException {
+        if (authUser != null && authUser.getRole() != User.Role.ADMIN && !authUser.getId().equals(id)) {
+            throw new IllegalArgumentException("You are not authorized to update another user's profile picture.");
+        }
+        User updated = userService.uploadProfilePicture(id, file);
+        return ResponseEntity.ok(ApiResponse.success("Profile picture updated successfully", updated));
+    }
+
+    @DeleteMapping("/{id}/profile-picture")
+    public ResponseEntity<ApiResponse<User>> deleteProfilePicture(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User authUser) {
+        if (authUser != null && authUser.getRole() != User.Role.ADMIN && !authUser.getId().equals(id)) {
+            throw new IllegalArgumentException("You are not authorized to remove another user's profile picture.");
+        }
+        User updated = userService.deleteProfilePicture(id);
+        return ResponseEntity.ok(ApiResponse.success("Profile picture removed successfully", updated));
+    }
+
     @PostMapping("/kyc/submit")
     public ResponseEntity<ApiResponse<com.seettu.manager.dto.UserKycResponse>> submitKyc(
             @RequestParam("nicNumber") String nicNumber,

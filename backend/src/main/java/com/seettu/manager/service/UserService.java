@@ -225,6 +225,7 @@ public class UserService {
                 .role(user.getRole() != null ? user.getRole().name() : null)
                 .nicNumber(user.getNicNumber())
                 .gnCertificateUrl(user.getGnCertificateUrl())
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .kycStatus(user.getKycStatus() != null ? user.getKycStatus().name() : "UNVERIFIED")
                 .kycRejectionReason(user.getKycRejectionReason())
                 .requestedRole(user.getRequestedRole())
@@ -276,5 +277,68 @@ public class UserService {
         notificationService.sendNotification(user.getId(),
                 "Your application to become a Seettu Organizer has been submitted. In accordance with The Cheetus Ordinance, our administration will verify your member credentials shortly.",
                 "ORGANIZER_REQUEST_SUBMITTED");
+    }
+
+    @Transactional
+    public User uploadProfilePicture(Long userId, MultipartFile file) throws IOException {
+        User user = getUserById(userId);
+
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("Profile picture file is required.");
+        }
+
+        // Validate image file type
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
+        }
+        if (!List.of(".jpg", ".jpeg", ".png", ".webp").contains(extension)) {
+            throw new IllegalArgumentException("Invalid image format. Allowed formats: JPG, JPEG, PNG, WEBP.");
+        }
+
+        // Save profile picture to ./uploads/profiles/
+        Path profileDir = Paths.get(uploadDir, "profiles");
+        if (!Files.exists(profileDir)) {
+            Files.createDirectories(profileDir);
+        }
+
+        // Clean up previous uploaded image if exists
+        if (user.getProfilePictureUrl() != null && !user.getProfilePictureUrl().isBlank()) {
+            try {
+                Path oldFile = Paths.get(uploadDir).resolve(user.getProfilePictureUrl().replaceFirst("^/uploads/", ""));
+                Files.deleteIfExists(oldFile);
+            } catch (Exception ignored) {}
+        }
+
+        String newFileName = "profile_user_" + userId + "_" + UUID.randomUUID().toString().substring(0, 8) + extension;
+        Path targetPath = profileDir.resolve(newFileName);
+        Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+        String fileUrl = "/uploads/profiles/" + newFileName;
+        user.setProfilePictureUrl(fileUrl);
+        user = userRepository.save(user);
+
+        auditLogService.log(user, "PROFILE_PICTURE_UPDATED", "users", user.getId(),
+                "User " + user.getFullName() + " updated their profile picture.");
+
+        return user;
+    }
+
+    @Transactional
+    public User deleteProfilePicture(Long userId) {
+        User user = getUserById(userId);
+        if (user.getProfilePictureUrl() != null && !user.getProfilePictureUrl().isBlank()) {
+            try {
+                Path oldFile = Paths.get(uploadDir).resolve(user.getProfilePictureUrl().replaceFirst("^/uploads/", ""));
+                Files.deleteIfExists(oldFile);
+            } catch (Exception ignored) {}
+            user.setProfilePictureUrl(null);
+            user = userRepository.save(user);
+
+            auditLogService.log(user, "PROFILE_PICTURE_DELETED", "users", user.getId(),
+                    "User " + user.getFullName() + " removed their profile picture.");
+        }
+        return user;
     }
 }

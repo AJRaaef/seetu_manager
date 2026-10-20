@@ -40,6 +40,9 @@ public class User implements UserDetails {
     @Column(name = "gn_certificate_url", length = 500)
     private String gnCertificateUrl;
 
+    @Column(name = "profile_picture_url", length = 500)
+    private String profilePictureUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "kyc_status", nullable = false)
     @Builder.Default
@@ -62,6 +65,7 @@ public class User implements UserDetails {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "verified_by")
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "verifiedBy"})
     private User verifiedBy;
 
     @Column(name = "verified_at")
@@ -114,11 +118,13 @@ public class User implements UserDetails {
 
     // UserDetails implementation
     @Override
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public String getPassword() {
         return passwordHash;
     }

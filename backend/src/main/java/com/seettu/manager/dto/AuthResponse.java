@@ -19,6 +19,7 @@ public class AuthResponse {
     private String nicNumber;
     private String kycStatus;
     private String gnCertificateUrl;
+    private String profilePictureUrl;
     private String kycRejectionReason;
     private String requestedRole;
 

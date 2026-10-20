@@ -19,6 +19,7 @@ public class UserKycResponse {
     private String role;
     private String nicNumber;
     private String gnCertificateUrl;
+    private String profilePictureUrl;
     private String kycStatus;
     private String kycRejectionReason;
     private String requestedRole;

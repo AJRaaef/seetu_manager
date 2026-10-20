@@ -76,6 +76,7 @@ public class AuthService {
                 .nicNumber(user.getNicNumber())
                 .kycStatus(user.getKycStatus() != null ? user.getKycStatus().name() : "UNVERIFIED")
                 .gnCertificateUrl(user.getGnCertificateUrl())
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .kycRejectionReason(user.getKycRejectionReason())
                 .requestedRole(user.getRequestedRole())
                 .build();
@@ -116,6 +117,7 @@ public class AuthService {
                 .nicNumber(user.getNicNumber())
                 .kycStatus(user.getKycStatus() != null ? user.getKycStatus().name() : "UNVERIFIED")
                 .gnCertificateUrl(user.getGnCertificateUrl())
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .kycRejectionReason(user.getKycRejectionReason())
                 .requestedRole(user.getRequestedRole())
                 .build();
@@ -294,6 +296,7 @@ public class AuthService {
                 .role(user.getRole().name())
                 .preferredLanguage(user.getPreferredLanguage().name())
                 .nicNumber(user.getNicNumber())
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .kycStatus(user.getKycStatus() != null ? user.getKycStatus().name() : "VERIFIED")
                 .requestedRole(user.getRequestedRole())
                 .build();
