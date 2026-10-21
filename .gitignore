@@ -17,8 +17,11 @@ Thumbs.db
 # Logs
 *.log
 
-# Environment
+# Environment & Secret Credentials
 .env
+*.env
+*local.properties
+backend/src/main/resources/application-local.properties
 
 # Generated Runtime Files & Uploads
 *.pdf
