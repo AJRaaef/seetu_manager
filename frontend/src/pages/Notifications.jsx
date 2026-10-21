@@ -171,6 +171,7 @@ const Notifications = () => {
               <span>{t('notifications_page.mark_all_read')}</span>
             </button>
           )}
+<<<<<<< Updated upstream
 
           {activeMainTab === 'IN_APP' && (
             <button
@@ -222,6 +223,8 @@ const Notifications = () => {
               LIVE DEMO
             </span>
           </button>
+=======
+>>>>>>> Stashed changes
         </div>
       </div>
 
