@@ -12,6 +12,17 @@ export const sendDemoEmail = async (to, type) => {
   return response.data;
 };
 
+export const sendDirectMessage = async ({ to, subject, message, recipientName, channel }) => {
+  const response = await api.post('/emails/direct-send', {
+    to,
+    subject,
+    message,
+    recipientName,
+    channel
+  });
+  return response.data;
+};
+
 export const getEmailPreviewUrl = (fileName) => {
   return `http://localhost:8081/api/emails/outbox/${encodeURIComponent(fileName)}/preview`;
 };
