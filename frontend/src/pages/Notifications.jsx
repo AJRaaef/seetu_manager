@@ -171,16 +171,6 @@ const Notifications = () => {
               <span>{t('notifications_page.mark_all_read')}</span>
             </button>
           )}
-
-          {activeMainTab === 'IN_APP' && (
-            <button
-              className="btn btn-outline-secondary btn-sm fw-bold d-flex align-items-center gap-1 shadow-sm"
-              onClick={fetchNotifications}
-            >
-              <Icon name="refresh" size={14} />
-              <span>Refresh</span>
-            </button>
-          )}
         </div>
       </div>
 
