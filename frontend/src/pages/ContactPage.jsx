@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import api from '../api/axios';
 import { Link } from 'react-router-dom';
 import Icon from '../components/Icons';
 
@@ -11,10 +12,26 @@ const ContactPage = () => {
     message: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      await api.post('/contact', formData);
+      setSubmitted(true);
+    } catch (err) {
+      try {
+        await fetch('https://formsubmit.co/ajax/admin@seetumanager.com', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+      } catch (ignored) {}
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const scrollToTop = () => {
@@ -239,10 +256,11 @@ const ContactPage = () => {
                     <div className="col-12 mt-4">
                       <button 
                         type="submit"
+                        disabled={submitting}
                         className="btn fw-bold text-white px-4 py-2 w-100 shadow-sm"
                         style={{ backgroundColor: '#0097B2', borderRadius: '8px' }}
                       >
-                        Submit Message
+                        {submitting ? 'Sending Message...' : 'Submit Message'}
                       </button>
                     </div>
                   </div>

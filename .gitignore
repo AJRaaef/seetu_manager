@@ -28,3 +28,5 @@ uploads/
 backend/certificates/
 backend/reports/
 backend/uploads/
+backend/emails/
+emails/

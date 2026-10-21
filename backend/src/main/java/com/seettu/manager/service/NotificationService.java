@@ -17,6 +17,7 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Transactional
     public Notification sendNotification(Long userId, String message, String type) {
@@ -28,7 +29,39 @@ public class NotificationService {
                 .type(type)
                 .isRead(false)
                 .build();
-        return notificationRepository.save(notification);
+        Notification saved = notificationRepository.save(notification);
+
+        // Directly dispatch background email to member's email address
+        try {
+            if (user.getEmail() != null && user.getEmail().contains("@")) {
+                String subject = formatEmailSubject(type);
+                emailService.sendNotificationEmail(
+                        user.getEmail(),
+                        user.getFullName(),
+                        subject,
+                        message,
+                        type
+                );
+            }
+        } catch (Exception ignored) {}
+
+        return saved;
+    }
+
+    private String formatEmailSubject(String type) {
+        if (type == null) return "Seettu Notice";
+        switch (type.toUpperCase()) {
+            case "PAYMENT_REMINDER": return "Monthly Contribution Reminder";
+            case "PAYMENT_LATE":
+            case "PAYMENT_OVERDUE": return "Overdue Contribution Notice";
+            case "LEGAL_NOTICE": return "Formal Notice Under The Cheetus Ordinance";
+            case "PAYMENT_RECEIVED": return "Contribution Payment Receipt";
+            case "PAYOUT_APPROVED": return "Seettu Circle Lump-Sum Payout Approved";
+            case "GROUP": return "Seettu Circle Membership Update";
+            case "KYC_VERIFIED": return "KYC Verification Approved";
+            case "KYC_REJECTED": return "KYC Verification Status";
+            default: return "Seettu Notification: " + type.replace('_', ' ');
+        }
     }
 
     public List<Notification> getNotificationsByUser(Long userId) {

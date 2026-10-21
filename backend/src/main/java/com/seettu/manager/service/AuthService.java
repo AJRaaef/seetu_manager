@@ -31,6 +31,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final AuditLogService auditLogService;
+    private final EmailService emailService;
 
     private static final int MAX_FAILED_ATTEMPTS = 5;
 
@@ -135,6 +136,7 @@ public class AuthService {
         System.out.println("Email: " + email);
         System.out.println("Token: " + resetToken);
         System.out.println("============================");
+        emailService.sendPasswordResetEmail(email, resetToken);
 
         auditLogService.log(user, "FORGOT_PASSWORD", "users", user.getId(), "Password reset requested for: " + email);
     }
