@@ -228,4 +228,103 @@ public class EmailService {
                 + "</body>"
                 + "</html>";
     }
+
+    /**
+     * Retrieve all outbound archived emails for web UI inspection and demo verification.
+     */
+    public java.util.List<java.util.Map<String, Object>> getOutboxMessages() {
+        java.util.List<java.util.Map<String, Object>> list = new java.util.ArrayList<>();
+        File dir = new File(emailOutputDir);
+        if (!dir.exists() || !dir.isDirectory()) {
+            return list;
+        }
+
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".html"));
+        if (files == null) return list;
+
+        // Sort by last modified descending
+        java.util.Arrays.sort(files, (a, b) -> Long.compare(b.lastModified(), a.lastModified()));
+
+        for (File f : files) {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("fileName", f.getName());
+            map.put("sizeBytes", f.length());
+            map.put("lastModified", java.time.Instant.ofEpochMilli(f.lastModified()).toString());
+
+            String to = "Unknown";
+            String subject = "No Subject";
+            String status = "DISPATCHED";
+
+            try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(f, StandardCharsets.UTF_8))) {
+                String line;
+                int count = 0;
+                while ((line = reader.readLine()) != null && count < 6) {
+                    if (line.contains("STATUS:")) {
+                        int idx = line.indexOf("STATUS:");
+                        int endIdx = line.indexOf("-->", idx);
+                        status = line.substring(idx + 7, endIdx != -1 ? endIdx : line.length()).trim();
+                    }
+                    if (line.contains("TO:")) {
+                        int toIdx = line.indexOf("TO:");
+                        int subIdx = line.indexOf("| SUBJECT:");
+                        if (subIdx != -1) {
+                            to = line.substring(toIdx + 3, subIdx).trim();
+                            int endSub = line.indexOf("| TIMESTAMP:");
+                            subject = line.substring(subIdx + 10, endSub != -1 ? endSub : line.length()).trim();
+                        }
+                    }
+                    count++;
+                }
+            } catch (Exception ignored) {}
+
+            map.put("to", to);
+            map.put("subject", subject);
+            map.put("status", status.equals("DELIVERED_VIA_SMTP") ? "DELIVERED_SMTP" : "DISPATCHED_OUTBOX");
+            map.put("channel", "Email (SMTP)");
+            list.add(map);
+        }
+        return list;
+    }
+
+    /**
+     * Read the full HTML content of an email file for in-browser modal preview.
+     */
+    public String getEmailHtml(String fileName) {
+        if (fileName == null || fileName.contains("..") || fileName.contains("/") || fileName.contains("\\")) {
+            return null;
+        }
+        File file = new File(emailOutputDir, fileName);
+        if (!file.exists()) {
+            return null;
+        }
+        try {
+            return java.nio.file.Files.readString(file.toPath(), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return "Failed to load email preview: " + e.getMessage();
+        }
+    }
+
+    /**
+     * Send a real-time demo email for website demonstration.
+     */
+    public java.util.Map<String, Object> sendDemoEmail(String to, String type) {
+        String cleanType = type != null ? type.toUpperCase() : "PAYMENT_REMINDER";
+        String cleanTo = to != null && to.contains("@") ? to.trim() : "member.demo@example.com";
+
+        if (cleanType.contains("RECEIPT")) {
+            sendPaymentReceiptEmail(cleanTo, "Demo Member", "Colombo Premier Seettu", "15,000", "RCT-" + System.currentTimeMillis());
+        } else if (cleanType.contains("LEGAL")) {
+            sendLegalNoticeEmail(cleanTo, "Demo Member", "Moratuwa Welfare Seettu", "Default of 2 consecutive rotational cycles", "Immediate settlement of LKR 24,000 required within 7 statutory calendar days.");
+        } else {
+            sendNotificationEmail(cleanTo, "Demo Member", "Monthly Contribution Reminder - Cycle 4", "Dear Member, your monthly installment of LKR 10,000 is due in 3 days. Please transfer to the syndicate account.", "PAYMENT_REMINDER");
+        }
+
+        java.util.Map<String, Object> res = new java.util.HashMap<>();
+        res.put("recipient", cleanTo);
+        res.put("type", cleanType);
+        res.put("timestamp", LocalDateTime.now().toString());
+        res.put("status", "DISPATCHED_TO_OUTBOX");
+        return res;
+    }
+
 }
