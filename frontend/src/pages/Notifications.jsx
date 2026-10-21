@@ -167,14 +167,6 @@ const Notifications = () => {
               <span>{t('notifications_page.mark_all_read')}</span>
             </button>
           )}
-
-          <button
-            className="btn btn-outline-secondary btn-sm fw-bold d-flex align-items-center gap-1 shadow-sm"
-            onClick={fetchNotifications}
-          >
-            <Icon name="refresh" size={14} />
-            <span>Refresh</span>
-          </button>
         </div>
       </div>
 
@@ -276,7 +268,7 @@ const Notifications = () => {
                       </span>
                       {unread && (
                         <span className="badge rounded-pill bg-danger small px-2 py-1">
-                          NEW
+                              NEW
                         </span>
                       )}
                       {scope === 'ALL_SYSTEM' && n.user && (
