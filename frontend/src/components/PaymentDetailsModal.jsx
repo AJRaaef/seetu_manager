@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { jsPDF } from 'jspdf';
 import Icon from './Icons';
 import { uploadPaymentEvidence, getPaymentEvidences } from '../api/paymentApi';
 
@@ -63,6 +64,110 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
   };
 
   const isPaid = payment.status?.toUpperCase() === 'PAID';
+
+  const handleDownloadReceipt = () => {
+    try {
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const margin = 20;
+      const contentWidth = pageWidth - margin * 2;
+      const receiptNumber = payment.id ? `PAY-${payment.id}` : 'PAY-101';
+      const safeText = (value, fallback = 'N/A') => String(value || fallback);
+      const addField = (label, value, x, y, width) => {
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(8);
+        pdf.setTextColor(100, 116, 139);
+        pdf.text(label.toUpperCase(), x, y);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        pdf.setTextColor(31, 41, 55);
+        const lines = pdf.splitTextToSize(safeText(value), width);
+        pdf.text(lines, x, y + 6);
+        return y + 6 + lines.length * 5;
+      };
+
+      pdf.setProperties({ title: `Payment Receipt ${receiptNumber}`, subject: 'SeettuManager payment receipt' });
+      pdf.setFillColor(19, 74, 90);
+      pdf.rect(0, 0, pageWidth, 42, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(20);
+      pdf.text('SeettuManager', margin, 18);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      pdf.text('Official Contribution Payment Receipt', margin, 26);
+      pdf.setFontSize(9);
+      pdf.text(`Receipt Ref: #${receiptNumber}`, margin, 34);
+      pdf.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth - margin, 34, { align: 'right' });
+
+      pdf.setFillColor(240, 253, 244);
+      pdf.setDrawColor(187, 222, 197);
+      pdf.roundedRect(margin, 54, contentWidth, 30, 3, 3, 'FD');
+      pdf.setTextColor(100, 116, 139);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(8);
+      pdf.text('AMOUNT', margin + 7, 63);
+      pdf.setTextColor(31, 41, 55);
+      pdf.setFontSize(20);
+      pdf.text(`${Number(payment.amount || 0).toLocaleString()} LKR`, margin + 7, 75);
+      pdf.setFillColor(isPaid ? 22 : 245, isPaid ? 163 : 158, isPaid ? 74 : 11);
+      pdf.roundedRect(pageWidth - margin - 31, 63, 24, 9, 4, 4, 'F');
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(8);
+      pdf.text(safeText(payment.status, 'PAID').toUpperCase(), pageWidth - margin - 19, 69, { align: 'center' });
+
+      pdf.setTextColor(19, 74, 90);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(11);
+      pdf.text('Payment Details', margin, 99);
+      pdf.setDrawColor(226, 232, 240);
+      pdf.line(margin, 103, pageWidth - margin, 103);
+
+      const columnGap = 12;
+      const columnWidth = (contentWidth - columnGap) / 2;
+      let y = 113;
+      const fields = [
+        ['Member', payment.member || payment.memberName || 'N/A', 'Group', payment.group || payment.groupName || 'N/A'],
+        ['Cycle', payment.cycle || 'N/A', 'Date', payment.date || 'N/A'],
+        ['Recorded By', payment.recordedBy || (isPaid ? 'Organizer' : 'N/A'), 'Payment Method', payment.method || 'Cash (Offline)']
+      ];
+
+      fields.forEach(([leftLabel, leftValue, rightLabel, rightValue]) => {
+        const leftHeight = addField(leftLabel, leftValue, margin, y, columnWidth);
+        const rightHeight = addField(rightLabel, rightValue, margin + columnWidth + columnGap, y, columnWidth);
+        y = Math.max(leftHeight, rightHeight) + 8;
+      });
+
+      pdf.setFillColor(248, 250, 252);
+      pdf.setDrawColor(226, 232, 240);
+      const notes = safeText(payment.notes, 'No extra notes recorded for this transaction.');
+      const noteLines = pdf.splitTextToSize(notes, contentWidth - 14);
+      const notesHeight = Math.max(25, 18 + noteLines.length * 5);
+      pdf.roundedRect(margin, y, contentWidth, notesHeight, 2, 2, 'FD');
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(8);
+      pdf.setTextColor(100, 116, 139);
+      pdf.text('NOTES / REMARKS', margin + 7, y + 8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      pdf.setTextColor(71, 85, 105);
+      pdf.text(noteLines, margin + 7, y + 15);
+
+      const footerY = Math.min(y + notesHeight + 22, 275);
+      pdf.setDrawColor(226, 232, 240);
+      pdf.line(margin, footerY - 8, pageWidth - margin, footerY - 8);
+      pdf.setFontSize(8);
+      pdf.setTextColor(100, 116, 139);
+      pdf.text('Generated electronically via SeettuManager Digital Discipline System', pageWidth / 2, footerY, { align: 'center' });
+      pdf.text('Verified by Group Organizer - Thank you for your contribution!', pageWidth / 2, footerY + 5, { align: 'center' });
+
+      const fileName = `Payment_Receipt_${receiptNumber}.pdf`;
+      pdf.save(fileName);
+    } catch (error) {
+      console.error('Failed to download payment receipt PDF', error);
+      alert('Unable to download the payment receipt. Please try again.');
+    }
+  };
 
   return (
     <Modal
@@ -228,6 +333,14 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
       <div className="custom-modal-footer no-print">
         <button type="button" className="btn btn-light px-4 border" onClick={onHide}>
           {t('modals.payment_details.close', 'Close')}
+        </button>
+        <button
+          type="button"
+          className="btn btn-outline-primary px-4 d-inline-flex align-items-center gap-2"
+          onClick={handleDownloadReceipt}
+        >
+          <Icon name="download" size={16} />
+          {t('modals.payment_details.download_receipt', 'Download Receipt')}
         </button>
         <button
           type="button"

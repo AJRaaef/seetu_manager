@@ -454,6 +454,7 @@
       "on_time_impact": "On-time payment recorded. Maintains member discipline score in EXCELLENT tier.",
       "pending_impact": "Pending / Overdue contribution. Reminders can be issued by group organizer.",
       "close": "Close",
+      "download_receipt": "Download Receipt",
       "print_receipt": "Print Receipt"
     },
     "invite_member": {
