@@ -65,7 +65,13 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
   const isPaid = payment.status?.toUpperCase() === 'PAID';
 
   return (
-    <Modal show={show} onHide={onHide} centered contentClassName="custom-modal-content printable-receipt">
+    <Modal
+      show={show}
+      onHide={onHide}
+      centered
+      className="receipt-print-modal"
+      contentClassName="custom-modal-content printable-receipt"
+    >
       {/* Official Print-Only Header */}
       <div className="print-only text-center p-3 mb-2 border-bottom">
         <div className="fs-3 fw-bold mb-0">

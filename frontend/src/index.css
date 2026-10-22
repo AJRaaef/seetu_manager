@@ -634,6 +634,48 @@ body {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  body:has(.receipt-print-modal) > #root {
+    display: none !important;
+  }
+
+  .receipt-print-modal {
+    position: static !important;
+    display: block !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  .receipt-print-modal .modal-dialog {
+    max-width: 580px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  .receipt-print-modal .printable-receipt {
+    position: static !important;
+    width: 100% !important;
+    max-width: 580px !important;
+    margin: 0 auto !important;
+    padding: 12px !important;
+    overflow: visible !important;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .receipt-print-modal .custom-modal-body {
+    padding: 12px !important;
+  }
+
+  .receipt-print-modal .custom-modal-body .row {
+    --bs-gutter-y: 0.5rem;
+    margin-bottom: 0.5rem !important;
+  }
 }
 
 /* ============================================================
