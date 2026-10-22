@@ -16,6 +16,9 @@ const Reports = () => {
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
+  const totalCollections = reportPayments
+    .filter((payment) => payment.status === 'PAID')
+    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
 
   const defaultType = (isAdmin || isOrganizer) ? 'GROUP_SUMMARY' : 'PERSONAL_PAYMENT_HISTORY';
   const [formData, setFormData] = useState({
@@ -170,6 +173,66 @@ const Reports = () => {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleOpenInExcel = () => {
+    const safeCell = (value) => {
+      const text = String(value ?? '');
+      const safeText = /^[\t\r\n ]*[=+\-@]/.test(text) ? `'${text}` : text;
+      return `"${safeText.replace(/"/g, '""')}"`;
+    };
+    const csvRows = [
+      ['Report Title', selectedReport.title],
+      ['Report Reference', `#${selectedReport.id}`],
+      ['Report Type', selectedReport.type],
+      ['Generated', selectedReport.createdAt ? new Date(selectedReport.createdAt).toLocaleString() : new Date().toLocaleString()],
+      ['Auditor', selectedReport.generatedBy?.fullName || user?.fullName || 'Administrator'],
+      ['Audit Findings', selectedReport.content || 'Comprehensive audit report covering registered groups, active members, contribution ledgers, and rotation schedules.'],
+      [],
+      ['Summary'],
+      ['Tracked Groups', reportGroups.length],
+      ['Total Collections (LKR)', totalCollections],
+      ['Transactions Logged', reportPayments.length],
+      ['Compliance Rating', '100%'],
+      [],
+      ['Active Seettu Groups Ledger'],
+      ['Group ID', 'Group Name', 'Category', 'Target Members', 'Contribution (LKR)', 'Cycle Frequency', 'Status'],
+      ...reportGroups.map((group) => [
+        `#${group.id}`,
+        group.name || 'Unnamed',
+        group.category || 'GENERAL',
+        `${group.memberCount || 0} Members`,
+        Number(group.contributionAmount || 0),
+        group.cycleFrequency || 'MONTHLY',
+        group.status || 'ACTIVE'
+      ]),
+      [],
+      ['Financial Contribution Ledger (Latest Transactions)'],
+      ['TX #', 'Seettu Group', 'Paying Member', 'Amount (LKR)', 'Settlement Method', 'Date', 'Status'],
+      ...reportPayments.slice(0, 15).map((payment) => [
+        `#${payment.id}`,
+        payment.cycle?.group?.name || 'Seettu Group',
+        payment.member?.fullName || `Member #${payment.member?.id || '-'}`,
+        Number(payment.amount || 0),
+        payment.paymentMethod || 'Cash',
+        payment.paymentDate ? String(payment.paymentDate).split('T')[0] : 'N/A',
+        payment.status || 'PAID'
+      ])
+    ];
+    const csvContent = `\uFEFF${csvRows.map((row) => row.map(safeCell).join(',')).join('\r\n')}`;
+    const blobUrl = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    const fileTitle = (selectedReport.title || 'Report')
+      .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_')
+      .trim()
+      .slice(0, 100) || 'Report';
+
+    link.href = blobUrl;
+    link.download = `${fileTitle}_${selectedReport.id}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
   };
 
   return (
@@ -355,12 +418,7 @@ const Reports = () => {
       )}
 
       {/* View/Print Report Modal */}
-      {selectedReport && (() => {
-        const totalCollections = reportPayments
-          .filter(p => p.status === 'PAID')
-          .reduce((sum, p) => sum + Number(p.amount || 0), 0);
-
-        return (
+      {selectedReport && (
           <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060 }}>
             <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
               <div className="modal-content border-0 shadow-lg printable-report" style={{ borderRadius: '12px', overflow: 'hidden' }}>
@@ -542,6 +600,16 @@ const Reports = () => {
                     Close
                   </button>
                   <div className="d-flex gap-2">
+                    <button
+                      type="button"
+                      className="btn btn-outline-success d-inline-flex align-items-center gap-2"
+                      style={{ borderRadius: '8px' }}
+                      onClick={handleOpenInExcel}
+                      title="Downloads an Excel-compatible CSV file"
+                    >
+                      <Icon name="download" size={16} />
+                      <span>Open in Excel (CSV)</span>
+                    </button>
                     <a
                       href={`http://localhost:8081/api/reports/${selectedReport.id}/download`}
                       target="_blank"
@@ -557,12 +625,14 @@ const Reports = () => {
                       <span>Print / Save as PDF</span>
                     </button>
                   </div>
+                  <small className="w-100 text-end text-muted">
+                    CSV downloads to your device; open the downloaded file with Excel.
+                  </small>
                 </div>
               </div>
             </div>
           </div>
-        );
-      })()}
+      )}
     </div>
   );
 };
