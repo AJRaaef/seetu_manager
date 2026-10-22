@@ -608,7 +608,7 @@ const Reports = () => {
                       title="Downloads an Excel-compatible CSV file"
                     >
                       <Icon name="download" size={16} />
-                      <span>Open in Excel (CSV)</span>
+                      <span>Download Excel Sheet</span>
                     </button>
                     <a
                       href={`http://localhost:8081/api/reports/${selectedReport.id}/download`}
