@@ -20,6 +20,7 @@ const Profile = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [actionMsg, setActionMsg] = useState('');
   const [uploadingPic, setUploadingPic] = useState(false);
+  const [failedProfilePictureUrl, setFailedProfilePictureUrl] = useState('');
   const fileInputRef = useRef(null);
 
   // KYC Verification state
@@ -248,6 +249,7 @@ const Profile = () => {
   const averageDisciplineScore = profileData?.averageDisciplineScore ?? 100;
   const certificatesEarned = profileData?.certificatesEarned ?? 0;
   const userInfo = profileData?.user || user;
+  const profilePictureUrl = userInfo?.profilePictureUrl || user?.profilePictureUrl;
 
   return (
     <div className="profile-page-container pb-4">
@@ -287,28 +289,19 @@ const Profile = () => {
                   border: '3px solid #E2E8F0'
                 }}
               >
-                {(userInfo?.profilePictureUrl || user?.profilePictureUrl) ? (
+                {profilePictureUrl && failedProfilePictureUrl !== profilePictureUrl ? (
                   <img
-                    src={`http://localhost:8081${userInfo?.profilePictureUrl || user?.profilePictureUrl}`}
+                    src={`http://localhost:8081${profilePictureUrl}`}
                     alt={fullName || userInfo?.fullName || 'User'}
                     className="w-100 h-100"
-                    style={{ objectFit: 'cover' }}
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      if (e.currentTarget.nextElementSibling) {
-                        e.currentTarget.nextElementSibling.style.display = 'flex';
-                      }
-                    }}
+                    style={{ objectFit: 'cover', display: 'block' }}
+                    onError={() => setFailedProfilePictureUrl(profilePictureUrl)}
                   />
-                ) : null}
-                <div
-                  className="d-flex align-items-center justify-content-center w-100 h-100"
-                  style={{
-                    display: (userInfo?.profilePictureUrl || user?.profilePictureUrl) ? 'none' : 'flex'
-                  }}
-                >
-                  {getInitials(fullName || userInfo?.fullName)}
-                </div>
+                ) : (
+                  <div className="d-flex align-items-center justify-content-center w-100 h-100">
+                    {getInitials(fullName || userInfo?.fullName)}
+                  </div>
+                )}
 
                 {uploadingPic && (
                   <div
