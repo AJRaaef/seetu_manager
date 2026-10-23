@@ -34,16 +34,27 @@ CREATE TABLE users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
--- 2. shops
+-- 2. shops (Aligned with ER Diagram: 12 attributes)
 -- ============================================================
 CREATE TABLE shops (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    shop_name VARCHAR(150),
+    shop_owner_name VARCHAR(150),
+    shop_type VARCHAR(100) DEFAULT 'GENERAL_MERCHANT',
+    shop_register_number VARCHAR(100),
+    shop_email VARCHAR(150),
     address VARCHAR(255),
+    shop_address VARCHAR(255),
+    contact_number VARCHAR(50),
+    status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',
+    description TEXT,
     owner_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_shops_owner (owner_id)
+    INDEX idx_shops_owner (owner_id),
+    INDEX idx_shops_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
