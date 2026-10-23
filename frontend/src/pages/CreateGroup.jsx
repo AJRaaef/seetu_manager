@@ -30,7 +30,13 @@ const CreateGroup = () => {
 
   const [showAddShopModal, setShowAddShopModal] = useState(false);
   const [newShopName, setNewShopName] = useState('');
+  const [newShopOwnerName, setNewShopOwnerName] = useState('');
+  const [newShopType, setNewShopType] = useState('GOLD_JEWELLERY');
+  const [newShopRegisterNumber, setNewShopRegisterNumber] = useState('');
+  const [newShopContact, setNewShopContact] = useState('');
+  const [newShopEmail, setNewShopEmail] = useState('');
   const [newShopAddress, setNewShopAddress] = useState('');
+  const [newShopDescription, setNewShopDescription] = useState('');
   const [savingShop, setSavingShop] = useState(false);
   const [shopError, setShopError] = useState('');
 
@@ -52,14 +58,33 @@ const CreateGroup = () => {
     setShopError('');
     try {
       const ownerId = user?.userId || user?.id || 2;
-      const res = await api.post(`/shops?name=${encodeURIComponent(newShopName.trim())}&address=${encodeURIComponent(newShopAddress.trim())}&ownerId=${ownerId}`);
+      const payload = {
+        shopName: newShopName.trim(),
+        name: newShopName.trim(),
+        shopOwnerName: newShopOwnerName.trim() || undefined,
+        shopType: newShopType,
+        shopRegisterNumber: newShopRegisterNumber.trim() || undefined,
+        contactNumber: newShopContact.trim() || undefined,
+        shopEmail: newShopEmail.trim() || undefined,
+        shopAddress: newShopAddress.trim() || undefined,
+        address: newShopAddress.trim() || undefined,
+        description: newShopDescription.trim() || undefined,
+        status: 'ACTIVE'
+      };
+      const res = await api.post(`/shops?ownerId=${ownerId}`, payload);
       const created = res.data?.data || res.data;
-      if (created && created.id) {
+      if (created && (created.id || created.shopId)) {
         setShops(prev => [...prev, created]);
-        setFormData(prev => ({ ...prev, shopId: String(created.id) }));
+        setFormData(prev => ({ ...prev, shopId: String(created.id || created.shopId) }));
         setShowAddShopModal(false);
         setNewShopName('');
+        setNewShopOwnerName('');
+        setNewShopType('GOLD_JEWELLERY');
+        setNewShopRegisterNumber('');
+        setNewShopContact('');
+        setNewShopEmail('');
         setNewShopAddress('');
+        setNewShopDescription('');
       }
     } catch (err) {
       setShopError('Failed to register partner merchant shop. Please try again.');
@@ -348,10 +373,10 @@ const CreateGroup = () => {
         </div>
       </div>
 
-      {/* Register Partner Merchant Shop Modal */}
+      {/* Register Partner Merchant Shop Modal (Aligned with 12 ER Diagram Attributes) */}
       {showAddShopModal && (
         <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
               <div className="modal-header text-white" style={{ backgroundColor: '#235665' }}>
                 <div>
@@ -371,34 +396,113 @@ const CreateGroup = () => {
                       {shopError}
                     </div>
                   )}
-                  <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium small">
-                      {t('create_group_page.register_shop_modal.shop_name', 'Shop / Merchant Showroom Name')} <span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder={t('create_group_page.register_shop_modal.shop_name_placeholder', 'e.g. Lalitha Jewellery (Pvt) Ltd, Singer Mega')}
-                      value={newShopName}
-                      onChange={e => setNewShopName(e.target.value)}
-                      required
-                      autoFocus
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium small">
-                      {t('create_group_page.register_shop_modal.address', 'Showroom / Branch Address')}
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder={t('create_group_page.register_shop_modal.address_placeholder', 'e.g. No. 125, Sea Street, Colombo 11')}
-                      value={newShopAddress}
-                      onChange={e => setNewShopAddress(e.target.value)}
-                    />
-                    <small className="text-muted" style={{ fontSize: '0.75rem' }}>
-                      {t('create_group_page.register_shop_modal.address_hint', 'Members collect physical assets and official commercial warranties at this address.')}
-                    </small>
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <label className="form-label text-secondary fw-medium small mb-1">
+                        Shop / Merchant Name <span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="e.g. Lalitha Jewellery (Pvt) Ltd"
+                        value={newShopName}
+                        onChange={e => setNewShopName(e.target.value)}
+                        required
+                        autoFocus
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-secondary fw-medium small mb-1">
+                        Shop Owner / Proprietor Name
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="e.g. M. K. Perera"
+                        value={newShopOwnerName}
+                        onChange={e => setNewShopOwnerName(e.target.value)}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-secondary fw-medium small mb-1">
+                        Shop Type / Category <span className="text-danger">*</span>
+                      </label>
+                      <select
+                        className="form-select"
+                        value={newShopType}
+                        onChange={e => setNewShopType(e.target.value)}
+                      >
+                        <option value="GOLD_JEWELLERY">Gold & Jewellery</option>
+                        <option value="ELECTRONICS">Electronics & Appliances</option>
+                        <option value="VEHICLES_MOTORS">Vehicles & Motorbikes</option>
+                        <option value="GROCERY_PROVISIONS">Grocery & Wholesale Provisions</option>
+                        <option value="HARDWARE_CONSTRUCTION">Hardware & Building Materials</option>
+                        <option value="GENERAL_MERCHANT">General Partner Merchant</option>
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-secondary fw-medium small mb-1">
+                        Business Registration (BR) No.
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="e.g. PV-123456 / W-8942"
+                        value={newShopRegisterNumber}
+                        onChange={e => setNewShopRegisterNumber(e.target.value)}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-secondary fw-medium small mb-1">
+                        Contact Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        className="form-control"
+                        placeholder="e.g. +94 11 234 5678"
+                        value={newShopContact}
+                        onChange={e => setNewShopContact(e.target.value)}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-secondary fw-medium small mb-1">
+                        Official Email
+                      </label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        placeholder="e.g. orders@lalithajewellers.lk"
+                        value={newShopEmail}
+                        onChange={e => setNewShopEmail(e.target.value)}
+                      />
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label text-secondary fw-medium small mb-1">
+                        Showroom / Store Address
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="e.g. No. 125, Sea Street, Colombo 11"
+                        value={newShopAddress}
+                        onChange={e => setNewShopAddress(e.target.value)}
+                      />
+                      <small className="text-muted" style={{ fontSize: '0.75rem' }}>
+                        Members redeem assets and collect physical goods with proof of certificate at this showroom.
+                      </small>
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label text-secondary fw-medium small mb-1">
+                        Description / Settlement Notes
+                      </label>
+                      <textarea
+                        className="form-control"
+                        rows="2"
+                        placeholder="e.g. Authorized 22K gold coin dealer. Delivery against digital certificate QR verification."
+                        value={newShopDescription}
+                        onChange={e => setNewShopDescription(e.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="modal-footer border-top p-3 bg-light">

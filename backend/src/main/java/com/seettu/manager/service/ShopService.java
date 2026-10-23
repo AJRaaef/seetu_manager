@@ -31,13 +31,51 @@ public class ShopService {
     }
 
     @Transactional
+    public Shop createShop(Shop shopData, Long ownerId) {
+        User owner = (ownerId != null) ? userService.getUserById(ownerId) : null;
+        shopData.setOwner(owner);
+
+        if (shopData.getName() == null && shopData.getShopName() != null) {
+            shopData.setName(shopData.getShopName());
+        }
+        if (shopData.getAddress() == null && shopData.getShopAddress() != null) {
+            shopData.setAddress(shopData.getShopAddress());
+        }
+        if (shopData.getStatus() == null || shopData.getStatus().trim().isEmpty()) {
+            shopData.setStatus("ACTIVE");
+        }
+
+        return shopRepository.save(shopData);
+    }
+
+    @Transactional
     public Shop createShop(String name, String address, Long ownerId) {
-        User owner = userService.getUserById(ownerId);
+        User owner = (ownerId != null) ? userService.getUserById(ownerId) : null;
         Shop shop = Shop.builder()
                 .name(name)
                 .address(address)
                 .owner(owner)
+                .status("ACTIVE")
                 .build();
+        return shopRepository.save(shop);
+    }
+
+    @Transactional
+    public Shop updateShop(Long id, Shop updateData) {
+        Shop shop = getShopById(id);
+
+        if (updateData.getName() != null) shop.setName(updateData.getName());
+        if (updateData.getShopName() != null) shop.setName(updateData.getShopName());
+        if (updateData.getAddress() != null) shop.setAddress(updateData.getAddress());
+        if (updateData.getShopAddress() != null) shop.setAddress(updateData.getShopAddress());
+        if (updateData.getShopOwnerName() != null) shop.setShopOwnerName(updateData.getShopOwnerName());
+        if (updateData.getShopType() != null) shop.setShopType(updateData.getShopType());
+        if (updateData.getShopRegisterNumber() != null) shop.setShopRegisterNumber(updateData.getShopRegisterNumber());
+        if (updateData.getShopEmail() != null) shop.setShopEmail(updateData.getShopEmail());
+        if (updateData.getContactNumber() != null) shop.setContactNumber(updateData.getContactNumber());
+        if (updateData.getStatus() != null) shop.setStatus(updateData.getStatus());
+        if (updateData.getDescription() != null) shop.setDescription(updateData.getDescription());
+
         return shopRepository.save(shop);
     }
 
