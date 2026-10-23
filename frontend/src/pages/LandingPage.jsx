@@ -1375,6 +1375,7 @@ const LandingPage = () => {
                       <Icon name="phone" size={13} color="#0097B2" />
                       +94 75 297 5632
                     </a>
+
                   </div>
                 </div>
 
