@@ -475,11 +475,7 @@ const LandingPage = () => {
               <Icon name="mail" size={13} className="me-1" color="#0097B2" />
               seetumanager@gmail.com
             </span>
-            <span className="d-none d-md-inline" style={{ opacity: 0.4 }}>|</span>
-            <span className="d-flex align-items-center">
-              <Icon name="phone" size={13} className="me-1" color="#0097B2" />
-              +94 75 297 5632 / 4040
-            </span>
+
           </div>
 
           <div className="d-flex align-items-center gap-2 ms-auto">
@@ -1370,10 +1366,6 @@ const LandingPage = () => {
                       <Icon name="phone" size={13} color="#0097B2" />
                       +94 75 297 5632
                     </a>
-                    <a href="tel:+94752974040" className="footer-contact-link">
-                      <Icon name="phone" size={13} color="#0097B2" />
-                      +94 75 297 4040
-                    </a>
                   </div>
                 </div>
 
@@ -1385,19 +1377,19 @@ const LandingPage = () => {
                   </a>
                 </div>
 
-                <div>
-                  <strong className="text-white d-block mb-1" style={{ fontSize: '0.88rem' }}>Platform Headquarters</strong>
-                  <span className="d-inline-flex align-items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.88rem' }}>
-                    <Icon name="shield" size={13} color="#0097B2" />
-                    Colombo, Western Province, Sri Lanka
-                  </span>
-                </div>
+               <div>
+                 <strong className="text-white d-block mb-1" style={{ fontSize: '0.88rem' }}>Platform Headquarters</strong>
+                 <span className="d-inline-flex align-items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.88rem' }}>
+                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0097B2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                     <circle cx="12" cy="10" r="3"></circle>
+                   </svg>
+                   Colombo, Western Province, Sri Lanka
+                 </span>
+               </div>
 
-                <div className="pt-2 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between flex-wrap gap-1">
+                <div className="pt-2 border-top border-secondary border-opacity-25">
                   <span className="text-white-50" style={{ fontSize: '0.78rem' }}>Mon – Sat (8:30 AM – 6:00 PM IST)</span>
-                  <span className="badge bg-success bg-opacity-25 text-success px-2 py-1" style={{ fontSize: '0.72rem' }}>
-                    ● Online
-                  </span>
                 </div>
               </div>
             </div>

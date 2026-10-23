@@ -146,7 +146,7 @@ const AdvancePayments = () => {
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
             onClick={() => setShowModal(true)}
           >
-            <span>+</span> {t('advance_page.apply_btn')}
+            {t('advance_page.apply_btn')}
           </button>
         )}
       </div>

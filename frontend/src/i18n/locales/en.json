@@ -264,7 +264,7 @@
   "disputes_page": {
     "title": "Dispute Resolution",
     "subtitle": "Statutory arbitration channels under Sri Lanka Cheetus Ordinance No. 61 of 1935",
-    "raise_btn": "+ Raise a Dispute",
+    "raise_btn": "Raise a Dispute",
     "active_disputes": "Active Disputes",
     "col_group": "Group",
     "col_complainant": "Complainant",

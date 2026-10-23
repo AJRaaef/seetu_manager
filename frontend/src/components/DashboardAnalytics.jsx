@@ -191,9 +191,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
             </span>
           </div>
         </div>
-        <span className="badge bg-light text-dark border px-3 py-1.5 rounded-pill small fw-semibold">
-          {isAdmin ? 'Admin Intelligence' : 'Organizer View'}
-        </span>
+
       </div>
 
       {/* Analytics Charts Grid */}
@@ -230,9 +228,6 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                   Risk tier breakdown across active circles
                 </span>
               </div>
-              <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded" style={{ fontSize: '0.72rem' }}>
-                {complianceRate}% On-Time
-              </span>
             </div>
 
             <div className="row align-items-center mt-1">
