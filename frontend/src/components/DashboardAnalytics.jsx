@@ -191,9 +191,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
             </span>
           </div>
         </div>
-        <span className="badge bg-light text-dark border px-3 py-1.5 rounded-pill small fw-semibold">
-          {isAdmin ? 'Admin Intelligence' : 'Organizer View'}
-        </span>
+
       </div>
 
       {/* Analytics Charts Grid */}
