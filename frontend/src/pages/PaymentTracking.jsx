@@ -444,9 +444,6 @@ const PaymentTracking = () => {
                 </p>
               </div>
             </div>
-            <span className="badge bg-light text-dark border px-3 py-1.5 rounded-pill small fw-medium font-monospace d-none d-sm-inline-block">
-              Payment Entry
-            </span>
           </div>
 
           <form onSubmit={handleRecordNew}>
