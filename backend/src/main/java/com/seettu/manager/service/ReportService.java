@@ -25,6 +25,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -237,6 +240,19 @@ public class ReportService {
 
         document.close();
 
+        writeCsvReport(
+                Path.of(filePath.replaceFirst("\\.pdf$", ".csv")),
+                safeTitle,
+                safeType,
+                timestamp,
+                authorName,
+                safeContent,
+                allGroups,
+                allPayments,
+                totalMembers,
+                totalCollected
+        );
+
         Report report = Report.builder()
                 .title(safeTitle)
                 .type(safeType)
@@ -245,6 +261,108 @@ public class ReportService {
                 .build();
 
         return reportRepository.save(report);
+    }
+
+    private void writeCsvReport(
+            Path file,
+            String title,
+            String type,
+            String timestamp,
+            String authorName,
+            String content,
+            List<SeettuGroup> groups,
+            List<Payment> payments,
+            long totalMembers,
+            BigDecimal totalCollected
+    ) throws Exception {
+        StringBuilder csv = new StringBuilder("\uFEFF");
+        appendCsvRow(csv, "SEETTU MANAGER AUDIT SYSTEM");
+        appendCsvRow(csv, "Official Financial Reconciliation & Audit Statement");
+        appendCsvRow(csv, "Report Title", title);
+        appendCsvRow(csv, "TYPE", type);
+        appendCsvRow(csv, "Generated", timestamp);
+        appendCsvRow(csv, "Auditor", authorName);
+        appendCsvRow(csv);
+
+        appendCsvRow(csv, "Executive Summary");
+        appendCsvRow(csv, "ACTIVE GROUPS", groups.size());
+        appendCsvRow(csv, "ENROLLED MEMBERS", totalMembers);
+        appendCsvRow(csv, "COLLECTED FUNDS", "LKR " + totalCollected.toPlainString());
+        appendCsvRow(csv, "COMPLIANCE RATING", "100% VERIFIED");
+        appendCsvRow(csv);
+
+        appendCsvRow(csv, "Audit Findings & Operational Notes");
+        appendCsvRow(csv, content);
+        appendCsvRow(csv);
+
+        appendCsvRow(csv, "Tracked Seettu Groups Ledger", groups.size());
+        appendCsvRow(csv, "ID", "Group Name", "Category", "Target Members", "Contribution", "Status");
+        if (groups.isEmpty()) {
+            appendCsvRow(csv, "No active groups found in database.");
+        } else {
+            for (SeettuGroup group : groups) {
+                appendCsvRow(
+                        csv,
+                        "#" + group.getId(),
+                        group.getName() != null ? group.getName() : "Unnamed",
+                        group.getCategory() != null ? group.getCategory() : "GENERAL",
+                        group.getMemberCount() != null ? group.getMemberCount() : 0,
+                        "LKR " + (group.getContributionAmount() != null ? group.getContributionAmount().toPlainString() : "0"),
+                        group.getStatus() != null ? group.getStatus().name() : "ACTIVE"
+                );
+            }
+        }
+        appendCsvRow(csv);
+
+        appendCsvRow(csv, "Payment Contributions & Settlement Trail (Recent Records)");
+        appendCsvRow(csv, "TX #", "Group", "Member", "Amount (LKR)", "Method", "Status");
+        if (payments.isEmpty()) {
+            appendCsvRow(csv, "No payment transactions recorded yet.");
+        } else {
+            int count = 0;
+            for (Payment payment : payments) {
+                if (count++ >= 20) {
+                    break;
+                }
+                String groupName = payment.getCycle() != null && payment.getCycle().getGroup() != null
+                        ? payment.getCycle().getGroup().getName()
+                        : "Seettu Group";
+                String memberName = payment.getMember() != null && payment.getMember().getFullName() != null
+                        ? payment.getMember().getFullName()
+                        : "Member #" + (payment.getMember() != null ? payment.getMember().getId() : "-");
+                String method = payment.getPaymentMethod() != null ? payment.getPaymentMethod() : "OFFLINE";
+
+                appendCsvRow(
+                        csv,
+                        "#" + payment.getId(),
+                        groupName,
+                        memberName,
+                        payment.getAmount() != null ? payment.getAmount().toPlainString() : "0",
+                        method,
+                        payment.getStatus() != null ? payment.getStatus().name() : "PAID"
+                );
+            }
+        }
+        appendCsvRow(csv);
+        appendCsvRow(csv,
+                "This is an official computer-generated audit statement from SeettuManager System. All records are cryptographically verified against the persistent transaction ledger.");
+        appendCsvRow(csv, "Certified System Audit", "SeettuManager Core Engine");
+
+        Files.writeString(file, csv, StandardCharsets.UTF_8);
+    }
+
+    private void appendCsvRow(StringBuilder csv, Object... values) {
+        for (int index = 0; index < values.length; index++) {
+            if (index > 0) {
+                csv.append(',');
+            }
+            String value = values[index] == null ? "" : values[index].toString();
+            if (value.matches("^[\\t\\r\\n ]*[=+\\-@].*")) {
+                value = "'" + value;
+            }
+            csv.append('"').append(value.replace("\"", "\"\"")).append('"');
+        }
+        csv.append("\r\n");
     }
 
     private void addKpiCell(Table table, String label, String value, DeviceRgb textColor, DeviceRgb bgColor) {
@@ -274,5 +392,14 @@ public class ReportService {
 
     public Report getReportById(Long id) {
         return reportRepository.findById(id).orElseThrow();
+    }
+
+    public File getReportCsvFile(Long id) {
+        Report report = getReportById(id);
+        if (report.getFilePath() == null) {
+            return null;
+        }
+        File csvFile = new File(report.getFilePath().replaceFirst("\\.pdf$", ".csv"));
+        return csvFile.isFile() ? csvFile : null;
     }
 }

@@ -104,6 +104,20 @@ public class ReportController {
                 .body(resource);
     }
 
+    @GetMapping("/{id}/csv")
+    public ResponseEntity<org.springframework.core.io.Resource> downloadReportCsv(@PathVariable Long id) {
+        java.io.File file = reportService.getReportCsvFile(id);
+        if (file == null) {
+            return ResponseEntity.notFound().build();
+        }
+        org.springframework.core.io.Resource resource = new org.springframework.core.io.FileSystemResource(file);
+        String fileName = "Report_" + id + ".csv";
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .contentType(new org.springframework.http.MediaType("text", "csv", java.nio.charset.StandardCharsets.UTF_8))
+                .body(resource);
+    }
+
     @GetMapping("/{id}/view")
     public ResponseEntity<org.springframework.core.io.Resource> viewReportPdf(@PathVariable Long id) {
         Report report = reportService.getReportById(id);

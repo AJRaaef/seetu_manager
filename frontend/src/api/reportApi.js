@@ -28,3 +28,10 @@ export const getReportsByUser = async (userId) => {
   const response = await api.get(`/reports/user/${userId}`);
   return response.data;
 };
+
+export const downloadReportCsv = async (reportId) => {
+  const response = await api.get(`/reports/${reportId}/csv`, {
+    responseType: 'blob'
+  });
+  return response.data;
+};

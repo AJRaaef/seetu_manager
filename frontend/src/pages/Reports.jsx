@@ -16,6 +16,7 @@ const Reports = () => {
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [downloadingCsv, setDownloadingCsv] = useState(false);
   const totalCollections = reportPayments
     .filter((payment) => payment.status === 'PAID')
     .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
@@ -171,64 +172,27 @@ const Reports = () => {
     }
   };
 
-  const handleOpenInExcel = () => {
-    const safeCell = (value) => {
-      const text = String(value ?? '');
-      const safeText = /^[\t\r\n ]*[=+\-@]/.test(text) ? `'${text}` : text;
-      return `"${safeText.replace(/"/g, '""')}"`;
-    };
-    const csvRows = [
-      ['Report Title', selectedReport.title],
-      ['Report Reference', `#${selectedReport.id}`],
-      ['Report Type', selectedReport.type],
-      ['Generated', selectedReport.createdAt ? new Date(selectedReport.createdAt).toLocaleString() : new Date().toLocaleString()],
-      ['Auditor', selectedReport.generatedBy?.fullName || user?.fullName || 'Administrator'],
-      ['Audit Findings', selectedReport.content || 'Comprehensive audit report covering registered groups, active members, contribution ledgers, and rotation schedules.'],
-      [],
-      ['Summary'],
-      ['Tracked Groups', reportGroups.length],
-      ['Total Collections (LKR)', totalCollections],
-      ['Transactions Logged', reportPayments.length],
-      ['Compliance Rating', '100%'],
-      [],
-      ['Active Seettu Groups Ledger'],
-      ['Group ID', 'Group Name', 'Category', 'Target Members', 'Contribution (LKR)', 'Cycle Frequency', 'Status'],
-      ...reportGroups.map((group) => [
-        `#${group.id}`,
-        group.name || 'Unnamed',
-        group.category || 'GENERAL',
-        `${group.memberCount || 0} Members`,
-        Number(group.contributionAmount || 0),
-        group.cycleFrequency || 'MONTHLY',
-        group.status || 'ACTIVE'
-      ]),
-      [],
-      ['Financial Contribution Ledger (Latest Transactions)'],
-      ['TX #', 'Seettu Group', 'Paying Member', 'Amount (LKR)', 'Settlement Method', 'Date', 'Status'],
-      ...reportPayments.slice(0, 15).map((payment) => [
-        `#${payment.id}`,
-        payment.cycle?.group?.name || 'Seettu Group',
-        payment.member?.fullName || `Member #${payment.member?.id || '-'}`,
-        Number(payment.amount || 0),
-        payment.paymentMethod || 'Cash',
-        payment.paymentDate ? String(payment.paymentDate).split('T')[0] : 'N/A',
-        payment.status || 'PAID'
-      ])
-    ];
-    const csvContent = `\uFEFF${csvRows.map((row) => row.map(safeCell).join(',')).join('\r\n')}`;
-    const blobUrl = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8' }));
-    const link = document.createElement('a');
-    const fileTitle = (selectedReport.title || 'Report')
-      .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_')
-      .trim()
-      .slice(0, 100) || 'Report';
-
-    link.href = blobUrl;
-    link.download = `${fileTitle}_${selectedReport.id}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+  const handleOpenInExcel = async () => {
+    setDownloadingCsv(true);
+    try {
+      const csvBlob = await reportApi.downloadReportCsv(selectedReport.id);
+      const blobUrl = URL.createObjectURL(csvBlob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `Report_${selectedReport.id}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    } catch (err) {
+      console.error('Failed to download report CSV', err);
+      const message = err.response?.status === 404
+        ? 'CSV is unavailable for this older report. Generate a new report to download a matching CSV.'
+        : 'Failed to download the report CSV.';
+      alert(message);
+    } finally {
+      setDownloadingCsv(false);
+    }
   };
 
   return (
@@ -601,10 +565,11 @@ const Reports = () => {
                       className="btn btn-outline-success d-inline-flex align-items-center gap-2"
                       style={{ borderRadius: '8px' }}
                       onClick={handleOpenInExcel}
+                      disabled={downloadingCsv}
                       title="Downloads an Excel-compatible CSV file"
                     >
                       <Icon name="download" size={16} />
-                      <span>Download Excel Sheet</span>
+                      <span>{downloadingCsv ? 'Preparing CSV...' : 'Download Excel Sheet'}</span>
                     </button>
                     <a
                       href={`http://localhost:8081/api/reports/${selectedReport.id}/download`}
