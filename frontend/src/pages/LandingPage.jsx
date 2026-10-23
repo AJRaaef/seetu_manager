@@ -1310,16 +1310,6 @@ const LandingPage = () => {
                   <Icon name="facebook" size={16} />
                 </a>
                 <a 
-                  href="https://twitter.com/seetumanager" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="btn btn-outline-light btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" 
-                  style={{ width: '36px', height: '36px', backgroundColor: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.2)' }}
-                  title="Twitter / X"
-                >
-                  <Icon name="twitter" size={16} />
-                </a>
-                <a 
                   href="https://instagram.com/seetumanager" 
                   target="_blank" 
                   rel="noopener noreferrer" 
