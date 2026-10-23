@@ -95,7 +95,7 @@ const EmergencyRequests = () => {
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
             onClick={() => setShowModal(true)}
           >
-            <span>+</span> {t('emergency_page.request_btn')}
+            {t('emergency_page.request_btn')}
           </button>
         )}
       </div>

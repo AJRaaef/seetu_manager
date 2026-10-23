@@ -164,7 +164,7 @@ const MyGroups = () => {
         </h2>
         {isOrganizer || isAdmin ? (
           <Link to="/groups/create" className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2">
-             {t('my_groups_page.create_new', 'Create New Group')}
+            {t('my_groups_page.create_new', 'Create New Group')}
           </Link>
         ) : (
           <button
@@ -178,7 +178,7 @@ const MyGroups = () => {
             }}
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm"
           >
-             {t('my_groups_page.join_group', 'Join Group')}
+            {t('my_groups_page.join_group', 'Join Group')}
           </button>
         )}
       </div>
