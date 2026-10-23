@@ -181,9 +181,6 @@ const PaymentAuditTrail = () => {
             <span className="badge bg-danger px-3 py-1.5 rounded-pill fw-bold text-uppercase" style={{ fontSize: '0.75rem' }}>
               <Icon name="shield" size={14} className="me-1" /> Admin Security Portal
             </span>
-            <span className="badge bg-dark bg-opacity-10 text-dark px-3 py-1.5 rounded-pill fw-semibold" style={{ fontSize: '0.75rem' }}>
-              Official Audit Ledger
-            </span>
           </div>
           <h2 className="fw-extrabold text-dark mb-0" style={{ color: '#0F2F3D' }}>
             Payment Audit Trail & System Logs
@@ -194,15 +191,6 @@ const PaymentAuditTrail = () => {
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <button 
-            onClick={fetchAuditLogs} 
-            className="btn btn-outline-secondary d-flex align-items-center gap-1.5 fw-semibold px-3 py-2 rounded-3"
-            title="Refresh Logs"
-          >
-            <Icon name="refresh" size={16} />
-            <span>Refresh</span>
-          </button>
-          
           <button 
             onClick={handleExportCSV} 
             className="btn btn-info text-white fw-bold d-flex align-items-center gap-1.5 px-3 py-2 rounded-3 shadow-sm"
