@@ -81,6 +81,10 @@ public class UserService {
     public UserKycResponse submitKyc(Long userId, String nicNumber, MultipartFile file, String requestedRole) throws IOException {
         User user = getUserById(userId);
 
+        if (user.getRole() == User.Role.ADMIN) {
+            throw new IllegalArgumentException("System Administrators hold platform governance authority and do not require KYC verification.");
+        }
+
         if (nicNumber == null || nicNumber.trim().isEmpty()) {
             throw new IllegalArgumentException("NIC Number is mandatory for member identity verification.");
         }
@@ -160,7 +164,7 @@ public class UserService {
             user.setKycRejectionReason(null);
             user.setVerifiedBy(admin);
             user.setVerifiedAt(LocalDateTime.now());
-            if ("ORGANIZER".equalsIgnoreCase(request.getRole())) {
+            if ("ORGANIZER".equalsIgnoreCase(request.getRole()) && user.getRole() != User.Role.ADMIN) {
                 user.setRole(User.Role.ORGANIZER);
             }
             user = userRepository.save(user);
@@ -198,8 +202,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<UserKycResponse> getPendingKycUsers() {
         return userRepository.findAll().stream()
-                .filter(u -> u.getKycStatus() == User.KycStatus.PENDING || 
-                        ("ORGANIZER".equalsIgnoreCase(u.getRequestedRole()) && u.getRole() != User.Role.ORGANIZER))
+                .filter(u -> u.getRole() != User.Role.ADMIN && (u.getKycStatus() == User.KycStatus.PENDING || ("ORGANIZER".equalsIgnoreCase(u.getRequestedRole()) && u.getRole() != User.Role.ORGANIZER)))
                 .sorted((a, b) -> {
                     if (a.getCreatedAt() == null || b.getCreatedAt() == null) return 0;
                     return b.getCreatedAt().compareTo(a.getCreatedAt());
@@ -263,6 +266,9 @@ public class UserService {
     @Transactional
     public void requestOrganizerRole(Long userId, Map<String, String> payload) {
         User user = getUserById(userId);
+        if (user.getRole() == User.Role.ADMIN) {
+            throw new IllegalArgumentException("System Administrators already hold platform governance authority and do not need to apply for organizer status.");
+        }
         user.setRequestedRole("ORGANIZER");
         userRepository.save(user);
 
