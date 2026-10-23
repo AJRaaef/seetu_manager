@@ -361,13 +361,15 @@ const PaymentTracking = () => {
               <span>Payment Audit Trail</span>
             </Link>
           )}
-          <button
-            onClick={fetchPayments}
-            className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 py-1.5"
-            title="Refresh from database"
-          >
-            <span>↻</span> Refresh
-          </button>
+          {!isAdmin && (
+            <button
+              onClick={fetchPayments}
+              className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 py-1.5"
+              title="Refresh from database"
+            >
+              <span>↻</span> Refresh
+            </button>
+          )}
         </div>
       </div>
 
