@@ -56,6 +56,33 @@ public class CertificateService {
         return certificateRepository.save(certificate);
     }
 
+    public Certificate updateCertificate(Long id, User newUser, SeettuGroup newGroup) throws Exception {
+        Certificate cert = certificateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Certificate not found with ID: " + id));
+
+        cert.setUser(newUser);
+        cert.setGroup(newGroup);
+
+        // Rebuild PDF file on disk
+        buildPdfFile(cert.getCertificateUuid(), newUser, newGroup);
+
+        return certificateRepository.save(cert);
+    }
+
+    public void deleteCertificate(Long id) {
+        Certificate cert = certificateRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Certificate not found with ID: " + id));
+
+        try {
+            File file = new File(certificateOutputDir + "/CERT_" + cert.getCertificateUuid() + ".pdf");
+            if (file.exists()) {
+                file.delete();
+            }
+        } catch (Exception ignored) {}
+
+        certificateRepository.delete(cert);
+    }
+
     public void buildPdfFile(String uuid, User user, SeettuGroup group) throws Exception {
         File dir = new File(certificateOutputDir);
         if (!dir.exists()) {

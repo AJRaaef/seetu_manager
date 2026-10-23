@@ -37,6 +37,33 @@ public class CertificateController {
         }
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public ResponseEntity<ApiResponse<Certificate>> updateCertificate(
+            @PathVariable Long id,
+            @RequestParam Long userId,
+            @RequestParam Long groupId) {
+        try {
+            User user = userService.getUserById(userId);
+            SeettuGroup group = groupService.getGroupById(groupId);
+            Certificate updated = certificateService.updateCertificate(id, user, group);
+            return ResponseEntity.ok(ApiResponse.success("Certificate updated successfully", updated));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(ApiResponse.error("Failed to update certificate: " + e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public ResponseEntity<ApiResponse<Void>> deleteCertificate(@PathVariable Long id) {
+        try {
+            certificateService.deleteCertificate(id);
+            return ResponseEntity.ok(ApiResponse.success("Certificate deleted successfully", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(ApiResponse.error("Failed to delete certificate: " + e.getMessage()));
+        }
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
     public ResponseEntity<ApiResponse<List<Certificate>>> getAllCertificates() {
