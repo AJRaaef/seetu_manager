@@ -164,10 +164,10 @@ const MyGroups = () => {
         </h2>
         {isOrganizer || isAdmin ? (
           <Link to="/groups/create" className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2">
-            <span>+</span> {t('my_groups_page.create_new', 'Create New Group')}
+             {t('my_groups_page.create_new', 'Create New Group')}
           </Link>
         ) : (
-          <button 
+          <button
             onClick={() => {
               if (user?.role === 'MEMBER' && user?.kycStatus !== 'VERIFIED') {
                 alert('⚠️ Verification Required: To prevent fraud, duplicate accounts, and financial risks, you must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before joining Seettu groups.\n\nPlease visit your Profile page to complete verification.');
@@ -175,10 +175,10 @@ const MyGroups = () => {
                 return;
               }
               setShowJoinModal(true);
-            }} 
+            }}
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm"
           >
-            <span>+</span> {t('my_groups_page.join_group', 'Join Group')}
+             {t('my_groups_page.join_group', 'Join Group')}
           </button>
         )}
       </div>
@@ -197,7 +197,7 @@ const MyGroups = () => {
             {t('my_groups_page.empty_desc', 'You are not currently enrolled in any Seettu group circles. Submit your NIC & Grama Niladhari verification to request joining open groups.')}
           </p>
           {!isOrganizer && !isAdmin && (
-            <button 
+            <button
               onClick={() => {
                 if (user?.role === 'MEMBER' && user?.kycStatus !== 'VERIFIED') {
                   alert('⚠️ Verification Required: To prevent fraud, duplicate accounts, and financial risks, you must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before joining Seettu groups.\n\nPlease visit your Profile page to complete verification.');
@@ -327,7 +327,7 @@ const MyGroups = () => {
                   </p>
                   <div className="mb-3 text-start">
                     <label className="form-label fw-semibold text-dark small mb-1">Select Available Seettu Scheme</label>
-                    <select 
+                    <select
                       className="form-select"
                       value={selectedJoinGroup}
                       onChange={(e) => setSelectedJoinGroup(e.target.value)}
@@ -343,9 +343,9 @@ const MyGroups = () => {
                   </div>
                   <div className="mb-3 text-start">
                     <label className="form-label fw-semibold text-dark small mb-1">Optional Note for Organizer</label>
-                    <textarea 
-                      className="form-control" 
-                      rows="3" 
+                    <textarea
+                      className="form-control"
+                      rows="3"
                       placeholder="e.g. Interested in joining this monthly cycle scheme."
                       value={joinMsg}
                       onChange={(e) => setJoinMsg(e.target.value)}
