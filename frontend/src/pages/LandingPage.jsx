@@ -1398,11 +1398,8 @@ const LandingPage = () => {
                  </span>
                </div>
 
-                <div className="pt-2 border-top border-secondary border-opacity-25 d-flex align-items-center justify-content-between flex-wrap gap-1">
+                <div className="pt-2 border-top border-secondary border-opacity-25">
                   <span className="text-white-50" style={{ fontSize: '0.78rem' }}>Mon – Sat (8:30 AM – 6:00 PM IST)</span>
-                  <span className="badge bg-success bg-opacity-25 text-success px-2 py-1" style={{ fontSize: '0.72rem' }}>
-                    ● Online
-                  </span>
                 </div>
               </div>
             </div>
