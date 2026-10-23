@@ -187,7 +187,7 @@ const Reports = () => {
     } catch (err) {
       console.error('Failed to download report CSV', err);
       const message = err.response?.status === 404
-        ? 'CSV is unavailable for this older report. Generate a new report to download a matching CSV.'
+        ? 'CSV export is unavailable. Please ensure the backend is up to date and try again.'
         : 'Failed to download the report CSV.';
       alert(message);
     } finally {

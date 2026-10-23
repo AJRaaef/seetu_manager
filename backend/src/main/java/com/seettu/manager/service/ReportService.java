@@ -22,6 +22,7 @@ import com.seettu.manager.repository.SeettuGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -394,12 +395,50 @@ public class ReportService {
         return reportRepository.findById(id).orElseThrow();
     }
 
-    public File getReportCsvFile(Long id) {
+    @Transactional(readOnly = true)
+    public File getReportCsvFile(Long id) throws Exception {
         Report report = getReportById(id);
         if (report.getFilePath() == null) {
             return null;
         }
-        File csvFile = new File(report.getFilePath().replaceFirst("\\.pdf$", ".csv"));
+        Path pdfPath = Path.of(report.getFilePath());
+        String pdfFileName = pdfPath.getFileName().toString();
+        if (!pdfFileName.toLowerCase(java.util.Locale.ROOT).endsWith(".pdf")) {
+            return null;
+        }
+        Path csvPath = pdfPath.resolveSibling(pdfFileName.replaceFirst("(?i)\\.pdf$", ".csv"));
+        File csvFile = csvPath.toFile();
+
+        if (!csvFile.isFile()) {
+            List<SeettuGroup> groups = groupRepository.findAllWithDetails();
+            List<Payment> payments = paymentRepository.findAllWithDetails();
+            BigDecimal totalCollected = payments.stream()
+                    .filter(payment -> payment.getStatus() == Payment.PaymentStatus.PAID)
+                    .map(Payment::getAmount)
+                    .filter(java.util.Objects::nonNull)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            String timestamp = report.getCreatedAt() != null
+                    ? report.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                    : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            String authorName = report.getGeneratedBy() != null && report.getGeneratedBy().getFullName() != null
+                    ? report.getGeneratedBy().getFullName()
+                    : "Administrator";
+            String defaultContent = "Comprehensive audit report covering registered groups, active members, contribution ledgers, and rotation schedules.";
+
+            writeCsvReport(
+                    csvPath,
+                    report.getTitle(),
+                    report.getType(),
+                    timestamp,
+                    authorName,
+                    defaultContent,
+                    groups,
+                    payments,
+                    memberRepository.count(),
+                    totalCollected
+            );
+        }
+
         return csvFile.isFile() ? csvFile : null;
     }
 }
