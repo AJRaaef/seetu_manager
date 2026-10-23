@@ -376,23 +376,23 @@ const Certificates = () => {
                   </button>
 
                   {(isAdmin || isOrganizer) && (
-                    <div className="btn-group w-100 shadow-xs" role="group">
+                    <div className="d-flex gap-2 w-100" role="group" aria-label="Certificate actions">
                       <button 
                         type="button"
-                        className="btn btn-outline-secondary btn-sm fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5 py-1.5"
+                        className="btn btn-light border btn-sm fw-semibold d-inline-flex align-items-center justify-content-center gap-2 py-2 flex-fill"
                         onClick={() => handleOpenEdit(c)}
                         title="Modify / Edit Certificate Details"
                       >
-                        <Icon name="pencil" size={13} color="#475569" />
+                        <Icon name="pencil" size={14} color="#235665" />
                         <span>Modify</span>
                       </button>
                       <button 
                         type="button"
-                        className="btn btn-outline-danger btn-sm fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5 py-1.5"
+                        className="btn btn-outline-danger btn-sm fw-semibold d-inline-flex align-items-center justify-content-center gap-2 py-2 flex-fill"
                         onClick={() => setDeleteCert(c)}
                         title="Delete Certificate Record"
                       >
-                        <Icon name="trash" size={13} color="#DC2626" />
+                        <Icon name="trash" size={14} />
                         <span>Delete</span>
                       </button>
                     </div>
