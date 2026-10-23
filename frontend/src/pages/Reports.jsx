@@ -171,10 +171,6 @@ const Reports = () => {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   const handleOpenInExcel = () => {
     const safeCell = (value) => {
       const text = String(value ?? '');
@@ -620,10 +616,6 @@ const Reports = () => {
                       <Icon name="download" size={16} />
                       <span>Download PDF Report</span>
                     </a>
-                    <button type="button" className="btn btn-teal px-4 d-inline-flex align-items-center gap-2" style={{ borderRadius: '8px' }} onClick={handlePrint}>
-                      <Icon name="printer" size={16} />
-                      <span>Print / Save as PDF</span>
-                    </button>
                   </div>
                   <small className="w-100 text-end text-muted">
                     CSV downloads to your device; open the downloaded file with Excel.
