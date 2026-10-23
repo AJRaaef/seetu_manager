@@ -475,6 +475,7 @@ const LandingPage = () => {
               <Icon name="mail" size={13} className="me-1" color="#0097B2" />
               seetumanager@gmail.com
             </span>
+
           </div>
 
           <div className="d-flex align-items-center gap-2 ms-auto">
@@ -1375,7 +1376,6 @@ const LandingPage = () => {
                       <Icon name="phone" size={13} color="#0097B2" />
                       +94 75 297 5632
                     </a>
-
                   </div>
                 </div>
 
