@@ -359,7 +359,6 @@ const Dashboard = () => {
       <div className="table-card shadow-sm">
         <div className="table-card-header d-flex justify-content-between align-items-center">
           <span>{t('dashboard_page.recent_payments.title', 'Recent Payments')}</span>
-          <span className="badge bg-light text-dark fw-normal border">Live Records</span>
         </div>
 
         <div className="table-responsive">
