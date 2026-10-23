@@ -94,6 +94,7 @@ const MainLayout = () => {
       />
 
       {/* Protected Dashboard & App Routes */}
+      <Route path="/admin" element={<Navigate to="/dashboard" replace />} />
       <Route path="/dashboard" element={<ProtectedRoute><AppLayout><Dashboard /></AppLayout></ProtectedRoute>} />
       <Route path="/groups" element={<ProtectedRoute><AppLayout><MyGroups /></AppLayout></ProtectedRoute>} />
       <Route path="/groups/create" element={<ProtectedRoute roles={['ORGANIZER', 'ADMIN']}><AppLayout><CreateGroup /></AppLayout></ProtectedRoute>} />
