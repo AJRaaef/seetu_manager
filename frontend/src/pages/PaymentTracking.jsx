@@ -351,16 +351,6 @@ const PaymentTracking = () => {
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('payments_page.title')}</h2>
         <div className="d-flex align-items-center gap-2">
-          {isAdmin && (
-            <Link
-              to="/audit-trail"
-              className="btn btn-info btn-sm text-white fw-bold d-flex align-items-center gap-2 px-3 py-1.5 rounded-2 shadow-sm"
-              style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
-            >
-              <Icon name="shield" size={15} />
-              <span>Payment Audit Trail</span>
-            </Link>
-          )}
           {!isAdmin && (
             <button
               onClick={fetchPayments}
