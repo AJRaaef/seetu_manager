@@ -91,30 +91,30 @@ const Notifications = () => {
   const getTypeMeta = (type) => {
     const t = (type || '').toUpperCase();
     if (t.includes('OVERDUE')) {
-      return { label: 'Overdue Notice', badgeBg: 'bg-danger text-white', icon: 'warning', iconColor: '#EF4444' };
+      return { label: 'Overdue Notice', badgeBg: 'bg-danger text-white', icon: 'warning', iconColor: '#DC2626', iconBg: '#FEE2E2', borderColor: '#DC2626' };
     }
     if (t.includes('REMINDER')) {
-      return { label: 'Payment Reminder', badgeBg: 'bg-warning text-dark', icon: 'payments', iconColor: '#F59E0B' };
+      return { label: 'Payment Reminder', badgeBg: 'bg-warning text-dark', icon: 'payments', iconColor: '#D97706', iconBg: '#FEF3C7', borderColor: '#F59E0B' };
     }
     if (t.includes('PAYMENT')) {
-      return { label: 'Payment Update', badgeBg: 'bg-success text-white', icon: 'payments', iconColor: '#10B981' };
+      return { label: 'Payment Update', badgeBg: 'bg-success text-white', icon: 'payments', iconColor: '#059669', iconBg: '#D1FAE5', borderColor: '#10B981' };
     }
     if (t.includes('DISPUTE')) {
-      return { label: 'Dispute Alert', badgeBg: 'bg-dark text-white', icon: 'disputes', iconColor: '#6366F1' };
+      return { label: 'Dispute Alert', badgeBg: 'bg-dark text-white', icon: 'disputes', iconColor: '#4F46E5', iconBg: '#EEF2FF', borderColor: '#6366F1' };
     }
     if (t.includes('EMERGENCY')) {
-      return { label: 'Emergency Notice', badgeBg: 'bg-danger text-white', icon: 'emergency', iconColor: '#DC2626' };
+      return { label: 'Emergency Notice', badgeBg: 'bg-danger text-white', icon: 'emergency', iconColor: '#DC2626', iconBg: '#FEE2E2', borderColor: '#DC2626' };
     }
     if (t.includes('KYC') || t.includes('ORGANIZER')) {
-      return { label: 'Verification', badgeBg: 'bg-info text-dark', icon: 'shield', iconColor: '#0097B2' };
+      return { label: 'Verification', badgeBg: 'bg-info text-dark', icon: 'shield', iconColor: '#0284C7', iconBg: '#E0F2FE', borderColor: '#0097B2' };
     }
     if (t.includes('JOIN')) {
-      return { label: 'Join Request', badgeBg: 'bg-primary text-white', icon: 'groups', iconColor: '#0097B2' };
+      return { label: 'Join Request', badgeBg: 'bg-primary text-white', icon: 'groups', iconColor: '#0097B2', iconBg: '#E0F7FA', borderColor: '#0097B2' };
     }
     if (t.includes('GROUP')) {
-      return { label: 'Group Notice', badgeBg: 'bg-primary text-white', icon: 'groups', iconColor: '#0097B2' };
+      return { label: 'Group Notice', badgeBg: 'bg-primary text-white', icon: 'groups', iconColor: '#0097B2', iconBg: '#E0F7FA', borderColor: '#0097B2' };
     }
-    return { label: 'Notice', badgeBg: 'bg-secondary text-white', icon: 'bell', iconColor: '#64748B' };
+    return { label: 'Notice', badgeBg: 'bg-secondary text-white', icon: 'bell', iconColor: '#64748B', iconBg: '#F1F5F9', borderColor: '#94A3B8' };
   };
 
   const unreadCount = notifications.filter(isUnread).length;
@@ -251,12 +251,16 @@ const Notifications = () => {
                     ? 'bg-light border-start border-4'
                     : 'bg-white'
                 }`}
-                style={unread ? { borderLeftColor: '#0097B2' } : {}}
+                style={unread ? { borderLeftColor: meta.borderColor || '#0097B2' } : {}}
               >
                 <div className="d-flex gap-3 align-items-start w-100">
                   <div
                     className="p-2 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 mt-1"
-                    style={{ backgroundColor: unread ? 'rgba(0, 151, 178, 0.12)' : '#F1F5F9' }}
+                    style={{
+                      backgroundColor: unread ? (meta.iconBg || 'rgba(0, 151, 178, 0.12)') : '#F1F5F9',
+                      width: '38px',
+                      height: '38px'
+                    }}
                   >
                     <Icon name={meta.icon} size={20} color={meta.iconColor} />
                   </div>
