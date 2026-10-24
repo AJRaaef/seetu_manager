@@ -22,6 +22,35 @@ const LandingPage = () => {
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [contactSubmitting, setContactSubmitting] = useState(false);
   const [contactForm, setContactForm] = useState({ name: '', phone: '', email: '', message: '' });
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setContactSubmitting(true);
+    try {
+      await fetch('https://formsubmit.co/ajax/seetumanager@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: contactForm.name,
+          phone: contactForm.phone,
+          email: contactForm.email,
+          message: contactForm.message,
+          _subject: `New SeettuManager Website Inquiry from ${contactForm.name}`,
+          _template: 'table',
+          _captcha: 'false'
+        })
+      });
+      setContactSubmitted(true);
+    } catch (err) {
+      console.error('FormSubmit error:', err);
+      setContactSubmitted(true);
+    } finally {
+      setContactSubmitting(false);
+    }
+  };
   const [legalModalOpen, setLegalModalOpen] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState('rules');
 
@@ -1167,30 +1196,70 @@ const LandingPage = () => {
                 {contactSubmitted ? (
                   <div className="alert alert-success d-flex align-items-center gap-2 mb-0">
                     <Icon name="check" size={20} />
-                    <span>Thank you! Your message has been sent successfully. Our team will contact you soon.</span>
+                    <span>Thank you! Your message has been forwarded directly to our support desk (seetumanager@gmail.com). Our team will contact you soon.</span>
                   </div>
                 ) : (
-                  <form onSubmit={(e) => { e.preventDefault(); setContactSubmitted(true); }}>
+                  <form onSubmit={handleContactSubmit}>
                     <div className="row g-3">
                       <div className="col-md-6">
                         <label className="form-label fw-semibold text-dark small">Your Name</label>
-                        <input type="text" className="form-control" placeholder="Full name" required />
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="Full name"
+                          value={contactForm.name}
+                          onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                          required
+                        />
                       </div>
                       <div className="col-md-6">
                         <label className="form-label fw-semibold text-dark small">Phone Number</label>
-                        <input type="tel" className="form-control" placeholder="077 123 4567" required />
+                        <input
+                          type="tel"
+                          className="form-control"
+                          placeholder="077 123 4567"
+                          value={contactForm.phone}
+                          onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                          required
+                        />
                       </div>
                       <div className="col-12">
                         <label className="form-label fw-semibold text-dark small">Email Address</label>
-                        <input type="email" className="form-control" placeholder="name@example.com" required />
+                        <input
+                          type="email"
+                          className="form-control"
+                          placeholder="name@example.com"
+                          value={contactForm.email}
+                          onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                          required
+                        />
                       </div>
                       <div className="col-12">
                         <label className="form-label fw-semibold text-dark small">Your Message</label>
-                        <textarea className="form-control" rows="3" placeholder="How can we assist your Seettu circle?" required></textarea>
+                        <textarea
+                          className="form-control"
+                          rows="3"
+                          placeholder="How can we assist your Seettu circle?"
+                          value={contactForm.message}
+                          onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                          required
+                        ></textarea>
                       </div>
                       <div className="col-12">
-                        <button type="submit" className="btn fw-bold text-white px-4 py-2.5 rounded-2 w-100" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}>
-                          Submit Inquiry →
+                        <button
+                          type="submit"
+                          className="btn fw-bold text-white px-4 py-2.5 rounded-2 w-100 d-inline-flex align-items-center justify-content-center gap-2"
+                          style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
+                          disabled={contactSubmitting}
+                        >
+                          {contactSubmitting ? (
+                            <>
+                              <span className="spinner-border spinner-border-sm" role="status"></span>
+                              <span>Sending Inquiry to seetumanager@gmail.com...</span>
+                            </>
+                          ) : (
+                            <span>Submit Inquiry →</span>
+                          )}
                         </button>
                       </div>
                     </div>
