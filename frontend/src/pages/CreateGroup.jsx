@@ -313,51 +313,56 @@ const CreateGroup = () => {
               </div>
               
               <div className="row mb-4">
-                <div className="col-md-4 mb-3 mb-md-0">
-                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
-                    {t('create_group_page.contribution_amount', 'Contribution Amount (LKR)')}
-                  </label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    placeholder={t('create_group_page.amount_placeholder', 'e.g. 10000')}
-                    value={formData.contributionAmount}
-                    onChange={e => setFormData({...formData, contributionAmount: e.target.value})}
-                    style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
-                    required
-                  />
-                </div>
-                <div className="col-md-4 mb-3 mb-md-0">
-                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
-                    {t('create_group_page.member_count', 'Member Count')}
-                  </label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    placeholder={t('create_group_page.member_placeholder', 'e.g. 12')}
-                    value={formData.memberCount}
-                    onChange={e => setFormData({...formData, memberCount: e.target.value})}
-                    style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
-                    required
-                  />
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
-                    {t('create_group_page.cycle_frequency', 'Cycle Frequency')}
-                  </label>
-                  <select 
-                    className="form-select" 
-                    value={formData.cycleFrequency} 
-                    onChange={e => setFormData({...formData, cycleFrequency: e.target.value})}
-                    style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
-                  >
-                    <option value="MONTHLY">{t('create_group_page.frequencies.monthly', 'Monthly')}</option>
-                    <option value="WEEKLY">{t('create_group_page.frequencies.weekly', 'Weekly')}</option>
-                    <option value="BI_WEEKLY">{t('create_group_page.frequencies.bi_weekly', 'Bi-Weekly')}</option>
-                    <option value="DAILY">{t('create_group_page.frequencies.daily', 'Daily')}</option>
-                  </select>
-                </div>
-              </div>
+                              <div className="col-md-4 mb-3 mb-md-0">
+                                <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
+                                  {t('create_group_page.contribution_amount', 'Contribution Amount (LKR)')}
+                                </label>
+                                <input
+                                  type="number"
+                                  className="form-control"
+                                  placeholder={t('create_group_page.amount_placeholder', 'e.g. 10000')}
+                                  value={formData.contributionAmount}
+                                  onChange={e => setFormData({...formData, contributionAmount: e.target.value})}
+                                  min="1"
+                                  step="any"
+                                  onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
+                                  style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
+                                  required
+                                />
+                              </div>
+                              <div className="col-md-4 mb-3 mb-md-0">
+                                <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
+                                  {t('create_group_page.member_count', 'Member Count')}
+                                </label>
+                                <input
+                                  type="number"
+                                  className="form-control"
+                                  placeholder={t('create_group_page.member_placeholder', 'e.g. 12')}
+                                  value={formData.memberCount}
+                                  onChange={e => setFormData({...formData, memberCount: e.target.value})}
+                                  min="1"
+                                  onKeyDown={e => { if (e.key === '-' || e.key === '.' || e.key === 'e') e.preventDefault(); }}
+                                  style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
+                                  required
+                                />
+                              </div>
+                              <div className="col-md-4">
+                                <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>
+                                  {t('create_group_page.cycle_frequency', 'Cycle Frequency')}
+                                </label>
+                                <select
+                                  className="form-select"
+                                  value={formData.cycleFrequency}
+                                  onChange={e => setFormData({...formData, cycleFrequency: e.target.value})}
+                                  style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
+                                >
+                                  <option value="MONTHLY">{t('create_group_page.frequencies.monthly', 'Monthly')}</option>
+                                  <option value="WEEKLY">{t('create_group_page.frequencies.weekly', 'Weekly')}</option>
+                                  <option value="BI_WEEKLY">{t('create_group_page.frequencies.bi_weekly', 'Bi-Weekly')}</option>
+                                  <option value="DAILY">{t('create_group_page.frequencies.daily', 'Daily')}</option>
+                                </select>
+                              </div>
+                            </div>
               
               <button 
                 type="submit" 
