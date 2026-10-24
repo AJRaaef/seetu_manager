@@ -105,7 +105,7 @@ public class ReportController {
     }
 
     @GetMapping("/{id}/csv")
-    public ResponseEntity<org.springframework.core.io.Resource> downloadReportCsv(@PathVariable Long id) {
+    public ResponseEntity<org.springframework.core.io.Resource> downloadReportCsv(@PathVariable Long id) throws Exception {
         java.io.File file = reportService.getReportCsvFile(id);
         if (file == null) {
             return ResponseEntity.notFound().build();

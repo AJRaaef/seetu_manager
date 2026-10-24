@@ -7,7 +7,6 @@ import { useLanguage } from '../hooks/useLanguage';
 import { useNotification } from '../hooks/useNotification';
 import Icon from '../components/Icons';
 import LegalPoliciesModal from '../components/LegalPoliciesModal';
-import BecomeOrganizerModal from '../components/BecomeOrganizerModal';
 
 const LandingPage = () => {
   const { t } = useTranslation();
@@ -25,7 +24,6 @@ const LandingPage = () => {
   const [contactForm, setContactForm] = useState({ name: '', phone: '', email: '', message: '' });
   const [legalModalOpen, setLegalModalOpen] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState('rules');
-  const [showOrganizerModal, setShowOrganizerModal] = useState(false);
 
   const openLegal = (tab = 'rules') => {
     setLegalModalTab(tab);
@@ -321,32 +319,7 @@ const LandingPage = () => {
           right: 20px;
         }
 
-        /* Vertical Right Sticky Tab (Jayapriya Reference in Project Theme) */
-        .vertical-organizer-tab {
-          position: fixed;
-          right: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 1040;
-          background: #0097B2;
-          color: #FFFFFF;
-          padding: 14px 10px;
-          font-weight: 800;
-          font-size: 0.78rem;
-          letter-spacing: 1.5px;
-          text-transform: uppercase;
-          writing-mode: vertical-rl;
-          text-orientation: mixed;
-          border-radius: 8px 0 0 8px;
-          box-shadow: -4px 6px 16px rgba(0, 0, 0, 0.25);
-          text-decoration: none;
-          transition: all 0.25s ease;
-        }
-        .vertical-organizer-tab:hover {
-          background-color: #0F2F3D;
-          color: #FFFFFF;
-          padding-right: 14px;
-        }
+
 
 
 
@@ -455,15 +428,7 @@ const LandingPage = () => {
         }
       `}</style>
 
-      {/* Vertical Sticky Right Tab: BECOME AN ORGANIZER */}
-      <button 
-        type="button" 
-        onClick={() => setShowOrganizerModal(true)} 
-        className="vertical-organizer-tab border-0" 
-        title="Become a Seettu Organizer Application"
-      >
-        BECOME AN ORGANIZER
-      </button>
+
 
 
 
@@ -804,15 +769,14 @@ const LandingPage = () => {
                     <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
                       Your community calling: create private or village circles, set custom rules, and lead your circle with automated rotations.
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => setShowOrganizerModal(true)}
+                    <Link
+                      to={user ? '/profile' : '/register'}
                       className="btn btn-sm btn-link text-decoration-none p-0 fw-bold mt-1.5 d-inline-flex align-items-center gap-1"
                       style={{ color: '#0097B2', fontSize: '0.84rem' }}
                     >
-                      <span>Apply Online as an Organizer</span>
+                      <span>{user ? 'Manage in Account' : 'Register to Organize'}</span>
                       <Icon name="chevron-right" size={14} />
-                    </button>
+                    </Link>
                   </div>
                 </div>
 
@@ -1444,11 +1408,7 @@ const LandingPage = () => {
         initialTab={legalModalTab} 
       />
 
-      {/* Become an Organizer Application Popup Modal */}
-      <BecomeOrganizerModal
-        show={showOrganizerModal}
-        onHide={() => setShowOrganizerModal(false)}
-      />
+
 
     </div>
   );
