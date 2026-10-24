@@ -62,36 +62,6 @@ const Reports = () => {
         }
       ]
     : [
-        {
-          name: 'Personal Payment History',
-          icon: 'payments',
-          bgColor: '#ECFDF5',
-          iconColor: '#059669',
-          type: 'PERSONAL_PAYMENT_HISTORY',
-          title: `Personal Payment History & Receipts - ${user?.fullName || 'Member'}`,
-          content: `Comprehensive contribution statement detailing all verified offline & online monthly installments, payment cycles, and receipt references for ${user?.fullName || 'Member'}.`,
-          desc: 'Official statement of all your completed contributions and advance balances.'
-        },
-        {
-          name: 'Discipline Scorecard',
-          icon: 'award',
-          bgColor: '#FEF3C7',
-          iconColor: '#D97706',
-          type: 'DISCIPLINE_SCORE_SUMMARY',
-          title: `Personal Discipline Scorecard - ${user?.fullName || 'Member'}`,
-          content: `Financial discipline certification confirming on-time payment track record (100% completion rate), zero default history, and high reliability rating across Seettu groups.`,
-          desc: 'Proof of your reliable credit standing, zero default rate, and 100% on-time score.'
-        },
-        {
-          name: 'Group Activity & Payout Schedule',
-          icon: 'users',
-          bgColor: '#E0F2FE',
-          iconColor: '#0284C7',
-          type: 'GROUP_SUMMARY',
-          title: `Group Activity & Payout Schedule - ${user?.fullName || 'Member'}`,
-          content: `Summary of active Seettu groups joined by ${user?.fullName || 'Member'}, assigned contribution turns, and scheduled payout distribution dates.`,
-          desc: 'Overview of all your enrolled Seettu groups and scheduled payout turns.'
-        }
       ];
 
   const openModalWithTemplate = (tpl) => {
@@ -290,8 +260,8 @@ const Reports = () => {
                 : 'Select one of the recommended member report templates below or create a custom report.'}
             </p>
             <div>
-              <button 
-                className="btn btn-teal px-4 py-2" 
+              <button
+                className="btn btn-teal px-4 py-2"
                 onClick={() => {
                   setFormData({
                     title: (isAdmin || isOrganizer) ? 'Monthly Group Summary Audit' : `Personal Payment History & Receipts - ${user?.fullName || 'Member'}`,
@@ -308,9 +278,7 @@ const Reports = () => {
 
           {/* Quick Start Templates */}
           <div>
-            <h6 className="fw-bold mb-3" style={{ color: '#1A3644' }}>
-              {isAdmin || isOrganizer ? 'Standard Audit Templates' : 'Recommended Reports for You'}
-            </h6>
+
             <div className="row g-3">
               {templates.map((tpl, idx) => (
                 <div key={idx} className="col-12 col-md-4">
