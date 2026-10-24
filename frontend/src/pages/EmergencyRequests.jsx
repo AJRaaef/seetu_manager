@@ -90,7 +90,14 @@ const EmergencyRequests = () => {
               : 'Apply for prioritized early payout in case of financial or medical emergencies'}
           </p>
         </div>
-
+        {!isAdmin && (
+          <button
+            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2"
+            onClick={() => setShowModal(true)}
+          >
+            {t('emergency_page.request_btn')}
+          </button>
+        )}
       </div>
 
       {isAdmin && (
@@ -118,7 +125,13 @@ const EmergencyRequests = () => {
               ? 'There are no active emergency payout applications to display.' 
               : 'You have no active or previous emergency payout requests.'}
           </p>
-
+          {!isAdmin && (
+            <div>
+              <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
+                {t('emergency_page.request_btn')}
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="ui-card shadow-sm border-0 overflow-hidden">
