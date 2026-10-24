@@ -147,17 +147,7 @@ const Login = () => {
             </Link>
           </div>
 
-          <div className="mt-3 pt-3 border-top text-center">
-            <button
-              type="button"
-              className="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-center gap-2 py-1.5"
-              onClick={() => setFormData({ email: 'admin@seetumanager.com', password: 'Admin@123' })}
-              title="Autofill System Administrator credentials"
-            >
-              <Icon name="shield" size={15} />
-              <span>Connect as System Admin</span>
-            </button>
-          </div>
+
         </form>
       </div>
     </div>
