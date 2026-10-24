@@ -11,7 +11,6 @@
   "confirm_password": "Confirm Password",
   "chatbot": "Seettu Assistant",
   "search": "Search",
-
   "dashboard": "Dashboard",
   "my_groups": "My Groups",
   "members": "Members",
@@ -27,45 +26,16 @@
   "logout": "Logout",
   "audit_trail": "Audit Trail",
   "help_center": "Help Center",
-
   "admin_portal": "ADMIN PORTAL",
   "organizer_portal": "ORGANIZER PORTAL",
   "member_portal": "MEMBER PORTAL",
   "manage_seettu": "Manage your Seettu",
-
-  "common": {
-    "edit": "Edit Profile",
-    "save": "Save",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "back": "Back"
-  },
-
-  "profile_page": {
-    "title": "User Profile"
-  },
-  "notifications_page": {
-    "title": "Notifications"
-  },
-  "reports_page": {
-    "title": "System Reports"
-  },
-  "disputes_page": {
-    "title": "Dispute Management"
-  },
   "certificates_page": {
-    "title": "Certificates & Bylaws"
+    "title": "Certificates and Bylaws"
   },
   "settings_page": {
     "title": "System Settings"
   },
-  "payments_page": {
-    "title": "Payment Management"
-  },
-  "advance_page": {
-    "title": "Advance Contributions"
-  },
-
   "create_group": "Create Group",
   "total_groups": "Total Groups",
   "active_groups": "Active Groups",
@@ -78,7 +48,6 @@
   "submit": "Submit",
   "cancel": "Cancel",
   "btn_cancel": "Cancel",
-
   "day_mode": "Day",
   "night_mode": "Night",
   "toggle_theme_title": "Toggle Day/Night Mode",
@@ -94,13 +63,11 @@
   "user_profile": "User Profile",
   "user_fallback": "User",
   "system_user": "System",
-
   "refresh": "Refresh",
   "export_csv": "Export CSV",
   "loading": "Loading...",
   "no_logs": "No audit logs found.",
   "audit_load_error": "Could not load audit logs. Please try again.",
-
   "dashboard_welcome": "Welcome back, {{name}}",
   "dashboard_subtitle": "Here is a quick look at your current Seettu groups and member contributions for this month.",
   "total_members": "Total Members",
@@ -136,7 +103,6 @@
   "no_recent_payments": "No recent payments found.",
   "payment_distribution": "Payment Distribution",
   "chart_placeholder": "[ Chart Display Area ]",
-
   "groups_title": "My Groups",
   "groups_create_btn": "Create New Group",
   "groups_join_btn": "Join Group",
@@ -144,7 +110,7 @@
   "groups_empty_title": "No Seettu Groups Joined Yet",
   "groups_empty_desc": "You are not currently enrolled in any Seettu group circles. Submit your NIC & Grama Niladhari verification to request joining open groups.",
   "groups_explore_btn": "Explore & Join a Group",
-  "groups_verification_required": "⚠️ Verification Required: To prevent fraud, duplicate accounts, and financial risks, you must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before joining Seettu groups.\n\nPlease visit your Profile page to complete verification.",
+  "groups_verification_required": "⚠ Verification Required: To prevent fraud, duplicate accounts, and financial risks, you must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before joining Seettu groups.\n\nPlease visit your Profile page to complete verification.",
   "groups_members": "Members",
   "groups_contribution": "Contribution",
   "groups_per_month": "{{amount}} LKR per month",
@@ -171,7 +137,6 @@
   "groups_type_monetary": "Monetary",
   "groups_type_non_monetary": "Non-Monetary",
   "groups_status_active": "Active",
-
   "gd_loading": "Loading group details & rotation schedule...",
   "gd_not_found": "Group details not found.",
   "gd_back_link": "Back to Groups",
@@ -244,7 +209,6 @@
   "gd_payout_recipient_label": "Select Group Member to Receive Payout (LKR {{amount}})",
   "gd_choose_member": "-- Choose Member --",
   "gd_confirm_payout": "Confirm Payout Assignment",
-
   "payments_title": "Payment Management",
   "payments_audit_trail": "Payment Audit Trail",
   "payments_refresh": "Refresh",
@@ -339,7 +303,6 @@
   "payments_settled_success": "✓ Payment for {{member}} settled successfully as {{status}}!",
   "payments_settle_error": "Error settling payment. Please try again.",
   "payments_reminder_sent": "✓ Payment reminder sent to {{member}} via {{channel}}!",
-
   "advance_title": "Advance Contributions",
   "advance_subtitle": "Record and track advance installment payments before cycle due dates",
   "advance_record_btn": "Record Advance Payment",
@@ -377,7 +340,6 @@
   "advance_select_group_option": "-- Select Group --",
   "advance_history_count": "Advance Contribution History ({{count}})",
   "advance_edit_modal_full": "Edit Advance Contribution #ADV-{{id}}",
-
   "pat_admin_badge": "Admin Security Portal",
   "pat_ledger_badge": "Official Audit Ledger",
   "pat_title": "Payment Audit Trail & System Logs",
@@ -467,7 +429,6 @@
   "pat_table_disputes": "Disputes",
   "pat_table_emergency_requests": "Emergency Requests",
   "pat_name_system_admin": "System Admin",
-
   "auth": {
     "login_subtitle": "Digital Financial Discipline for Seettu Group",
     "email_placeholder": "Enter your email",
@@ -480,7 +441,6 @@
     "show_password": "Show password",
     "register_here": "Register New Account"
   },
-
   "chatbot_widget": {
     "title": "Seettu Assistant",
     "status": "Instant Help & FAQ",
@@ -501,7 +461,6 @@
       "helplines": "Helplines"
     }
   },
-
   "status": {
     "PAID": "Paid",
     "PENDING": "Pending",
@@ -513,7 +472,6 @@
     "VERIFIED": "Verified",
     "REJECTED": "Rejected"
   },
-
   "modals": {
     "delete_payment": {
       "title": "Delete Payment Record",
@@ -592,7 +550,6 @@
       "approve_btn": "Approve Payout"
     }
   },
-
   "emergency_page": {
     "title": "Emergency Payout Requests",
     "admin_subtitle": "Review and oversee emergency payout applications across group cycles",
@@ -622,7 +579,6 @@
     "submit_failed": "Failed to submit emergency request.",
     "status_update_failed": "Failed to update request status."
   },
-
   "members_page": {
     "title": "Members",
     "subtitle": "Manage member profiles, verify NIC & Grama Niladhari certificates, and monitor discipline scores",
@@ -652,7 +608,6 @@
     "approve": "Approve",
     "cancel": "Cancel"
   },
-
   "invite_modal": {
     "title": "Invite New Member",
     "select_group": "Select Seettu Group",
@@ -670,7 +625,6 @@
     "adding": "Adding...",
     "error_select_group": "Please select a group."
   },
-
   "landing": {
     "nav_home": "Home",
     "nav_about": "About Us",
@@ -699,5 +653,61 @@
     "legal_banner_title": "Governed by The Cheetus Ordinance No. 61 of 1935",
     "legal_banner_desc": "Sri Lanka's recognized statutory framework for rotating savings. Every group maintains digital bylaws, audit trails, and formal default remediation procedures.",
     "footer_rights": "SeettuManager Sri Lanka. All Rights Reserved. Regulated under statutory rotating savings practices."
+  },
+  "common": {
+    "date": "Date",
+    "group": "Group",
+    "member": "Member",
+    "amount": "Amount",
+    "status": "Status",
+    "notes": "Notes",
+    "actions": "Actions",
+    "action": "Action",
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "all": "All",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "required": "Required",
+    "save": "Save",
+    "back": "Back"
+  },
+  "notifications_page": {
+    "title": "Notifications",
+    "mark_all_read": "Mark all as read"
+  },
+  "payments_page": {
+    "title": "Payment Tracking",
+    "total_collected": "Total Collected"
+  },
+  "advance_page": {
+    "title": "Advance Payments",
+    "subtitle": "Manage advance contributions and early settlements",
+    "apply_btn": "Record Advance Payment",
+    "total_disbursed": "Total Advance Disbursed",
+    "col_amount": "Advance Amount"
+  },
+  "reports_page": {
+    "title": "Reports & Analytics",
+    "subtitle": "Generate and export financial reports, cycle statements, and member analytics",
+    "generate_btn": "Generate Report",
+    "export_pdf": "View / Print Report"
+  },
+  "disputes_page": {
+    "title": "Disputes & Grievances",
+    "subtitle": "Mediate, investigate, and record resolutions for member grievances",
+    "col_complainant": "Complainant",
+    "col_subject": "Subject",
+    "raise_btn": "Raise Dispute"
+  },
+  "profile_page": {
+    "title": "Profile Settings",
+    "remove_photo": "Remove Photo",
+    "upload_photo": "Upload Photo",
+    "full_name": "Full Name",
+    "phone": "Phone Number",
+    "saving": "Saving...",
+    "save_changes": "Save Changes"
   }
 }

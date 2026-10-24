@@ -349,7 +349,7 @@ const PaymentTracking = () => {
     <div className="payment-management-container pb-4">
       {/* Title */}
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-        <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('payments_page.title')}</h2>
+        <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('payments_page.title', 'Payment Tracking')}</h2>
         <div className="d-flex align-items-center gap-2">
           {!isAdmin && (
             <button

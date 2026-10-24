@@ -137,16 +137,16 @@ const AdvancePayments = () => {
         <div>
           <div className="d-flex align-items-center gap-2 mb-1">
             <Icon name="advance" size={24} color="#235665" />
-            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('advance_page.title')}</h2>
+            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('advance_page.title', 'Advance Payments')}</h2>
           </div>
-          <p className="text-muted mb-0">{t('advance_page.subtitle')}</p>
+          <p className="text-muted mb-0">{t('advance_page.subtitle', 'Manage advance contributions and early settlements')}</p>
         </div>
         {isAdminOrOrg && (
           <button 
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
             onClick={() => setShowModal(true)}
           >
-            {t('advance_page.apply_btn')}
+            {t('advance_page.apply_btn', 'Record Advance Payment')}
           </button>
         )}
       </div>
@@ -159,7 +159,7 @@ const AdvancePayments = () => {
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <span className="text-white-50 text-uppercase fw-semibold" style={{ fontSize: '0.8rem', letterSpacing: '0.5px' }}>
-              {t('advance_page.total_disbursed')}
+              {t('advance_page.total_disbursed', 'Total Advance Disbursed')}
             </span>
             <h2 className="display-6 fw-bold mb-0 mt-1">LKR {totalAdvance.toLocaleString()}</h2>
           </div>
@@ -192,18 +192,18 @@ const AdvancePayments = () => {
       ) : (
         <div className="ui-card shadow-sm border-0 overflow-hidden">
           <div className="card-header bg-white border-bottom fw-bold text-dark py-3">
-            {t('advance_page.title')} ({advancePayments.length})
+            {t('advance_page.title', 'Advance Payments')} ({advancePayments.length})
           </div>
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
               <thead style={{ backgroundColor: '#DCE7EB' }}>
                 <tr>
                   <th>ID</th>
-                  <th>{t('common.member')}</th>
-                  <th>{t('advance_page.col_amount')}</th>
-                  <th>{t('common.notes')}</th>
-                  <th>{t('common.date')}</th>
-                  {isAdminOrOrg && <th className="text-end pe-3">{t('common.actions')}</th>}
+                  <th>{t('common.member', 'Member')}</th>
+                  <th>{t('advance_page.col_amount', 'Amount')}</th>
+                  <th>{t('common.notes', 'Notes')}</th>
+                  <th>{t('common.date', 'Date')}</th>
+                  {isAdminOrOrg && <th className="text-end pe-3">{t('common.actions', 'Actions')}</th>}
                 </tr>
               </thead>
               <tbody>
