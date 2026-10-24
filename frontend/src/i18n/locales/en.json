@@ -409,7 +409,20 @@
   "pat_act_EMERGENCY_REQUESTED": "Emergency Requested",
   "pat_act_EMERGENCY_APPROVED": "Emergency Approved",
   "pat_act_EMERGENCY_REJECTED": "Emergency Rejected",
-  "pat_months": ["January","February","March","April","May","June","July","August","September","October","November","December"],
+  "pat_months": [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ],
   "pat_am": "AM",
   "pat_pm": "PM",
   "pat_msg_login": "User logged in:",
@@ -431,7 +444,9 @@
     "fill_required": "Please fill in both email and password fields.",
     "invalid_credentials": "Invalid email or password. Please check your credentials.",
     "hide_password": "Hide password",
-    "show_password": "Show password"
+    "show_password": "Show password",
+    "no_account": "Don't have an account?",
+    "register_here": "Register New Account"
   },
 
   "chatbot_widget": {

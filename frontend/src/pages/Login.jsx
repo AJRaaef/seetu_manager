@@ -6,6 +6,7 @@ import { useLanguage } from '../hooks/useLanguage';
 import { getErrorMessage } from '../utils/errorHandler';
 import Icon from '../components/Icons';
 
+
 const Login = () => {
   const { t } = useTranslation();
   const { language, changeLanguage } = useLanguage();
@@ -57,7 +58,7 @@ const Login = () => {
               style={{ fontSize: '0.75rem' }}
               onClick={() => changeLanguage('si')}
             >
-              සිංහල
+              සිං
             </button>
             <button
               type="button"
@@ -65,14 +66,22 @@ const Login = () => {
               style={{ fontSize: '0.75rem' }}
               onClick={() => changeLanguage('ta')}
             >
-              தமிழ்
+              த
             </button>
           </div>
         </div>
 
-        <div className="text-center mb-2">
-          <img src="/logo.png" alt="SeettuManager Logo" style={{ height: '70px', width: '70px', borderRadius: '50%', objectFit: 'cover' }} />
+        <div className="text-center mb-2 d-flex justify-content-center align-items-center">
+          <img 
+            src="/logo.jpg" 
+            alt="SeettuManager Logo" 
+            style={{ height: '70px', width: '70px', borderRadius: '50%', objectFit: 'cover', display: 'block' }} 
+            onError={(e) => {
+              e.target.src = '/logo.png'; // Fallback to png if jpg fails
+            }}
+          />
         </div>
+
         <h2 className="auth-title mt-1">
           <span className="brand-seettu">Seettu</span>
           <span className="brand-manager">Manager</span>
@@ -135,8 +144,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-teal w-100 py-2 fw-semibold fs-6 mb-3"
-          >
+            className="btn btn-teal w-100 py-2 fw-semibold fs-6 mb-3">
             {loading ? t('auth.signing_in', 'Logging in...') : t('login', 'Login')}
           </button>
 

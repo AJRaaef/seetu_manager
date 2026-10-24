@@ -434,7 +434,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at 20% 30%, #52899C 0%, #306576 45%, #154554 100%);
+  background: radial-gradient(circle at 50% 30%, #447b8d 0%, #225160 60%, #13343f 100%);
   padding: 1.5rem;
 }
 
