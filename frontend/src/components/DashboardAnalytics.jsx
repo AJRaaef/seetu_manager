@@ -319,9 +319,6 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                     </span>
                   </div>
                 </div>
-                <span className="badge bg-light text-dark border px-2 py-1 rounded" style={{ fontSize: '0.72rem' }}>
-                  {totalGroupsCount} Total Circles
-                </span>
               </div>
 
               {/* Progress Bar Segmented */}
