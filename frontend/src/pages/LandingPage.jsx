@@ -487,16 +487,7 @@ const LandingPage = () => {
               </Link>
             )}
 
-            {/* Direct Login Button */}
-            {user ? (
-              <Link to="/dashboard" className="btn btn-sm fw-bold px-3 text-white rounded-1" style={{ backgroundColor: '#0097B2', fontSize: '0.8rem' }}>
-                Dashboard
-              </Link>
-            ) : (
-              <Link to="/login" className="btn btn-sm fw-bold px-3 text-white rounded-1" style={{ backgroundColor: '#0097B2', fontSize: '0.8rem' }}>
-                Login
-              </Link>
-            )}
+
           </div>
         </div>
       </div>
@@ -551,12 +542,20 @@ const LandingPage = () => {
             </ul>
 
             <div className="d-flex align-items-center gap-2">
-              <Link to={user ? '/groups/create' : '/register'} className="btn btn-outline-dark fw-bold px-3 py-2 rounded-2" style={{ borderColor: '#CBD5E1', color: '#0F2F3D', fontSize: '0.88rem' }}>
-                Create Circle
-              </Link>
-              <Link to={user ? '/dashboard' : '/register'} className="btn fw-bold text-white px-3 py-2 rounded-2 shadow-sm" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2', fontSize: '0.88rem' }}>
-                {user ? t('landing.nav_my_account', 'My Account') : t('landing.nav_get_started', 'Get Started')}
-              </Link>
+              {user ? (
+                <Link to="/dashboard" className="btn fw-bold text-white px-3 py-2 rounded-2 shadow-sm" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2', fontSize: '0.88rem' }}>
+                  {t('landing.nav_my_account', 'My Account')}
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login" className="btn btn-outline-dark fw-bold px-3 py-2 rounded-2" style={{ borderColor: '#CBD5E1', color: '#0F2F3D', fontSize: '0.88rem' }}>
+                    {t('login', 'Login')}
+                  </Link>
+                  <Link to="/register" className="btn fw-bold text-white px-3 py-2 rounded-2 shadow-sm" style={{ backgroundColor: '#0097B2', borderColor: '#0097B2', fontSize: '0.88rem' }}>
+                    {t('landing.nav_get_started', 'Get Started')}
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -633,15 +632,7 @@ const LandingPage = () => {
                   <Icon name="chevron-right" size={18} />
                 </a>
 
-                {!user && (
-                  <Link 
-                    to="/login" 
-                    className="btn btn-lg fw-bold text-white px-4 py-3 rounded-2 shadow-lg"
-                    style={{ backgroundColor: '#0F2F3D', borderColor: '#0F2F3D' }}
-                  >
-                    Member Sign In
-                  </Link>
-                )}
+
               </div>
 
             </div>
