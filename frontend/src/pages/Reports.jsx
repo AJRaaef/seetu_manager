@@ -267,12 +267,7 @@ const Reports = () => {
           </div>
           <p className="text-muted mb-0">{t('reports_page.subtitle')}</p>
         </div>
-        <button 
-          className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
-          onClick={() => setShowModal(true)}
-        >
-          <span>+</span> {t('reports_page.generate_btn')}
-        </button>
+
       </div>
 
       {error && <div className="alert alert-danger shadow-sm mb-4 rounded-3">{error}</div>}
@@ -431,7 +426,7 @@ const Reports = () => {
                 </div>
                 <div className="modal-footer py-3 px-4 bg-light">
                   <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>Generate Report</button>
+                  <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>+</button>
                 </div>
               </form>
             </div>
