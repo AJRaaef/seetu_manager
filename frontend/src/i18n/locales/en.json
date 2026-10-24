@@ -38,9 +38,64 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
-    "back": "Back"
+    "back": "Back",
+    "date": "Date",
+    "view": "View",
+    "loading": "Loading..."
   },
 
+  "dashboard_page": {
+    "welcome": "Welcome back",
+    "subtitles": {
+      "admin": "Executive overview of all Seettu circles, cash movements, and compliance metrics across Sri Lanka.",
+      "organizer": "Manage your active circles, track monthly collections, and oversee scheduled payouts.",
+      "member": "Here is a quick look at your current Seettu circles, savings progress, and upcoming payouts."
+    },
+    "roles": {
+      "admin": "Admin",
+      "organizer": "Organizer",
+      "member": "Member"
+    },
+    "metrics": {
+      "active_groups": "Active Groups",
+      "active_groups_sub": "Total active Seettu groups",
+      "total_members": "Total Members",
+      "group_members": "Group Members",
+      "members_sub": "Enrolled participants",
+      "completion_rate": "Completion Rate",
+      "discipline_score": "Discipline Score",
+      "discipline_sub": "Reputation & trust index",
+      "advance_disbursed": "Advance Contributions",
+      "advance_sub": "Pre-paid cycle balance"
+    },
+    "badges": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor",
+      "high_risk": "High Risk"
+    },
+    "payout_card": {
+      "title": "Upcoming Rotational Payout",
+      "approved_btn": "Approved & Disbursed",
+      "review_btn": "Review Payout"
+    },
+    "recent_payments": {
+      "title": "Recent Payments",
+      "col_member": "Member",
+      "col_amount": "Amount",
+      "col_status": "Status",
+      "col_date": "Date",
+      "no_payments": "No recent payments found."
+    }
+  },
+
+  "payments_page": {
+    "title": "Payment Management"
+  },
+  "advance_page": {
+    "title": "Advance Contributions"
+  },
   "profile_page": {
     "title": "User Profile"
   },
@@ -58,12 +113,6 @@
   },
   "settings_page": {
     "title": "System Settings"
-  },
-  "payments_page": {
-    "title": "Payment Management"
-  },
-  "advance_page": {
-    "title": "Advance Contributions"
   },
 
   "create_group": "Create Group",
