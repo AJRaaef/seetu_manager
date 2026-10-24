@@ -90,14 +90,7 @@ const EmergencyRequests = () => {
               : 'Apply for prioritized early payout in case of financial or medical emergencies'}
           </p>
         </div>
-        {!isAdmin && (
-          <button
-            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2"
-            onClick={() => setShowModal(true)}
-          >
-            {t('emergency_page.request_btn')}
-          </button>
-        )}
+
       </div>
 
       {isAdmin && (
