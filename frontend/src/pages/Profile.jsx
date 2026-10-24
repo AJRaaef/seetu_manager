@@ -256,7 +256,7 @@ const Profile = () => {
   return (
     <div className="profile-page-container pb-4">
       {/* Title */}
-      <h2 className="fw-bold mb-4" style={{ color: '#0F2F3D' }}>{t('profile_page.title')}</h2>
+      <h2 className="fw-bold mb-4" style={{ color: '#0F2F3D' }}>{t('profile_page.title', 'Profile Settings')}</h2>
 
       {actionMsg && (
         <div className="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
@@ -464,11 +464,12 @@ const Profile = () => {
 
           {/* KYC Identity & Grama Niladhari Character Verification Card */}
           <div 
-            className="ui-card p-4 shadow-sm border-start border-4 text-start"
+            className="ui-card p-4 shadow-sm text-start"
             style={{
-              borderColor: (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'VERIFIED' ? '#198754' :
+              borderLeft: !isAdmin ? `4px solid ${ (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'VERIFIED' ? '#198754' :
                 (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'PENDING' ? '#FFC107' :
                 (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'REJECTED' ? '#DC3545' : '#0D6EFD'
+              }` : undefined
             }}
           >
             <div className="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">

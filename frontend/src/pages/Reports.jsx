@@ -17,6 +17,7 @@ const Reports = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
+  const [creatingReport, setCreatingReport] = useState(false);
   const totalCollections = reportPayments
     .filter((payment) => payment.status === 'PAID')
     .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
@@ -127,6 +128,7 @@ const Reports = () => {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+    setCreatingReport(true);
     try {
       const uid = user?.userId || user?.id;
       await reportApi.generateReport(formData.title, formData.type, uid, formData.content);
@@ -138,7 +140,9 @@ const Reports = () => {
       });
       fetchReports();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to generate report.');
+      alert(err.response?.data?.message || err.message || 'Failed to generate report.');
+    } finally {
+      setCreatingReport(false);
     }
   };
 
@@ -233,11 +237,25 @@ const Reports = () => {
         <div>
           <div className="d-flex align-items-center gap-2 mb-1">
             <Icon name="reports" size={24} color="#235665" />
-            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('reports_page.title')}</h2>
+            <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('reports_page.title', 'Reports & Analytics')}</h2>
           </div>
-          <p className="text-muted mb-0">{t('reports_page.subtitle')}</p>
+          <p className="text-muted mb-0">{t('reports_page.subtitle', 'Generate and export financial reports, cycle statements, and member analytics')}</p>
         </div>
 
+        <button
+          type="button"
+          className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm"
+          onClick={() => {
+            setFormData({
+              title: (isAdmin || isOrganizer) ? 'Monthly Group Summary Audit' : `Personal Payment History & Receipts - ${user?.fullName || 'Member'}`,
+              type: (isAdmin || isOrganizer) ? 'GROUP_SUMMARY' : 'PERSONAL_PAYMENT_HISTORY',
+              content: (isAdmin || isOrganizer) ? 'Comprehensive group summary and cycle audit.' : `Contribution audit and ledger statement for ${user?.fullName || 'Member'}.`
+            });
+            setShowModal(true);
+          }}
+        >
+          <span>+</span> {t('reports_page.generate_btn', 'Generate Report')}
+        </button>
       </div>
 
       {error && <div className="alert alert-danger shadow-sm mb-4 rounded-3">{error}</div>}
@@ -294,7 +312,7 @@ const Reports = () => {
                       className="btn btn-outline-primary w-100 btn-sm py-2 fw-semibold"
                       onClick={() => openModalWithTemplate(tpl)}
                     >
-                      {t('reports_page.generate_btn')}
+                      {t('reports_page.generate_btn', 'Generate Report')}
                     </button>
                   </div>
                 </div>
@@ -340,7 +358,7 @@ const Reports = () => {
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
               <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#134A5A' }}>
-                <h5 className="modal-title fw-bold">{t('reports_page.generate_btn')}</h5>
+                <h5 className="modal-title fw-bold">{t('reports_page.generate_btn', 'Generate Report')}</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleCreate}>
@@ -394,7 +412,9 @@ const Reports = () => {
                 </div>
                 <div className="modal-footer py-3 px-4 bg-light">
                   <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>+</button>
+                  <button type="submit" className="btn btn-teal px-4 fw-semibold" style={{ borderRadius: '8px' }} disabled={creatingReport}>
+                    {creatingReport ? 'Generating...' : t('reports_page.generate_btn', 'Generate Report')}
+                  </button>
                 </div>
               </form>
             </div>

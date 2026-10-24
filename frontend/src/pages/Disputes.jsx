@@ -149,8 +149,8 @@ const Disputes = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2 className="fw-bold mb-0" style={{ color: '#0F2F3D' }}>{t('disputes_page.title')}</h2>
-          <p className="text-muted small mb-0">{t('disputes_page.subtitle')}</p>
+          <h2 className="fw-bold mb-0" style={{ color: '#0F2F3D' }}>{t('disputes_page.title', 'Disputes & Grievances')}</h2>
+          <p className="text-muted small mb-0">{t('disputes_page.subtitle', 'Mediate, investigate, and record resolutions for member grievances')}</p>
         </div>
         <span className="badge-peach px-3 py-2 fs-6 fw-semibold">
           {openDisputesCount} Open Dispute{openDisputesCount !== 1 ? 's' : ''}
@@ -180,13 +180,13 @@ const Disputes = () => {
             <thead style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
               <tr>
                 <th className="py-3 px-3 text-muted fw-semibold small">ID</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.date')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.group')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('disputes_page.col_complainant')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('disputes_page.col_subject')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.notes')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('common.status')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-end">{t('common.action')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.date', 'Date')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.group', 'Group')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('disputes_page.col_complainant', 'Complainant')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('disputes_page.col_subject', 'Subject')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.notes', 'Notes')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('common.status', 'Status')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-end">{t('common.action', 'Action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -287,7 +287,7 @@ const Disputes = () => {
           </div>
 
           <div className="mb-3">
-            <label className="form-label text-dark fw-semibold small">{t('disputes_page.col_subject')}</label>
+            <label className="form-label text-dark fw-semibold small">{t('disputes_page.col_subject', 'Subject')}</label>
             <textarea
               className="form-control"
               rows="3"
@@ -328,7 +328,7 @@ const Disputes = () => {
           </div>
 
           <button type="submit" className="btn btn-teal w-100 py-2 fw-semibold" disabled={submitting || groups.length === 0}>
-            {submitting ? t('common.loading') : t('disputes_page.raise_btn')}
+            {submitting ? t('common.loading', 'Loading...') : t('disputes_page.raise_btn', 'Raise Dispute')}
           </button>
         </form>
       </div>

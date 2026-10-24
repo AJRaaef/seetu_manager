@@ -131,7 +131,7 @@ const Notifications = () => {
         <div>
           <h2 className="fw-bold mb-1 d-flex align-items-center gap-2">
             <Icon name="bell" size={26} color="#0097B2" />
-            <span style={{ color: '#0F2F3D' }}>{t('notifications_page.title')}</span>
+            <span style={{ color: '#0F2F3D' }}>{t('notifications_page.title', 'Notifications')}</span>
             {unreadCount > 0 && (
               <span className="badge rounded-pill bg-danger fs-6 align-middle ms-2">
                 {unreadCount} unread
@@ -164,7 +164,7 @@ const Notifications = () => {
               onClick={handleMarkAllAsRead}
             >
               <Icon name="check" size={14} />
-              <span>{t('notifications_page.mark_all_read')}</span>
+              <span>{t('notifications_page.mark_all_read', 'Mark all as read')}</span>
             </button>
           )}
         </div>
