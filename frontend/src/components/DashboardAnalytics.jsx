@@ -187,7 +187,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
               {isAdmin ? 'System Portfolio & Cashflow Analytics' : 'Circle Portfolio & Performance'}
             </h5>
             <span className="text-muted small" style={{ fontSize: '0.78rem' }}>
-              Real-time operational financial health & payment compliance from MySQL database ledger
+              Real-time operational financial health & payment compliance
             </span>
           </div>
         </div>
