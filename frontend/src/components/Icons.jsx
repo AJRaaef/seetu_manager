@@ -8,6 +8,7 @@ import {
   CreditCard,
   Zap,
   AlertTriangle,
+  AlertOctagon,
   Award,
   GraduationCap,
   Handshake,
@@ -28,6 +29,7 @@ import {
   Megaphone,
   ToggleRight,
   CheckSquare,
+  CheckCircle,
   Pencil,
   Trash2,
   Bell,
@@ -75,9 +77,14 @@ export const Icon = ({ name, size = 18, className = '', color = 'currentColor', 
     case 'advance':
     case 'zap':
       return <Zap {...iconProps} />;
-    case 'emergency':
+    case 'warning':
+    case 'alert':
     case 'alert-triangle':
+    case 'emergency':
       return <AlertTriangle {...iconProps} />;
+    case 'alert-octagon':
+    case 'octagon-alert':
+      return <AlertOctagon {...iconProps} />;
     case 'certificates':
     case 'award':
       return <Award {...iconProps} />;
@@ -145,6 +152,8 @@ export const Icon = ({ name, size = 18, className = '', color = 'currentColor', 
       return <Minus {...iconProps} />;
     case 'check':
       return <Check {...iconProps} />;
+    case 'check-circle':
+      return <CheckCircle {...iconProps} />;
     case 'chevron-down':
       return <ChevronDown {...iconProps} />;
     case 'chevron-up':

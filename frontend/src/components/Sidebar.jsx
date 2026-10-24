@@ -28,7 +28,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
     : isOrganizer
       ? t("sidebar.organizer_portal", "ORGANIZER PORTAL")
       : t("sidebar.member_portal", "MEMBER PORTAL");
-  
 
   // Shared class name function for NavLink active state
   const linkClass = ({ isActive }) =>
@@ -59,9 +58,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
             <div className="sidebar-portal-title">{portalLabel}</div>
             <div className="sidebar-portal-sub">
               {t("sidebar.manage_seettu", "Manage your Seettu")}
-            </div>
-            <div className="sidebar-portal-sub">
-              {t("manage_seettu", "Manage your Seettu")}
             </div>
           </div>
 
@@ -100,7 +96,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                     </span>
                   )}
                 </div>
-                <span>{t("dashboard", "Dashboard")}</span>
               </NavLink>
             </li>
 
@@ -112,7 +107,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
               >
                 <Icon name="groups" size={18} />
                 <span>{t("sidebar.my_groups", "My Groups")}</span>
-                <span>{t("my_groups", "My Groups")}</span>
               </NavLink>
             </li>
 
@@ -124,7 +118,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
               >
                 <Icon name="members" size={18} />
                 <span>{t("sidebar.members", "Members")}</span>
-                <span>{t("members", "Members")}</span>
               </NavLink>
             </li>
 
@@ -136,7 +129,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
               >
                 <Icon name="payments" size={18} />
                 <span>{t("sidebar.payments", "Payments")}</span>
-                <span>{t("payments", "Payments")}</span>
               </NavLink>
             </li>
 
@@ -148,7 +140,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
               >
                 <Icon name="advance" size={18} />
                 <span>{t("sidebar.advance", "Advance")}</span>
-                <span>{t("advance", "Advance")}</span>
               </NavLink>
             </li>
 
@@ -162,7 +153,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 >
                   <Icon name="shield" size={18} />
                   <span>{t("sidebar.audit_trail", "Audit Trail")}</span>
-                  <span>{t("audit_trail", "Audit Trail")}</span>
                 </NavLink>
               </li>
             )}
@@ -175,7 +165,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
               >
                 <Icon name="emergency" size={18} />
                 <span>{t("sidebar.emergency", "Emergency")}</span>
-                <span>{t("emergency", "Emergency")}</span>
               </NavLink>
             </li>
 
@@ -187,7 +176,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
               >
                 <Icon name="reports" size={18} />
                 <span>{t("sidebar.reports", "Reports")}</span>
-                <span>{t("reports", "Reports")}</span>
               </NavLink>
             </li>
 
@@ -199,7 +187,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
               >
                 <Icon name="disputes" size={18} />
                 <span>{t("sidebar.disputes", "Disputes")}</span>
-                <span>{t("disputes", "Disputes")}</span>
               </NavLink>
             </li>
 
@@ -211,7 +198,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
               >
                 <Icon name="certificates" size={18} />
                 <span>{t("sidebar.certificates", "Certificates")}</span>
-                <span>{t("certificates", "Certificates")}</span>
               </NavLink>
             </li>
 
@@ -223,7 +209,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
               >
                 <Icon name="settings" size={18} />
                 <span>{t("sidebar.settings", "Settings")}</span>
-                <span>{t("settings", "Settings")}</span>
               </NavLink>
             </li>
           </ul>
@@ -240,7 +225,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
             >
               <Icon name="help" size={18} />
               <span>{t("sidebar.help_center", "Help Center")}</span>
-              <span>{t("help_center", "Help Center")}</span>
             </button>
           )}
 
@@ -254,7 +238,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
           >
             <Icon name="logout" size={18} color="#DC3545" />
             <span>{t("sidebar.logout", "Logout")}</span>
-            <span>{t("logout", "Logout")}</span>
           </button>
         </div>
       </aside>
