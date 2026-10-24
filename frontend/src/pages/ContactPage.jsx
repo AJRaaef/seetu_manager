@@ -18,16 +18,26 @@ const ContactPage = () => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await api.post('/contact', formData);
+      await fetch('https://formsubmit.co/ajax/seetumanager@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+          _subject: `New SeettuManager Inquiry [${formData.subject}] from ${formData.name}`,
+          _template: 'table',
+          _captcha: 'false'
+        })
+      });
       setSubmitted(true);
     } catch (err) {
-      try {
-        await fetch('https://formsubmit.co/ajax/admin@seetumanager.com', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-      } catch (ignored) {}
+      console.error('FormSubmit error:', err);
       setSubmitted(true);
     } finally {
       setSubmitting(false);

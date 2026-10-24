@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import Icon from '../components/Icons';
+import OrganizerRequestModal from '../components/OrganizerRequestModal';
 import { getUserProfileStats, updateUserProfile, submitKyc, getMyKycStatus, uploadProfilePicture, deleteProfilePicture } from '../api/userApi';
 import { getErrorMessage } from '../utils/errorHandler';
 
@@ -31,6 +32,7 @@ const Profile = () => {
   const [kycError, setKycError] = useState('');
   const [kycSuccess, setKycSuccess] = useState('');
   const [kycStatusData, setKycStatusData] = useState(null);
+  const [showOrganizerModal, setShowOrganizerModal] = useState(false);
 
   const currentUserId = user?.id || user?.userId;
 
@@ -542,6 +544,45 @@ const Profile = () => {
                     <span className="text-success fw-semibold">No Duplicate Flags</span>
                   </div>
                 </div>
+
+                {/* In-App Organizer Upgrade Section for Verified Members */}
+                {(userInfo?.role === 'MEMBER' || user?.role === 'MEMBER') && (
+                  <>
+                    {(kycStatusData?.requestedRole === 'ORGANIZER' || userInfo?.requestedRole === 'ORGANIZER' || user?.requestedRole === 'ORGANIZER') ? (
+                      <div className="p-3 rounded-3 mt-3 border" style={{ backgroundColor: '#FFFBEB', borderColor: '#FDE68A' }}>
+                        <div className="d-flex align-items-center gap-2 text-warning-emphasis fw-bold small mb-1">
+                          <Icon name="clock" size={16} />
+                          <span>Organizer Application Under Review</span>
+                        </div>
+                        <p className="mb-0 text-muted small" style={{ fontSize: '0.78rem', lineHeight: '1.45' }}>
+                          You have applied to become a Group Organizer. System Administrator is reviewing your verified credentials. You will unlock the Create Group feature as soon as approved.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="p-3 rounded-3 mt-3 border" style={{ backgroundColor: '#F0F9FF', borderColor: '#BAE6FD' }}>
+                        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                          <div>
+                            <div className="fw-bold text-dark small d-flex align-items-center gap-1.5">
+                              <Icon name="award" size={16} color="#0097B2" />
+                              <span>Want to start your own Seettu circles?</span>
+                            </div>
+                            <div className="text-muted small mt-0.5" style={{ fontSize: '0.76rem' }}>
+                              Upgrade to an authorized Organizer directly without logging out.
+                            </div>
+                          </div>
+                          <button 
+                            type="button"
+                            onClick={() => setShowOrganizerModal(true)} 
+                            className="btn btn-sm btn-teal fw-semibold px-3 py-1.5 text-white shadow-sm"
+                            style={{ backgroundColor: '#0097B2', fontSize: '0.78rem' }}
+                          >
+                            Become an Organizer
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             ) : (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'PENDING' ? (
               <div>
@@ -847,6 +888,11 @@ const Profile = () => {
           </div>
         </div>
       </div>
+      <OrganizerRequestModal
+        isOpen={showOrganizerModal}
+        onClose={() => setShowOrganizerModal(false)}
+        onSuccess={fetchProfile}
+      />
     </div>
   );
 };

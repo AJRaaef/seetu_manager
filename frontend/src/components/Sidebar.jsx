@@ -13,7 +13,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   const handleHelpCenter = () => {

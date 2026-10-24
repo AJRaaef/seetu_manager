@@ -18,7 +18,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   const isActive = (path) => location.pathname === path ? 'active' : '';
@@ -167,6 +167,14 @@ const Navbar = () => {
                 <li><hr className="dropdown-divider" /></li>
                 <li><Link className="dropdown-item" to="/profile"><Icon name="user" size={14} className="me-2" />{t('profile') || 'My Profile'}</Link></li>
                 <li><Link className="dropdown-item" to="/certificates"><Icon name="certificates" size={14} className="me-2" />{t('certificates', 'Certificates')}</Link></li>
+                {user?.role === 'MEMBER' && (
+                  <li>
+                    <Link className="dropdown-item fw-semibold text-primary" to="/groups">
+                      <Icon name="award" size={14} className="me-2 text-primary" />
+                      {user?.requestedRole === 'ORGANIZER' ? 'Organizer Status Pending' : 'Become an Organizer'}
+                    </Link>
+                  </li>
+                )}
                 <li><hr className="dropdown-divider" /></li>
                 <li><button className="dropdown-item text-danger fw-bold" onClick={handleLogout}><Icon name="logout" size={14} className="me-2 text-danger" />{t('logout', 'Logout')}</button></li>
               </ul>

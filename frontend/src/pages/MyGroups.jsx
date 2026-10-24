@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { getGroupsByUser, getAllGroups, deleteGroup } from '../api/groupApi';
 import { createJoinRequest } from '../api/joinRequestApi';
 import Icon from '../components/Icons';
+import OrganizerRequestModal from '../components/OrganizerRequestModal';
 
 const MyGroups = () => {
   const { t } = useTranslation();
@@ -12,6 +13,7 @@ const MyGroups = () => {
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showOrganizerModal, setShowOrganizerModal] = useState(false);
 
   const userId = user?.userId || user?.id;
 
@@ -167,19 +169,43 @@ const MyGroups = () => {
             {t('my_groups_page.create_new', 'Create New Group')}
           </Link>
         ) : (
-          <button
-            onClick={() => {
-              if (user?.role === 'MEMBER' && user?.kycStatus !== 'VERIFIED') {
-                alert('⚠️ Verification Required: To prevent fraud, duplicate accounts, and financial risks, you must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before joining Seettu groups.\n\nPlease visit your Profile page to complete verification.');
-                navigate('/profile');
-                return;
-              }
-              setShowJoinModal(true);
-            }}
-            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm"
-          >
-            {t('my_groups_page.join_group', 'Join Group')}
-          </button>
+          <div className="d-flex align-items-center gap-2 flex-wrap">
+            {user?.requestedRole === 'ORGANIZER' ? (
+              <span 
+                className="badge px-3 py-2 d-flex align-items-center gap-1.5 shadow-sm border"
+                style={{ backgroundColor: '#FEF3C7', color: '#92400E', borderColor: '#F59E0B', fontSize: '0.82rem' }}
+                title="Your application to become a Group Organizer is currently under Administrator review"
+              >
+                <Icon name="clock" size={15} />
+                <span>Organizer Application Pending Review</span>
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowOrganizerModal(true)}
+                className="btn btn-outline-teal px-3 py-2 d-flex align-items-center gap-1.5 shadow-sm fw-semibold"
+                style={{ borderColor: '#0097B2', color: '#0097B2', fontSize: '0.88rem' }}
+                title="Apply to create and organize your own Seettu circles without creating a new account"
+              >
+                <Icon name="award" size={16} />
+                <span>Become an Organizer</span>
+              </button>
+            )}
+            <button
+              onClick={() => {
+                if (user?.role === 'MEMBER' && user?.kycStatus !== 'VERIFIED') {
+                  alert('⚠️ Verification Required: To prevent fraud, duplicate accounts, and financial risks, you must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before joining Seettu groups.\n\nPlease visit your Profile page to complete verification.');
+                  navigate('/profile');
+                  return;
+                }
+                setShowJoinModal(true);
+              }}
+              className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm text-white"
+              style={{ backgroundColor: '#1A5265', borderColor: '#1A5265' }}
+            >
+              {t('my_groups_page.join_group', 'Join Group')}
+            </button>
+          </div>
         )}
       </div>
 
@@ -310,6 +336,13 @@ const MyGroups = () => {
         })}
         </div>
       )}
+
+      {/* In-App Organizer Upgrade Modal (No Logout Required) */}
+      <OrganizerRequestModal
+        isOpen={showOrganizerModal}
+        onClose={() => setShowOrganizerModal(false)}
+        onSuccess={() => setShowOrganizerModal(false)}
+      />
 
       {/* Join Seettu Group Modal for Members */}
       {showJoinModal && (

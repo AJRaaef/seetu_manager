@@ -354,6 +354,7 @@ const CreateGroup = () => {
                     <option value="MONTHLY">{t('create_group_page.frequencies.monthly', 'Monthly')}</option>
                     <option value="WEEKLY">{t('create_group_page.frequencies.weekly', 'Weekly')}</option>
                     <option value="BI_WEEKLY">{t('create_group_page.frequencies.bi_weekly', 'Bi-Weekly')}</option>
+                    <option value="DAILY">{t('create_group_page.frequencies.daily', 'Daily')}</option>
                   </select>
                 </div>
               </div>

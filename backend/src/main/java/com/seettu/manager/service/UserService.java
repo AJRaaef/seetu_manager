@@ -166,6 +166,7 @@ public class UserService {
             user.setVerifiedAt(LocalDateTime.now());
             if ("ORGANIZER".equalsIgnoreCase(request.getRole()) && user.getRole() != User.Role.ADMIN) {
                 user.setRole(User.Role.ORGANIZER);
+                user.setRequestedRole(null);
             }
             user = userRepository.save(user);
 
@@ -178,6 +179,20 @@ public class UserService {
                     "KYC_VERIFIED");
         } else {
             String reason = request.getRejectionReason();
+
+            // If already verified member who applied for organizer upgrade, keep their member status intact
+            if (user.getKycStatus() == User.KycStatus.VERIFIED && "ORGANIZER".equalsIgnoreCase(user.getRequestedRole())) {
+                user.setRequestedRole(null);
+                user.setOrganizerApplicationNote(null);
+                user = userRepository.save(user);
+                auditLogService.log(admin, "ORGANIZER_REQUEST_REJECTED", "users", targetUserId,
+                        "Admin declined organizer upgrade request for " + user.getFullName() + ". Reason: " + reason);
+                notificationService.sendNotification(user.getId(),
+                        "Your request to upgrade to Group Organizer was declined: " + (reason != null && !reason.trim().isEmpty() ? reason : "Administrative policy requirement"),
+                        "ORGANIZER_REQUEST_DECLINED");
+                return toKycResponse(user);
+            }
+
             if (reason == null || reason.trim().isEmpty()) {
                 reason = "Grama Niladhari certificate proof does not match or is illegible. Please re-upload a clear copy.";
             }
@@ -270,12 +285,24 @@ public class UserService {
             throw new IllegalArgumentException("System Administrators already hold platform governance authority and do not need to apply for organizer status.");
         }
         user.setRequestedRole("ORGANIZER");
+
+        String note = "";
+        if (payload != null) {
+            if (payload.containsKey("district") && payload.get("district") != null && !payload.get("district").trim().isEmpty()) {
+                user.setDistrict(payload.get("district").trim());
+            }
+            if (payload.containsKey("message") && payload.get("message") != null && !payload.get("message").trim().isEmpty()) {
+                user.setOrganizerApplicationNote(payload.get("message").trim());
+                note = " Note: " + payload.get("message").trim();
+            } else if (payload.containsKey("note") && payload.get("note") != null && !payload.get("note").trim().isEmpty()) {
+                user.setOrganizerApplicationNote(payload.get("note").trim());
+                note = " Note: " + payload.get("note").trim();
+            }
+        }
         userRepository.save(user);
 
-        String note = (payload != null && payload.containsKey("message") && payload.get("message") != null)
-                ? " Note: " + payload.get("message") : "";
-        String location = (payload != null && payload.containsKey("district") && payload.get("district") != null)
-                ? " (District: " + payload.get("district") + ")" : "";
+        String location = (user.getDistrict() != null && !user.getDistrict().isEmpty())
+                ? " (District: " + user.getDistrict() + ")" : "";
 
         auditLogService.log(user, "ORGANIZER_REQUESTED", "users", user.getId(),
                 "Member " + user.getFullName() + location + " applied to become a Group Organizer." + note);
