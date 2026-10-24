@@ -358,7 +358,8 @@
     "frequencies": {
       "monthly": "Monthly",
       "weekly": "Weekly",
-      "bi_weekly": "Bi-Weekly"
+      "bi_weekly": "Bi-Weekly",
+      "daily": "Daily"
     },
     "creating": "Creating Group...",
     "submit": "Submit",
