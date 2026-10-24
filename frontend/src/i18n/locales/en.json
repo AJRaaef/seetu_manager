@@ -33,6 +33,39 @@
   "member_portal": "MEMBER PORTAL",
   "manage_seettu": "Manage your Seettu",
 
+  "common": {
+    "edit": "Edit Profile",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "back": "Back"
+  },
+
+  "profile_page": {
+    "title": "User Profile"
+  },
+  "notifications_page": {
+    "title": "Notifications"
+  },
+  "reports_page": {
+    "title": "System Reports"
+  },
+  "disputes_page": {
+    "title": "Dispute Management"
+  },
+  "certificates_page": {
+    "title": "Certificates & Bylaws"
+  },
+  "settings_page": {
+    "title": "System Settings"
+  },
+  "payments_page": {
+    "title": "Payment Management"
+  },
+  "advance_page": {
+    "title": "Advance Contributions"
+  },
+
   "create_group": "Create Group",
   "total_groups": "Total Groups",
   "active_groups": "Active Groups",
@@ -445,7 +478,6 @@
     "invalid_credentials": "Invalid email or password. Please check your credentials.",
     "hide_password": "Hide password",
     "show_password": "Show password",
-    "no_account": "Don't have an account?",
     "register_here": "Register New Account"
   },
 
