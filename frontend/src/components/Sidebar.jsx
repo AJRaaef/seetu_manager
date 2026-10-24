@@ -7,11 +7,11 @@ import Icon from "./Icons";
 
 const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
   const { t } = useTranslation();
-  const { user, logout, isOrganizer, isAdmin } = useAuth();
+  const { logout, isOrganizer, isAdmin } = useAuth();
   const { unreadCount } = useNotification();
   const navigate = useNavigate();
 
-  // Clear the session and go back to the login page
+  // Clear the session and go back to the landing page
   const handleLogout = () => {
     logout();
     navigate("/");
@@ -28,11 +28,19 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
     : isOrganizer
       ? t("sidebar.organizer_portal", "ORGANIZER PORTAL")
       : t("sidebar.member_portal", "MEMBER PORTAL");
-  
 
-  // Shared class name function for NavLink active state
-  const linkClass = ({ isActive }) =>
-    `sidebar-link ${isActive ? "active" : ""}`;
+  // Adds the "active" class to the current NavLink
+  const linkClass = ({ isActive }) => `sidebar-link ${isActive ? "active" : ""}`;
+
+  // One menu item: icon + translated label. Keeps the markup identical for every link.
+  const MenuLink = ({ to, icon, labelKey, labelDefault }) => (
+    <li>
+      <NavLink to={to} className={linkClass} onClick={onCloseMobile}>
+        <Icon name={icon} size={18} />
+        <span>{t(labelKey, labelDefault)}</span>
+      </NavLink>
+    </li>
+  );
 
   return (
     <>
@@ -46,7 +54,11 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
       )}
 
       <aside
-        className={`sidebar-nav ${isMobileOpen ? "d-flex position-fixed top-0 start-0 h-100 shadow-lg" : "d-none d-md-flex"}`}
+        className={`sidebar-nav ${
+          isMobileOpen
+            ? "d-flex position-fixed top-0 start-0 h-100 shadow-lg"
+            : "d-none d-md-flex"
+        }`}
         style={
           isMobileOpen
             ? { zIndex: 1040, top: "64px", height: "calc(100vh - 64px)" }
@@ -60,172 +72,42 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
             <div className="sidebar-portal-sub">
               {t("sidebar.manage_seettu", "Manage your Seettu")}
             </div>
-            <div className="sidebar-portal-sub">
-              {t("manage_seettu", "Manage your Seettu")}
-            </div>
           </div>
 
           {/* Main navigation */}
           <ul className="sidebar-menu">
+            <MenuLink to="/dashboard" icon="speedometer" labelKey="sidebar.dashboard" labelDefault="Dashboard" />
+
             <li>
-              <NavLink
-                to="/dashboard"
-                className={linkClass}
-                onClick={onCloseMobile}
-              >
-                <Icon name="speedometer" size={18} />
-                <span>{t("sidebar.dashboard", "Dashboard")}</span>
+              <NavLink to="/notifications" className={linkClass} onClick={onCloseMobile}>
+                <Icon name="bell" size={18} />
+                <span>{t("sidebar.notifications", "Notifications")}</span>
+                {unreadCount > 0 && (
+                  <span
+                    className="badge bg-danger rounded-pill px-2 py-0.5 ms-auto"
+                    style={{ fontSize: "0.68rem" }}
+                  >
+                    {unreadCount}
+                  </span>
+                )}
               </NavLink>
             </li>
 
-            <li>
-              <NavLink
-                to="/notifications"
-                className={({ isActive }) =>
-                  `sidebar-link ${isActive ? "active" : ""}`
-                }
-                onClick={onCloseMobile}
-              >
-                <div className="d-flex align-items-center justify-content-between w-100">
-                  <div className="d-flex align-items-center gap-2">
-                    <Icon name="bell" size={18} />
-                    <span>{t("sidebar.notifications", "Notifications")}</span>
-                  </div>
-                  {unreadCount > 0 && (
-                    <span
-                      className="badge bg-danger rounded-pill px-2 py-0.5"
-                      style={{ fontSize: "0.68rem" }}
-                    >
-                      {unreadCount}
-                    </span>
-                  )}
-                </div>
-                <span>{t("dashboard", "Dashboard")}</span>
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink
-                to="/groups"
-                className={linkClass}
-                onClick={onCloseMobile}
-              >
-                <Icon name="groups" size={18} />
-                <span>{t("sidebar.my_groups", "My Groups")}</span>
-                <span>{t("my_groups", "My Groups")}</span>
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink
-                to="/members"
-                className={linkClass}
-                onClick={onCloseMobile}
-              >
-                <Icon name="members" size={18} />
-                <span>{t("sidebar.members", "Members")}</span>
-                <span>{t("members", "Members")}</span>
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink
-                to="/payments"
-                className={linkClass}
-                onClick={onCloseMobile}
-              >
-                <Icon name="payments" size={18} />
-                <span>{t("sidebar.payments", "Payments")}</span>
-                <span>{t("payments", "Payments")}</span>
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink
-                to="/advance-payments"
-                className={linkClass}
-                onClick={onCloseMobile}
-              >
-                <Icon name="advance" size={18} />
-                <span>{t("sidebar.advance", "Advance")}</span>
-                <span>{t("advance", "Advance")}</span>
-              </NavLink>
-            </li>
+            <MenuLink to="/groups" icon="groups" labelKey="sidebar.my_groups" labelDefault="My Groups" />
+            <MenuLink to="/members" icon="members" labelKey="sidebar.members" labelDefault="Members" />
+            <MenuLink to="/payments" icon="payments" labelKey="sidebar.payments" labelDefault="Payments" />
+            <MenuLink to="/advance-payments" icon="advance" labelKey="sidebar.advance" labelDefault="Advance" />
 
             {/* Admin only */}
             {isAdmin && (
-              <li>
-                <NavLink
-                  to="/audit-trail"
-                  className={linkClass}
-                  onClick={onCloseMobile}
-                >
-                  <Icon name="shield" size={18} />
-                  <span>{t("sidebar.audit_trail", "Audit Trail")}</span>
-                  <span>{t("audit_trail", "Audit Trail")}</span>
-                </NavLink>
-              </li>
+              <MenuLink to="/audit-trail" icon="shield" labelKey="sidebar.audit_trail" labelDefault="Audit Trail" />
             )}
 
-            <li>
-              <NavLink
-                to="/emergency"
-                className={linkClass}
-                onClick={onCloseMobile}
-              >
-                <Icon name="emergency" size={18} />
-                <span>{t("sidebar.emergency", "Emergency")}</span>
-                <span>{t("emergency", "Emergency")}</span>
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink
-                to="/reports"
-                className={linkClass}
-                onClick={onCloseMobile}
-              >
-                <Icon name="reports" size={18} />
-                <span>{t("sidebar.reports", "Reports")}</span>
-                <span>{t("reports", "Reports")}</span>
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink
-                to="/disputes"
-                className={linkClass}
-                onClick={onCloseMobile}
-              >
-                <Icon name="disputes" size={18} />
-                <span>{t("sidebar.disputes", "Disputes")}</span>
-                <span>{t("disputes", "Disputes")}</span>
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink
-                to="/certificates"
-                className={linkClass}
-                onClick={onCloseMobile}
-              >
-                <Icon name="certificates" size={18} />
-                <span>{t("sidebar.certificates", "Certificates")}</span>
-                <span>{t("certificates", "Certificates")}</span>
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink
-                to="/profile"
-                className={linkClass}
-                onClick={onCloseMobile}
-              >
-                <Icon name="settings" size={18} />
-                <span>{t("sidebar.settings", "Settings")}</span>
-                <span>{t("settings", "Settings")}</span>
-              </NavLink>
-            </li>
+            <MenuLink to="/emergency" icon="emergency" labelKey="sidebar.emergency" labelDefault="Emergency" />
+            <MenuLink to="/reports" icon="reports" labelKey="sidebar.reports" labelDefault="Reports" />
+            <MenuLink to="/disputes" icon="disputes" labelKey="sidebar.disputes" labelDefault="Disputes" />
+            <MenuLink to="/certificates" icon="certificates" labelKey="sidebar.certificates" labelDefault="Certificates" />
+            <MenuLink to="/profile" icon="settings" labelKey="sidebar.settings" labelDefault="Settings" />
           </ul>
         </div>
 
@@ -240,7 +122,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
             >
               <Icon name="help" size={18} />
               <span>{t("sidebar.help_center", "Help Center")}</span>
-              <span>{t("help_center", "Help Center")}</span>
             </button>
           )}
 
@@ -254,7 +135,6 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
           >
             <Icon name="logout" size={18} color="#DC3545" />
             <span>{t("sidebar.logout", "Logout")}</span>
-            <span>{t("logout", "Logout")}</span>
           </button>
         </div>
       </aside>
