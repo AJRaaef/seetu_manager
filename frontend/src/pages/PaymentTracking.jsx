@@ -37,6 +37,7 @@ const PaymentTracking = () => {
   const [selectedMemberId, setSelectedMemberId] = useState('');
   const [selectedCycleId, setSelectedCycleId] = useState('');
   const [amountInput, setAmountInput] = useState('');
+  const [statusInput, setStatusInput] = useState('PAID');
   const [dateInput, setDateInput] = useState(new Date().toISOString().split('T')[0]);
   const [paymentMethodInput, setPaymentMethodInput] = useState('Cash (Offline)');
   const [evidenceFile, setEvidenceFile] = useState(null);
@@ -159,6 +160,8 @@ const PaymentTracking = () => {
           cycleId: Number(selectedCycleId),
           memberId: Number(targetMemberId),
           amount: parseFloat(amountInput),
+          status: statusInput,
+          paymentDate: dateInput,
           paymentMethod: paymentMethodInput,
           notes: (isAdmin || isOrganizer) ? 'Recorded via Payment Management portal' : 'Submitted by member with payment slip'
         },
@@ -175,6 +178,7 @@ const PaymentTracking = () => {
 
       alert(`Payment ${(isAdmin || isOrganizer) ? 'recorded' : 'evidence submitted'} successfully${evidenceFile ? ' with attached payment slip' : ''}!`);
       setAmountInput('');
+      setStatusInput('PAID');
       setEvidenceFile(null);
       fetchPayments();
     } catch (err) {
@@ -527,7 +531,7 @@ const PaymentTracking = () => {
             {/* Row 2: Financial Details & Verification Evidence */}
             <div className="row g-3">
               {/* Amount Input */}
-              <div className="col-12 col-sm-6 col-md-3">
+              <div className="col-12 col-sm-6 col-md-2">
                 <label className="form-label small fw-semibold text-dark mb-1">
                   Amount <span className="text-danger">*</span>
                 </label>
@@ -545,8 +549,27 @@ const PaymentTracking = () => {
                 </div>
               </div>
 
+              {/* Payment Status Dropdown */}
+              <div className="col-12 col-sm-6 col-md-2">
+                <label className="form-label small fw-semibold text-dark mb-1">
+                  Status <span className="text-danger">*</span>
+                </label>
+                <select
+                  className="form-select bg-white fw-semibold"
+                  value={statusInput}
+                  onChange={(e) => setStatusInput(e.target.value)}
+                  title="Payment Status"
+                >
+                  <option value="PAID">Paid (Full)</option>
+                  <option value="PARTIAL">Partial</option>
+                  <option value="OVERDUE">Overdue</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="LATE">Late</option>
+                </select>
+              </div>
+
               {/* Date Input */}
-              <div className="col-12 col-sm-6 col-md-3">
+              <div className="col-12 col-sm-6 col-md-2">
                 <label className="form-label small fw-semibold text-dark mb-1">
                   Payment Date <span className="text-danger">*</span>
                 </label>
@@ -596,7 +619,7 @@ const PaymentTracking = () => {
                 <div className="small text-muted">
                   {selectedGroupId && amountInput ? (
                     <span>
-                      Recording: <strong className="text-dark">LKR {Number(amountInput || 0).toLocaleString()}</strong> via <span className="badge bg-light text-dark border">{paymentMethodInput}</span>
+                      Recording: <strong className="text-dark">LKR {Number(amountInput || 0).toLocaleString()}</strong> as <span className="badge bg-success-subtle text-success border">{statusInput}</span> via <span className="badge bg-light text-dark border">{paymentMethodInput}</span>
                     </span>
                   ) : (
                     <span>Select group, member, and rotation cycle to record payment.</span>

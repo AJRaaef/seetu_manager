@@ -41,15 +41,27 @@ public class PaymentService {
         if (paymentRepository.existsByCycleIdAndMemberId(request.getCycleId(), request.getMemberId())) {
             Payment existing = paymentRepository.findByCycleIdAndMemberId(request.getCycleId(), request.getMemberId())
                     .orElseThrow();
-            if (existing.getStatus() == Payment.PaymentStatus.PAID) {
+            if (existing.getStatus() == Payment.PaymentStatus.PAID && (request.getStatus() == null || "PAID".equalsIgnoreCase(request.getStatus()))) {
                 throw new DuplicateResourceException("Payment already recorded for this cycle and member");
+            }
+            // Parse requested status if provided, else default to PAID
+            Payment.PaymentStatus updatedStatus = Payment.PaymentStatus.PAID;
+            if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
+                try {
+                    updatedStatus = Payment.PaymentStatus.valueOf(request.getStatus().trim().toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    updatedStatus = Payment.PaymentStatus.PAID;
+                }
             }
             // Update existing pending payment
             existing.setAmount(request.getAmount());
-            existing.setStatus(Payment.PaymentStatus.PAID);
-            existing.setPaymentDate(LocalDate.now());
+            existing.setStatus(updatedStatus);
+            existing.setPaymentDate(request.getPaymentDate() != null ? request.getPaymentDate() : LocalDate.now());
             existing.setRecordedBy(recorder);
             existing.setNotes(request.getNotes());
+            if (request.getPaymentMethod() != null) {
+                existing.setPaymentMethod(request.getPaymentMethod());
+            }
             paymentRepository.save(existing);
 
             auditLogService.log(recorder, "PAYMENT_UPDATED", "payments", existing.getId(),
@@ -60,9 +72,15 @@ public class PaymentService {
             return existing;
         }
 
-        // Determine status based on timing and contribution amount
+        // Determine status based on explicit request or timing and contribution amount
         Payment.PaymentStatus status = Payment.PaymentStatus.PAID;
-        if (recorder != null && recorder.getRole() == User.Role.MEMBER) {
+        if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
+            try {
+                status = Payment.PaymentStatus.valueOf(request.getStatus().trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                status = Payment.PaymentStatus.PAID;
+            }
+        } else if (recorder != null && recorder.getRole() == User.Role.MEMBER) {
             status = Payment.PaymentStatus.PENDING;
         } else if (cycle.getGroup() != null && cycle.getGroup().getContributionAmount() != null
                 && request.getAmount().compareTo(cycle.getGroup().getContributionAmount()) < 0) {
@@ -76,7 +94,7 @@ public class PaymentService {
                 .member(member)
                 .amount(request.getAmount())
                 .status(status)
-                .paymentDate(LocalDate.now())
+                .paymentDate(request.getPaymentDate() != null ? request.getPaymentDate() : LocalDate.now())
                 .recordedBy(recorder)
                 .notes(request.getNotes())
                 .paymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "Cash (Offline)")
