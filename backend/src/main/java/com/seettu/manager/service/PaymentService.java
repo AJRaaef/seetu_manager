@@ -212,7 +212,7 @@ public class PaymentService {
                                     .status(Payment.PaymentStatus.OVERDUE)
                                     .paymentDate(dueDate)
                                     .paymentMethod("Pending Settlement")
-                                    .notes("🤖 System Auto-Detected: Contribution not received by due date (" + dueDate + ")")
+                                    .notes("System Auto-Detected: Contribution not received by due date (" + dueDate + ")")
                                     .recordedBy(null)
                                     .build();
                             paymentRepository.save(overduePayment);

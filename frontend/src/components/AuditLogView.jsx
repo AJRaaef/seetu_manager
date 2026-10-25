@@ -225,7 +225,7 @@ const AuditLogView = () => {
       <div className="card border-0 shadow-sm rounded-3 overflow-hidden">
         <div className="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
           <h5 className="fw-bold mb-0 text-dark">
-            🛡️ {t('audit_records_title', 'Audit Log Records')}{' '}
+            {t('audit_records_title', 'Audit Log Records')}{' '}
             <span className="badge bg-light text-dark ms-2">
               {filteredRows.length} {t('audit_entries', 'Entries')}
             </span>

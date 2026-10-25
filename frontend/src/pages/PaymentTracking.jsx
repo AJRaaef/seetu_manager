@@ -443,8 +443,9 @@ const PaymentTracking = () => {
       {isAdmin ? (
         <div className="alert alert-light border shadow-xs d-flex flex-wrap align-items-center justify-content-between p-3 mb-4 rounded-3" style={{ background: '#F8FAFC' }}>
           <div className="d-flex align-items-center gap-2">
-            <span className="badge bg-dark text-white px-2.5 py-1.5 fw-semibold" style={{ fontSize: '0.78rem' }}>
-              🛡️ Platform Oversight Mode
+            <span className="badge bg-dark text-white px-2.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" style={{ fontSize: '0.78rem' }}>
+              <Icon name="shield" size={13} color="#FFFFFF" />
+              <span>Platform Oversight Mode</span>
             </span>
             <span className="text-muted small">
               You are reviewing verified transactions, receipts, and automated delinquency recovery desks across all circles.
@@ -1066,9 +1067,8 @@ const PaymentTracking = () => {
                     </td>
                     <td className="py-3 px-3 text-muted small">
                       {p.status === 'OVERDUE' ? (
-                        <span className="badge bg-light text-secondary border d-inline-flex align-items-center gap-1 px-2 py-1">
-                          <span>🤖</span>
-                          <span>System Auto-Detected</span>
+                        <span className="badge bg-light text-secondary border px-2 py-1">
+                          System Auto-Detected
                         </span>
                       ) : (
                         p.recordedBy || '—'
