@@ -85,9 +85,14 @@ public class PaymentController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
-    public ResponseEntity<ApiResponse<PaymentResponse>> updatePayment(@PathVariable Long id,
-                                                                      @RequestBody PaymentRecordRequest request) {
-        Payment payment = paymentService.updatePayment(id, request);
+    public ResponseEntity<ApiResponse<PaymentResponse>> updatePayment(
+            @PathVariable Long id,
+            @RequestBody PaymentRecordRequest request,
+            @RequestParam(required = false) Long recorderId,
+            @AuthenticationPrincipal User authUser) {
+        Long finalRecorderId = (recorderId != null) ? recorderId : (authUser != null ? authUser.getId() : null);
+        User recorder = (finalRecorderId != null) ? userService.getUserById(finalRecorderId) : null;
+        Payment payment = paymentService.updatePayment(id, request, recorder);
         return ResponseEntity.ok(ApiResponse.success("Payment updated successfully", paymentService.toPaymentResponse(payment)));
     }
 

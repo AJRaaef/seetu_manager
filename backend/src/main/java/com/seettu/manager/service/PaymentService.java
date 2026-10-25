@@ -130,15 +130,16 @@ public class PaymentService {
         return paymentRepository.findByGroupIdAndMemberId(groupId, memberId);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Payment> getAllPayments() {
+        markOverduePayments();
         return paymentRepository.findAllWithDetails().stream()
                 .filter(payment -> payment.getMember() != null && payment.getMember().getRole() != User.Role.ADMIN)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public Payment updatePayment(Long id, PaymentRecordRequest request) {
+    public Payment updatePayment(Long id, PaymentRecordRequest request, User recorder) {
         Payment payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + id));
         if (request.getAmount() != null) {
@@ -160,13 +161,21 @@ public class PaymentService {
         if (request.getPaymentMethod() != null && !request.getPaymentMethod().trim().isEmpty()) {
             payment.setPaymentMethod(request.getPaymentMethod());
         }
+        if (recorder != null) {
+            payment.setRecordedBy(recorder);
+        }
         Payment updated = paymentRepository.save(payment);
 
-        User recorder = payment.getRecordedBy();
-        auditLogService.log(recorder, "PAYMENT_UPDATED", "payments", payment.getId(),
+        User logUser = (recorder != null) ? recorder : payment.getRecordedBy();
+        auditLogService.log(logUser, "PAYMENT_UPDATED", "payments", payment.getId(),
                 "Payment #" + payment.getId() + " updated: amount=" + payment.getAmount() + " LKR, status=" + payment.getStatus());
 
         return updated;
+    }
+
+    @Transactional
+    public Payment updatePayment(Long id, PaymentRecordRequest request) {
+        return updatePayment(id, request, null);
     }
 
     @Transactional
@@ -180,17 +189,45 @@ public class PaymentService {
 
     @Transactional
     public void markOverduePayments() {
-        // According to system spec: Mark OVERDUE if no payment recorded within 7 days after due date
-        LocalDate cutoffDate = LocalDate.now().minusDays(7);
-        List<PaymentCycle> overdueCycles = paymentCycleService.getOverdueCycles(cutoffDate);
-        for (PaymentCycle cycle : overdueCycles) {
-            List<Payment> pendingPayments = paymentRepository.findByCycleIdAndStatus(
-                    cycle.getId(), Payment.PaymentStatus.PENDING);
-            for (Payment payment : pendingPayments) {
-                payment.setStatus(Payment.PaymentStatus.OVERDUE);
-                paymentRepository.save(payment);
-                notificationService.sendNotification(payment.getMember().getId(),
-                        "Your payment for cycle " + cycle.getCycleNumber() + " is overdue!", "PAYMENT_OVERDUE");
+        LocalDate today = LocalDate.now();
+        List<PaymentCycle> activeCycles = paymentCycleService.getActiveCycles();
+        for (PaymentCycle cycle : activeCycles) {
+            LocalDate dueDate = cycle.getEndDate();
+            if (dueDate != null && !dueDate.isAfter(today) && cycle.getGroup() != null) {
+                List<GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(
+                        cycle.getGroup().getId(), GroupMember.MemberStatus.ACTIVE);
+                java.math.BigDecimal contributionAmount = cycle.getGroup().getContributionAmount() != null
+                        ? cycle.getGroup().getContributionAmount()
+                        : java.math.BigDecimal.ZERO;
+
+                for (GroupMember gm : activeMembers) {
+                    if (gm.getUser() != null && gm.getUser().getRole() != User.Role.ADMIN) {
+                        Long memberUserId = gm.getUser().getId();
+                        Optional<Payment> existingPayment = paymentRepository.findByCycleIdAndMemberId(cycle.getId(), memberUserId);
+                        if (existingPayment.isEmpty()) {
+                            Payment overduePayment = Payment.builder()
+                                    .cycle(cycle)
+                                    .member(gm.getUser())
+                                    .amount(contributionAmount)
+                                    .status(Payment.PaymentStatus.OVERDUE)
+                                    .paymentDate(dueDate)
+                                    .paymentMethod("Pending Settlement")
+                                    .notes("🤖 System Auto-Detected: Contribution not received by due date (" + dueDate + ")")
+                                    .recordedBy(null)
+                                    .build();
+                            paymentRepository.save(overduePayment);
+                            notificationService.sendNotification(memberUserId,
+                                    "Your installment for '" + cycle.getGroup().getName() + "' (Cycle #" + cycle.getCycleNumber() + ") is overdue!",
+                                    "PAYMENT_OVERDUE");
+                        } else {
+                            Payment p = existingPayment.get();
+                            if (p.getStatus() == Payment.PaymentStatus.PENDING) {
+                                p.setStatus(Payment.PaymentStatus.OVERDUE);
+                                paymentRepository.save(p);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -247,7 +284,7 @@ public class PaymentService {
                 .amount(payment.getAmount())
                 .status(payment.getStatus().name())
                 .paymentDate(payment.getPaymentDate())
-                .recordedByName(payment.getRecordedBy() != null ? payment.getRecordedBy().getFullName() : null)
+                .recordedByName(payment.getRecordedBy() != null ? payment.getRecordedBy().getFullName() : "System Auto-Detected")
                 .notes(payment.getNotes())
                 .paymentMethod(payment.getPaymentMethod() != null ? payment.getPaymentMethod() : "Cash (Offline)")
                 .createdAt(payment.getCreatedAt())

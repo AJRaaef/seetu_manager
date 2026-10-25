@@ -261,7 +261,7 @@ const PaymentTracking = () => {
         paymentDate: updated.date,
         paymentMethod: updated.method,
         notes: updated.notes
-      });
+      }, userId);
       if (updated.evidenceFile) {
         try {
           await uploadPaymentEvidence(updated.id, updated.evidenceFile.name);
@@ -583,10 +583,8 @@ const PaymentTracking = () => {
                   title="Payment Status"
                 >
                   <option value="PAID">Paid (Full)</option>
-                  <option value="PARTIAL">Partial</option>
-                  <option value="OVERDUE">Overdue</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="LATE">Late</option>
+                  <option value="LATE">Paid (Late)</option>
+                  <option value="PARTIAL">Partial Payment</option>
                 </select>
               </div>
 
@@ -993,7 +991,7 @@ const PaymentTracking = () => {
                 <th className="py-3 px-3 text-muted fw-semibold small">Cycle</th>
                 <th className="py-3 px-3 text-muted fw-semibold small">{ledgerTab === 'overdue' ? 'Due Amount' : 'Amount'}</th>
                 <th className="py-3 px-3 text-muted fw-semibold small text-center">Status</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">Recorded By</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{ledgerTab === 'overdue' ? 'Detected By' : 'Recorded By'}</th>
                 <th className="py-3 px-3 text-muted fw-semibold small text-end">{ledgerTab === 'overdue' ? 'Recovery Actions' : 'Actions'}</th>
               </tr>
             </thead>
@@ -1052,7 +1050,16 @@ const PaymentTracking = () => {
                     >
                       {getStatusBadge(p.status)}
                     </td>
-                    <td className="py-3 px-3 text-muted small">{p.recordedBy}</td>
+                    <td className="py-3 px-3 text-muted small">
+                      {p.status === 'OVERDUE' ? (
+                        <span className="badge bg-light text-secondary border d-inline-flex align-items-center gap-1 px-2 py-1">
+                          <span>🤖</span>
+                          <span>System Auto-Detected</span>
+                        </span>
+                      ) : (
+                        p.recordedBy || '—'
+                      )}
+                    </td>
                     <td
                       className="py-3 px-3 text-end"
                       onClick={(e) => e.stopPropagation()}
