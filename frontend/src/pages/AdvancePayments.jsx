@@ -151,10 +151,18 @@ const AdvancePayments = () => {
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
             onClick={() => setShowModal(true)}
           >
-            <span>+</span>
+            <Icon name="plus" size={16} />
             <span>{t('advance_page.apply_btn', 'Record Advance Payment')}</span>
           </button>
-        ) : null}
+        ) : (
+          <button 
+            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm fw-semibold" 
+            onClick={() => setShowModal(true)}
+          >
+            <Icon name="upload" size={16} />
+            <span>{t('advance_page.submit_advance', 'Submit Advance Contribution')}</span>
+          </button>
+        )}
       </div>
 
       {/* Summary Card matching brand teal palette */}
@@ -246,12 +254,12 @@ const AdvancePayments = () => {
       )}
 
       {/* Record Modal (Admin/Organizer only) */}
-      {showModal && isAdminOrOrg && (
+      {showModal && !isAdmin && (
         <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
               <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#134A5A' }}>
-                <h5 className="modal-title fw-bold">Record Advance Contribution</h5>
+                <h5 className="modal-title fw-bold">{isOrganizer ? 'Record Advance Contribution' : 'Submit Advance Contribution'}</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleCreate}>
@@ -271,32 +279,38 @@ const AdvancePayments = () => {
                       ))}
                     </select>
                   </div>
-                  {/* Member Selection - Always Visible */}
-                  <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Select Member</label>
-                    <select
-                      className="form-select"
-                      value={formData.memberId}
-                      onChange={(e) => setFormData({ ...formData, memberId: e.target.value })}
-                      style={{ borderRadius: '8px' }}
-                      disabled={!formData.groupId}
-                      required
-                    >
-                      <option value="">{formData.groupId ? '-- Select Member --' : '-- Choose Group First --'}</option>
-                      {isAdminOrOrg && user && (
-                        <option value={user?.userId || user?.id}>
-                          {user.fullName || user.email || 'Organizer'} (Organizer / Me)
-                        </option>
-                      )}
-                      {members
-                        .filter(m => String(m.user?.id || m.userId || m.id) !== String(user?.userId || user?.id))
-                        .map((m) => {
-                          const mId = m.user?.id || m.userId || m.id;
-                          const mName = m.user?.fullName || m.fullName || m.name || `Member #${mId}`;
-                          return <option key={mId} value={mId}>{mName}</option>;
-                        })}
-                    </select>
-                  </div>
+                  {/* Member Selection (Organizer only) */}
+                  {isOrganizer ? (
+                    <div className="mb-3">
+                      <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Select Member</label>
+                      <select
+                        className="form-select"
+                        value={formData.memberId}
+                        onChange={(e) => setFormData({ ...formData, memberId: e.target.value })}
+                        style={{ borderRadius: '8px' }}
+                        disabled={!formData.groupId}
+                        required
+                      >
+                        <option value="">{formData.groupId ? '-- Select Member --' : '-- Choose Group First --'}</option>
+                        {user && (
+                          <option value={user?.userId || user?.id}>
+                            {user.fullName || user.email || 'Organizer'} (Organizer / Me)
+                          </option>
+                        )}
+                        {members
+                          .filter(m => String(m.user?.id || m.userId || m.id) !== String(user?.userId || user?.id))
+                          .map((m) => {
+                            const mId = m.user?.id || m.userId || m.id;
+                            const mName = m.user?.fullName || m.fullName || m.name || `Member #${mId}`;
+                            return <option key={mId} value={mId}>{mName}</option>;
+                          })}
+                      </select>
+                    </div>
+                  ) : (
+                    <div className="mb-3 p-2.5 bg-light rounded border text-muted small">
+                      Contributing as: <strong className="text-dark">{user?.fullName || 'Member'}</strong>
+                    </div>
+                  )}
                   <div className="mb-3">
                     <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Advance Amount (LKR)</label>
                     <input

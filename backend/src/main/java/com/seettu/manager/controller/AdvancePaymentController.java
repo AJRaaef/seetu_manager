@@ -21,14 +21,16 @@ public class AdvancePaymentController {
     private final AdvancePaymentService advancePaymentService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER') or hasRole('MEMBER')")
     public ResponseEntity<ApiResponse<AdvancePayment>> recordAdvancePayment(
             @RequestParam(required = false) Long memberId,
             @RequestParam BigDecimal amount,
             @RequestParam(required = false) String notes,
             @RequestParam(required = false) Long groupId,
             @AuthenticationPrincipal User authUser) {
-        Long finalMemberId = (memberId != null) ? memberId : (authUser != null ? authUser.getId() : null);
+        Long finalMemberId = (authUser != null && authUser.getRole() == User.Role.MEMBER)
+                ? authUser.getId()
+                : ((memberId != null) ? memberId : (authUser != null ? authUser.getId() : null));
         if (finalMemberId == null) {
             throw new IllegalArgumentException("Member ID is required");
         }
