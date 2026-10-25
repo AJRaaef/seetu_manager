@@ -204,8 +204,23 @@ public class PaymentService {
     public void deletePayment(Long id) {
         Payment payment = paymentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + id));
-        auditLogService.log(payment.getRecordedBy(), "PAYMENT_DELETED", "payments", payment.getId(),
-                "Payment #" + payment.getId() + " deleted for member: " + (payment.getMember() != null ? payment.getMember().getFullName() : "Member"));
+
+        // Delete associated evidences first to prevent foreign key constraints
+        List<com.seettu.manager.entity.PaymentEvidence> evidences = paymentEvidenceRepository.findByPaymentId(id);
+        if (evidences != null && !evidences.isEmpty()) {
+            paymentEvidenceRepository.deleteAll(evidences);
+        }
+
+        try {
+            auditLogService.log(
+                    payment.getRecordedBy() != null ? payment.getRecordedBy() : payment.getMember(),
+                    "PAYMENT_DELETED",
+                    "payments",
+                    payment.getId(),
+                    "Payment #" + payment.getId() + " deleted for member: " + (payment.getMember() != null ? payment.getMember().getFullName() : "Member")
+            );
+        } catch (Exception ignored) {}
+
         paymentRepository.delete(payment);
     }
 

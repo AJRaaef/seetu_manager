@@ -5,6 +5,8 @@ import { getAllMembersWithKyc } from '../api/userApi';
 import api from '../api/axios';
 import { useAuth } from '../hooks/useAuth';
 import { getErrorMessage } from '../utils/errorHandler';
+import DisbursementVoucherModal from '../components/DisbursementVoucherModal';
+import Icon from '../components/Icons';
 
 const GroupDetail = () => {
   const { id } = useParams();
@@ -24,6 +26,8 @@ const GroupDetail = () => {
   const [drawWinner, setDrawWinner] = useState(null);
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [voucherCycle, setVoucherCycle] = useState(null);
+  const [showDisbursementModal, setShowDisbursementModal] = useState(false);
+  const [disbursementCycle, setDisbursementCycle] = useState(null);
   const [memberUserId, setMemberUserId] = useState('');
   const [verifiedMembers, setVerifiedMembers] = useState([]);
   const [actionMsg, setActionMsg] = useState('');
@@ -126,9 +130,29 @@ const GroupDetail = () => {
   const handleCycleStatusChange = async (cycleId, status) => {
     setActionMsg('');
     setErrorMsg('');
+    const targetCycle = group?.cycles?.find((c) => c.id === cycleId);
+
+    if (status === 'COMPLETED') {
+      const winnerName = targetCycle?.payoutMember?.fullName || targetCycle?.payoutMemberName;
+      if (!winnerName || winnerName === 'Unassigned' || winnerName === 'Pending Rotation Selection') {
+        alert(`Please assign a payout recipient member for Cycle #${targetCycle?.cycleNumber} before marking it as completed.`);
+        setSelectedCycle(targetCycle);
+        setShowAssignPayoutModal(true);
+        return;
+      }
+      const confirmMsg = `Confirm Cycle #${targetCycle.cycleNumber} Completion:\n\nAre you sure you want to complete this cycle and disburse the rotational pot of LKR ${totalPool.toLocaleString()} to ${winnerName}?\n\n• An automatic notification will be sent to all circle members\n• Official Payout Verification Voucher will be issued\n• Next cycle will be activated automatically`;
+      if (!window.confirm(confirmMsg)) return;
+    }
+
     try {
       await api.put(`/payment-cycles/${cycleId}/status?status=${status}`);
-      setActionMsg(`Cycle status updated to ${status}!`);
+      if (status === 'COMPLETED') {
+        setActionMsg(`Cycle #${targetCycle?.cycleNumber} completed successfully! Payout pot of LKR ${totalPool.toLocaleString()} disbursed. All circle members notified!`);
+        setDisbursementCycle(targetCycle);
+        setShowDisbursementModal(true);
+      } else {
+        setActionMsg(`Cycle status updated to ${status}!`);
+      }
       fetchGroup();
     } catch (err) {
       setErrorMsg(getErrorMessage(err, 'Failed to update cycle status.'));
@@ -395,6 +419,20 @@ const GroupDetail = () => {
                                     </button>
                                   )}
                                 </>
+                              )}
+                              {(c.payoutMember || (c.payoutMemberName && c.payoutMemberName !== 'Unassigned' && c.payoutMemberName !== 'Pending Rotation Selection')) && (
+                                <button
+                                  className="btn btn-sm btn-outline-primary fw-semibold d-inline-flex align-items-center gap-1 shadow-xs"
+                                  onClick={() => {
+                                    setDisbursementCycle(c);
+                                    setShowDisbursementModal(true);
+                                  }}
+                                  title="View Official Rotational Payout Disbursement Voucher"
+                                  style={{ fontSize: '0.78rem' }}
+                                >
+                                  <Icon name="award" size={13} />
+                                  <span>Payout Voucher</span>
+                                </button>
                               )}
                               {(c.payoutMemberName && c.payoutMemberName !== 'Unassigned' && c.payoutMemberName !== 'Pending Rotation Selection') && group.shopName && (
                                 <button
@@ -769,6 +807,15 @@ const GroupDetail = () => {
           </div>
         );
       })()}
+
+      {/* Official Rotational Payout Disbursement Voucher Modal */}
+      <DisbursementVoucherModal
+        show={showDisbursementModal}
+        onHide={() => setShowDisbursementModal(false)}
+        cycle={disbursementCycle}
+        group={group}
+        organizerName={group?.organizerName || user?.fullName}
+      />
 
       {/* Non-Monetary Asset Collection Voucher Modal */}
       {showVoucherModal && voucherCycle && (

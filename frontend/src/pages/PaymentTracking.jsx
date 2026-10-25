@@ -108,6 +108,13 @@ const PaymentTracking = () => {
           : (userId ? await getGroupsByUser(userId) : null);
         const gList = res?.data || res || [];
         setAvailableGroups(gList);
+        if (gList.length > 0) {
+          const first = gList[0];
+          setSelectedGroupId(String(first.id));
+          if (first.contributionAmount) {
+            setAmountInput(String(first.contributionAmount));
+          }
+        }
       } catch (err) {
         console.error('Failed to load groups for payment form', err);
       }
@@ -138,9 +145,16 @@ const PaymentTracking = () => {
         setGroupMembers(membersList);
         setGroupCycles(cyclesList);
 
-        // Auto-select first cycle if available
+        // Auto-select active or first cycle
         if (cyclesList.length > 0) {
-          setSelectedCycleId(cyclesList[0].id);
+          const activeCycle = cyclesList.find(c => c.status === 'ACTIVE') || cyclesList[0];
+          setSelectedCycleId(String(activeCycle.id));
+        }
+        if (!isAdmin && !isOrganizer && userId) {
+          setSelectedMemberId(String(userId));
+        } else if (membersList.length > 0) {
+          const firstMemId = membersList[0].user?.id || membersList[0].userId || membersList[0].id || userId;
+          setSelectedMemberId(String(firstMemId));
         }
       } catch (err) {
         console.error('Failed to load group members/cycles', err);
@@ -574,35 +588,40 @@ const PaymentTracking = () => {
                 <label className="form-label small fw-semibold text-dark mb-1">
                   Paying Member <span className="text-danger">*</span>
                 </label>
-                <select
-                  className="form-select bg-white"
-                  value={selectedMemberId}
-                  onChange={(e) => setSelectedMemberId(e.target.value)}
-                  disabled={!selectedGroupId}
-                  required
-                >
-                  <option value="">{selectedGroupId ? '-- Select Member --' : 'Select Group First'}</option>
-                  {/* Current Organizer (Me) always guaranteed in dropdown */}
-                  {(isAdmin || isOrganizer) && user && (
-                    <option value={userId}>
-                      {user.fullName || user.email || 'Organizer'} (Organizer / Me)
-                    </option>
-                  )}
-                  {groupMembers
-                    .filter((m) => {
-                      const mUserId = m.user?.id || m.userId || m.id;
-                      return String(mUserId) !== String(userId);
-                    })
-                    .map((m) => {
-                      const mUserId = m.user?.id || m.userId || m.id;
-                      const mName = m.user?.fullName || m.fullName || m.name || `Member #${mUserId}`;
-                      return (
-                        <option key={m.id || mUserId} value={mUserId}>
-                          {mName} (Member #{mUserId})
-                        </option>
-                      );
-                    })}
-                </select>
+                {!isAdmin && !isOrganizer ? (
+                  <div className="form-control bg-light text-dark fw-semibold d-flex align-items-center justify-content-between" style={{ minHeight: '38px' }}>
+                    <span>{user?.fullName || user?.email || 'Me'}</span>
+                    <span className="badge bg-primary-subtle text-primary border border-primary-subtle small">Member (You)</span>
+                  </div>
+                ) : (
+                  <select
+                    className="form-select bg-white"
+                    value={selectedMemberId}
+                    onChange={(e) => setSelectedMemberId(e.target.value)}
+                    required
+                  >
+                    <option value="">{selectedGroupId ? '-- Select Member --' : '-- Select Group First --'}</option>
+                    {(isAdmin || isOrganizer) && user && (
+                      <option value={userId}>
+                        {user.fullName || user.email || 'Organizer'} (Organizer / Me)
+                      </option>
+                    )}
+                    {groupMembers
+                      .filter((m) => {
+                        const mUserId = m.user?.id || m.userId || m.id;
+                        return String(mUserId) !== String(userId);
+                      })
+                      .map((m) => {
+                        const mUserId = m.user?.id || m.userId || m.id;
+                        const mName = m.user?.fullName || m.fullName || m.name || `Member #${mUserId}`;
+                        return (
+                          <option key={m.id || mUserId} value={mUserId}>
+                            {mName} (Member #{mUserId})
+                          </option>
+                        );
+                      })}
+                  </select>
+                )}
               </div>
 
               {/* Cycle Select */}
@@ -614,10 +633,9 @@ const PaymentTracking = () => {
                   className="form-select bg-white"
                   value={selectedCycleId}
                   onChange={(e) => setSelectedCycleId(e.target.value)}
-                  disabled={!selectedGroupId}
                   required
                 >
-                  <option value="">{selectedGroupId ? '-- Select Rotation Cycle --' : 'Select Group First'}</option>
+                  <option value="">{selectedGroupId ? (groupCycles.length > 0 ? '-- Select Rotation Cycle --' : 'No cycles available') : '-- Select Group First --'}</option>
                   {groupCycles.map((c) => (
                     <option key={c.id} value={c.id}>
                       Cycle #{c.cycleNumber} — ({c.status || 'Active'})
@@ -1241,23 +1259,13 @@ const PaymentTracking = () => {
                       {isAdmin ? (
                         <div className="d-flex justify-content-end align-items-center gap-2 flex-nowrap">
                           <button
-                            className="btn btn-sm btn-outline-secondary px-2.5 py-1 text-decoration-none small fw-semibold"
+                            className="btn btn-sm btn-outline-secondary px-3 py-1 text-decoration-none small fw-semibold"
                             onClick={(e) => {
                               e.stopPropagation();
                               setViewPayment(p);
                             }}
                           >
                             View Details
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger px-2 py-1"
-                            title="Delete Payment Record (Admin Emergency Override)"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteTargetPayment(p);
-                            }}
-                          >
-                            <Icon name="trash" size={14} color="#DC3545" />
                           </button>
                         </div>
                       ) : isOrganizer ? (
