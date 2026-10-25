@@ -52,6 +52,8 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
     switch (status?.toUpperCase()) {
       case 'PAID':
         return <span className="badge-paid">{t('status.PAID', 'Paid')}</span>;
+      case 'LATE':
+        return <span className="badge bg-warning text-dark px-2 py-1 rounded-2 fw-semibold" style={{ fontSize: '0.75rem' }}>{t('status.LATE', 'Paid (Late)')}</span>;
       case 'PENDING':
         return <span className="badge-pending">{t('status.PENDING', 'Pending')}</span>;
       case 'OVERDUE':
@@ -63,7 +65,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
     }
   };
 
-  const isPaid = payment.status?.toUpperCase() === 'PAID';
+  const isPaid = payment.status?.toUpperCase() === 'PAID' || payment.status?.toUpperCase() === 'LATE';
 
   const handleDownloadReceipt = () => {
     try {

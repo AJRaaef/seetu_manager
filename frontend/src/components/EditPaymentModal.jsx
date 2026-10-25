@@ -92,6 +92,7 @@ const EditPaymentModal = ({ show, onHide, payment, onSave }) => {
               onChange={(e) => setStatus(e.target.value)}
             >
               <option value="PAID">{t('status.PAID', 'Paid')}</option>
+              <option value="LATE">Paid (Late)</option>
               <option value="PENDING">{t('status.PENDING', 'Pending')}</option>
               <option value="OVERDUE">{t('status.OVERDUE', 'Overdue')}</option>
               <option value="PARTIAL">{t('status.PARTIAL', 'Partial')}</option>

@@ -180,6 +180,11 @@ const PaymentTracking = () => {
       }
 
       alert(`Payment ${(isAdmin || isOrganizer) ? 'recorded' : 'evidence submitted'} successfully${evidenceFile ? ' with attached payment slip' : ''}!`);
+      if (statusInput === 'OVERDUE' || statusInput === 'PARTIAL' || statusInput === 'PENDING') {
+        setLedgerTab('overdue');
+      } else {
+        setLedgerTab('recorded');
+      }
       setAmountInput('');
       setStatusInput('PAID');
       setEvidenceFile(null);
@@ -264,7 +269,10 @@ const PaymentTracking = () => {
           console.error('Failed to attach digital slip', fileErr);
         }
       }
-      alert(`Payment for ${updated.member} settled successfully as ${updated.status === 'LATE' ? 'Paid (Late)' : updated.status}!`);
+      alert(`Payment for ${updated.member} settled successfully as ${updated.status === 'LATE' ? 'Paid (Late)' : updated.status} and moved to Recorded Payments Ledger!`);
+      if (updated.status === 'PAID' || updated.status === 'LATE') {
+        setLedgerTab('recorded');
+      }
       await fetchPayments();
     } catch (err) {
       console.error('Failed to settle payment in database', err);
@@ -348,7 +356,7 @@ const PaymentTracking = () => {
   const metricsSource = isFiltered ? filteredPayments : payments;
 
   const totalCollected = metricsSource
-    .filter((p) => p.status === 'PAID')
+    .filter((p) => p.status === 'PAID' || p.status === 'LATE')
     .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
   const totalPending = metricsSource
@@ -386,7 +394,7 @@ const PaymentTracking = () => {
               <div className="fw-bold fs-4 text-dark mt-1">{totalCollected.toLocaleString()} LKR</div>
             </div>
             <div className="text-muted small mt-2" style={{ fontSize: '0.75rem' }}>
-              {metricsSource.filter((p) => p.status === 'PAID').length} Paid Payments
+              {metricsSource.filter((p) => p.status === 'PAID' || p.status === 'LATE').length} Paid Payments
             </div>
           </div>
         </div>
