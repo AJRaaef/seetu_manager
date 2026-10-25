@@ -121,7 +121,7 @@ const EmergencyRequests = () => {
           {!isAdmin && (
             <div>
               <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
-                {t('emergency_page.request_btn')}
+                {t('Emergency Request')}
               </button>
             </div>
           )}
