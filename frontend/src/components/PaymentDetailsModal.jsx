@@ -288,7 +288,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           ) : (
             <div className="text-muted small py-2 px-3 bg-light rounded-2 border fst-italic">
               {(payment.method || '').toLowerCase().includes('cash') && isPaid
-                ? t('modals.payment_details.cash_note', 'Handled via offline cash payment. No digital slip required.')
+                ? t('modals.payment_details.cash_note', 'Handled via offline cash payment. Official electronic receipt is issued through the system (available for PDF download and printing below).')
                 : t('modals.payment_details.no_slip_yet', 'No digital payment slip attached yet.')}
             </div>
           )}

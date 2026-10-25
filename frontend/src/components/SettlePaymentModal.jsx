@@ -33,6 +33,10 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!onSettle || !payment) return;
+    if (method !== 'Cash (Offline)' && !evidenceFile) {
+      alert('Bank deposit slip / payment proof is mandatory for Bank Deposit / Transfer. Please attach the slip.');
+      return;
+    }
     setSubmitting(true);
     try {
       await onSettle({
@@ -149,8 +153,6 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
               >
                 <option value="Cash (Offline)">Cash (Offline)</option>
                 <option value="Bank Deposit / Transfer">Bank Deposit / Transfer</option>
-                <option value="Mobile Wallet (EzCash/mCash)">Mobile Wallet (EzCash/mCash)</option>
-                <option value="Online Banking">Online Banking</option>
               </select>
             </div>
 
@@ -172,17 +174,30 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
             </div>
           </div>
 
-          {/* Optional Deposit Slip Upload */}
+          {/* Deposit Slip Upload or Offline Cash Notice */}
           <div className="mb-3">
             <label className="form-label text-dark fw-semibold small mb-1">
-              {t('modals.settle_payment.evidence', 'Payment Slip / Bank Transfer Receipt (Optional)')}
+              {method === 'Cash (Offline)' ? (
+                <span>{t('modals.settle_payment.evidence_cash', 'Official Electronic Receipt')}</span>
+              ) : (
+                <span>
+                  {t('modals.settle_payment.evidence_bank', 'Bank Transfer Slip / Deposit Receipt')} <span className="text-danger">*</span>
+                </span>
+              )}
             </label>
-            <input
-              type="file"
-              accept="image/*,.pdf"
-              className="form-control bg-white"
-              onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)}
-            />
+            {method === 'Cash (Offline)' ? (
+              <div className="p-2.5 bg-light rounded-2 border text-muted small" style={{ fontSize: '0.82rem' }}>
+                Handled via offline cash. The system will automatically generate an official electronic receipt upon settlement.
+              </div>
+            ) : (
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                className="form-control bg-white"
+                required
+                onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)}
+              />
+            )}
           </div>
 
           {/* Notes / Reference */}
