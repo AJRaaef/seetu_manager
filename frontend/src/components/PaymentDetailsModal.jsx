@@ -10,21 +10,46 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
   const [attachedFiles, setAttachedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
 
+  const getFileUrl = (path) => {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `http://localhost:8081${cleanPath}`;
+  };
+
+  const isImageFile = (path) => {
+    if (!path) return false;
+    const clean = path.split('?')[0].toLowerCase();
+    return clean.endsWith('.png') || clean.endsWith('.jpg') || clean.endsWith('.jpeg') || clean.endsWith('.webp') || clean.endsWith('.gif');
+  };
+
   useEffect(() => {
     if (payment?.id && show) {
       getPaymentEvidences(payment.id)
         .then((res) => {
-          if (Array.isArray(res)) {
-            setAttachedFiles(res.map((item) => item.filePath || item));
+          const list = res?.data || (Array.isArray(res) ? res : []);
+          const files = list.map((item) => item.filePath || item);
+          if (files.length > 0) {
+            setAttachedFiles(files);
+          } else if (payment.evidenceUrls && payment.evidenceUrls.length > 0) {
+            setAttachedFiles(payment.evidenceUrls);
+          } else {
+            setAttachedFiles([]);
           }
         })
         .catch(() => {
-          setAttachedFiles([]);
+          if (payment.evidenceUrls && payment.evidenceUrls.length > 0) {
+            setAttachedFiles(payment.evidenceUrls);
+          } else {
+            setAttachedFiles([]);
+          }
         });
+    } else if (payment?.evidenceUrls && payment.evidenceUrls.length > 0) {
+      setAttachedFiles(payment.evidenceUrls);
     } else {
       setAttachedFiles([]);
     }
-  }, [payment?.id, show]);
+  }, [payment?.id, payment?.evidenceUrls, show]);
 
   if (!payment) return null;
 
@@ -35,14 +60,16 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
     setUploading(true);
     try {
       if (payment.id) {
-        await uploadPaymentEvidence(payment.id, file.name);
+        const uploadRes = await uploadPaymentEvidence(payment.id, file);
+        const savedPath = uploadRes?.data?.filePath || uploadRes?.filePath || file.name;
+        setAttachedFiles((prev) => [...prev, savedPath]);
+      } else {
+        setAttachedFiles((prev) => [...prev, file.name]);
       }
-      setAttachedFiles((prev) => [...prev, file.name]);
       alert(`Digital payment evidence "${file.name}" attached successfully!`);
     } catch (err) {
       console.error('Evidence upload failed', err);
-      setAttachedFiles((prev) => [...prev, file.name]);
-      alert(`Payment slip "${file.name}" attached.`);
+      alert(`Failed to attach slip: ${err?.response?.data?.message || err?.message || 'Error uploading file'}`);
     } finally {
       setUploading(false);
     }
@@ -272,18 +299,53 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           </div>
 
           {attachedFiles.length > 0 ? (
-            <div className="d-flex flex-column gap-2 mb-2">
-              {attachedFiles.map((fn, idx) => (
-                <div key={idx} className="d-flex align-items-center justify-content-between bg-light p-2 rounded-2 border">
-                  <div className="d-flex align-items-center gap-2 overflow-hidden">
-                    <Icon name="file-text" size={18} className="text-primary flex-shrink-0" />
-                    <span className="small text-truncate font-monospace" style={{ fontSize: '0.8rem' }}>
-                      {fn}
-                    </span>
+            <div className="d-flex flex-column gap-3 mb-2">
+              {attachedFiles.map((fn, idx) => {
+                const fileUrl = getFileUrl(fn);
+                const isImg = isImageFile(fn);
+                const fileName = typeof fn === 'string' ? fn.split('/').pop() : 'Evidence Slip';
+                return (
+                  <div key={idx} className="bg-light p-2.5 rounded-3 border">
+                    <div className="d-flex align-items-center justify-content-between mb-2">
+                      <div className="d-flex align-items-center gap-2 overflow-hidden">
+                        <Icon name={isImg ? 'image' : 'file-text'} size={18} className="text-primary flex-shrink-0" />
+                        <span className="small text-truncate font-monospace fw-semibold" style={{ fontSize: '0.8rem' }} title={fileName}>
+                          {fileName}
+                        </span>
+                      </div>
+                      <div className="d-flex align-items-center gap-2">
+                        <span className="badge bg-success-subtle text-success small">{t('modals.payment_details.verified', 'Attached Slip')}</span>
+                        {fileUrl && (
+                          <a
+                            href={fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-xs btn-outline-primary py-0.5 px-2 small text-decoration-none"
+                            style={{ fontSize: '0.75rem' }}
+                          >
+                            Open Full Slip ↗
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    {isImg && fileUrl && (
+                      <div className="text-center bg-white p-2 rounded-2 border">
+                        <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                          <img
+                            src={fileUrl}
+                            alt="Payment Slip"
+                            className="img-fluid rounded"
+                            style={{ maxHeight: '220px', objectFit: 'contain' }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        </a>
+                      </div>
+                    )}
                   </div>
-                  <span className="badge bg-success-subtle text-success small">{t('modals.payment_details.verified', 'Verified')}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-muted small py-2 px-3 bg-light rounded-2 border fst-italic">

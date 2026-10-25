@@ -29,4 +29,5 @@ public class PaymentResponse {
     private String groupName;
     private String memberPhone;
     private String memberEmail;
+    private java.util.List<String> evidenceUrls;
 }

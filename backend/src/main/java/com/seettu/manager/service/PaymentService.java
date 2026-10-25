@@ -25,6 +25,7 @@ public class PaymentService {
     private final AuditLogService auditLogService;
     private final NotificationService notificationService;
     private final com.seettu.manager.repository.GroupMemberRepository groupMemberRepository;
+    private final com.seettu.manager.repository.PaymentEvidenceRepository paymentEvidenceRepository;
 
     @Transactional
     public Payment recordPayment(PaymentRecordRequest request, User recorder) {
@@ -278,6 +279,11 @@ public class PaymentService {
     }
 
     public PaymentResponse toPaymentResponse(Payment payment) {
+        List<String> evidenceUrls = paymentEvidenceRepository.findByPaymentId(payment.getId())
+                .stream()
+                .map(com.seettu.manager.entity.PaymentEvidence::getFilePath)
+                .collect(Collectors.toList());
+
         return PaymentResponse.builder()
                 .id(payment.getId())
                 .cycleId(payment.getCycle().getId())
@@ -294,6 +300,7 @@ public class PaymentService {
                 .groupName(payment.getCycle().getGroup().getName())
                 .memberPhone(payment.getMember() != null ? payment.getMember().getPhone() : null)
                 .memberEmail(payment.getMember() != null ? payment.getMember().getEmail() : null)
+                .evidenceUrls(evidenceUrls)
                 .build();
     }
 

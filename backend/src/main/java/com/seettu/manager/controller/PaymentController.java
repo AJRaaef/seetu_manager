@@ -64,14 +64,28 @@ public class PaymentController {
         return ResponseEntity.ok(ApiResponse.success(paymentService.toPaymentResponseList(payments)));
     }
 
-    @PostMapping("/{id}/evidence")
-    public ResponseEntity<ApiResponse<com.seettu.manager.entity.PaymentEvidence>> uploadEvidence(
+    @PostMapping(value = "/{id}/evidence", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<com.seettu.manager.entity.PaymentEvidence>> uploadEvidenceMultipart(
+            @PathVariable Long id,
+            @RequestParam(value = "file", required = false) org.springframework.web.multipart.MultipartFile file,
+            @RequestParam(value = "filePath", required = false) String filePath) throws java.io.IOException {
+        if (file != null && !file.isEmpty()) {
+            com.seettu.manager.entity.PaymentEvidence evidence = paymentEvidenceService.saveEvidenceFile(id, file);
+            return ResponseEntity.ok(ApiResponse.success("Payment evidence attached successfully", evidence));
+        }
+        String path = (filePath != null && !filePath.trim().isEmpty()) ? filePath : "/uploads/payments/bank_slip_payment_" + id + ".png";
+        com.seettu.manager.entity.PaymentEvidence evidence = paymentEvidenceService.addEvidence(id, path);
+        return ResponseEntity.ok(ApiResponse.success("Payment evidence attached successfully", evidence));
+    }
+
+    @PostMapping(value = "/{id}/evidence")
+    public ResponseEntity<ApiResponse<com.seettu.manager.entity.PaymentEvidence>> uploadEvidenceJson(
             @PathVariable Long id,
             @RequestParam(required = false) String filePath,
             @RequestBody(required = false) java.util.Map<String, String> body) {
         String path = (body != null && body.get("filePath") != null) ? body.get("filePath") : filePath;
         if (path == null || path.trim().isEmpty()) {
-            path = "uploads/receipts/bank_slip_payment_" + id + ".png";
+            path = "/uploads/payments/bank_slip_payment_" + id + ".png";
         }
         com.seettu.manager.entity.PaymentEvidence evidence = paymentEvidenceService.addEvidence(id, path);
         return ResponseEntity.ok(ApiResponse.success("Payment evidence attached successfully", evidence));

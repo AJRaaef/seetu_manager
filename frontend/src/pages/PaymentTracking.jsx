@@ -85,7 +85,8 @@ const PaymentTracking = () => {
         method: p.paymentMethod || 'Cash (Offline)',
         notes: p.notes || '',
         memberPhone: p.memberPhone,
-        memberEmail: p.memberEmail
+        memberEmail: p.memberEmail,
+        evidenceUrls: p.evidenceUrls || []
       }));
       setPayments(formatted);
     } catch (err) {
@@ -165,7 +166,7 @@ const PaymentTracking = () => {
     try {
       const isMemberUser = !isAdmin && !isOrganizer;
       const targetStatus = isMemberUser ? 'PENDING' : statusInput;
-      const created = await recordPayment(
+      const createdRes = await recordPayment(
         {
           cycleId: Number(selectedCycleId),
           memberId: Number(targetMemberId),
@@ -178,9 +179,12 @@ const PaymentTracking = () => {
         userId || 1
       );
 
-      if (evidenceFile && created?.id) {
+      const created = createdRes?.data || createdRes;
+      const paymentId = created?.id;
+
+      if (evidenceFile && paymentId) {
         try {
-          await uploadPaymentEvidence(created.id, evidenceFile.name);
+          await uploadPaymentEvidence(paymentId, evidenceFile);
         } catch (fileErr) {
           console.error('Failed to attach digital slip', fileErr);
         }
@@ -276,7 +280,7 @@ const PaymentTracking = () => {
       }, userId);
       if (updated.evidenceFile) {
         try {
-          await uploadPaymentEvidence(updated.id, updated.evidenceFile.name);
+          await uploadPaymentEvidence(updated.id, updated.evidenceFile);
         } catch (fileErr) {
           console.error('Failed to attach digital slip', fileErr);
         }
@@ -1123,15 +1127,44 @@ const PaymentTracking = () => {
                     </td>
                     <td className="py-3 px-3 text-muted small">
                       {p.status === 'PENDING' ? (
-                        <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1">
-                          Awaiting Organizer Approval
-                        </span>
+                        <div className="d-flex flex-column align-items-start gap-1">
+                          <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1">
+                            Awaiting Organizer Approval
+                          </span>
+                          {p.evidenceUrls && p.evidenceUrls.length > 0 ? (
+                            <span
+                              className="badge bg-info-subtle text-info-emphasis border border-info-subtle d-inline-flex align-items-center gap-1"
+                              style={{ fontSize: '0.72rem', cursor: 'pointer' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setViewPayment(p);
+                              }}
+                              title="Click to view bank deposit slip"
+                            >
+                              <Icon name="paperclip" size={11} /> {p.evidenceUrls.length} Slip Attached
+                            </span>
+                          ) : (
+                            <span className="text-muted" style={{ fontSize: '0.72rem' }}>
+                              {p.method}
+                            </span>
+                          )}
+                        </div>
                       ) : p.status === 'OVERDUE' ? (
                         <span className="badge bg-light text-secondary border px-2 py-1">
                           System Auto-Detected
                         </span>
                       ) : (
-                        p.recordedBy || '—'
+                        <div className="d-flex flex-column align-items-start">
+                          <span>{p.recordedBy || '—'}</span>
+                          {p.evidenceUrls && p.evidenceUrls.length > 0 && (
+                            <span
+                              className="badge bg-light text-muted border d-inline-flex align-items-center gap-1 mt-0.5"
+                              style={{ fontSize: '0.7rem' }}
+                            >
+                              <Icon name="paperclip" size={10} /> Slip on file
+                            </span>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td

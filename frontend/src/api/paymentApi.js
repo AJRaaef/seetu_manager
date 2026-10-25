@@ -50,7 +50,16 @@ export const deletePayment = async (paymentId) => {
   return response.data;
 };
 
-export const uploadPaymentEvidence = async (paymentId, filePath) => {
+export const uploadPaymentEvidence = async (paymentId, fileOrPath) => {
+  if (fileOrPath instanceof File || (fileOrPath && typeof fileOrPath === 'object' && fileOrPath.name)) {
+    const formData = new FormData();
+    formData.append('file', fileOrPath);
+    const response = await api.post(`/payments/${paymentId}/evidence`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  }
+  const filePath = typeof fileOrPath === 'string' ? fileOrPath : fileOrPath?.filePath;
   const response = await api.post(`/payments/${paymentId}/evidence`, { filePath });
   return response.data;
 };
