@@ -205,26 +205,37 @@ const Certificates = () => {
           <div className="d-flex align-items-center gap-2 mb-1">
             <Icon name="certificates" size={26} color="#0097B2" />
             <h2 className="fw-bold mb-0" style={{ color: '#0F2F3D' }}>
-              {isAdmin || isOrganizer
-                ? t('certificates_page.admin_title', 'Certificates Management')
+              {isAdmin
+                ? t('certificates_page.admin_title', 'Certificates Oversight')
+                : isOrganizer
+                ? t('certificates_page.organizer_title', 'Circle Completion Certificates')
                 : t('certificates_page.title', 'My Completion Certificates')}
             </h2>
-            {(isAdmin || isOrganizer) && (
-              <span className="badge bg-teal-subtle text-teal border border-teal-subtle px-2.5 py-1 small fw-bold">
-                {isAdmin ? 'ADMINISTRATIVE CONTROL' : 'ORGANIZER DESK'}
+            {isAdmin ? (
+              <span className="badge bg-light text-secondary border px-2.5 py-1 small fw-bold">
+                PLATFORM OVERSIGHT
               </span>
-            )}
+            ) : isOrganizer ? (
+              <span className="badge bg-teal-subtle text-teal border border-teal-subtle px-2.5 py-1 small fw-bold">
+                ORGANIZER DESK
+              </span>
+            ) : null}
           </div>
           <p className="text-muted mb-0">
             {isAdmin
-              ? 'Issue, modify, preview, and delete verified completion certificates for community members.'
+              ? 'Oversee all statutory completion certificates across circles, verify credentials, and audit compliance.'
               : isOrganizer
-              ? 'Manage and issue statutory completion certificates for members in your active circles.'
+              ? 'Issue and manage verified completion certificates for members who completed all cycle contributions in your circles.'
               : t('certificates_page.subtitle', 'Official recognized certificates verifying your successful contributions.')}
           </p>
         </div>
 
-        {(isAdmin || isOrganizer) && (
+        {isAdmin ? (
+          <span className="badge bg-light text-secondary border px-3 py-2 small fw-semibold d-inline-flex align-items-center gap-1.5">
+            <Icon name="shield" size={15} />
+            <span>Platform Oversight Mode</span>
+          </span>
+        ) : isOrganizer ? (
           <button 
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm fw-bold text-white" 
             style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
@@ -233,7 +244,7 @@ const Certificates = () => {
             <Icon name="plus" size={16} />
             <span>{t('certificates_page.issue_btn', 'Issue Certificate')}</span>
           </button>
-        )}
+        ) : null}
       </div>
 
       {/* Feedback Toast */}

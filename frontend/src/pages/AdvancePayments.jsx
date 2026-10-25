@@ -7,7 +7,7 @@ import Icon from '../components/Icons';
 
 const AdvancePayments = () => {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, isAdmin, isOrganizer } = useAuth();
   const isAdminOrOrg = user?.role === 'ADMIN' || user?.role === 'ORGANIZER';
 
   const [advancePayments, setAdvancePayments] = useState([]);
@@ -141,7 +141,12 @@ const AdvancePayments = () => {
           </div>
           <p className="text-muted mb-0">{t('advance_page.subtitle', 'Manage advance contributions and early settlements')}</p>
         </div>
-        {isAdminOrOrg && (
+        {isAdmin ? (
+          <span className="badge bg-light text-secondary border px-3 py-2 small fw-semibold d-inline-flex align-items-center gap-1.5">
+            <Icon name="shield" size={15} />
+            <span>Platform Oversight Mode</span>
+          </span>
+        ) : isOrganizer ? (
           <button 
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
             onClick={() => setShowModal(true)}
@@ -149,7 +154,7 @@ const AdvancePayments = () => {
             <span>+</span>
             <span>{t('advance_page.apply_btn', 'Record Advance Payment')}</span>
           </button>
-        )}
+        ) : null}
       </div>
 
       {/* Summary Card matching brand teal palette */}
@@ -211,14 +216,16 @@ const AdvancePayments = () => {
                     {isAdminOrOrg && (
                       <td className="text-end pe-3">
                         <div className="d-flex justify-content-end gap-2">
-                          <button
-                            className="btn btn-link p-1 text-decoration-none"
-                            style={{ color: '#188754' }}
-                            title="Edit Advance Payment"
-                            onClick={() => handleOpenEdit(adv)}
-                          >
-                            <Icon name="pencil" size={16} color="#188754" />
-                          </button>
+                          {isOrganizer && (
+                            <button
+                              className="btn btn-link p-1 text-decoration-none"
+                              style={{ color: '#188754' }}
+                              title="Edit Advance Payment"
+                              onClick={() => handleOpenEdit(adv)}
+                            >
+                              <Icon name="pencil" size={16} color="#188754" />
+                            </button>
+                          )}
                           <button
                             className="btn btn-link p-1 text-decoration-none"
                             style={{ color: '#DC3545' }}
