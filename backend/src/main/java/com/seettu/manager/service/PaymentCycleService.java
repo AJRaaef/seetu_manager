@@ -19,6 +19,7 @@ public class PaymentCycleService {
     private final NotificationService notificationService;
     private final AuditLogService auditLogService;
     private final com.seettu.manager.repository.GroupMemberRepository groupMemberRepository;
+    private final com.seettu.manager.repository.SeettuGroupRepository groupRepository;
 
     public List<PaymentCycle> getCyclesByGroup(Long groupId) {
         return cycleRepository.findByGroupIdOrderByCycleNumberAsc(groupId);
@@ -94,6 +95,14 @@ public class PaymentCycleService {
             if (nextCycle != null && nextCycle.getStatus() == PaymentCycle.CycleStatus.PENDING) {
                 nextCycle.setStatus(PaymentCycle.CycleStatus.ACTIVE);
                 cycleRepository.save(nextCycle);
+            }
+
+            // If all cycles in group are now completed, mark group as COMPLETED
+            boolean hasIncompleteCycles = allGroupCycles.stream()
+                    .anyMatch(c -> !c.getId().equals(cycle.getId()) && c.getStatus() != PaymentCycle.CycleStatus.COMPLETED);
+            if (!hasIncompleteCycles) {
+                group.setStatus(SeettuGroup.GroupStatus.COMPLETED);
+                groupRepository.save(group);
             }
 
             // 2. Broadcast cycle completion & payout notification to all active circle members

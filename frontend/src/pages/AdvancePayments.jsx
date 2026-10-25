@@ -29,6 +29,21 @@ const AdvancePayments = () => {
     fetchData();
   }, [user]);
 
+  const loadGroupMembers = async (gId) => {
+    if (!gId) {
+      setMembers([]);
+      return;
+    }
+    try {
+      const res = await groupApi.getGroupMembers(gId);
+      const mList = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      setMembers(mList);
+    } catch (err) {
+      console.error('Failed to load group members', err);
+      setMembers([]);
+    }
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -38,7 +53,18 @@ const AdvancePayments = () => {
         ? await groupApi.getAllGroups()
         : (uid ? await groupApi.getUserGroups(uid) : null);
       const gList = groupRes?.data || groupRes || [];
-      setGroups(Array.isArray(gList) ? gList : []);
+      const validGroups = Array.isArray(gList) ? gList : [];
+      setGroups(validGroups);
+
+      if (validGroups.length > 0) {
+        const defaultGroupId = String(validGroups[0].id);
+        setFormData(prev => ({
+          ...prev,
+          groupId: prev.groupId || defaultGroupId,
+          memberId: prev.memberId || (uid ? String(uid) : '')
+        }));
+        loadGroupMembers(defaultGroupId);
+      }
 
       const advRes = isAdminOrOrg
         ? await api.get('/advance-payments')
@@ -53,19 +79,23 @@ const AdvancePayments = () => {
   };
 
   const handleGroupChange = async (gId) => {
-    setFormData((prev) => ({ ...prev, groupId: gId, memberId: '' }));
-    if (!gId) {
-      setMembers([]);
-      return;
+    setFormData((prev) => ({ ...prev, groupId: gId }));
+    await loadGroupMembers(gId);
+  };
+
+  const handleOpenModal = () => {
+    const activeGroupId = formData.groupId || (groups.length > 0 ? String(groups[0].id) : '');
+    const uid = user ? String(user.userId || user.id) : '';
+    setFormData({
+      groupId: activeGroupId,
+      memberId: formData.memberId || uid,
+      amount: '',
+      notes: ''
+    });
+    if (activeGroupId) {
+      loadGroupMembers(activeGroupId);
     }
-    try {
-      const res = await groupApi.getGroupMembers(gId);
-      const mList = res?.data || res || [];
-      setMembers(Array.isArray(mList) ? mList : []);
-    } catch (err) {
-      console.error('Failed to load group members', err);
-      setMembers([]);
-    }
+    setShowModal(true);
   };
 
   const handleCreate = async (e) => {
@@ -149,7 +179,7 @@ const AdvancePayments = () => {
         ) : isOrganizer ? (
           <button 
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
-            onClick={() => setShowModal(true)}
+            onClick={handleOpenModal}
           >
             <Icon name="plus" size={16} />
             <span>{t('advance_page.apply_btn', 'Record Advance Payment')}</span>
@@ -157,7 +187,7 @@ const AdvancePayments = () => {
         ) : (
           <button 
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm fw-semibold" 
-            onClick={() => setShowModal(true)}
+            onClick={handleOpenModal}
           >
             <Icon name="upload" size={16} />
             <span>{t('advance_page.submit_advance', 'Submit Advance Contribution')}</span>
@@ -288,12 +318,11 @@ const AdvancePayments = () => {
                         value={formData.memberId}
                         onChange={(e) => setFormData({ ...formData, memberId: e.target.value })}
                         style={{ borderRadius: '8px' }}
-                        disabled={!formData.groupId}
                         required
                       >
-                        <option value="">{formData.groupId ? '-- Select Member --' : '-- Choose Group First --'}</option>
+                        <option value="">-- Select Member --</option>
                         {user && (
-                          <option value={user?.userId || user?.id}>
+                          <option value={String(user?.userId || user?.id)}>
                             {user.fullName || user.email || 'Organizer'} (Organizer / Me)
                           </option>
                         )}
@@ -302,7 +331,12 @@ const AdvancePayments = () => {
                           .map((m) => {
                             const mId = m.user?.id || m.userId || m.id;
                             const mName = m.user?.fullName || m.fullName || m.name || `Member #${mId}`;
-                            return <option key={mId} value={mId}>{mName}</option>;
+                            const mNic = m.user?.nicNumber ? ` (${m.user.nicNumber})` : '';
+                            return (
+                              <option key={mId} value={String(mId)}>
+                                {mName}{mNic} - Member #{mId}
+                              </option>
+                            );
                           })}
                       </select>
                     </div>

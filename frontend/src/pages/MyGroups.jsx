@@ -46,7 +46,9 @@ const MyGroups = () => {
       const list = res?.data || res || [];
       if (Array.isArray(list) && list.length > 0) {
         const formatted = list.map(g => {
-          const totalCycles = g.memberCount || (Array.isArray(g.cycles) ? g.cycles.length : 10) || 10;
+          const totalCycles = (Array.isArray(g.cycles) && g.cycles.length > 0)
+            ? g.cycles.length
+            : (g.memberCount || 10);
 
           // Calculate completed cycles count
           let completedCyclesCount = 0;
@@ -58,18 +60,20 @@ const MyGroups = () => {
             completedCyclesCount = Math.max(0, (g.currentCycle || 1) - 1);
           }
 
-          const completionRate = totalCycles > 0
-            ? Math.min(100, Math.max(0, Math.round((completedCyclesCount / totalCycles) * 100)))
-            : 0;
+          const completionRate = (g.status === 'COMPLETED' || completedCyclesCount >= totalCycles)
+            ? 100
+            : (totalCycles > 0 ? Math.min(100, Math.max(0, Math.round((completedCyclesCount / totalCycles) * 100))) : 0);
 
           // Determine active/current cycle number
           let currentCycleNumber = 1;
-          if (Array.isArray(g.cycles) && g.cycles.length > 0) {
+          if (g.status === 'COMPLETED' || completedCyclesCount >= totalCycles) {
+            currentCycleNumber = totalCycles;
+          } else if (Array.isArray(g.cycles) && g.cycles.length > 0) {
             const activeCycle = g.cycles.find(c => c.status === 'ACTIVE');
             const nextPending = g.cycles.find(c => c.status === 'PENDING');
-            currentCycleNumber = activeCycle?.cycleNumber || nextPending?.cycleNumber || g.cycles[g.cycles.length - 1]?.cycleNumber || 1;
+            currentCycleNumber = activeCycle?.cycleNumber || nextPending?.cycleNumber || (completedCyclesCount > 0 ? Math.min(totalCycles, completedCyclesCount + 1) : 1);
           } else {
-            currentCycleNumber = g.currentCycle || 1;
+            currentCycleNumber = g.currentCycle || (completedCyclesCount > 0 ? Math.min(totalCycles, completedCyclesCount + 1) : 1);
           }
 
           return {
