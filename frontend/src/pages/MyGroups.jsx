@@ -167,7 +167,7 @@ const MyGroups = () => {
         </h2>
         {isOrganizer || isAdmin ? (
           <Link to="/groups/create" className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2">
-            {t('my_groups_page.create_new', 'Create New Group')}
+            <span>+</span>{t('my_groups_page.create_new', 'Create New Group')}
           </Link>
         ) : (
           <div className="d-flex align-items-center gap-2 flex-wrap">
