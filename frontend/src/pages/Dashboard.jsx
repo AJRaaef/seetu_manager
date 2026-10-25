@@ -300,59 +300,61 @@ const Dashboard = () => {
         />
       )}
 
-      {/* Upcoming Payout Banner Card */}
-      {hasUpcomingPayout ? (
-        <div className="upcoming-payout-banner mb-4">
-          <div>
-            <div className="d-flex align-items-center gap-2 mb-2">
-              <Icon name={payoutApproved ? 'check-circle' : 'megaphone'} size={20} color={payoutApproved ? '#34D399' : '#FACC15'} />
-              <span className="fw-bold fs-6" style={{ color: payoutApproved ? '#34D399' : '#FFFFFF' }}>
-                {payoutApproved 
-                  ? t('dashboard_page.payout_card.approved_btn', 'Payout Approved & Disbursed') 
-                  : t('dashboard_page.payout_card.title', 'Upcoming Rotational Payout')}
-              </span>
-            </div>
-            <div className="small text-white-50 mb-1" style={{ fontSize: '0.8rem' }}>
-              {upcomingPayout.cycle}
-            </div>
-            <h3 className="fw-bold mb-1 text-white">{upcomingPayout.recipient}</h3>
-            <div className="small text-white-50 mb-2">
-              {t('common.date', 'Date')} : {upcomingPayout.date}
-            </div>
-            <div className="fw-bold small" style={{ color: payoutApproved ? '#34D399' : '#FACC15' }}>
-              {payoutApproved ? t('dashboard_page.payout_card.approved_btn', 'Disbursed to Member') : upcomingPayout.daysRemaining}
-            </div>
-          </div>
-
-          <div className="text-end">
-            <div className="display-6 fw-bold text-white mb-3" style={{ letterSpacing: '0.5px' }}>
-              {upcomingPayout.amount}
-            </div>
-            {payoutApproved ? (
-              <div className="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-success text-white fw-semibold small shadow-sm">
-                <span>✓</span> {t('dashboard_page.payout_card.approved_btn', 'Approved & Disbursed')}
+      {/* Upcoming Payout Banner Card (For Members & Organizers participating in Seettu) */}
+      {!isAdmin && (
+        hasUpcomingPayout ? (
+          <div className="upcoming-payout-banner mb-4">
+            <div>
+              <div className="d-flex align-items-center gap-2 mb-2">
+                <Icon name={payoutApproved ? 'check-circle' : 'megaphone'} size={20} color={payoutApproved ? '#34D399' : '#FACC15'} />
+                <span className="fw-bold fs-6" style={{ color: payoutApproved ? '#34D399' : '#FFFFFF' }}>
+                  {payoutApproved 
+                    ? t('dashboard_page.payout_card.approved_btn', 'Payout Approved & Disbursed') 
+                    : t('dashboard_page.payout_card.title', 'Upcoming Rotational Payout')}
+                </span>
               </div>
-            ) : (
-              <button
-                onClick={() => setShowPayoutModal(true)}
-                className="btn btn-light rounded-pill px-4 py-2 fw-semibold text-dark shadow-sm border-0"
-                style={{ fontSize: '0.9rem' }}
-              >
-                {canManagePayout 
-                  ? t('dashboard_page.payout_card.review_btn', 'Review Payout') 
-                  : t('common.view', 'View Payout Details')}
-              </button>
-            )}
+              <div className="small text-white-50 mb-1" style={{ fontSize: '0.8rem' }}>
+                {upcomingPayout.cycle}
+              </div>
+              <h3 className="fw-bold mb-1 text-white">{upcomingPayout.recipient}</h3>
+              <div className="small text-white-50 mb-2">
+                {t('common.date', 'Date')} : {upcomingPayout.date}
+              </div>
+              <div className="fw-bold small" style={{ color: payoutApproved ? '#34D399' : '#FACC15' }}>
+                {payoutApproved ? t('dashboard_page.payout_card.approved_btn', 'Disbursed to Member') : upcomingPayout.daysRemaining}
+              </div>
+            </div>
+
+            <div className="text-end">
+              <div className="display-6 fw-bold text-white mb-3" style={{ letterSpacing: '0.5px' }}>
+                {upcomingPayout.amount}
+              </div>
+              {payoutApproved ? (
+                <div className="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-success text-white fw-semibold small shadow-sm">
+                  <span>✓</span> {t('dashboard_page.payout_card.approved_btn', 'Approved & Disbursed')}
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowPayoutModal(true)}
+                  className="btn btn-light rounded-pill px-4 py-2 fw-semibold text-dark shadow-sm border-0"
+                  style={{ fontSize: '0.9rem' }}
+                >
+                  {canManagePayout 
+                    ? t('dashboard_page.payout_card.review_btn', 'Review Payout') 
+                    : t('common.view', 'View Payout Details')}
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="card shadow-sm border-0 mb-4 p-4 text-center rounded-4" style={{ backgroundColor: '#FFFFFF' }}>
-          <div className="d-flex flex-column align-items-center justify-content-center py-2">
-            <Icon name="calendar" size={28} color="#94A3B8" />
-            <div className="fw-bold text-dark mt-2 mb-1">No Upcoming Payouts Scheduled</div>
-            <div className="text-muted small">Join or create a Seettu group to begin contribution cycles and scheduled payouts.</div>
+        ) : (
+          <div className="card shadow-sm border-0 mb-4 p-4 text-center rounded-4" style={{ backgroundColor: '#FFFFFF' }}>
+            <div className="d-flex flex-column align-items-center justify-content-center py-2">
+              <Icon name="calendar" size={28} color="#94A3B8" />
+              <div className="fw-bold text-dark mt-2 mb-1">No Upcoming Payouts Scheduled</div>
+              <div className="text-muted small">Join or create a Seettu group to begin contribution cycles and scheduled payouts.</div>
+            </div>
           </div>
-        </div>
+        )
       )}
 
       {/* Recent Payment Table Card */}
