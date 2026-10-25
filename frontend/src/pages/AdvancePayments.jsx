@@ -146,7 +146,8 @@ const AdvancePayments = () => {
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
             onClick={() => setShowModal(true)}
           >
-            {t('advance_page.apply_btn', 'Record Advance Payment')}
+            <span>+</span>
+            <span>{t('advance_page.apply_btn', 'Record Advance Payment')}</span>
           </button>
         )}
       </div>
@@ -180,14 +181,7 @@ const AdvancePayments = () => {
             <Icon name="advance" size={36} color="#235665" />
           </div>
           <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>No Advance Payments Recorded</h5>
-          <p className="text-muted small mb-4">You have no recorded advance payment contributions for your groups.</p>
-          {isAdminOrOrg && (
-            <div>
-              <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
-                Record Advance Payment
-              </button>
-            </div>
-          )}
+          <p className="text-muted small mb-0">You have no recorded advance payment contributions for your groups.</p>
         </div>
       ) : (
         <div className="ui-card shadow-sm border-0 overflow-hidden">
