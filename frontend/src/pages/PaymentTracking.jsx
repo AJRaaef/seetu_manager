@@ -358,17 +358,18 @@ const PaymentTracking = () => {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'PAID':
-        return <span className="badge-paid" style={{ cursor: 'pointer' }}>Paid</span>;
+        return <span className="badge-paid text-nowrap" style={{ cursor: 'pointer' }}>Paid</span>;
       case 'LATE':
-        return <span className="badge bg-warning text-dark px-2 py-1 rounded-2 fw-semibold" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>Paid (Late)</span>;
+        return <span className="badge bg-warning text-dark px-2 py-1 rounded-2 fw-semibold text-nowrap" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>Paid (Late)</span>;
       case 'PENDING':
-        return <span className="badge-pending" style={{ cursor: 'pointer' }}>Pending</span>;
+        return <span className="badge-pending text-nowrap" style={{ cursor: 'pointer' }}>Pending</span>;
       case 'OVERDUE':
-        return <span className="badge-overdue" style={{ cursor: 'pointer' }}>Overdue</span>;
+      case 'MISSED':
+        return <span className="badge-overdue text-nowrap" style={{ cursor: 'pointer' }}>Overdue</span>;
       case 'PARTIAL':
-        return <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 rounded-2" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>Partial</span>;
+        return <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 rounded-2 text-nowrap" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>Partial</span>;
       default:
-        return <span className="badge-paid" style={{ cursor: 'pointer' }}>{status}</span>;
+        return <span className="badge bg-secondary-subtle text-secondary border px-2 py-1 rounded-2 text-nowrap" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>{status}</span>;
     }
   };
 
@@ -389,7 +390,7 @@ const PaymentTracking = () => {
   // Separate counts for Recorded vs Overdue
   const recordedCount = payments.filter((p) => p.status === 'PAID' || p.status === 'LATE').length;
   const pendingCount = payments.filter((p) => p.status === 'PENDING').length;
-  const overdueCount = payments.filter((p) => p.status === 'OVERDUE' || p.status === 'PARTIAL').length;
+  const overdueCount = payments.filter((p) => p.status === 'OVERDUE' || p.status === 'MISSED' || p.status === 'PARTIAL').length;
 
   const filteredPayments = payments.filter((p) => {
     // Tab filtering:
@@ -398,7 +399,7 @@ const PaymentTracking = () => {
     } else if (ledgerTab === 'pending') {
       if (p.status !== 'PENDING') return false;
     } else if (ledgerTab === 'overdue') {
-      if (p.status !== 'OVERDUE' && p.status !== 'PARTIAL') return false;
+      if (p.status !== 'OVERDUE' && p.status !== 'MISSED' && p.status !== 'PARTIAL') return false;
     }
 
     const term = searchQuery.toLowerCase().trim();
@@ -1145,14 +1146,14 @@ const PaymentTracking = () => {
           <table className="table table-hover align-middle mb-0">
             <thead style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E5E7EB' }}>
               <tr>
-                <th className="py-3 px-3 text-muted fw-semibold small">{ledgerTab === 'overdue' ? 'Due Date' : 'Date'}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">Group</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{ledgerTab === 'overdue' ? 'Delinquent Member' : 'Member'}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">Cycle</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{ledgerTab === 'overdue' ? 'Due Amount' : 'Amount'}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-center">Status</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{ledgerTab === 'pending' ? 'Verification' : ledgerTab === 'overdue' ? 'Detected By' : 'Recorded By'}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-end">{ledgerTab === 'overdue' ? 'Recovery Actions' : 'Actions'}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{ledgerTab === 'overdue' ? 'Due Date' : 'Date'}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-nowrap">Group</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{ledgerTab === 'overdue' ? 'Delinquent Member' : 'Member'}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-nowrap">Cycle</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{ledgerTab === 'overdue' ? 'Due Amount' : 'Amount'}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-center text-nowrap">Status</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{ledgerTab === 'pending' ? 'Verification' : ledgerTab === 'overdue' ? 'Detected By' : 'Recorded By'}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-end text-nowrap" style={{ minWidth: '240px' }}>{ledgerTab === 'overdue' ? 'Recovery Actions' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody>
@@ -1196,24 +1197,24 @@ const PaymentTracking = () => {
                     onClick={() => setViewPayment(p)}
                     style={{ cursor: 'pointer' }}
                   >
-                    <td className="py-3 px-3 text-muted small">{p.date}</td>
-                    <td className="py-3 px-3 text-dark small">{p.group}</td>
-                    <td className="py-3 px-3 fw-semibold text-dark small">
+                    <td className="py-3 px-3 text-muted small text-nowrap">{p.date}</td>
+                    <td className="py-3 px-3 text-dark small text-nowrap">{p.group}</td>
+                    <td className="py-3 px-3 fw-semibold text-dark small text-nowrap">
                       {p.member}
                     </td>
-                    <td className="py-3 px-3 text-muted small">{p.cycle}</td>
-                    <td className="py-3 px-3 fw-semibold text-dark small">{p.amount.toLocaleString()} LKR</td>
+                    <td className="py-3 px-3 text-muted small text-nowrap">{p.cycle}</td>
+                    <td className="py-3 px-3 fw-semibold text-dark small text-nowrap">{p.amount.toLocaleString()} LKR</td>
                     <td
-                      className="py-3 px-3 text-center"
+                      className="py-3 px-3 text-center text-nowrap"
                       onClick={() => setViewPayment(p)}
                       title="Click to view payment details"
                     >
                       {getStatusBadge(p.status)}
                     </td>
-                    <td className="py-3 px-3 text-muted small">
+                    <td className="py-3 px-3 text-muted small text-nowrap">
                       {p.status === 'PENDING' ? (
                         <div className="d-flex flex-column align-items-start gap-1">
-                          <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1">
+                          <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 text-nowrap">
                             Awaiting Organizer Approval
                           </span>
                           {p.evidenceUrls && p.evidenceUrls.length > 0 ? (
@@ -1234,16 +1235,16 @@ const PaymentTracking = () => {
                             </span>
                           )}
                         </div>
-                      ) : p.status === 'OVERDUE' ? (
-                        <span className="badge bg-light text-secondary border px-2 py-1">
-                          System Auto-Detected
+                      ) : (p.status === 'OVERDUE' || p.status === 'MISSED') ? (
+                        <span className="badge bg-light text-secondary border px-2 py-1 text-nowrap">
+                          {p.recordedBy && p.recordedBy !== '—' && p.recordedBy !== 'Organizer' ? p.recordedBy : 'System Auto-Detected'}
                         </span>
                       ) : (
                         <div className="d-flex flex-column align-items-start">
-                          <span>{p.recordedBy || '—'}</span>
+                          <span className="badge bg-light text-secondary border px-2 py-1 text-nowrap">{p.recordedBy || '—'}</span>
                           {p.evidenceUrls && p.evidenceUrls.length > 0 && (
                             <span
-                              className="badge bg-light text-muted border d-inline-flex align-items-center gap-1 mt-0.5"
+                              className="badge bg-light text-muted border d-inline-flex align-items-center gap-1 mt-0.5 text-nowrap"
                               style={{ fontSize: '0.7rem' }}
                             >
                               <Icon name="paperclip" size={10} /> Slip on file
@@ -1253,13 +1254,14 @@ const PaymentTracking = () => {
                       )}
                     </td>
                     <td
-                      className="py-3 px-3 text-end"
+                      className="py-3 px-3 text-end text-nowrap"
+                      style={{ minWidth: '240px' }}
                       onClick={(e) => e.stopPropagation()}
                     >
                       {isAdmin ? (
                         <div className="d-flex justify-content-end align-items-center gap-2 flex-nowrap">
                           <button
-                            className="btn btn-sm btn-outline-secondary px-3 py-1 text-decoration-none small fw-semibold"
+                            className="btn btn-sm btn-outline-secondary px-3 py-1 text-decoration-none small fw-semibold text-nowrap"
                             onClick={(e) => {
                               e.stopPropagation();
                               setViewPayment(p);
@@ -1272,8 +1274,8 @@ const PaymentTracking = () => {
                         <div className="d-flex justify-content-end align-items-center gap-2 flex-nowrap">
                           {p.status !== 'PAID' && p.status !== 'LATE' && (
                             <button
-                              className="btn btn-sm btn-teal px-2.5 py-1 d-inline-flex align-items-center gap-1.5 shadow-sm fw-medium"
-                              style={{ fontSize: '0.78rem', borderRadius: '6px' }}
+                              className="btn btn-sm btn-teal px-2.5 py-1 d-inline-flex align-items-center gap-1.5 shadow-sm fw-medium text-nowrap"
+                              style={{ fontSize: '0.78rem', borderRadius: '6px', whiteSpace: 'nowrap' }}
                               title={p.status === 'PENDING' ? 'Review and approve member payment slip' : 'Settle payment with method & confirmation'}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -1285,14 +1287,14 @@ const PaymentTracking = () => {
                               }}
                             >
                               <Icon name="check" size={13} color="#FFFFFF" />
-                              <span>{p.status === 'PENDING' ? 'Approve Payment' : 'Settle Payment'}</span>
+                              <span style={{ whiteSpace: 'nowrap' }}>{p.status === 'PENDING' ? 'Approve Payment' : 'Settle Payment'}</span>
                             </button>
                           )}
 
-                          {p.status === 'OVERDUE' && (
+                          {(p.status === 'OVERDUE' || p.status === 'MISSED') && (
                             <button
-                              className="btn btn-sm btn-outline-danger px-2 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-xs"
-                              style={{ fontSize: '0.75rem', borderRadius: '6px' }}
+                              className="btn btn-sm btn-outline-danger px-2 py-1 fw-bold d-inline-flex align-items-center gap-1 shadow-xs text-nowrap"
+                              style={{ fontSize: '0.75rem', borderRadius: '6px', whiteSpace: 'nowrap' }}
                               title="Issue Formal Statutory Notice of Default & Legal Demand (The Cheetus Ordinance No. 61 of 1935)"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -1300,11 +1302,11 @@ const PaymentTracking = () => {
                               }}
                             >
                               <Icon name="warning" size={13} color="#DC3545" />
-                              <span>Legal LOD</span>
+                              <span style={{ whiteSpace: 'nowrap' }}>Legal LOD</span>
                             </button>
                           )}
 
-                          <div className="btn-group btn-group-sm border rounded bg-white shadow-xs">
+                          <div className="btn-group btn-group-sm border rounded bg-white shadow-xs flex-nowrap">
                             {p.status !== 'PAID' && p.status !== 'LATE' && (
                               <button
                                 className="btn btn-light btn-sm text-secondary px-2 border-end"
