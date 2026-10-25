@@ -17,6 +17,22 @@ const MyGroups = () => {
 
   const userId = user?.userId || user?.id;
 
+  const formatContribution = (amount, frequency) => {
+    const formattedAmount = Number(amount || 0).toLocaleString();
+    const freq = (frequency || 'MONTHLY').toUpperCase();
+    switch (freq) {
+      case 'DAILY':
+        return t('groups_per_day', { amount: formattedAmount, defaultValue: `${formattedAmount} LKR per day` });
+      case 'WEEKLY':
+        return t('groups_per_week', { amount: formattedAmount, defaultValue: `${formattedAmount} LKR per week` });
+      case 'BI_WEEKLY':
+        return t('groups_per_bi_week', { amount: formattedAmount, defaultValue: `${formattedAmount} LKR per 2 weeks` });
+      case 'MONTHLY':
+      default:
+        return t('groups_per_month', { amount: formattedAmount, defaultValue: `${formattedAmount} LKR per month` });
+    }
+  };
+
   const defaultGroups = [
     {
       id: 1,
@@ -24,6 +40,7 @@ const MyGroups = () => {
       type: 'Monetary',
       membersCount: 12,
       maxMembers: 12,
+      cycleFrequency: 'MONTHLY',
       contributionAmount: '1,000 LKR per month',
       currentCycle: 5,
       totalCycles: 12,
@@ -36,7 +53,8 @@ const MyGroups = () => {
       type: 'Monetary',
       membersCount: 8,
       maxMembers: 10,
-      contributionAmount: '5,000 LKR per month',
+      cycleFrequency: 'WEEKLY',
+      contributionAmount: '5,000 LKR per week',
       currentCycle: 3,
       totalCycles: 10,
       completionRate: 20,
@@ -48,7 +66,8 @@ const MyGroups = () => {
       type: 'Non-Monetary',
       membersCount: 15,
       maxMembers: 15,
-      contributionAmount: '2,000 LKR per month',
+      cycleFrequency: 'DAILY',
+      contributionAmount: '2,000 LKR per day',
       currentCycle: 8,
       totalCycles: 15,
       completionRate: 47,
@@ -99,7 +118,8 @@ const MyGroups = () => {
             type: g.seettuType?.name || (g.category === 'NON_MONETARY' ? 'Non-Monetary' : 'Monetary'),
             membersCount: Array.isArray(g.members) ? g.members.length : (typeof g.membersCount === 'number' ? g.membersCount : 0),
             maxMembers: g.memberCount || 10,
-            contributionAmount: `${(g.contributionAmount || 1000).toLocaleString()} LKR per month`,
+            cycleFrequency: g.cycleFrequency || 'MONTHLY',
+            contributionAmount: formatContribution(g.contributionAmount, g.cycleFrequency),
             currentCycle: currentCycleNumber,
             totalCycles: totalCycles,
             completionRate: completionRate,
@@ -116,7 +136,7 @@ const MyGroups = () => {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, t]);
 
   useEffect(() => {
     fetchGroups();
@@ -398,7 +418,7 @@ const MyGroups = () => {
                       <option value="">-- Choose a Seettu Group --</option>
                       {displayPublicGroups.map((g) => (
                         <option key={g.id} value={g.id}>
-                          {g.name} ({g.contributionAmount ? `${g.contributionAmount} LKR` : 'Standard Contribution'} • {g.category || 'Monetary'})
+                          {g.name} ({g.contributionAmount ? formatContribution(g.contributionAmount, g.cycleFrequency) : 'Standard Contribution'} • {g.category || 'Monetary'})
                         </option>
                       ))}
                     </select>
