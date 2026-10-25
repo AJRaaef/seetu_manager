@@ -874,6 +874,30 @@ const PaymentTracking = () => {
         </div>
       )}
 
+      {/* Alert Banner for Pending Submissions */}
+      {pendingCount > 0 && ledgerTab !== 'pending' && (
+        <div className="alert alert-warning py-2.5 px-3 mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2 rounded-3 border-warning-subtle shadow-xs">
+          <div className="d-flex align-items-center gap-2">
+            <Icon name="clock" size={18} color="#856404" />
+            <span className="small fw-semibold text-dark">
+              {isOrganizer || isAdmin
+                ? `Attention: You have ${pendingCount} member payment submission(s) awaiting slip verification and approval.`
+                : `You have ${pendingCount} payment submission(s) currently awaiting organizer verification.`}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="btn btn-sm btn-warning text-dark fw-bold px-3 py-1 shadow-xs"
+            onClick={() => {
+              setLedgerTab('pending');
+              setFilterStatus('All');
+            }}
+          >
+            Review Pending (${pendingCount})
+          </button>
+        </div>
+      )}
+
       {/* Payment Ledger Section Navigation Tabs */}
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 p-3 bg-white rounded-3 border shadow-xs">
         <div className="d-flex flex-wrap gap-2">

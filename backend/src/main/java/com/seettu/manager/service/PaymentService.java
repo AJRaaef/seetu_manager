@@ -119,9 +119,18 @@ public class PaymentService {
         return paymentRepository.findByGroupIdWithDetails(groupId);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Payment> getPaymentsByMember(Long memberId) {
-        return paymentRepository.findByMemberIdWithDetails(memberId);
+        List<Payment> list = paymentRepository.findByMemberIdWithDetails(memberId);
+        for (Payment payment : list) {
+            if (payment.getStatus() == Payment.PaymentStatus.OVERDUE) {
+                if (!paymentEvidenceRepository.findByPaymentId(payment.getId()).isEmpty()) {
+                    payment.setStatus(Payment.PaymentStatus.PENDING);
+                    paymentRepository.save(payment);
+                }
+            }
+        }
+        return list;
     }
 
     @Transactional(readOnly = true)
@@ -137,9 +146,18 @@ public class PaymentService {
     @Transactional
     public List<Payment> getAllPayments() {
         markOverduePayments();
-        return paymentRepository.findAllWithDetails().stream()
+        List<Payment> list = paymentRepository.findAllWithDetails().stream()
                 .filter(payment -> payment.getMember() != null && payment.getMember().getRole() != User.Role.ADMIN)
                 .collect(Collectors.toList());
+        for (Payment payment : list) {
+            if (payment.getStatus() == Payment.PaymentStatus.OVERDUE) {
+                if (!paymentEvidenceRepository.findByPaymentId(payment.getId()).isEmpty()) {
+                    payment.setStatus(Payment.PaymentStatus.PENDING);
+                    paymentRepository.save(payment);
+                }
+            }
+        }
+        return list;
     }
 
     @Transactional
@@ -225,8 +243,10 @@ public class PaymentService {
                                     "PAYMENT_OVERDUE");
                         } else {
                             Payment p = existingPayment.get();
-                            if (p.getStatus() == Payment.PaymentStatus.PENDING) {
-                                p.setStatus(Payment.PaymentStatus.OVERDUE);
+                            // Protect PENDING payments: a member who submitted their slip must stay PENDING for organizer approval
+                            boolean hasSlips = !paymentEvidenceRepository.findByPaymentId(p.getId()).isEmpty();
+                            if (hasSlips && p.getStatus() == Payment.PaymentStatus.OVERDUE) {
+                                p.setStatus(Payment.PaymentStatus.PENDING);
                                 paymentRepository.save(p);
                             }
                         }
