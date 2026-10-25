@@ -8,6 +8,7 @@ import EditPaymentModal from '../components/EditPaymentModal';
 import DeletePaymentModal from '../components/DeletePaymentModal';
 import PaymentReminderModal from '../components/PaymentReminderModal';
 import SettlePaymentModal from '../components/SettlePaymentModal';
+import ApprovePaymentModal from '../components/ApprovePaymentModal';
 import LegalNoticeModal from '../components/LegalNoticeModal';
 import {
   getAllPayments,
@@ -49,6 +50,7 @@ const PaymentTracking = () => {
   const [deleteTargetPayment, setDeleteTargetPayment] = useState(null);
   const [reminderPayment, setReminderPayment] = useState(null);
   const [settlePayment, setSettlePayment] = useState(null);
+  const [approveTargetPayment, setApproveTargetPayment] = useState(null);
   const [legalNoticePayment, setLegalNoticePayment] = useState(null);
 
   // Section Tab state ('recorded' | 'overdue' | 'all')
@@ -266,7 +268,48 @@ const PaymentTracking = () => {
     }
   };
 
-  // Handle Settle Overdue/Pending Payment via Settlement Modal (Option A)
+  // Handle One-Click Approval for Pending Member Submission (Read-Only Verification)
+  const handleApprovePayment = async (payment, approvalNotes) => {
+    try {
+      const finalNotes = approvalNotes
+        ? `${payment.notes ? payment.notes + ' | ' : ''}Verified & Approved by Organizer: ${approvalNotes}`
+        : (payment.notes || 'Verified and approved by Organizer');
+
+      await updatePayment(payment.id, {
+        status: 'PAID',
+        notes: finalNotes
+      }, userId);
+
+      alert(`Payment of ${Number(payment.amount).toLocaleString()} LKR for ${payment.member} approved successfully! The record is now marked as PAID and moved to the Recorded Payments Ledger.`);
+      setLedgerTab('recorded');
+      await fetchPayments();
+    } catch (err) {
+      console.error('Failed to approve payment', err);
+      const msg = err.response?.data?.message || err.message || 'Error approving payment.';
+      alert(`Error approving payment: ${msg}`);
+      fetchPayments();
+    }
+  };
+
+  // Handle Rejection for Invalid/Unverified Pending Submission
+  const handleRejectPayment = async (payment, rejectionReason) => {
+    try {
+      await updatePayment(payment.id, {
+        status: 'MISSED',
+        notes: `Rejected by Organizer on ${new Date().toLocaleDateString()}: ${rejectionReason || 'Deposit slip unverified'}`
+      }, userId);
+
+      alert(`Payment submission for ${payment.member} has been rejected.`);
+      await fetchPayments();
+    } catch (err) {
+      console.error('Failed to reject payment', err);
+      const msg = err.response?.data?.message || err.message || 'Error rejecting payment.';
+      alert(`Error rejecting payment: ${msg}`);
+      fetchPayments();
+    }
+  };
+
+  // Handle Settle Overdue Payment via Settlement Modal
   const handleConfirmSettle = async (updated) => {
     try {
       await updatePayment(updated.id, {
@@ -1199,10 +1242,14 @@ const PaymentTracking = () => {
                             <button
                               className="btn btn-sm btn-teal px-2.5 py-1 d-inline-flex align-items-center gap-1.5 shadow-sm fw-medium"
                               style={{ fontSize: '0.78rem', borderRadius: '6px' }}
-                              title="Settle payment with method & confirmation"
+                              title={p.status === 'PENDING' ? 'Review and approve member payment slip' : 'Settle payment with method & confirmation'}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSettlePayment(p);
+                                if (p.status === 'PENDING') {
+                                  setApproveTargetPayment(p);
+                                } else {
+                                  setSettlePayment(p);
+                                }
                               }}
                             >
                               <Icon name="check" size={13} color="#FFFFFF" />
@@ -1300,6 +1347,14 @@ const PaymentTracking = () => {
         onSend={(data) => {
           alert(`Payment reminder sent to ${data.payment.member} via ${data.channel}!`);
         }}
+      />
+
+      <ApprovePaymentModal
+        show={!!approveTargetPayment}
+        onHide={() => setApproveTargetPayment(null)}
+        payment={approveTargetPayment}
+        onApprove={handleApprovePayment}
+        onReject={handleRejectPayment}
       />
 
       <SettlePaymentModal
