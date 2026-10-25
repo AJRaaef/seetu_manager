@@ -60,9 +60,14 @@ const Notifications = () => {
   };
 
   const handleMarkAllAsRead = async () => {
-    if (!currentUserId) return;
     try {
-      await notificationApi.markAllAsRead(currentUserId);
+      if (scope === 'ALL_SYSTEM') {
+        const unreadItems = notifications.filter(isUnread);
+        await Promise.all(unreadItems.map(item => notificationApi.markAsRead(item.id)));
+      } else {
+        if (!currentUserId) return;
+        await notificationApi.markAllAsRead(currentUserId);
+      }
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true, readStatus: true })));
       setSuccessMsg('All notifications marked as read.');
       setTimeout(() => setSuccessMsg(''), 3000);
@@ -158,7 +163,7 @@ const Notifications = () => {
             </button>
           )}
 
-          {unreadCount > 0 && scope === 'MINE' && (
+          {unreadCount > 0 && (
             <button
               className="btn btn-outline-primary btn-sm fw-bold d-flex align-items-center gap-1 shadow-sm"
               onClick={handleMarkAllAsRead}
@@ -292,7 +297,7 @@ const Notifications = () => {
                     </p>
                   </div>
 
-                  {unread && scope === 'MINE' && (
+                  {unread && (
                     <button
                       className="btn btn-sm btn-outline-primary fw-bold ms-3 flex-shrink-0 d-inline-flex align-items-center gap-1"
                       style={{ color: '#0097B2', borderColor: '#0097B2' }}
