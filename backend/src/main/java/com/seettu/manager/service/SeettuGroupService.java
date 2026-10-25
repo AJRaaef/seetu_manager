@@ -69,12 +69,21 @@ public class SeettuGroupService {
             }
         }
 
+        SeettuGroup.CycleFrequency cycleFrequency = SeettuGroup.CycleFrequency.MONTHLY;
+        if (request.getCycleFrequency() != null && !request.getCycleFrequency().trim().isEmpty()) {
+            try {
+                cycleFrequency = SeettuGroup.CycleFrequency.valueOf(request.getCycleFrequency().trim().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                cycleFrequency = SeettuGroup.CycleFrequency.MONTHLY;
+            }
+        }
+
         SeettuGroup group = SeettuGroup.builder()
                 .name(request.getName())
                 .description(request.getDescription())
                 .contributionAmount(request.getContributionAmount())
                 .memberCount(request.getMemberCount())
-                .cycleFrequency(SeettuGroup.CycleFrequency.valueOf(request.getCycleFrequency()))
+                .cycleFrequency(cycleFrequency)
                 .status(SeettuGroup.GroupStatus.ACTIVE)
                 .category(request.getCategory())
                 .createdBy(creator)
