@@ -263,7 +263,12 @@ const Members = () => {
           <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('members_page.title', 'Members')}</h2>
           <p className="text-muted small mb-0">{t('members_page.subtitle', 'Manage member profiles, verify NIC & Grama Niladhari certificates, and monitor discipline scores')}</p>
         </div>
-        {(isOrganizer || isAdmin) && (
+        {isAdmin ? (
+          <span className="badge bg-light text-secondary border px-3 py-2 small fw-semibold d-inline-flex align-items-center gap-1.5">
+            <Icon name="shield" size={15} />
+            <span>Platform Overseer Mode</span>
+          </span>
+        ) : isOrganizer ? (
           <button
             onClick={() => setShowInviteModal(true)}
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2"
@@ -271,7 +276,7 @@ const Members = () => {
             <Icon name="user-plus" size={18} />
             <span>{t('members_page.invite_btn', 'Invite Member')}</span>
           </button>
-        )}
+        ) : null}
       </div>
 
       {actionMsg && (

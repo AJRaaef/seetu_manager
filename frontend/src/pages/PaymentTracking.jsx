@@ -440,7 +440,21 @@ const PaymentTracking = () => {
       </div>
 
       {/* Record Payment / Submit Evidence Form Card */}
-      {(isAdmin || isOrganizer) ? (
+      {isAdmin ? (
+        <div className="alert alert-light border shadow-xs d-flex flex-wrap align-items-center justify-content-between p-3 mb-4 rounded-3" style={{ background: '#F8FAFC' }}>
+          <div className="d-flex align-items-center gap-2">
+            <span className="badge bg-dark text-white px-2.5 py-1.5 fw-semibold" style={{ fontSize: '0.78rem' }}>
+              🛡️ Platform Oversight Mode
+            </span>
+            <span className="text-muted small">
+              You are reviewing verified transactions, receipts, and automated delinquency recovery desks across all circles.
+            </span>
+          </div>
+          <span className="badge bg-light text-secondary border small">
+            Financial Audit • Emergency Override Enabled
+          </span>
+        </div>
+      ) : isOrganizer ? (
         <div className="ui-card p-4 mb-4 shadow-sm rounded-3 border-0 bg-white">
           <div className="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
             <div className="d-flex align-items-center">

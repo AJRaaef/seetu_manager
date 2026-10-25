@@ -164,9 +164,14 @@ const MyGroups = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>
-          {t('my_groups_page.title', 'My Groups')}
+          {isAdmin ? t('my_groups_page.admin_title', 'All Seettu Circles') : t('my_groups_page.title', 'My Groups')}
         </h2>
-        {isOrganizer || isAdmin ? (
+        {isAdmin ? (
+          <span className="badge bg-light text-secondary border px-3 py-2 small fw-semibold d-inline-flex align-items-center gap-1.5">
+            <Icon name="shield" size={15} />
+            <span>Platform Overseer Mode</span>
+          </span>
+        ) : isOrganizer ? (
           <Link to="/groups/create" className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2">
             <span>+</span>{t('my_groups_page.create_new', 'Create New Group')}
           </Link>
