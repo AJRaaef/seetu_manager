@@ -14,7 +14,7 @@ import {
   getPaymentsByMember,
   recordPayment,
   updatePayment,
-  deletePayment,
+  deletePayment as apiDeletePayment,
   getPaymentCyclesByGroup,
   uploadPaymentEvidence
 } from '../api/paymentApi';
@@ -45,7 +45,7 @@ const PaymentTracking = () => {
   // Modal states
   const [viewPayment, setViewPayment] = useState(null);
   const [editPayment, setEditPayment] = useState(null);
-  const [deletePayment, setDeletePayment] = useState(null);
+  const [deleteTargetPayment, setDeleteTargetPayment] = useState(null);
   const [reminderPayment, setReminderPayment] = useState(null);
   const [settlePayment, setSettlePayment] = useState(null);
   const [legalNoticePayment, setLegalNoticePayment] = useState(null);
@@ -227,14 +227,13 @@ const PaymentTracking = () => {
       alert('Security Protection: Only system administrators are authorized to permanently delete payment records.');
       return;
     }
-    if (!window.confirm(`Are you sure you want to permanently delete payment record #PAY-${target.id}? This action cannot be undone.`)) {
-      return;
-    }
     try {
-      await deletePayment(target.id);
+      await apiDeletePayment(target.id);
+      setDeleteTargetPayment(null);
       fetchPayments();
     } catch (err) {
       console.error('Failed to delete payment from database', err);
+      alert('Failed to delete payment: ' + (err?.response?.data?.message || err?.message || 'Unknown error'));
       fetchPayments();
     }
   };
@@ -977,7 +976,7 @@ const PaymentTracking = () => {
                                 title="Delete Payment Record (Admin Only)"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleDeleteRecord(p);
+                                  setDeleteTargetPayment(p);
                                 }}
                               >
                                 <Icon name="trash" size={14} color="#DC3545" />
@@ -1020,9 +1019,9 @@ const PaymentTracking = () => {
       />
 
       <DeletePaymentModal
-        show={!!deletePayment}
-        onHide={() => setDeletePayment(null)}
-        payment={deletePayment}
+        show={!!deleteTargetPayment}
+        onHide={() => setDeleteTargetPayment(null)}
+        payment={deleteTargetPayment}
         onDelete={handleDeleteRecord}
       />
 
