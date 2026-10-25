@@ -221,9 +221,13 @@ const PaymentTracking = () => {
     }
   };
 
-  // Handle Delete Record
+  // Handle Delete Record (Admin Only)
   const handleDeleteRecord = async (target) => {
-    if (!window.confirm(`Are you sure you want to delete payment record #PAY-${target.id}?`)) {
+    if (!isAdmin) {
+      alert('Security Protection: Only system administrators are authorized to permanently delete payment records.');
+      return;
+    }
+    if (!window.confirm(`Are you sure you want to permanently delete payment record #PAY-${target.id}? This action cannot be undone.`)) {
       return;
     }
     try {
@@ -956,7 +960,7 @@ const PaymentTracking = () => {
                               </button>
                             )}
                             <button
-                              className="btn btn-light btn-sm text-secondary px-2 border-end"
+                              className={`btn btn-light btn-sm text-secondary px-2 ${isAdmin ? 'border-end' : ''}`}
                               style={{ background: '#FAFBFB' }}
                               title="Edit Payment Record & Details"
                               onClick={(e) => {
@@ -966,17 +970,19 @@ const PaymentTracking = () => {
                             >
                               <Icon name="pencil" size={14} color="#188754" />
                             </button>
-                            <button
-                              className="btn btn-light btn-sm text-secondary px-2"
-                              style={{ background: '#FAFBFB' }}
-                              title="Delete Payment Record"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteRecord(p);
-                              }}
-                            >
-                              <Icon name="trash" size={14} color="#DC3545" />
-                            </button>
+                            {isAdmin && (
+                              <button
+                                className="btn btn-light btn-sm text-secondary px-2"
+                                style={{ background: '#FAFBFB' }}
+                                title="Delete Payment Record (Admin Only)"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteRecord(p);
+                                }}
+                              >
+                                <Icon name="trash" size={14} color="#DC3545" />
+                              </button>
+                            )}
                           </div>
                         </div>
                       ) : (
