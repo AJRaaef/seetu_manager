@@ -75,7 +75,7 @@ CREATE TABLE seettu_groups (
     description TEXT,
     contribution_amount DECIMAL(12,2) NOT NULL,
     member_count INT NOT NULL,
-    cycle_frequency ENUM('WEEKLY', 'BI_WEEKLY', 'MONTHLY') NOT NULL DEFAULT 'MONTHLY',
+    cycle_frequency ENUM('DAILY', 'WEEKLY', 'BI_WEEKLY', 'MONTHLY') NOT NULL DEFAULT 'MONTHLY',
     status ENUM('ACTIVE', 'COMPLETED', 'CANCELLED', 'PENDING') NOT NULL DEFAULT 'PENDING',
     seettu_type_id BIGINT,
     category VARCHAR(50),

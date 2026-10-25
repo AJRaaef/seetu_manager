@@ -67,7 +67,7 @@ public class SeettuGroup {
     }
 
     public enum CycleFrequency {
-        WEEKLY, BI_WEEKLY, MONTHLY
+        DAILY, WEEKLY, BI_WEEKLY, MONTHLY
     }
 
     public enum GroupStatus {

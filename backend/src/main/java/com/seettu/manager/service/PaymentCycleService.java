@@ -36,6 +36,9 @@ public class PaymentCycleService {
         for (int i = 1; i <= group.getMemberCount(); i++) {
             LocalDate endDate;
             switch (group.getCycleFrequency()) {
+                case DAILY:
+                    endDate = startDate;
+                    break;
                 case WEEKLY:
                     endDate = startDate.plusWeeks(1).minusDays(1);
                     break;
