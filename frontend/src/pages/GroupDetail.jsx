@@ -209,7 +209,11 @@ const GroupDetail = () => {
               <ul className="list-group list-group-flush">
                 <li className="list-group-item d-flex justify-content-between align-items-center p-3">
                   <span className="text-muted">Contribution / Member</span>
-                  <strong className="text-primary fs-6">LKR {(group.contributionAmount || 0).toLocaleString()}</strong>
+                  <strong className="text-primary fs-6">
+                    LKR {(group.contributionAmount || 0).toLocaleString()} <span className="small text-muted fw-normal">
+                      ({group.cycleFrequency === 'DAILY' ? 'per day' : group.cycleFrequency === 'WEEKLY' ? 'per week' : group.cycleFrequency === 'BI_WEEKLY' ? 'per 2 weeks' : 'per month'})
+                    </span>
+                  </strong>
                 </li>
                 <li className="list-group-item d-flex justify-content-between align-items-center p-3">
                   <span className="text-muted">Cycle Frequency</span>

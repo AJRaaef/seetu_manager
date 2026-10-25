@@ -87,7 +87,17 @@ const PHRASES = {
   "Download PDF": { si: "PDF බාගන්න", ta: "PDF பதிவிறக்குக" },
   "View": { si: "බලන්න", ta: "பார்க்க" },
   "Edit": { si: "සංස්කරණය", ta: "திருத்துக" },
-  "Delete": { si: "මකන්න", ta: "நீக்குக" }
+  "Delete": { si: "මකන්න", ta: "நீக்குக" },
+
+  // Frequencies
+  "Daily": { si: "දිනපතා", ta: "தினசரி" },
+  "Weekly": { si: "සතිපතා", ta: "வாராந்திர" },
+  "Bi-Weekly": { si: "සති දෙකකට වරක්", ta: "இருவாரத்திற்கு ஒருமுறை" },
+  "Monthly": { si: "මාසික", ta: "மாதாந்திர" },
+  "per month": { si: "මසකට", ta: "மாதத்திற்கு" },
+  "per week": { si: "සතියකට", ta: "வாரத்திற்கு" },
+  "per day": { si: "දිනකට", ta: "நாளுக்கு" },
+  "per 2 weeks": { si: "සති 2කට", ta: "2 வாரங்களுக்கு" }
 };
 
 export const LanguageProvider = ({ children }) => {
