@@ -260,8 +260,8 @@ const Members = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('members_page.title')}</h2>
-          <p className="text-muted small mb-0">{t('members_page.subtitle')}</p>
+          <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('members_page.title', 'Members')}</h2>
+          <p className="text-muted small mb-0">{t('members_page.subtitle', 'Manage member profiles, verify NIC & Grama Niladhari certificates, and monitor discipline scores')}</p>
         </div>
         {(isOrganizer || isAdmin) && (
           <button
@@ -269,7 +269,7 @@ const Members = () => {
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2"
           >
             <Icon name="user-plus" size={18} />
-            <span>{t('members_page.invite_btn')}</span>
+            <span>{t('members_page.invite_btn', 'Invite Member')}</span>
           </button>
         )}
       </div>
@@ -479,7 +479,7 @@ const Members = () => {
             <input
               type="text"
               className="form-control border-0 shadow-none ps-1"
-              placeholder={t('members_page.search_placeholder')}
+              placeholder={t('members_page.search_placeholder', 'Search members by name, email, or NIC...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -492,7 +492,7 @@ const Members = () => {
             value={groupFilter}
             onChange={(e) => setGroupFilter(e.target.value)}
           >
-            <option value="All">{t('members_page.filter_group')}</option>
+            <option value="All">{t('members_page.filter_group', 'All Groups')}</option>
             {groups.map((g) => (
               <option key={g.id} value={g.name}>{g.name}</option>
             ))}
@@ -505,7 +505,7 @@ const Members = () => {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="All">{t('common.all')}</option>
+            <option value="All">{t('common.all', 'All')}</option>
             <option value="Active">Active</option>
             <option value="REMOVED">Removed</option>
             <option value="Inactive">Inactive</option>
@@ -520,15 +520,15 @@ const Members = () => {
             <thead style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E5E7EB' }}>
               <tr>
                 <th className="py-3 px-3 text-muted fw-semibold small">ID</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('members_page.col_name')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('members_page.col_name', 'Member Name')}</th>
                 <th className="py-3 px-3 text-muted fw-semibold small">Email</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('auth.phone_label')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.group')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.date')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('members_page.col_kyc')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('members_page.col_score')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('common.status')}</th>
-                {(isOrganizer || isAdmin) && <th className="py-3 px-3 text-muted fw-semibold small text-end">{t('members_page.col_actions')}</th>}
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('auth.phone_label', 'Phone')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.group', 'Group')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.date', 'Joined Date')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('members_page.col_kyc', 'Identity (NIC & GN)')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('members_page.col_score', 'Discipline Score')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('common.status', 'Status')}</th>
+                {(isOrganizer || isAdmin) && <th className="py-3 px-3 text-muted fw-semibold small text-end">{t('members_page.col_actions', 'Actions')}</th>}
               </tr>
             </thead>
             <tbody>
@@ -543,8 +543,8 @@ const Members = () => {
                 <tr>
                   <td colSpan={(isOrganizer || isAdmin) ? "10" : "9"} className="text-center py-5">
                     <Icon name="users" size={36} color="#94A3B8" className="mb-2" />
-                    <h6 className="fw-bold text-dark">{t('members_page.no_members')}</h6>
-                    <p className="text-muted small mb-0">{t('members_page.no_members')}</p>
+                    <h6 className="fw-bold text-dark">{t('members_page.no_members', 'No members found')}</h6>
+                    <p className="text-muted small mb-0">{t('members_page.no_members_desc', 'No active members match the current filters or no members are registered yet.')}</p>
                   </td>
                 </tr>
               ) : (

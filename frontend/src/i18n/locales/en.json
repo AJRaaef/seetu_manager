@@ -30,7 +30,6 @@
   "organizer_portal": "ORGANIZER PORTAL",
   "member_portal": "MEMBER PORTAL",
   "manage_seettu": "Manage your Seettu",
-
   "dashboard_page": {
     "welcome": "Welcome back",
     "subtitles": {
@@ -78,7 +77,6 @@
       "no_payments": "No recent payments found."
     }
   },
-
   "dashboard_analytics": {
     "header_title": "System Portfolio & Cashflow Analytics",
     "header_sub": "Real-time operational financial health & payment compliance",
@@ -104,14 +102,12 @@
     "certificates_issued": "Certificates Issued",
     "audit_reports": "Audit Reports"
   },
-
   "certificates_page": {
     "title": "Certificates and Bylaws"
   },
   "settings_page": {
     "title": "System Settings"
   },
-
   "create_group": "Create Group",
   "total_groups": "Total Groups",
   "active_groups": "Active Groups",
@@ -178,7 +174,6 @@
   "groups_type_monetary": "Monetary",
   "groups_type_non_monetary": "Non-Monetary",
   "groups_status_active": "Active",
-
   "gd_loading": "Loading group details & rotation schedule...",
   "gd_not_found": "Group details not found.",
   "gd_back_link": "Back to Groups",
@@ -481,7 +476,21 @@
     "invalid_credentials": "Invalid email or password. Please check your credentials.",
     "hide_password": "Hide password",
     "show_password": "Show password",
-    "register_here": "Register New Account"
+    "register_here": "Register New Account",
+    "phone_label": "Phone Number",
+    "full_name_label": "Full Name",
+    "email_label": "Email Address",
+    "forgot_title": "Reset Your Password",
+    "sending": "Sending...",
+    "reset_btn": "Send Reset Link",
+    "back_to_login": "Back to Login",
+    "full_name_placeholder": "e.g. John Doe",
+    "phone_placeholder": "e.g. 077 123 4567",
+    "password_label": "Password",
+    "confirm_password_label": "Confirm Password",
+    "agree_terms": "I agree to the Member Enrollment Agreement, Seettu Law, and Privacy Policy.",
+    "creating_account": "Creating Account...",
+    "have_account": "Already have an account? "
   },
   "chatbot_widget": {
     "title": "Seettu Assistant",
@@ -648,7 +657,12 @@
     "verify_member": "Verify Member",
     "reject": "Reject",
     "approve": "Approve",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "col_name": "Member Name",
+    "col_kyc": "Identity (NIC & GN)",
+    "col_score": "Discipline Score",
+    "col_actions": "Actions",
+    "no_members": "No members found"
   },
   "invite_modal": {
     "title": "Invite New Member",
@@ -715,7 +729,6 @@
     "save": "Save",
     "back": "Back"
   },
-
   "notifications_page": {
     "title": "Notifications",
     "unread_badge": "{{count}} unread",
@@ -738,12 +751,10 @@
     "sent_to": "Sent to:",
     "mark_read": "Mark Read"
   },
-
   "payments_page": {
     "title": "Payment Tracking",
     "total_collected": "Total Collected"
   },
-
   "advance_page": {
     "title": "Advance Payments",
     "subtitle": "Manage advance contributions and early settlements",
@@ -757,7 +768,6 @@
     "generate_btn": "Generate Report",
     "export_pdf": "View / Print Report"
   },
-
   "disputes_page": {
     "title": "Disputes & Grievances",
     "subtitle": "Mediate, investigate, and record resolutions for member grievances",
@@ -765,7 +775,6 @@
     "col_subject": "Subject",
     "raise_btn": "Raise Dispute"
   },
-
   "profile_page": {
     "title": "Profile Settings",
     "remove_photo": "Remove Photo",

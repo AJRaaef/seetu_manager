@@ -30,7 +30,6 @@
   "organizer_portal": "සංවිධායක පෝටලය",
   "member_portal": "සාමාජික පෝටලය",
   "manage_seettu": "ඔබගේ සීට්ටු කළමනාකරණය කරන්න",
-
   "dashboard_page": {
     "welcome": "ආයුබෝවන්",
     "subtitles": {
@@ -78,7 +77,6 @@
       "no_payments": "මෑත කාලීන ගෙවීම් හමු නොවීය."
     }
   },
-
   "dashboard_analytics": {
     "header_title": "පද්ධති පෝට්ෆෝලියෝ සහ මුදල් ප්‍රවාහ විශ්ලේෂණය",
     "header_sub": "සජීවී මෙහෙයුම් මූල්‍ය තත්ත්වය සහ ගෙවීම් අනුකූලතාව",
@@ -104,7 +102,6 @@
     "certificates_issued": "නිකුත් කළ සහතික",
     "audit_reports": "විගණන වාර්තා"
   },
-
   "certificates_page": {
     "title": "සහතික සහ අතුරු ව්‍යවස්ථා"
   },
@@ -479,7 +476,21 @@
     "invalid_credentials": "විද්‍යුත් තැපෑල හෝ මුරපදය වැරදියි.",
     "hide_password": "මුරපදය සඟවන්න",
     "show_password": "මුරපදය පෙන්වන්න",
-    "register_here": "නව ගිණුමක් සාදන්න"
+    "register_here": "නව ගිණුමක් සාදන්න",
+    "phone_label": "දුරකථන අංකය",
+    "full_name_label": "සම්පූර්ණ නම",
+    "email_label": "විද්‍යුත් තැපෑල",
+    "forgot_title": "මුරපදය නැවත සකසන්න",
+    "sending": "යවමින් පවතී...",
+    "reset_btn": "සබැඳිය යවන්න",
+    "back_to_login": "නැවත පිවිසීමට",
+    "full_name_placeholder": "උදා: සුනිල් ශාන්ත",
+    "phone_placeholder": "උදා: 077 123 4567",
+    "password_label": "මුරපදය",
+    "confirm_password_label": "මුරපදය තහවුරු කරන්න",
+    "agree_terms": "මම සාමාජික ලියාපදිංචි ගිවිසුමට, සීට්ටු නීතියට සහ රහස්‍යතා ප්‍රතිපත්තියට එකඟ වෙමි.",
+    "creating_account": "ගිණුම නිර්මාණය කරමින්...",
+    "have_account": "දැනටමත් ගිණුමක් තිබේද? "
   },
   "chatbot_widget": {
     "title": "සීට්ටු සහකාර",
@@ -646,7 +657,12 @@
     "verify_member": "තහවුරු කරන්න",
     "reject": "ප්‍රතික්ෂේප කරන්න",
     "approve": "අනුමත කරන්න",
-    "cancel": "අවලංගු කරන්න"
+    "cancel": "අවලංගු කරන්න",
+    "col_name": "සාමාජිකයාගේ නම",
+    "col_kyc": "අනන්‍යතාව (NIC & GN)",
+    "col_score": "විනය ලකුණු ප්‍රමාණය",
+    "col_actions": "ක්‍රියාමාර්ග",
+    "no_members": "සාමාජිකයින් හමු නොවීය"
   },
   "invite_modal": {
     "title": "නව සාමාජිකයෙකුට ඇරයුම් කරන්න",
@@ -713,7 +729,6 @@
     "save": "සුරකින්න",
     "back": "ආපසු"
   },
-
   "notifications_page": {
     "title": "දැනුම්දීම්",
     "unread_badge": "{{count}} ක් කියවා නැත",
@@ -736,12 +751,10 @@
     "sent_to": "යවන ලද්දේ:",
     "mark_read": "කියවූ ලෙස සටහන් කරන්න"
   },
-
   "payments_page": {
     "title": "ගෙවීම් නිරීක්ෂණය",
     "total_collected": "එකතු වූ මුළු මුදල"
   },
-  
   "advance_page": {
     "title": "පෙර ගෙවීම්",
     "subtitle": "පෙර දායකත්වයන් සහ පියවීම් කළමනාකරණය",
@@ -749,7 +762,6 @@
     "total_disbursed": "ලබාදී ඇති මුළු පෙර ගෙවීම්",
     "col_amount": "පෙර ගෙවූ මුදල"
   },
-
   "reports_page": {
     "title": "වාර්තා සහ විශ්ලේෂණ",
     "subtitle": "මූල්‍ය වාර්තා සහ සාමාජික විශ්ලේෂණ ලබාගන්න",
