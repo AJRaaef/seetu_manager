@@ -66,7 +66,7 @@ const Members = () => {
         getAllMembers().catch(() => ({ data: [] })),
         getAllGroups().catch(() => ({ data: [] })),
         (isOrganizer || isAdmin) ? getPendingJoinRequests().catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
-        (isOrganizer || isAdmin) ? getPendingKycUsers().catch(() => ({ data: [] })) : Promise.resolve({ data: [] })
+        isAdmin ? getPendingKycUsers().catch(() => ({ data: [] })) : Promise.resolve({ data: [] })
       ]);
 
       const mList = Array.isArray(membersRes?.data) ? membersRes.data : (Array.isArray(membersRes) ? membersRes : (membersRes?.data?.data || []));
@@ -296,7 +296,7 @@ const Members = () => {
       )}
 
       {/* Identity & Grama Niladhari Character Verification Queue */}
-      {(isOrganizer || isAdmin) && pendingKycList.length > 0 && (
+      {isAdmin && pendingKycList.length > 0 && (
         <div className="ui-card p-4 mb-4 shadow-sm border-0 rounded-3 border-start border-4 border-warning">
           <div className="d-flex justify-content-between align-items-center mb-3">
             <div>
