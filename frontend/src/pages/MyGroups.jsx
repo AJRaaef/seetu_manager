@@ -27,7 +27,7 @@ const MyGroups = () => {
       contributionAmount: '1,000 LKR per month',
       currentCycle: 5,
       totalCycles: 12,
-      completionRate: 42,
+      completionRate: 33,
       status: 'Active'
     },
     {
@@ -39,7 +39,7 @@ const MyGroups = () => {
       contributionAmount: '5,000 LKR per month',
       currentCycle: 3,
       totalCycles: 10,
-      completionRate: 30,
+      completionRate: 20,
       status: 'Active'
     },
     {
@@ -51,7 +51,7 @@ const MyGroups = () => {
       contributionAmount: '2,000 LKR per month',
       currentCycle: 8,
       totalCycles: 15,
-      completionRate: 53,
+      completionRate: 47,
       status: 'Active'
     }
   ];
@@ -66,18 +66,46 @@ const MyGroups = () => {
       const res = await getGroupsByUser(userId);
       const list = res?.data || res || [];
       if (Array.isArray(list) && list.length > 0) {
-        const formatted = list.map(g => ({
-          id: g.id,
-          name: g.name,
-          type: g.seettuType?.name || (g.category === 'NON_MONETARY' ? 'Non-Monetary' : 'Monetary'),
-          membersCount: Array.isArray(g.members) ? g.members.length : (typeof g.membersCount === 'number' ? g.membersCount : 0),
-          maxMembers: g.memberCount || 10,
-          contributionAmount: `${(g.contributionAmount || 1000).toLocaleString()} LKR per month`,
-          currentCycle: g.currentCycle || 1,
-          totalCycles: g.memberCount || 10,
-          completionRate: Math.round(((g.currentCycle || 1) / (g.memberCount || 10)) * 100),
-          status: g.status === 'ACTIVE' ? 'Active' : g.status || 'Active'
-        }));
+        const formatted = list.map(g => {
+          const totalCycles = g.memberCount || (Array.isArray(g.cycles) ? g.cycles.length : 10) || 10;
+
+          // Calculate completed cycles count
+          let completedCyclesCount = 0;
+          if (g.status === 'COMPLETED') {
+            completedCyclesCount = totalCycles;
+          } else if (Array.isArray(g.cycles) && g.cycles.length > 0) {
+            completedCyclesCount = g.cycles.filter(c => c.status === 'COMPLETED').length;
+          } else {
+            completedCyclesCount = Math.max(0, (g.currentCycle || 1) - 1);
+          }
+
+          const completionRate = totalCycles > 0
+            ? Math.min(100, Math.max(0, Math.round((completedCyclesCount / totalCycles) * 100)))
+            : 0;
+
+          // Determine active/current cycle number
+          let currentCycleNumber = 1;
+          if (Array.isArray(g.cycles) && g.cycles.length > 0) {
+            const activeCycle = g.cycles.find(c => c.status === 'ACTIVE');
+            const nextPending = g.cycles.find(c => c.status === 'PENDING');
+            currentCycleNumber = activeCycle?.cycleNumber || nextPending?.cycleNumber || g.cycles[g.cycles.length - 1]?.cycleNumber || 1;
+          } else {
+            currentCycleNumber = g.currentCycle || 1;
+          }
+
+          return {
+            id: g.id,
+            name: g.name,
+            type: g.seettuType?.name || (g.category === 'NON_MONETARY' ? 'Non-Monetary' : 'Monetary'),
+            membersCount: Array.isArray(g.members) ? g.members.length : (typeof g.membersCount === 'number' ? g.membersCount : 0),
+            maxMembers: g.memberCount || 10,
+            contributionAmount: `${(g.contributionAmount || 1000).toLocaleString()} LKR per month`,
+            currentCycle: currentCycleNumber,
+            totalCycles: totalCycles,
+            completionRate: completionRate,
+            status: g.status === 'ACTIVE' ? 'Active' : g.status || 'Active'
+          };
+        });
         setGroups(formatted);
       } else {
         setGroups([]);
