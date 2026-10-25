@@ -1138,7 +1138,29 @@ const PaymentTracking = () => {
                       className="py-3 px-3 text-end"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      {(isAdmin || isOrganizer) ? (
+                      {isAdmin ? (
+                        <div className="d-flex justify-content-end align-items-center gap-2 flex-nowrap">
+                          <button
+                            className="btn btn-sm btn-outline-secondary px-2.5 py-1 text-decoration-none small fw-semibold"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setViewPayment(p);
+                            }}
+                          >
+                            View Details
+                          </button>
+                          <button
+                            className="btn btn-sm btn-outline-danger px-2 py-1"
+                            title="Delete Payment Record (Admin Emergency Override)"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteTargetPayment(p);
+                            }}
+                          >
+                            <Icon name="trash" size={14} color="#DC3545" />
+                          </button>
+                        </div>
+                      ) : isOrganizer ? (
                         <div className="d-flex justify-content-end align-items-center gap-2 flex-nowrap">
                           {p.status !== 'PAID' && p.status !== 'LATE' && (
                             <button
@@ -1185,7 +1207,7 @@ const PaymentTracking = () => {
                               </button>
                             )}
                             <button
-                              className={`btn btn-light btn-sm text-secondary px-2 ${isAdmin ? 'border-end' : ''}`}
+                              className="btn btn-light btn-sm text-secondary px-2"
                               style={{ background: '#FAFBFB' }}
                               title="Edit Payment Record & Details"
                               onClick={(e) => {
@@ -1195,19 +1217,6 @@ const PaymentTracking = () => {
                             >
                               <Icon name="pencil" size={14} color="#188754" />
                             </button>
-                            {isAdmin && (
-                              <button
-                                className="btn btn-light btn-sm text-secondary px-2"
-                                style={{ background: '#FAFBFB' }}
-                                title="Delete Payment Record (Admin Only)"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setDeleteTargetPayment(p);
-                                }}
-                              >
-                                <Icon name="trash" size={14} color="#DC3545" />
-                              </button>
-                            )}
                           </div>
                         </div>
                       ) : (
