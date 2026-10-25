@@ -163,15 +163,17 @@ const PaymentTracking = () => {
 
     setSubmitting(true);
     try {
+      const isMemberUser = !isAdmin && !isOrganizer;
+      const targetStatus = isMemberUser ? 'PENDING' : statusInput;
       const created = await recordPayment(
         {
           cycleId: Number(selectedCycleId),
           memberId: Number(targetMemberId),
           amount: parseFloat(amountInput),
-          status: statusInput,
+          status: targetStatus,
           paymentDate: dateInput,
           paymentMethod: paymentMethodInput,
-          notes: (isAdmin || isOrganizer) ? 'Recorded via Payment Management portal' : 'Submitted by member with payment slip'
+          notes: (isAdmin || isOrganizer) ? 'Recorded via Payment Management portal' : 'Submitted by member with payment slip (Awaiting Approval)'
         },
         userId || 1
       );
@@ -184,11 +186,16 @@ const PaymentTracking = () => {
         }
       }
 
-      alert(paymentMethodInput === 'Cash (Offline)' ? 'Offline cash payment recorded successfully! Official electronic receipt is generated and available in payment details.' : `Bank payment recorded successfully with attached deposit slip!`);
-      if (statusInput === 'OVERDUE' || statusInput === 'PARTIAL' || statusInput === 'PENDING') {
-        setLedgerTab('overdue');
+      if (isMemberUser) {
+        alert('Contribution slip submitted successfully! Your payment is now PENDING organizer verification and approval.');
+        setLedgerTab('pending');
       } else {
-        setLedgerTab('recorded');
+        alert(paymentMethodInput === 'Cash (Offline)' ? 'Offline cash payment recorded successfully! Official electronic receipt is generated and available in payment details.' : `Bank payment recorded successfully with attached deposit slip!`);
+        if (statusInput === 'OVERDUE' || statusInput === 'PARTIAL') {
+          setLedgerTab('overdue');
+        } else {
+          setLedgerTab('recorded');
+        }
       }
       setAmountInput('');
       setStatusInput('PAID');
@@ -320,14 +327,17 @@ const PaymentTracking = () => {
 
   // Separate counts for Recorded vs Overdue
   const recordedCount = payments.filter((p) => p.status === 'PAID' || p.status === 'LATE').length;
-  const overdueCount = payments.filter((p) => p.status === 'OVERDUE' || p.status === 'PARTIAL' || p.status === 'PENDING').length;
+  const pendingCount = payments.filter((p) => p.status === 'PENDING').length;
+  const overdueCount = payments.filter((p) => p.status === 'OVERDUE' || p.status === 'PARTIAL').length;
 
   const filteredPayments = payments.filter((p) => {
-    // Tab filtering: 'recorded' shows only confirmed paid records; 'overdue' shows dues requiring action
+    // Tab filtering:
     if (ledgerTab === 'recorded') {
       if (p.status !== 'PAID' && p.status !== 'LATE') return false;
+    } else if (ledgerTab === 'pending') {
+      if (p.status !== 'PENDING') return false;
     } else if (ledgerTab === 'overdue') {
-      if (p.status === 'PAID' || p.status === 'LATE') return false;
+      if (p.status !== 'OVERDUE' && p.status !== 'PARTIAL') return false;
     }
 
     const term = searchQuery.toLowerCase().trim();
@@ -712,7 +722,7 @@ const PaymentTracking = () => {
                 <p className="text-muted small mb-0" style={{ fontSize: '0.82rem' }}>Upload bank transfer or cash deposit slips to report your group payments to organizers.</p>
               </div>
             </div>
-            <span className="badge bg-info-subtle text-info border border-info px-3 py-1 rounded-pill">Member Submission</span>
+
           </div>
           <form onSubmit={handleRecordNew}>
             <div className="row g-3 align-items-center">
@@ -839,7 +849,28 @@ const PaymentTracking = () => {
             </span>
           </button>
 
-          {(isAdmin || isOrganizer) && (
+          <button
+            type="button"
+            className={`btn px-3 py-2 rounded-2 fw-semibold d-inline-flex align-items-center gap-2 ${
+              ledgerTab === 'pending'
+                ? 'btn-warning text-dark shadow-sm fw-bold'
+                : 'btn-outline-secondary bg-light text-dark'
+            }`}
+            onClick={() => {
+              setLedgerTab('pending');
+              setFilterStatus('All');
+            }}
+          >
+            <Icon name="clock" size={16} />
+            <span>Pending Verification</span>
+            {pendingCount > 0 && (
+              <span className={`badge rounded-pill ${ledgerTab === 'pending' ? 'bg-dark text-white' : 'bg-warning text-dark'}`}>
+                {pendingCount}
+              </span>
+            )}
+          </button>
+
+          {(isAdmin || isOrganizer || overdueCount > 0) && (
             <button
               type="button"
               className={`btn px-3 py-2 rounded-2 fw-semibold d-inline-flex align-items-center gap-2 ${
@@ -885,6 +916,9 @@ const PaymentTracking = () => {
         <div className="text-muted small">
           {ledgerTab === 'recorded' && (
             <span>Historical transaction ledger of confirmed and received member contributions.</span>
+          )}
+          {ledgerTab === 'pending' && (
+            <span className="text-warning-emphasis fw-semibold">Member payment submissions awaiting organizer slip verification and approval.</span>
           )}
           {ledgerTab === 'overdue' && (
             <span className="text-danger fw-semibold">Delinquent accounts requiring follow-up, settlement, or statutory legal demand notices.</span>
@@ -1009,6 +1043,7 @@ const PaymentTracking = () => {
             />
             <h6 className="fw-bold mb-0 text-dark">
               {ledgerTab === 'recorded' && 'Recorded Payments History'}
+              {ledgerTab === 'pending' && 'Pending Member Submissions & Verification Queue'}
               {ledgerTab === 'overdue' && 'Overdue Contributions & Default Action Desk'}
               {ledgerTab === 'all' && 'All Payment Records'}
             </h6>
@@ -1027,7 +1062,7 @@ const PaymentTracking = () => {
                 <th className="py-3 px-3 text-muted fw-semibold small">Cycle</th>
                 <th className="py-3 px-3 text-muted fw-semibold small">{ledgerTab === 'overdue' ? 'Due Amount' : 'Amount'}</th>
                 <th className="py-3 px-3 text-muted fw-semibold small text-center">Status</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{ledgerTab === 'overdue' ? 'Detected By' : 'Recorded By'}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{ledgerTab === 'pending' ? 'Verification' : ledgerTab === 'overdue' ? 'Detected By' : 'Recorded By'}</th>
                 <th className="py-3 px-3 text-muted fw-semibold small text-end">{ledgerTab === 'overdue' ? 'Recovery Actions' : 'Actions'}</th>
               </tr>
             </thead>
@@ -1087,7 +1122,11 @@ const PaymentTracking = () => {
                       {getStatusBadge(p.status)}
                     </td>
                     <td className="py-3 px-3 text-muted small">
-                      {p.status === 'OVERDUE' ? (
+                      {p.status === 'PENDING' ? (
+                        <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1">
+                          Awaiting Organizer Approval
+                        </span>
+                      ) : p.status === 'OVERDUE' ? (
                         <span className="badge bg-light text-secondary border px-2 py-1">
                           System Auto-Detected
                         </span>
@@ -1112,7 +1151,7 @@ const PaymentTracking = () => {
                               }}
                             >
                               <Icon name="check" size={13} color="#FFFFFF" />
-                              <span>Settle Payment</span>
+                              <span>{p.status === 'PENDING' ? 'Approve Payment' : 'Settle Payment'}</span>
                             </button>
                           )}
 

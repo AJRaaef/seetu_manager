@@ -46,7 +46,9 @@ public class PaymentService {
             }
             // Parse requested status if provided, else default to PAID
             Payment.PaymentStatus updatedStatus = Payment.PaymentStatus.PAID;
-            if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
+            if (recorder != null && recorder.getRole() == User.Role.MEMBER) {
+                updatedStatus = Payment.PaymentStatus.PENDING;
+            } else if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
                 try {
                     updatedStatus = Payment.PaymentStatus.valueOf(request.getStatus().trim().toUpperCase());
                 } catch (IllegalArgumentException e) {
@@ -57,7 +59,7 @@ public class PaymentService {
             existing.setAmount(request.getAmount());
             existing.setStatus(updatedStatus);
             existing.setPaymentDate(request.getPaymentDate() != null ? request.getPaymentDate() : LocalDate.now());
-            existing.setRecordedBy(recorder);
+            existing.setRecordedBy(recorder != null && recorder.getRole() == User.Role.MEMBER ? null : recorder);
             existing.setNotes(request.getNotes());
             if (request.getPaymentMethod() != null) {
                 existing.setPaymentMethod(request.getPaymentMethod());
@@ -74,14 +76,15 @@ public class PaymentService {
 
         // Determine status based on explicit request or timing and contribution amount
         Payment.PaymentStatus status = Payment.PaymentStatus.PAID;
-        if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
+        if (recorder != null && recorder.getRole() == User.Role.MEMBER) {
+            // Members submitting contributions are always PENDING until Organizer/Admin approves
+            status = Payment.PaymentStatus.PENDING;
+        } else if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
             try {
                 status = Payment.PaymentStatus.valueOf(request.getStatus().trim().toUpperCase());
             } catch (IllegalArgumentException e) {
                 status = Payment.PaymentStatus.PAID;
             }
-        } else if (recorder != null && recorder.getRole() == User.Role.MEMBER) {
-            status = Payment.PaymentStatus.PENDING;
         } else if (cycle.getGroup() != null && cycle.getGroup().getContributionAmount() != null
                 && request.getAmount().compareTo(cycle.getGroup().getContributionAmount()) < 0) {
             status = Payment.PaymentStatus.PARTIAL;
@@ -284,7 +287,7 @@ public class PaymentService {
                 .amount(payment.getAmount())
                 .status(payment.getStatus().name())
                 .paymentDate(payment.getPaymentDate())
-                .recordedByName(payment.getRecordedBy() != null ? payment.getRecordedBy().getFullName() : "System Auto-Detected")
+                .recordedByName(payment.getRecordedBy() != null ? payment.getRecordedBy().getFullName() : (payment.getStatus() == Payment.PaymentStatus.PENDING ? "Awaiting Organizer Approval" : "System Auto-Detected"))
                 .notes(payment.getNotes())
                 .paymentMethod(payment.getPaymentMethod() != null ? payment.getPaymentMethod() : "Cash (Offline)")
                 .createdAt(payment.getCreatedAt())
