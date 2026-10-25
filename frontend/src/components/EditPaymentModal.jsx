@@ -58,7 +58,7 @@ const EditPaymentModal = ({ show, onHide, payment, onSave }) => {
             </div>
             <div className="col-6">
               <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.edit_payment.group', 'GROUP')}</div>
-              <div className="fw-bold text-dark">{payment.group || "Village Women's"} ({payment.cycle || 'Cycle 3'})</div>
+              <div className="fw-bold text-dark">{payment.group || '—'} ({payment.cycle || '—'})</div>
             </div>
           </div>
 

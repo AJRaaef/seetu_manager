@@ -33,47 +33,7 @@ const MyGroups = () => {
     }
   };
 
-  const defaultGroups = [
-    {
-      id: 1,
-      name: "Village Women's Seettu",
-      type: 'Monetary',
-      membersCount: 12,
-      maxMembers: 12,
-      cycleFrequency: 'MONTHLY',
-      contributionAmount: '1,000 LKR per month',
-      currentCycle: 5,
-      totalCycles: 12,
-      completionRate: 33,
-      status: 'Active'
-    },
-    {
-      id: 2,
-      name: 'Small Business Seettu',
-      type: 'Monetary',
-      membersCount: 8,
-      maxMembers: 10,
-      cycleFrequency: 'WEEKLY',
-      contributionAmount: '5,000 LKR per week',
-      currentCycle: 3,
-      totalCycles: 10,
-      completionRate: 20,
-      status: 'Active'
-    },
-    {
-      id: 3,
-      name: "Community Farmer's Group",
-      type: 'Non-Monetary',
-      membersCount: 15,
-      maxMembers: 15,
-      cycleFrequency: 'DAILY',
-      contributionAmount: '2,000 LKR per day',
-      currentCycle: 8,
-      totalCycles: 15,
-      completionRate: 47,
-      status: 'Active'
-    }
-  ];
+
 
   const fetchGroups = useCallback(async () => {
     if (!userId) {
@@ -163,14 +123,7 @@ const MyGroups = () => {
     fetchPublicGroups();
   }, []);
 
-  const defaultPublicGroups = [
-    { id: 101, name: "Gold Saver Monthly Seettu", contributionAmount: 10000, category: "GOLD" },
-    { id: 102, name: "Community Farmer Circle", contributionAmount: 5000, category: "GENERAL" },
-    { id: 103, name: "Small Business Equipment Seettu", contributionAmount: 25000, category: "FURNITURE" },
-    { id: 104, name: "Express Weekly Micro Savings", contributionAmount: 2000, category: "GENERAL" }
-  ];
-
-  const displayPublicGroups = publicGroups.length > 0 ? publicGroups : defaultPublicGroups;
+  const displayPublicGroups = publicGroups;
 
   const handleJoinSubmit = async (e) => {
     e.preventDefault();

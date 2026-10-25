@@ -11,12 +11,12 @@ const getScoreMeta = (scoreNum, t) => {
   return { label: t ? t('dashboard_page.badges.poor', 'Poor') : 'Poor', color: '#DC3545' };
 };
 
-const EditMemberModal = ({ show, onHide, member, onSave }) => {
+const EditMemberModal = ({ show, onHide, member, onSave, groups = [] }) => {
   const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [group, setGroup] = useState("Village Women's");
+  const [group, setGroup] = useState('');
   const [status, setStatus] = useState('Active');
   const [score, setScore] = useState(100);
 
@@ -25,7 +25,7 @@ const EditMemberModal = ({ show, onHide, member, onSave }) => {
       setName(member.name || '');
       setEmail(member.email || '');
       setPhone(member.phone || '');
-      setGroup(member.group || "Village Women's");
+      setGroup(member.group || '');
       setStatus(member.status || 'Active');
       setScore(member.score !== undefined ? member.score : 100);
     }
@@ -118,9 +118,15 @@ const EditMemberModal = ({ show, onHide, member, onSave }) => {
                 value={group}
                 onChange={(e) => setGroup(e.target.value)}
               >
-                <option value="Village Women's">Village Women's</option>
-                <option value="Small Business">Small Business</option>
-                <option value="Community Farmers">Community Farmers</option>
+                <option value="">{t('modals.edit_member.select_group', '— Select Group —')}</option>
+                {groups && groups.map((g) => {
+                  const gName = typeof g === 'string' ? g : (g.groupName || g.name);
+                  return (
+                    <option key={g.id || gName} value={gName}>
+                      {gName}
+                    </option>
+                  );
+                })}
               </select>
             </div>
             <div className="col-12 col-md-6">

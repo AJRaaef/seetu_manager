@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { getAdminDashboard, getUserDashboard } from '../api/dashboardApi';
 import { getAllPayments, getPaymentsByMember, getAdvancePayments, getAllAdvancePayments } from '../api/paymentApi';
+import { getGroupsByUser } from '../api/groupApi';
 import Icon from '../components/Icons';
 import ReviewPayoutModal from '../components/ReviewPayoutModal';
 import PaymentDetailsModal from '../components/PaymentDetailsModal';
@@ -22,6 +23,7 @@ const Dashboard = () => {
   const [loadingPayments, setLoadingPayments] = useState(true);
   const [payoutApproved, setPayoutApproved] = useState(false);
   const [advanceTotal, setAdvanceTotal] = useState(0);
+  const [realUpcomingPayout, setRealUpcomingPayout] = useState(null);
 
   const userId = user?.userId || user?.id;
 
@@ -88,10 +90,50 @@ const Dashboard = () => {
       }
     };
 
+    const fetchUpcomingPayout = async () => {
+      if (isAdmin || !userId) {
+        setRealUpcomingPayout(null);
+        return;
+      }
+      try {
+        const res = await getGroupsByUser(userId);
+        const groupList = res?.data || res || [];
+        if (Array.isArray(groupList)) {
+          for (const g of groupList) {
+            if (Array.isArray(g.cycles)) {
+              const matchedCycle = g.cycles.find(
+                (c) => (String(c.payoutMemberId) === String(userId) || String(c.payoutMember?.id) === String(userId)) && c.status !== 'COMPLETED'
+              );
+              if (matchedCycle) {
+                const totalPot = Number(g.contributionAmount || 0) * (g.memberCount || 1);
+                const daysRemaining = matchedCycle.endDate
+                  ? Math.max(0, Math.ceil((new Date(matchedCycle.endDate) - new Date()) / 86400000))
+                  : (stats?.nextPaymentDueDays || 0);
+                setRealUpcomingPayout({
+                  cycle: `${g.name} • Cycle #${matchedCycle.cycleNumber}`,
+                  recipient: matchedCycle.payoutMemberName || user?.fullName || 'Member',
+                  date: matchedCycle.endDate || matchedCycle.startDate || '-',
+                  daysRemaining: `${daysRemaining} days remaining`,
+                  amount: `${totalPot.toLocaleString()} LKR`,
+                  cycleId: matchedCycle.id
+                });
+                return;
+              }
+            }
+          }
+        }
+        setRealUpcomingPayout(null);
+      } catch (err) {
+        console.error('Failed to load real upcoming payout from database', err);
+        setRealUpcomingPayout(null);
+      }
+    };
+
     if (isAdmin || userId) {
       fetchDashboard();
       fetchRecentPayments();
       fetchAdvance();
+      fetchUpcomingPayout();
     } else {
       setLoading(false);
       setLoadingPayments(false);
@@ -106,32 +148,14 @@ const Dashboard = () => {
     ? Math.round(stats.overallCompletionRate)
     : 100;
 
-  // Upcoming payout data (shown when active groups or payments exist)
-  const hasUpcomingPayout = activeGroupsCount > 0 || recentPayments.length > 0;
-  const upcomingPayout = {
-    cycle: 'Cycle 1 Payout',
-    recipient: user?.fullName || 'Member',
-    date: new Date(Date.now() + (stats?.nextPaymentDueDays || 5) * 86400000).toISOString().split('T')[0],
-    daysRemaining: `${stats?.nextPaymentDueDays || 5} days remaining`,
-    amount: '12,000 LKR'
-  };
+  // Real Upcoming Payout strictly from MySQL database
+  const hasUpcomingPayout = !isAdmin && !!realUpcomingPayout;
+  const upcomingPayout = realUpcomingPayout || {};
 
   const handleApprovePayout = (data) => {
     setPayoutApproved(true);
-    const payoutRecord = {
-      id: 'PAYOUT-' + Date.now(),
-      member: `${data.recipient} (Payout Disbursed)`,
-      amount: parseInt(String(data.amount).replace(/[^0-9]/g, '')) || 12000,
-      status: 'PAID',
-      date: new Date().toISOString().split('T')[0],
-      group: data.cycle || 'Cycle 1 Payout',
-      cycle: data.cycle,
-      recordedBy: user?.fullName || 'Organizer',
-      method: 'Bank / Cash Transfer',
-      notes: 'Approved payout disbursement'
-    };
-    setRecentPayments((prev) => [payoutRecord, ...prev]);
-    alert(`Payout of ${data.amount} to ${data.recipient} approved & disbursed successfully!`);
+    alert(`Payout of ${data.amount} to ${data.recipient} approved successfully!`);
+    fetchRecentPayments();
   };
 
   const handleRowClick = (payment) => {

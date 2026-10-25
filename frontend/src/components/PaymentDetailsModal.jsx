@@ -228,7 +228,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           </div>
           <div className="col-6">
             <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.group', 'GROUP')}</div>
-            <div className="fw-bold text-dark">{payment.group || payment.groupName || "Village Women's"}</div>
+            <div className="fw-bold text-dark">{payment.group || payment.groupName || '—'}</div>
           </div>
           <div className="col-6">
             <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.cycle', 'CYCLE')}</div>

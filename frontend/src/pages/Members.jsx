@@ -700,6 +700,7 @@ const Members = () => {
         show={!!editingMember}
         onHide={() => setEditingMember(null)}
         member={editingMember}
+        groups={groups}
         onSave={handleSaveMember}
       />
     </div>

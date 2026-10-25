@@ -36,15 +36,15 @@ const DeletePaymentModal = ({ show, onHide, payment, onDelete }) => {
           </div>
           <div className="d-flex justify-content-between py-1 small">
             <span className="text-muted">{t('modals.delete_payment.group', 'Group:')}</span>
-            <span className="fw-semibold text-dark">{payment.group || "Village Women's (Cycle 3)"}</span>
+            <span className="fw-semibold text-dark">{payment.group || '—'}</span>
           </div>
           <div className="d-flex justify-content-between py-1 small">
             <span className="text-muted">{t('modals.delete_payment.amount', 'Amount:')}</span>
-            <span className="fw-semibold text-dark">{payment.amount ? `${payment.amount.toLocaleString()} LKR` : '1,000 LKR'}</span>
+            <span className="fw-semibold text-dark">{payment.amount ? `${Number(payment.amount).toLocaleString()} LKR` : '—'}</span>
           </div>
           <div className="d-flex justify-content-between py-1 small">
             <span className="text-muted">{t('modals.delete_payment.date', 'Date:')}</span>
-            <span className="fw-semibold text-dark">{payment.date || '2026-09-15'}</span>
+            <span className="fw-semibold text-dark">{payment.date || '—'}</span>
           </div>
         </div>
       </div>
