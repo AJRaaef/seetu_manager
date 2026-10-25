@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
@@ -56,43 +56,43 @@ const MyGroups = () => {
     }
   ];
 
-  useEffect(() => {
-    const fetchGroups = async () => {
-      if (!userId) {
+  const fetchGroups = useCallback(async () => {
+    if (!userId) {
+      setGroups([]);
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await getGroupsByUser(userId);
+      const list = res?.data || res || [];
+      if (Array.isArray(list) && list.length > 0) {
+        const formatted = list.map(g => ({
+          id: g.id,
+          name: g.name,
+          type: g.seettuType?.name || (g.category === 'NON_MONETARY' ? 'Non-Monetary' : 'Monetary'),
+          membersCount: Array.isArray(g.members) ? g.members.length : (typeof g.membersCount === 'number' ? g.membersCount : 0),
+          maxMembers: g.memberCount || 10,
+          contributionAmount: `${(g.contributionAmount || 1000).toLocaleString()} LKR per month`,
+          currentCycle: g.currentCycle || 1,
+          totalCycles: g.memberCount || 10,
+          completionRate: Math.round(((g.currentCycle || 1) / (g.memberCount || 10)) * 100),
+          status: g.status === 'ACTIVE' ? 'Active' : g.status || 'Active'
+        }));
+        setGroups(formatted);
+      } else {
         setGroups([]);
-        setLoading(false);
-        return;
       }
-      try {
-        const res = await getGroupsByUser(userId);
-        const list = res?.data || res || [];
-        if (Array.isArray(list) && list.length > 0) {
-          const formatted = list.map(g => ({
-            id: g.id,
-            name: g.name,
-            type: g.seettuType?.name || (g.category === 'NON_MONETARY' ? 'Non-Monetary' : 'Monetary'),
-            membersCount: Array.isArray(g.members) ? g.members.length : (typeof g.membersCount === 'number' ? g.membersCount : 0),
-            maxMembers: g.memberCount || 10,
-            contributionAmount: `${(g.contributionAmount || 1000).toLocaleString()} LKR per month`,
-            currentCycle: g.currentCycle || 1,
-            totalCycles: g.memberCount || 10,
-            completionRate: Math.round(((g.currentCycle || 1) / (g.memberCount || 10)) * 100),
-            status: g.status === 'ACTIVE' ? 'Active' : g.status || 'Active'
-          }));
-          setGroups(formatted);
-        } else {
-          setGroups([]);
-        }
-      } catch (error) {
-        console.error('Failed to fetch groups from database', error);
-        setGroups([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGroups();
+    } catch (error) {
+      console.error('Failed to fetch groups from database', error);
+      setGroups([]);
+    } finally {
+      setLoading(false);
+    }
   }, [userId]);
+
+  useEffect(() => {
+    fetchGroups();
+  }, [fetchGroups]);
 
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [selectedJoinGroup, setSelectedJoinGroup] = useState('');
@@ -149,6 +149,7 @@ const MyGroups = () => {
     }
     try {
       await deleteGroup(groupId);
+      setGroups(prev => prev.filter(g => g.id !== groupId));
       alert(`Group "${groupName}" deleted successfully.`);
       fetchGroups();
     } catch (err) {
