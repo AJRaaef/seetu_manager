@@ -51,6 +51,9 @@ const PaymentTracking = () => {
   const [settlePayment, setSettlePayment] = useState(null);
   const [legalNoticePayment, setLegalNoticePayment] = useState(null);
 
+  // Section Tab state ('recorded' | 'overdue' | 'all')
+  const [ledgerTab, setLedgerTab] = useState('recorded');
+
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [filterGroup, setFilterGroup] = useState('All');
@@ -302,7 +305,18 @@ const PaymentTracking = () => {
   );
   const memberOptions = dynamicMembers;
 
+  // Separate counts for Recorded vs Overdue
+  const recordedCount = payments.filter((p) => p.status === 'PAID' || p.status === 'LATE').length;
+  const overdueCount = payments.filter((p) => p.status === 'OVERDUE' || p.status === 'PARTIAL' || p.status === 'PENDING').length;
+
   const filteredPayments = payments.filter((p) => {
+    // Tab filtering: 'recorded' shows only confirmed paid records; 'overdue' shows dues requiring action
+    if (ledgerTab === 'recorded') {
+      if (p.status !== 'PAID' && p.status !== 'LATE') return false;
+    } else if (ledgerTab === 'overdue') {
+      if (p.status === 'PAID' || p.status === 'LATE') return false;
+    }
+
     const term = searchQuery.toLowerCase().trim();
     const matchesSearch =
       !term ||
@@ -761,6 +775,84 @@ const PaymentTracking = () => {
         </div>
       )}
 
+      {/* Payment Ledger Section Navigation Tabs */}
+      <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 p-3 bg-white rounded-3 border shadow-xs">
+        <div className="d-flex flex-wrap gap-2">
+          <button
+            type="button"
+            className={`btn px-3 py-2 rounded-2 fw-semibold d-inline-flex align-items-center gap-2 ${
+              ledgerTab === 'recorded'
+                ? 'btn-teal text-white shadow-sm'
+                : 'btn-outline-secondary bg-light text-dark'
+            }`}
+            onClick={() => {
+              setLedgerTab('recorded');
+              setFilterStatus('All');
+            }}
+          >
+            <Icon name="check-circle" size={16} />
+            <span>Recorded Payments</span>
+            <span className={`badge rounded-pill ${ledgerTab === 'recorded' ? 'bg-white text-dark' : 'bg-white text-muted border'}`}>
+              {recordedCount}
+            </span>
+          </button>
+
+          {(isAdmin || isOrganizer) && (
+            <button
+              type="button"
+              className={`btn px-3 py-2 rounded-2 fw-semibold d-inline-flex align-items-center gap-2 ${
+                ledgerTab === 'overdue'
+                  ? 'btn-danger text-white shadow-sm'
+                  : 'btn-outline-secondary bg-light text-dark'
+              }`}
+              onClick={() => {
+                setLedgerTab('overdue');
+                setFilterStatus('All');
+              }}
+            >
+              <Icon name="warning" size={16} />
+              <span>Overdue & Default Notices</span>
+              {overdueCount > 0 && (
+                <span className={`badge rounded-pill ${ledgerTab === 'overdue' ? 'bg-white text-danger' : 'bg-danger text-white'}`}>
+                  {overdueCount}
+                </span>
+              )}
+            </button>
+          )}
+
+          <button
+            type="button"
+            className={`btn px-3 py-2 rounded-2 fw-semibold d-inline-flex align-items-center gap-2 ${
+              ledgerTab === 'all'
+                ? 'btn-dark text-white shadow-sm'
+                : 'btn-outline-secondary bg-light text-dark'
+            }`}
+            onClick={() => {
+              setLedgerTab('all');
+              setFilterStatus('All');
+            }}
+          >
+            <Icon name="payments" size={16} />
+            <span>All Records</span>
+            <span className={`badge rounded-pill ${ledgerTab === 'all' ? 'bg-white text-dark' : 'bg-white text-muted border'}`}>
+              {payments.length}
+            </span>
+          </button>
+        </div>
+
+        <div className="text-muted small">
+          {ledgerTab === 'recorded' && (
+            <span>Historical transaction ledger of confirmed and received member contributions.</span>
+          )}
+          {ledgerTab === 'overdue' && (
+            <span className="text-danger fw-semibold">Delinquent accounts requiring follow-up, settlement, or statutory legal demand notices.</span>
+          )}
+          {ledgerTab === 'all' && (
+            <span>Consolidated payment register across all contribution statuses.</span>
+          )}
+        </div>
+      </div>
+
       {/* Search & Filter Bar */}
       <div className="row g-3 mb-3 align-items-center">
         {/* Search Bar */}
@@ -834,10 +926,11 @@ const PaymentTracking = () => {
               onChange={(e) => setFilterStatus(e.target.value)}
             >
               <option value="All">All Status</option>
-              <option value="PAID">Paid</option>
-              <option value="PENDING">Pending</option>
-              <option value="OVERDUE">Overdue</option>
-              <option value="PARTIAL">Partial</option>
+              {ledgerTab !== 'overdue' && <option value="PAID">Paid</option>}
+              {ledgerTab !== 'overdue' && <option value="LATE">Paid (Late)</option>}
+              {ledgerTab !== 'recorded' && <option value="OVERDUE">Overdue</option>}
+              {ledgerTab !== 'recorded' && <option value="PARTIAL">Partial</option>}
+              {ledgerTab !== 'recorded' && <option value="PENDING">Pending</option>}
             </select>
           </div>
         </div>
@@ -865,18 +958,35 @@ const PaymentTracking = () => {
 
       {/* Payment Table Card */}
       <div className="table-card shadow-sm">
+        <div className="d-flex justify-content-between align-items-center px-4 py-3 border-bottom bg-white">
+          <div className="d-flex align-items-center gap-2">
+            <Icon
+              name={ledgerTab === 'overdue' ? 'warning' : 'credit-card'}
+              size={18}
+              color={ledgerTab === 'overdue' ? '#DC3545' : '#188754'}
+            />
+            <h6 className="fw-bold mb-0 text-dark">
+              {ledgerTab === 'recorded' && 'Recorded Payments History'}
+              {ledgerTab === 'overdue' && 'Overdue Contributions & Default Action Desk'}
+              {ledgerTab === 'all' && 'All Payment Records'}
+            </h6>
+          </div>
+          <span className="badge bg-light text-muted border small">
+            {filteredPayments.length} {filteredPayments.length === 1 ? 'record' : 'records'}
+          </span>
+        </div>
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0">
             <thead style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E5E7EB' }}>
               <tr>
-                <th className="py-3 px-3 text-muted fw-semibold small">Date</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{ledgerTab === 'overdue' ? 'Due Date' : 'Date'}</th>
                 <th className="py-3 px-3 text-muted fw-semibold small">Group</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">Member</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{ledgerTab === 'overdue' ? 'Delinquent Member' : 'Member'}</th>
                 <th className="py-3 px-3 text-muted fw-semibold small">Cycle</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">Amount</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{ledgerTab === 'overdue' ? 'Due Amount' : 'Amount'}</th>
                 <th className="py-3 px-3 text-muted fw-semibold small text-center">Status</th>
                 <th className="py-3 px-3 text-muted fw-semibold small">Recorded By</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-end">Actions</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-end">{ledgerTab === 'overdue' ? 'Recovery Actions' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody>
@@ -892,11 +1002,15 @@ const PaymentTracking = () => {
                   <td colSpan="8" className="text-center py-5">
                     <div className="d-flex flex-column align-items-center justify-content-center">
                       <Icon name="search" size={32} color="#94A3B8" />
-                      <h6 className="fw-bold mt-3 mb-1 text-dark">No payments found</h6>
+                      <h6 className="fw-bold mt-3 mb-1 text-dark">
+                        {ledgerTab === 'overdue' ? 'No overdue payments or default notices' : 'No payments found'}
+                      </h6>
                       <p className="text-muted small mb-3">
-                        {isFiltered
+                        {ledgerTab === 'overdue'
+                          ? 'All group contributions are up to date! There are no delinquent payments or pending notices.'
+                          : isFiltered
                           ? 'No payment records match your search or filter criteria.'
-                          : 'There are no payment records registered yet.'}
+                          : 'There are no recorded payments registered yet.'}
                       </p>
                       {isFiltered && (
                         <button
