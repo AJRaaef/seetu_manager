@@ -61,15 +61,15 @@ const LandingPage = () => {
 
   // Structured Professional Quick Links (Statutory Law, Rules, Governance & Policies)
   const quickLinksList = [
-    { label: 'Chit Law & Governance', path: '/law' },
-    { label: 'Member Enrollment Rules', path: '/rules' },
-    { label: 'Complaints & Disputes', path: '/complaints' },
-    { label: 'Contact Us', path: '/contact' },
-    { label: 'Privacy & Policy', path: '/privacy' },
-    { label: 'Terms & Conditions', path: '/terms' },
-    { label: 'Cancellation Policy', path: '/cancellation' },
-    { label: 'Refund Policy', path: '/refund' },
-    { label: 'Disclaimer', path: '/disclaimer' },
+    { label: t('quick_links.law', 'Chit Law & Governance'), path: '/law' },
+    { label: t('quick_links.rules', 'Member Enrollment Rules'), path: '/rules' },
+    { label: t('quick_links.complaints', 'Complaints & Disputes'), path: '/complaints' },
+    { label: t('quick_links.contact', 'Contact Us'), path: '/contact' },
+    { label: t('quick_links.privacy', 'Privacy & Policy'), path: '/privacy' },
+    { label: t('quick_links.terms', 'Terms & Conditions'), path: '/terms' },
+    { label: t('quick_links.cancellation', 'Cancellation Policy'), path: '/cancellation' },
+    { label: t('quick_links.refund', 'Refund Policy'), path: '/refund' },
+    { label: t('quick_links.disclaimer', 'Disclaimer'), path: '/disclaimer' },
   ];
 
   // Navigatable Hero Slides (Traditional Sri Lankan Seettu Themes)
@@ -136,92 +136,93 @@ const LandingPage = () => {
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
   };
 
-  const faqs = [
+ const faqs = [
     {
       category: 'BASICS',
-      categoryLabel: 'Basics & Legal',
-      q: 'What is a Seettu (Chit Fund / ROSCA)?',
-      a: 'A Seettu (internationally termed a Chit Fund or Rotating Savings and Credit Association — ROSCA) is a traditional community savings mechanism where members pool fixed contributions at regular intervals (daily, weekly, or monthly). In each cycle, the pooled sum is awarded to one member via fixed rotation, auction bidding, or fair lottery, continuing until every participant receives their complete payout.'
-    },
-    {
-      category: 'BASICS',
-      categoryLabel: 'Basics & Legal',
-      q: 'What is the difference between a Bank Loan and a Seettu?',
-      a: 'Unlike traditional bank loans that charge high compounding interest, require mortgaged collateral, and involve rigid banking bureaucracy, a Seettu is a community-funded financial circle. Non-bidded members use Seettu as a high-yield savings tool earning monthly dividend deductions, while bidded members access rapid lump-sum capital without exploitative interest rates.'
+      categoryLabel: t('landing.faq_cat_basics', 'Basics & Legal'),
+      q: t('landing.faq_1_q', 'What is a Seettu (Chit Fund / ROSCA)?'),
+      a: t('landing.faq_1_a', 'A Seettu...')
     },
     {
       category: 'BASICS',
-      categoryLabel: 'Basics & Legal',
-      q: 'Is Seettu legal and registered in Sri Lanka?',
-      a: 'Yes. SeettuManager operates in strict compliance with The Cheetus Ordinance No. 61 of 1935 (the statutory law governing rotating savings in Sri Lanka). Every group maintains a digital Seettu Agreement with verified terms, administrative organizer vetting, deduplicated Sri Lankan NICs, and full transaction audit trails.'
+      categoryLabel: t('landing.faq_cat_basics', 'Basics & Legal'),
+      q: t('landing.faq_2_q', 'What is the difference between a Bank Loan and a Seettu?'),
+      a: t('landing.faq_2_a', 'Unlike traditional bank loans...')
     },
     {
       category: 'BASICS',
-      categoryLabel: 'Basics & Legal',
-      q: 'Who is the Organizer (Foreman) and who is the Member (Subscriber)?',
-      a: 'The Organizer (Foreman) is the certified group leader responsible for creating the circle, scheduling cycles, verifying bank deposit slips, and executing on-time payouts. The Member (Subscriber) commits to timely installment payments and participates in rotation or auctions to receive the pooled lump-sum.'
+      categoryLabel: t('landing.faq_cat_basics', 'Basics & Legal'),
+      q: t('landing.faq_3_q', 'Is Seettu legal and registered in Sri Lanka?'),
+      a: t('landing.faq_3_a', 'Yes. SeettuManager operates...')
+    },
+    {
+      category: 'BASICS',
+      categoryLabel: t('landing.faq_cat_basics', 'Basics & Legal'),
+      q: t('landing.faq_4_q', 'Who is the Organizer (Foreman) and who is the Member (Subscriber)?'),
+      a: t('landing.faq_4_a', 'The Organizer (Foreman)...')
     },
     {
       category: 'AUCTIONS',
-      categoryLabel: 'Auctions & Payouts',
-      q: 'What is the Gross Seettu Amount vs. Net Payout Amount?',
-      a: 'The Gross Seettu Amount is the total capital collected in a single cycle (e.g., 10 members × LKR 50,000 = LKR 500,000). In an auction Seettu, the Net Payout Amount is the lump-sum given to the winning bidder after deducting their bid discount. The discount amount is redistributed back to all other members as a dividend, reducing their next installment.'
+      categoryLabel: t('landing.faq_faq_cat_auctions', 'Auctions & Payouts'),
+      q: t('landing.faq_5_q', 'What is the Gross Seettu Amount vs. Net Payout Amount?'),
+      a: t('landing.faq_5_a', 'The Gross Seettu Amount...')
     },
     {
       category: 'AUCTIONS',
-      categoryLabel: 'Auctions & Payouts',
-      q: 'What types of Seettu groups are supported?',
-      a: 'SeettuManager supports 4 distinct models: (1) Fixed Rotational Seettu (predetermined schedule), (2) Auction & Bidding Seettu (competitive discount bidding for early liquidity), (3) Random Draw / Lottery (fair algorithmic turn selection), and (4) Non-Monetary Asset Seettu (for physical items like gold jewelry, consumer electronics, and machinery with certified market valuation).'
+      categoryLabel: t('landing.faq_cat_auctions', 'Auctions & Payouts'),
+      q: t('landing.faq_6_q', 'What types of Seettu groups are supported?'),
+      a: t('landing.faq_6_a', 'SeettuManager supports...')
     },
     {
       category: 'AUCTIONS',
-      categoryLabel: 'Auctions & Payouts',
-      q: 'What is the bidding procedure and how does an auction work?',
-      a: 'During the cycle bidding window, members who need funds submit a discount bid representing the amount they are willing to forego to receive the payout early. The member who places the highest discount bid wins the cycle pool. The discounted surplus is shared equally among all non-bidded subscribers as a monthly dividend.'
+      categoryLabel: t('landing.faq_cat_auctions', 'Auctions & Payouts'),
+      q: t('landing.faq_7_q', 'What is the bidding procedure and how does an auction work?'),
+      a: t('landing.faq_7_a', 'During the cycle bidding...')
     },
     {
       category: 'AUCTIONS',
-      categoryLabel: 'Auctions & Payouts',
-      q: 'Who is a Bidded Subscriber vs. a Non-Bidded Subscriber?',
-      a: 'A Bidded Subscriber is a member who has already won an auction and received their pooled payout in a previous cycle; they are legally bound to continue paying full installments on time until the group closes. A Non-Bidded Subscriber has not yet taken a payout and enjoys monthly dividend deductions that lower their out-of-pocket contributions.'
+      categoryLabel: t('landing.faq_cat_auctions', 'Auctions & Payouts'),
+      q: t('landing.faq_8_q', 'Who is a Bidded Subscriber vs. a Non-Bidded Subscriber?'),
+      a: t('landing.faq_8_a', 'A Bidded Subscriber...')
     },
     {
       category: 'PAYMENTS',
-      categoryLabel: 'Payments & Discipline',
-      q: 'What is the Financial Discipline Score (0–100) and why is it important?',
-      a: 'The Financial Discipline Score is an automated algorithmic credit metric (Score ∈ [0, 100]) engineered in SeettuManager as per SRS REQ-SCR-01. Prompt payments maintain a 100 score. Delays or missed contributions trigger algorithmic penalties: max(0, 100 - [(Late × 5) + (Missed × 10) + (AvgDelayDays × 0.5)]). High scores qualify members for larger capital circles and verified financial certificates.'
+      categoryLabel: t('landing.faq_cat_payments', 'Payments & Discipline'),
+      q: t('landing.faq_9_q', 'What is the Financial Discipline Score (0–100) and why is it important?'),
+      a: t('landing.faq_9_a', 'The Financial Discipline Score...')
     },
     {
       category: 'PAYMENTS',
-      categoryLabel: 'Payments & Discipline',
-      q: 'What modes of payment are accepted on the platform?',
-      a: 'Members can fulfill installments through three methods: (1) Bank Deposit Slip Upload (uploading a clear receipt photo for organizer review), (2) Direct Online Bank Transfer with transaction reference, or (3) Verified Offline Cash Handover with immediate digital receipt generation in the audit ledger.'
+      categoryLabel: t('landing.faq_cat_payments', 'Payments & Discipline'),
+      q: t('landing.faq_10_q', 'What modes of payment are accepted on the platform?'),
+      a: t('landing.faq_10_a', 'Members can fulfill...')
     },
     {
       category: 'PAYMENTS',
-      categoryLabel: 'Payments & Discipline',
-      q: 'What happens when a member delays or defaults on an installment?',
-      a: 'Delinquent payments trigger an immediate drop in the member\'s Discipline Score and automated SMS/email alerts. To ensure the winning member receives their payout on time, the circle\'s Emergency Relief Reserve covers the shortfall. Habitual defaulters face circle disqualification, administrative lockouts, and legal recovery under The Cheetus Ordinance.'
+      categoryLabel: t('landing.faq_cat_payments', 'Payments & Discipline'),
+      q: t('landing.faq_11_q', 'What happens when a member delays or defaults on an installment?'),
+      a: t('landing.faq_11_a', 'Delinquent payments...')
     },
     {
       category: 'PAYMENTS',
-      categoryLabel: 'Payments & Discipline',
-      q: 'Why is identity verification (NIC & Grama Niladhari Certificate) mandatory?',
-      a: 'To eradicate synthetic fraud, duplicate memberships, and default flight risk, SeettuManager enforces mandatory Sri Lankan National Identity Card (NIC) validation (9-digit with V/X or 12-digit format) and Grama Niladhari residency character certificates before large-value payouts can be disbursed.'
+      categoryLabel: t('landing.faq_cat_payments', 'Payments & Discipline'),
+      q: t('landing.faq_12_q', 'Why is identity verification (NIC & Grama Niladhari Certificate) mandatory?'),
+      a: t('landing.faq_12_a', 'To eradicate synthetic fraud...')
     },
     {
       category: 'BASICS',
-      categoryLabel: 'Basics & Legal',
-      q: 'Can I take multiple tickets or slots in the same Seettu group?',
-      a: 'Yes. Eligible members with an established Financial Discipline Score can subscribe to multiple tickets/slots in the same group (e.g., 2 slots in a 12-member group). Each ticket is treated independently with separate contribution obligations and two distinct rotation payout opportunities.'
+      categoryLabel: t('landing.faq_cat_basics', 'Basics & Legal'),
+      q: t('landing.faq_13_q', 'Can I take multiple tickets or slots in the same Seettu group?'),
+      a: t('landing.faq_13_a', 'Yes. Eligible members...')
     },
     {
       category: 'AUCTIONS',
-      categoryLabel: 'Auctions & Payouts',
-      q: 'What if a subscriber needs to cancel or leave a Seettu early?',
-      a: 'Under standard Seettu agreements, if an un-bidded subscriber encounters genuine hardship, the Organizer facilitates a "Vacant Chit Transfer" to an approved replacement member from the waitlist, refunding the original member\'s contributions according to group bylaws.'
+      categoryLabel: t('landing.faq_cat_auctions', 'Auctions & Payouts'),
+      q: t('landing.faq_14_q', 'What if a subscriber needs to cancel or leave a Seettu early?'),
+      a: t('landing.faq_14_a', 'Under standard Seettu agreements...')
     }
-  ];
+  ]; 
+
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
