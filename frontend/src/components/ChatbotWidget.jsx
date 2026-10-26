@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from 'i18next';
 import { useAuth } from '../hooks/useAuth';
 import { queryChatbot } from '../api/chatbotApi';
 import Icon from './Icons';
@@ -8,22 +9,73 @@ import Icon from './Icons';
 const currentTime = () =>
   new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-// Quick topics shown as chips. The label is translated with the key under chatbot_widget.topics
-const QUICK_TOPICS = [
-  { key: 'how_to_pay', label: 'How to Pay', icon: 'credit-card', query: 'How do I make a payment or upload a deposit slip?' },
-  { key: 'score_formula', label: 'Score Formula', icon: 'award', query: 'How is the Financial Discipline Score calculated?' },
-  { key: 'payout_cycles', label: 'Payout Cycles', icon: 'refresh', query: 'When and how are monthly payouts disbursed?' },
-  { key: 'seettu_law', label: 'Seettu Law', icon: 'shield', query: 'Is Seettu legal under Sri Lankan law?' },
-  { key: 'exit_rules', label: 'Exit Rules', icon: 'alert-circle', query: 'What happens if a member wants to cancel or leave early?' },
-  { key: 'refund_policy', label: 'Refund Policy', icon: 'file-text', query: 'How does the refund process work?' },
-  { key: 'file_dispute', label: 'File Dispute', icon: 'scale', query: 'How do I file a dispute or complaint?' },
-  { key: 'helplines', label: 'Helplines', icon: 'phone', query: 'How do I contact SeettuManager customer support?' },
-];
+// Quick topics supporting multi-language queries
+const getQuickTopics = (lang) => {
+  if (lang === 'si') {
+    return [
+      { key: 'how_to_pay', label: 'ගෙවීම් කරන්නේ කෙසේද?', icon: 'credit-card', query: 'ගෙවීමක් කරන්නේ කෙසේද?' },
+      { key: 'score_formula', label: 'ලකුණු ගණනය කිරීම', icon: 'award', query: 'මූල්‍ය විනය ලකුණු ගණනය වන්නේ කෙසේද?' },
+      { key: 'payout_cycles', label: 'චක්‍ර සහ ගෙවීම්', icon: 'refresh', query: 'මාසික ගෙවීම් බෙදා හරින්නේ කෙසේද?' },
+      { key: 'seettu_law', label: 'සීට්ටු නීතිය', icon: 'shield', query: 'සීට්ටු නීතිමය වන්නේ කෙසේද?' },
+      { key: 'exit_rules', label: 'ඉවත් වීමේ නීති', icon: 'alert-circle', query: 'කණ්ඩායමෙන් ඉවත් වන්නේ කෙසේද?' },
+      { key: 'file_dispute', label: 'පැමිණිලි කිරීම', icon: 'scale', query: 'ආරවුලක් ඉදිරිපත් කරන්නේ කෙසේද?' },
+      { key: 'helplines', label: 'උදව් ලබා ගැනීම', icon: 'phone', query: 'පාරිභෝගික සහාය ලබා ගන්නේ කෙසේද?' },
+    ];
+  }
+  if (lang === 'ta') {
+    return [
+      { key: 'how_to_pay', label: 'கட்டணம் செலுத்துவது எப்படி', icon: 'credit-card', query: 'கட்டணம் செலுத்துவது எப்படி?' },
+      { key: 'score_formula', label: 'மதிப்பெண் கணக்கீடு', icon: 'award', query: 'மதிப்பெண் கணக்கிடப்படுவது எப்படி?' },
+      { key: 'payout_cycles', label: 'பணம் பெறும் சுழற்சி', icon: 'refresh', query: 'சுழற்சி முறைகள் என்ன?' },
+      { key: 'seettu_law', label: 'சீட்டு சட்டம்', icon: 'shield', query: 'சீட்டு சட்டம் என்ன?' },
+    ];
+  }
+  // Default English Topics
+  return [
+    { key: 'how_to_pay', label: 'How to Pay', icon: 'credit-card', query: 'How do I make a payment or upload a deposit slip?' },
+    { key: 'score_formula', label: 'Score Formula', icon: 'award', query: 'How is the Financial Discipline Score calculated?' },
+    { key: 'payout_cycles', label: 'Payout Cycles', icon: 'refresh', query: 'When and how are monthly payouts disbursed?' },
+    { key: 'seettu_law', label: 'Seettu Law', icon: 'shield', query: 'Is Seettu legal under Sri Lankan law?' },
+    { key: 'exit_rules', label: 'Exit Rules', icon: 'alert-circle', query: 'What happens if a member wants to cancel or leave early?' },
+    { key: 'file_dispute', label: 'File Dispute', icon: 'scale', query: 'How do I file a dispute or complaint?' },
+    { key: 'helplines', label: 'Helplines', icon: 'phone', query: 'How do I contact SeettuManager customer support?' },
+  ];
+};
 
-// Offline answers (SRS STB-13) used when the server cannot be reached
+// Offline answers supporting English, Sinhala, and Tamil based on active language
 const getFallbackAnswer = (text) => {
   const lower = text.toLowerCase();
+  const currentLang = i18n.language; // Get current active language (en, si, or ta)
 
+  // Handle Sinhala responses when language is set to 'si'
+  if (currentLang === 'si') {
+    if (lower.includes('score') || lower.includes('discipline') || lower.includes('formula') || lower.includes('ලකුණු')) {
+      return "ඔබගේ මූල්‍ය විනය ලකුණු (Financial Discipline Score) 100කින් ආරම්භ වේ:\n\nසූත්‍රය: 100 - [(ප්‍රමාද වූ ගෙවීම් × 5) + (මග හැරුණු චක්‍ර × 10)]\n\n• 90-100 (විශිෂ්ටයි): ප්‍රමුඛතා ගෙවීම් හිමිවේ\n• 75-89 (හොඳයි): සාමාන්‍ය සුදුසුකම්\n• 50-74 (මධ්‍යමයි): ඇපකරුවෙකු අවශ්‍ය වේ\n• 50ට අඩු: අවදානම් මට්ටමක පවතී";
+    }
+    if (lower.includes('pay') || lower.includes('slip') || lower.includes('deposit') || lower.includes('ගෙවීම')) {
+      return "ගෙවීමක් කිරීමට හෝ වාර්තා කිරීමට:\n1. වම් පැත්තේ මෙනුවෙන් 'ගෙවීම්' (Payments) වෙත යන්න.\n2. ඔබේ සක්‍රීය සීට්ටු කණ්ඩායම සහ චක්‍රය තෝරන්න.\n3. 'ගෙවීම වාර්තා කරන්න' ක්ලික් කර ඔබේ ස්ලිප් පත යොමු කරන්න.";
+    }
+    if (lower.includes('law') || lower.includes('ordinance') || lower.includes('නීතිය')) {
+      return "සීට්ටුමැනේජර් ආයතනය 1935 අංක 61 දරන චීටු ආඥාපනත යටතේ ක්‍රියාත්මක වේ.";
+    }
+    return "සර්වර් එක සමඟ සම්බන්ධ වීමට නොහැකි විය. කරුණාකර මූලික මාතෘකා වලින් එකක් තෝරන්න හෝ පසුව උත්සාහ කරන්න.";
+  }
+
+  // Handle Tamil responses when language is set to 'ta'
+  if (currentLang === 'ta') {
+    if (lower.includes('score') || lower.includes('discipline') || lower.includes('formula')) {
+      return "உங்கள் நிதி ஒழுக்க மதிப்பெண் (Financial Discipline Score) 100 புள்ளிகளில் தொடங்குகிறது:\n\n• 90-100 (சிறந்தது): முன்னுரிமை செலுத்துதல்\n• 75-89 (நன்று): நிலையான தகுதி\n• 50-74 (சராசரி): பிணையாளர் தேவை\n• 50 க்கும் குறைவாக: ஆபத்து";
+    }
+    if (lower.includes('pay') || lower.includes('slip') || lower.includes('deposit')) {
+      return "கட்டணம் செலுத்த அல்லது பதிவு செய்ய:\n1. பக்கவாட்டு மெனுவில் 'Payments' என்பதைத் திறக்கவும்.\n2. உங்கள் சீட்டுக் குழுவைத் தேர்ந்தெடுத்து பற்றுச்சீட்டைப் பதிவேற்றவும்.";
+    }
+    if (lower.includes('law') || lower.includes('ordinance')) {
+      return "சீட்டுமேனேஜர் இலங்கையின் 1935 இன் 61 ஆம் இலக்க சீட்டுச் சட்டத்தின் கீழ் இயங்குகிறது.";
+    }
+    return "தற்போது சர்வரைத் தொடர்பு கொள்ள முடியவில்லை. தயவுசெய்து ஒரு தலைப்பைத் தேர்ந்தெடுக்கவும்.";
+  }
+
+  // Default English Fallbacks (en)
   if (lower.includes('score') || lower.includes('discipline') || lower.includes('formula')) {
     return "Your Financial Discipline Score starts at 100 points:\n\nFormula: 100 - [(Late Payments × 5) + (Missed Cycles × 10) + (Avg Delay Days × 0.5)]\n\n• 90-100 (Excellent): Priority payout access\n• 75-89 (Good): Standard eligibility\n• 50-74 (Average): Guarantor required\n• Below 50: At Risk";
   }
@@ -82,7 +134,7 @@ const ChatbotWidget = () => {
     return () => clearTimeout(timer);
   }, [messages, isOpen, loading]);
 
-  // Sends a question (typed or from a quick topic) and appends the reply
+  // Sends a question and appends the reply based on current language
   const handleSendText = async (textToSend) => {
     const queryText = (textToSend ?? input).trim();
     if (!queryText || loading) return;
@@ -92,6 +144,17 @@ const ChatbotWidget = () => {
     setLoading(true);
 
     try {
+      // If language is Sinhala or Tamil, directly use local multi-language answers for instant response
+      if (i18n.language === 'si' || i18n.language === 'ta') {
+        const localAnswer = getFallbackAnswer(queryText);
+        setTimeout(() => {
+          setMessages((prev) => [...prev, { text: localAnswer, sender: 'bot', time: currentTime() }]);
+          setLoading(false);
+        }, 400); // Small realistic delay
+        return;
+      }
+
+      // Try querying the backend for English
       const res = await queryChatbot(queryText);
       const botResponse = res?.data ?? res?.answer ?? res;
       const text = typeof botResponse === 'string' ? botResponse : JSON.stringify(botResponse);
@@ -238,7 +301,7 @@ const ChatbotWidget = () => {
           {/* Quick topic chips */}
           <div className="bg-white border-top border-bottom py-2 flex-shrink-0">
             <div className="chatbot-chips-scroll px-3 d-flex gap-2" style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
-              {QUICK_TOPICS.map((item) => (
+              {getQuickTopics(i18n.language).map((item) => (
                 <button
                   key={item.key}
                   type="button"
