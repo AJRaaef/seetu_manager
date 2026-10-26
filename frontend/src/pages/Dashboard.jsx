@@ -17,7 +17,6 @@ import { getGroupsByUser } from '../api/groupApi';
 import api from '../api/axios';
 import Icon from '../components/Icons';
 import ReviewPayoutModal from '../components/ReviewPayoutModal';
-import SettlePaymentModal from '../components/SettlePaymentModal';
 import PaymentDetailsModal from '../components/PaymentDetailsModal';
 import DashboardAnalytics from '../components/DashboardAnalytics';
 
@@ -39,8 +38,6 @@ const Dashboard = () => {
   const [selectedUpcomingPayout, setSelectedUpcomingPayout] = useState(null);
   const [pendingDues, setPendingDues] = useState([]);
   const [loadingDues, setLoadingDues] = useState(true);
-  const [settleModalItem, setSettleModalItem] = useState(null);
-  const [showSettleModal, setShowSettleModal] = useState(false);
 
   const userId = user?.userId || user?.id;
 
@@ -253,77 +250,6 @@ const Dashboard = () => {
     }
   };
 
-
-  const handleOpenSettle = (dueItem) => {
-    setSettleModalItem({
-      id: dueItem.existingPaymentId || null,
-      cycleId: dueItem.cycleId,
-      memberId: userId,
-      member: user?.fullName || 'You',
-      amount: dueItem.amount,
-      group: dueItem.groupName,
-      cycle: `Cycle ${dueItem.cycleNumber}`,
-      status: dueItem.isOverdue ? 'LATE' : 'PAID',
-      date: new Date().toISOString().split('T')[0],
-      method: 'Bank Transfer (Slip Uploaded)',
-      notes: dueItem.isOverdue
-        ? `Settled overdue contribution (${dueItem.daysOverdue} days late)`
-        : `Settled contribution for Cycle #${dueItem.cycleNumber}`
-    });
-    setShowSettleModal(true);
-  };
-
-  const handleConfirmSettleModal = async (form) => {
-    try {
-      let paymentId = form.id;
-      if (paymentId) {
-        await updatePayment(paymentId, {
-          cycleId: form.cycleId,
-          memberId: form.memberId,
-          amount: form.amount,
-          status: form.status,
-          paymentDate: form.date,
-          paymentMethod: form.method,
-          notes: form.notes
-        }, userId);
-      } else {
-        const res = await recordPayment({
-          cycleId: form.cycleId,
-          memberId: form.memberId,
-          amount: form.amount,
-          status: isOrganizer ? form.status : 'PENDING',
-          paymentDate: form.date,
-          paymentMethod: form.method,
-          notes: form.notes
-        }, userId);
-        paymentId = res?.data?.id || res?.id;
-      }
-
-      if (form.evidenceFile && paymentId) {
-        await uploadPaymentEvidence(paymentId, form.evidenceFile);
-      }
-
-      alert('Payment submitted successfully! Your record is now updated in the database.');
-      setShowSettleModal(false);
-      setSettleModalItem(null);
-      // Reload metrics and dues
-      const duesRes = await getMyPendingDues();
-      setPendingDues(duesRes?.data || []);
-      const payRes = await getPaymentsByMember(userId);
-      setRecentPayments((payRes?.data || payRes || []).slice(0, 5).map(p => ({
-        id: p.id,
-        member: p.memberName || 'Member',
-        amount: Number(p.amount) || 0,
-        status: (p.status || 'PAID').toUpperCase(),
-        date: p.paymentDate || p.createdAt?.split('T')[0] || '-',
-        group: p.groupName || 'General Group',
-        cycle: p.cycleNumber ? `Cycle ${p.cycleNumber}` : 'Cycle 1'
-      })));
-    } catch (err) {
-      console.error('Failed to submit payment settlement', err);
-      alert(err?.response?.data?.message || 'Failed to submit payment settlement to database.');
-    }
-  };
 
   const handleRowClick = (payment) => {
     setSelectedPayment(payment);
@@ -627,33 +553,13 @@ const Dashboard = () => {
                         </div>
                       </div>
 
-                      <div className="d-flex align-items-center gap-2">
-                        {isAwaiting ? (
-                          <Link
-                            to={`/groups/${due.groupId}`}
-                            className="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold"
-                          >
-                            View Circle
-                          </Link>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => handleOpenSettle(due)}
-                              className={`btn btn-sm rounded-pill px-3.5 py-1.5 fw-semibold shadow-sm d-inline-flex align-items-center gap-1.5 ${theme.btnClass}`}
-                            >
-                              <Icon name="credit-card" size={15} />
-                              <span>{isOverdue ? 'Settle Overdue Now' : 'Pay / Upload Slip'}</span>
-                            </button>
-                            <Link
-                              to={`/groups/${due.groupId}`}
-                              className="btn btn-sm btn-light border rounded-pill px-2.5 py-1.5 text-muted"
-                              title="View Group"
-                            >
-                              <Icon name="arrow-right" size={15} />
-                            </Link>
-                          </>
-                        )}
-                      </div>
+                      <Link
+                        to={`/groups/${due.groupId}`}
+                        className="btn btn-sm btn-outline-secondary rounded-pill px-3.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm"
+                      >
+                        <span>View Circle</span>
+                        <Icon name="arrow-right" size={14} />
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -823,18 +729,7 @@ const Dashboard = () => {
         payment={selectedPayment}
       />
 
-      {/* Settle Payment Modal for Direct Dashboard Submissions */}
-      {showSettleModal && settleModalItem && (
-        <SettlePaymentModal
-          show={showSettleModal}
-          onHide={() => {
-            setShowSettleModal(false);
-            setSettleModalItem(null);
-          }}
-          payment={settleModalItem}
-          onSettle={handleConfirmSettleModal}
-        />
-      )}
+
 
     </div>
   );
