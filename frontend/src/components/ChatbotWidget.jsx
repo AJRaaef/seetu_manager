@@ -173,7 +173,7 @@ const ChatbotWidget = () => {
   if (isAdmin) return null;
 
   return (
-    <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1060 }}>
+    <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1000 }}>
       {/* Scoped CSS: hides the chip scrollbar and styles the message scrollbar */}
       <style>{`
         .chatbot-chips-scroll { scrollbar-width: none; -ms-overflow-style: none; }
@@ -214,7 +214,7 @@ const ChatbotWidget = () => {
             maxWidth: 'calc(100vw - 36px)',
             height: '560px',
             maxHeight: 'calc(100vh - 48px)',
-            zIndex: 1070,
+            zIndex: 1010,
             overflow: 'hidden',
             boxShadow: '0 20px 40px rgba(15, 47, 61, 0.22)',
           }}
