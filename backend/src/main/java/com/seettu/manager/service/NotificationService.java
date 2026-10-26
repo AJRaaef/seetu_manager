@@ -59,6 +59,7 @@ public class NotificationService {
             case "PAYOUT_APPROVED": return "Seettu Circle Lump-Sum Payout Approved";
             case "CYCLE_COMPLETED": return "Seettu Cycle Completion & Payout Notification";
             case "UPCOMING_PAYOUT": return "Upcoming Seettu Rotational Payout Notice";
+            case "KULUKKAL_DRAW": return "Kulukkal Lot Drawing Announcement";
             case "GROUP": return "Seettu Circle Membership Update";
             case "KYC_VERIFIED": return "KYC Verification Approved";
             case "KYC_REJECTED": return "KYC Verification Status";

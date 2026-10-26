@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -250,6 +252,161 @@ public class PaymentCycleService {
                     "Payout allocated to " + member.getFullName() + " for Cycle #" + cycle.getCycleNumber()
             );
         }
+        return saved;
+    }
+
+    @Transactional
+    public List<PaymentCycle> conductKulukkalDraw(Long groupId) {
+        SeettuGroup group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new com.seettu.manager.exception.ResourceNotFoundException("SeettuGroup", "id", groupId));
+
+        List<PaymentCycle> cycles = cycleRepository.findByGroupIdOrderByCycleNumberAsc(groupId);
+        if (cycles.isEmpty()) {
+            throw new IllegalArgumentException("No payment cycles found for this group to conduct Kulukkal draw.");
+        }
+
+        List<com.seettu.manager.entity.GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(
+                groupId, com.seettu.manager.entity.GroupMember.MemberStatus.ACTIVE);
+
+        if (activeMembers.isEmpty()) {
+            throw new IllegalArgumentException("No active members enrolled in this group to conduct Kulukkal draw.");
+        }
+
+        // 1. Identify the Organizer for Cycle 1
+        User organizer = group.getCreatedBy();
+        if (organizer == null) {
+            organizer = activeMembers.stream()
+                    .map(com.seettu.manager.entity.GroupMember::getUser)
+                    .filter(u -> u != null && u.getRole() == User.Role.ORGANIZER)
+                    .findFirst()
+                    .orElse(activeMembers.get(0).getUser());
+        }
+
+        final Long organizerId = organizer != null ? organizer.getId() : null;
+
+        // 2. Identify remaining enrolled members for Cycles 2..N
+        List<User> otherMembers = activeMembers.stream()
+                .map(com.seettu.manager.entity.GroupMember::getUser)
+                .filter(u -> u != null && (organizerId == null || !u.getId().equals(organizerId)))
+                .collect(Collectors.toList());
+
+        // Cryptographically secure shuffle for authentic, fair Kulukkal lot drawing
+        Collections.shuffle(otherMembers, new java.security.SecureRandom());
+
+        StringBuilder drawSummary = new StringBuilder();
+
+        for (PaymentCycle cycle : cycles) {
+            if (cycle.getCycleNumber() == 1) {
+                // Cycle 1: Strictly reserved for Organizer
+                cycle.setPayoutMember(organizer);
+                cycleRepository.save(cycle);
+                drawSummary.append("Cycle #1: ").append(organizer != null ? organizer.getFullName() : "Organizer").append(" (Organizer Turn), ");
+            } else {
+                // Cycles 2..N: Drawn fairly from remaining members
+                int memberIdx = cycle.getCycleNumber() - 2;
+                User recipient;
+                if (!otherMembers.isEmpty()) {
+                    recipient = otherMembers.get(memberIdx % otherMembers.size());
+                } else {
+                    recipient = activeMembers.get((cycle.getCycleNumber() - 1) % activeMembers.size()).getUser();
+                }
+                cycle.setPayoutMember(recipient);
+                cycleRepository.save(cycle);
+                drawSummary.append("Cycle #").append(cycle.getCycleNumber()).append(": ").append(recipient != null ? recipient.getFullName() : "Member").append(", ");
+            }
+        }
+
+        // 3. Broadcast Kulukkal draw notification to all circle members
+        String groupName = group.getName() != null ? group.getName() : "Seettu Circle";
+        String broadcastMsg = "Kulukkal Lot Drawing Completed for '" + groupName + "'! Cycle #1 is allocated to the Organizer (" 
+                + (organizer != null ? organizer.getFullName() : "Organizer") 
+                + "). Subsequent cycles were fairly drawn. View the full rotation schedule in your group dashboard.";
+
+        for (com.seettu.manager.entity.GroupMember gm : activeMembers) {
+            if (gm.getUser() != null && gm.getUser().getId() != null) {
+                try {
+                    notificationService.sendNotification(gm.getUser().getId(), broadcastMsg, "KULUKKAL_DRAW");
+                } catch (Exception ignored) {}
+            }
+        }
+
+        // 4. Audit log
+        try {
+            auditLogService.log(
+                    organizer,
+                    "KULUKKAL_DRAW_COMPLETED",
+                    "payment_cycles",
+                    groupId,
+                    "Kulukkal lot draw conducted for group '" + groupName + "'. Results: " + drawSummary
+            );
+        } catch (Exception ignored) {}
+
+        return cycleRepository.findByGroupIdOrderByCycleNumberAsc(groupId);
+    }
+
+    @Transactional
+    public PaymentCycle conductSingleKulukkalDraw(Long cycleId) {
+        PaymentCycle cycle = getCycleById(cycleId);
+        SeettuGroup group = cycle.getGroup();
+        if (group == null) {
+            throw new IllegalArgumentException("Cycle does not belong to a valid group.");
+        }
+
+        List<com.seettu.manager.entity.GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(
+                group.getId(), com.seettu.manager.entity.GroupMember.MemberStatus.ACTIVE);
+
+        if (activeMembers.isEmpty()) {
+            throw new IllegalArgumentException("No active members in group.");
+        }
+
+        User winner;
+        if (cycle.getCycleNumber() == 1) {
+            winner = group.getCreatedBy();
+            if (winner == null) {
+                winner = activeMembers.get(0).getUser();
+            }
+        } else {
+            // Find members who haven't won any other cycle yet
+            List<PaymentCycle> allCycles = cycleRepository.findByGroupIdOrderByCycleNumberAsc(group.getId());
+            List<Long> alreadyAwardedIds = allCycles.stream()
+                    .filter(c -> !c.getId().equals(cycle.getId()) && c.getPayoutMember() != null)
+                    .map(c -> c.getPayoutMember().getId())
+                    .toList();
+
+            Long organizerId = group.getCreatedBy() != null ? group.getCreatedBy().getId() : null;
+            List<User> eligible = activeMembers.stream()
+                    .map(com.seettu.manager.entity.GroupMember::getUser)
+                    .filter(u -> u != null && !alreadyAwardedIds.contains(u.getId()) && (organizerId == null || !u.getId().equals(organizerId)))
+                    .collect(Collectors.toList());
+
+            if (eligible.isEmpty()) {
+                eligible = activeMembers.stream()
+                        .map(com.seettu.manager.entity.GroupMember::getUser)
+                        .filter(u -> u != null && !alreadyAwardedIds.contains(u.getId()))
+                        .collect(Collectors.toList());
+            }
+
+            if (eligible.isEmpty()) {
+                eligible = activeMembers.stream().map(com.seettu.manager.entity.GroupMember::getUser).collect(Collectors.toList());
+            }
+
+            Collections.shuffle(eligible, new java.security.SecureRandom());
+            winner = eligible.get(0);
+        }
+
+        cycle.setPayoutMember(winner);
+        PaymentCycle saved = cycleRepository.save(cycle);
+
+        String groupName = group.getName() != null ? group.getName() : "Seettu Group";
+        String notice = "Kulukkal Winner Drawn! For Cycle #" + cycle.getCycleNumber() + " in '" + groupName + "', the winning lot chit was drawn for " + winner.getFullName() + ".";
+        for (com.seettu.manager.entity.GroupMember gm : activeMembers) {
+            if (gm.getUser() != null && gm.getUser().getId() != null) {
+                try {
+                    notificationService.sendNotification(gm.getUser().getId(), notice, "KULUKKAL_DRAW");
+                } catch (Exception ignored) {}
+            }
+        }
+
         return saved;
     }
 

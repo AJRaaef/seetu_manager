@@ -42,4 +42,16 @@ public class PaymentCycleController {
         User member = userService.getUserById(memberId);
         return ResponseEntity.ok(ApiResponse.success("Payout member assigned", paymentCycleService.assignPayoutMember(id, member)));
     }
+
+    @PostMapping("/group/{groupId}/kulukkal-draw")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public ResponseEntity<ApiResponse<List<PaymentCycle>>> conductKulukkalDraw(@PathVariable Long groupId) {
+        return ResponseEntity.ok(ApiResponse.success("Kulukkal draw completed successfully", paymentCycleService.conductKulukkalDraw(groupId)));
+    }
+
+    @PostMapping("/{id}/kulukkal-draw")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    public ResponseEntity<ApiResponse<PaymentCycle>> conductSingleKulukkalDraw(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Cycle Kulukkal draw completed", paymentCycleService.conductSingleKulukkalDraw(id)));
+    }
 }

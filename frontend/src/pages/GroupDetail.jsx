@@ -6,6 +6,7 @@ import api from '../api/axios';
 import { useAuth } from '../hooks/useAuth';
 import { getErrorMessage } from '../utils/errorHandler';
 import DisbursementVoucherModal from '../components/DisbursementVoucherModal';
+import KulukkalDrawModal from '../components/KulukkalDrawModal';
 import Icon from '../components/Icons';
 
 const GroupDetail = () => {
@@ -17,6 +18,7 @@ const GroupDetail = () => {
   const [activeTab, setActiveTab] = useState('members');
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showAssignPayoutModal, setShowAssignPayoutModal] = useState(false);
+  const [showKulukkalModal, setShowKulukkalModal] = useState(false);
   const [selectedCycle, setSelectedCycle] = useState(null);
   const [selectedPayoutMemberId, setSelectedPayoutMemberId] = useState('');
   const [payoutMode, setPayoutMode] = useState('direct'); // 'direct', 'random', 'auction'
@@ -208,6 +210,14 @@ const GroupDetail = () => {
           </Link>
           {(isOrganizer || isAdmin) && (
             <>
+              <button 
+                className="btn btn-outline-success fw-semibold d-flex align-items-center gap-1.5 shadow-xs" 
+                onClick={() => setShowKulukkalModal(true)}
+                title="Conduct Kulukkal Lot Drawing (குலுக்கல் சீட்டு)"
+              >
+                <Icon name="refresh" size={15} />
+                <span>Kulukkal Draw (குலுக்கல்)</span>
+              </button>
               <button className="btn btn-teal fw-semibold d-flex align-items-center gap-1" onClick={() => setShowAddMemberModal(true)}>
                 <span>+</span> Add Member
               </button>
@@ -361,7 +371,23 @@ const GroupDetail = () => {
               )}
 
               {activeTab === 'cycles' && (
-                <div className="table-responsive">
+                <>
+                  {(isOrganizer || isAdmin) && (
+                    <div className="p-3 bg-light border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                      <div className="small text-muted">
+                        <strong>Kulukkal Method (குலுக்கல்):</strong> Cycle #1 is allocated to the Organizer. Cycles #2+ are drawn via lot chits.
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-success fw-bold d-inline-flex align-items-center gap-1.5 shadow-xs"
+                        onClick={() => setShowKulukkalModal(true)}
+                      >
+                        <Icon name="refresh" size={14} />
+                        <span>Conduct Kulukkal Draw (குலுக்கல்)</span>
+                      </button>
+                    </div>
+                  )}
+                  <div className="table-responsive">
                   <table className="table table-hover align-middle mb-0">
                     <thead className="table-light">
                       <tr>
@@ -463,6 +489,7 @@ const GroupDetail = () => {
                     </tbody>
                   </table>
                 </div>
+                </>
               )}
             </div>
           </div>
@@ -607,7 +634,7 @@ const GroupDetail = () => {
                       Cycle #{selectedCycle.cycleNumber} Payout Selection
                     </h5>
                     <small className="text-white-50">
-                      Select recipient via Fixed Rotation, Fair Random Draw, or Auction Bidding
+                      Select recipient via Fixed Rotation, Kulukkal Lot Draw (குலுக்கல்), or Auction Bidding
                     </small>
                   </div>
                   <button type="button" className="btn-close btn-close-white" onClick={() => setShowAssignPayoutModal(false)}></button>
@@ -630,7 +657,7 @@ const GroupDetail = () => {
                       style={payoutMode === 'random' ? { backgroundColor: '#235665', color: '#fff' } : {}}
                       onClick={() => setPayoutMode('random')}
                     >
-                      Random Draw
+                      Kulukkal Draw (குலுக்கல்)
                     </button>
                     <button
                       type="button"
@@ -673,57 +700,86 @@ const GroupDetail = () => {
                       </div>
                     )}
 
-                    {/* MODE 2: RANDOM DRAW / LOTTERY */}
+                    {/* MODE 2: KULUKKAL LOT DRAW */}
                     {payoutMode === 'random' && (
                       <div>
                         <div className="alert alert-info py-2 px-3 mb-3 small border-0 bg-info-subtle text-info-emphasis rounded-3">
-                          <strong>Fair Random Draw:</strong> Neutral algorithmic lot selection among non-prizewinning members.
+                          {selectedCycle.cycleNumber === 1 ? (
+                            <span><strong>Seettu Rule:</strong> Cycle #1 is allocated directly to the Circle Organizer ({group.createdByName || 'Organizer'}) as customary management remuneration.</span>
+                          ) : (
+                            <span><strong>Kulukkal Lot Shaker (குலுக்கல்):</strong> Fair algorithmic lot drawing among participating subscribers who have not received a payout yet.</span>
+                          )}
                         </div>
 
                         <div className="p-4 text-center rounded-3 mb-3 border bg-light">
-                          <div className="text-secondary small fw-bold mb-2">ELIGIBLE MEMBERS IN LOTTERY POOL: {eligibleMembers.length}</div>
+                          <div className="text-secondary small fw-bold mb-2">
+                            {selectedCycle.cycleNumber === 1 ? 'CYCLE 1: ORGANIZER GUARANTEED TURN' : `ELIGIBLE MEMBERS IN KULUKKAL POOL: ${eligibleMembers.length}`}
+                          </div>
                           
                           {isRolling ? (
                             <div className="py-3">
                               <div className="spinner-border text-primary mb-2" role="status"></div>
-                              <h4 className="fw-bold font-monospace text-primary">{rolledName || 'Drawing...'}</h4>
-                              <small className="text-muted">Shuffling participant lots...</small>
+                              <h4 className="fw-bold font-monospace text-primary">{rolledName || 'Shuffling chits...'}</h4>
+                              <small className="text-muted">Mixing Kulukkal chits in the shaker...</small>
                             </div>
                           ) : drawWinner ? (
                             <div className="py-2">
-                              <span className="badge bg-success fs-6 px-3 py-2 mb-2 rounded-pill">WINNER SELECTED</span>
+                              <span className="badge bg-success fs-6 px-3 py-2 mb-2 rounded-pill">KULUKKAL WINNER DRAWN</span>
                               <h3 className="fw-bold text-dark mt-1">{drawWinner.fullName}</h3>
                               <div className="text-muted small">{drawWinner.email} • ID #{drawWinner.userId || drawWinner.id}</div>
                               <div className="text-success small fw-semibold mt-1">Lump-sum Pot: LKR {totalPool.toLocaleString()}</div>
                             </div>
                           ) : (
                             <div className="py-2">
-                              <p className="text-muted small mb-3">
-                                {eligibleMembers.length > 0
-                                  ? `${eligibleMembers.length} active member(s) have not received a payout yet.`
-                                  : 'All enrolled members have already received a payout!'}
-                              </p>
-                              <button
-                                type="button"
-                                className="btn btn-primary px-4 py-2 fw-bold shadow-sm"
-                                style={{ backgroundColor: '#235665', borderColor: '#235665' }}
-                                onClick={handleRunRandomDraw}
-                                disabled={eligibleMembers.length === 0}
-                              >
-                                Run Random Draw
-                              </button>
+                              {selectedCycle.cycleNumber === 1 ? (
+                                <div>
+                                  <p className="text-muted small mb-3">
+                                    Click below to assign Cycle #1 to the Organizer ({group.createdByName || 'Organizer'}).
+                                  </p>
+                                  <button
+                                    type="button"
+                                    className="btn btn-success px-4 py-2 fw-bold shadow-sm"
+                                    onClick={() => {
+                                      const organizer = (group.members || []).find(m => String(m.userId || m.id) === String(group.createdById)) || group.members?.[0];
+                                      if (organizer) {
+                                        setDrawWinner(organizer);
+                                        setSelectedPayoutMemberId(String(organizer.userId || organizer.id));
+                                      }
+                                    }}
+                                  >
+                                    Assign to Organizer ({group.createdByName || 'Organizer'})
+                                  </button>
+                                </div>
+                              ) : (
+                                <div>
+                                  <p className="text-muted small mb-3">
+                                    {eligibleMembers.length > 0
+                                      ? `${eligibleMembers.length} active member(s) have not received a payout yet.`
+                                      : 'All enrolled members have already received a payout!'}
+                                  </p>
+                                  <button
+                                    type="button"
+                                    className="btn btn-primary px-4 py-2 fw-bold shadow-sm"
+                                    style={{ backgroundColor: '#235665', borderColor: '#235665' }}
+                                    onClick={handleRunRandomDraw}
+                                    disabled={eligibleMembers.length === 0}
+                                  >
+                                    Shake Kulukkal Lots (குலுக்கல்)
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
 
-                        {drawWinner && (
+                        {drawWinner && selectedCycle.cycleNumber !== 1 && (
                           <div className="d-flex justify-content-end">
                             <button
                               type="button"
                               className="btn btn-outline-secondary btn-sm"
                               onClick={handleRunRandomDraw}
                             >
-                              Re-Draw Lot
+                              Re-Draw Kulukkal Lot
                             </button>
                           </div>
                         )}
@@ -900,6 +956,16 @@ const GroupDetail = () => {
           </div>
         </div>
       )}
+      {/* Kulukkal Draw Modal */}
+      <KulukkalDrawModal
+        show={showKulukkalModal}
+        onHide={() => setShowKulukkalModal(false)}
+        group={group}
+        onDrawSuccess={(updatedCycles) => {
+          setActionMsg('Kulukkal Draw completed successfully! Cycle #1 is allocated to Organizer, and other cycle turns have been fairly drawn.');
+          fetchGroup();
+        }}
+      />
     </div>
   );
 };
