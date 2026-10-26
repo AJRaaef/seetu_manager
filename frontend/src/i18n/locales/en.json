@@ -813,10 +813,10 @@
       "refund": "Refund Policy",
       "disclaimer": "Disclaimer"
     },
-    
-"faq_1_q": "What is a Seettu (Chit Fund / ROSCA)?",
+
+    "faq_1_q": "What is a Seettu (Chit Fund / ROSCA)?",
     "faq_1_a": "A Seettu (internationally termed a Chit Fund or Rotating Savings and Credit Association — ROSCA) is a traditional community savings mechanism where members pool fixed contributions at regular intervals (daily, weekly, or monthly). In each cycle, the pooled sum is awarded to one member via fixed rotation, auction bidding, or fair lottery, continuing until every participant receives their complete payout.",
-    
+
     "faq_2_q": "What is the difference between a Bank Loan and a Seettu?",
     "faq_2_a": "Unlike traditional bank loans that charge high compounding interest, require mortgaged collateral, and involve rigid banking bureaucracy, a Seettu is a community-funded financial circle. Non-bidded members use Seettu as a high-yield savings tool earning monthly dividend deductions, while bidded members access rapid lump-sum capital without exploitative interest rates.",
 
@@ -854,8 +854,25 @@
     "faq_13_a": "Yes. Eligible members with an established Financial Discipline Score can subscribe to multiple tickets/slots in the same group (e.g., 2 slots in a 12-member group). Each ticket is treated independently with separate contribution obligations and two distinct rotation payout opportunities.",
 
     "faq_14_q": "What if a subscriber needs to cancel or leave a Seettu early?",
-    "faq_14_a": "Under standard Seettu agreements, if an un-bidded subscriber encounters genuine hardship, the Organizer facilitates a 'Vacant Chit Transfer' to an approved replacement member from the waitlist, refunding the original member's contributions according to group bylaws."
+    "faq_14_a": "Under standard Seettu agreements, if an un-bidded subscriber encounters genuine hardship, the Organizer facilitates a 'Vacant Chit Transfer' to an approved replacement member from the waitlist, refunding the original member's contributions according to group bylaws.",
 
+    "feat_discipline_title": "Financial Discipline Score",
+    "feat_discipline_desc": "Algorithmic 0–100 reliability scoring based on payment punctuality. Builds trusted creditability and eliminates default risks.",
+
+    "feat_organizer_title": "Become an Organizer",
+    "feat_organizer_desc": "Your community calling: create private or village circles, set custom rules, and lead your circle with automated rotations.",
+
+    "feat_installment_title": "Option to Pay Your Installment",
+    "feat_installment_desc": "Flexible contribution periods on a daily, weekly, or monthly basis with offline cash tracking and instant bank slip verification.",
+
+    "feat_payout_title": "Payment Quality & Payouts",
+    "feat_payout_desc": "Automated rotation calendar guarantees on-time payouts. Every member receives their lump-sum safely on their scheduled cycle date.",
+
+    "feat_joining_title": "Joining Process",
+    "feat_joining_desc": "Easily join and pay into Seettu circles with zero paperwork. Instant phone verification, member directories, and transparent rules.",
+
+    "feat_secure_title": "Secure & Non-Custodial",
+    "feat_secure_desc": "Pay directly to organizer or members via bank transfer or cash with digital tamper-proof audit trails and duplicate payment prevention."
   },
 
   "common": {

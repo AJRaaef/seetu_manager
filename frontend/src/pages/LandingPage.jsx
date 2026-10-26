@@ -727,14 +727,14 @@ const LandingPage = () => {
           {/* Section Header */}
           <div className="text-center mb-5">
             <span className="text-uppercase fw-bold" style={{ color: '#0097B2', letterSpacing: '2px', fontSize: '0.85rem' }}>
-              WELCOME TO
+              {t('landing.welcome_tag', 'WELCOME TO')}
             </span>
             <h2 className="fw-black display-5 mt-1 mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
               <span style={{ color: '#003847', fontWeight: 900 }}>Seettu</span>
               <span style={{ color: '#0097B2', fontWeight: 900 }}>Manager</span>
             </h2>
             <p className="lead text-secondary mx-auto mb-0" style={{ maxWidth: '820px', fontSize: '1.05rem', lineHeight: '1.6' }}>
-              Saving and Investing is a lifelong process. The sooner you start; the better off you'll be in the long run. Smart way to save and borrow.
+              {t('landing.welcome_desc', "Saving and Investing is a lifelong process. The sooner you start; the better off you'll be in the long run. Smart way to save and borrow.")}
             </p>
           </div>
 
@@ -761,10 +761,10 @@ const LandingPage = () => {
                   </div>
                   <div>
                     <h5 className="fw-bold mb-1" style={{ color: '#0F2F3D', fontSize: '1.15rem' }}>
-                      Financial Discipline Score
+                      {t('landing.feat_discipline_title', 'Financial Discipline Score')}
                     </h5>
                     <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
-                      Algorithmic 0–100 reliability scoring based on payment punctuality. Builds trusted creditability and eliminates default risks.
+                      {t('landing.feat_discipline_desc', 'Algorithmic 0–100 reliability scoring based on payment punctuality. Builds trusted creditability and eliminates default risks.')}
                     </p>
                   </div>
                 </div>
@@ -785,10 +785,10 @@ const LandingPage = () => {
                   </div>
                   <div>
                     <h5 className="fw-bold mb-1" style={{ color: '#0F2F3D', fontSize: '1.15rem' }}>
-                      Become an Organizer
+                      {t('landing.feat_organizer_title', 'Become an Organizer')}
                     </h5>
                     <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
-                      Your community calling: create private or village circles, set custom rules, and lead your circle with automated rotations.
+                      {t('landing.feat_organizer_desc', 'Your community calling: create private or village circles, set custom rules, and lead your circle with automated rotations.')}
                     </p>
                     <Link
                       to={user ? '/profile' : '/register'}
@@ -817,10 +817,10 @@ const LandingPage = () => {
                   </div>
                   <div>
                     <h5 className="fw-bold mb-1" style={{ color: '#0F2F3D', fontSize: '1.15rem' }}>
-                      Option to Pay Your Installment
+                      {t('landing.feat_installment_title', 'Option to Pay Your Installment')}
                     </h5>
                     <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
-                      Flexible contribution periods on a daily, weekly, or monthly basis with offline cash tracking and instant bank slip verification.
+                      {t('landing.feat_installment_desc', 'Flexible contribution periods on a daily, weekly, or monthly basis with offline cash tracking and instant bank slip verification.')}
                     </p>
                   </div>
                 </div>
@@ -828,7 +828,7 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* Center Column: Unique High-Resolution Fintech Showcase Visual */}
+            {/* Center Column: Unique High-Resolution Fintech Showcase Visual (PHOTO PRESERVED) */}
             <div className="col-lg-4 col-md-12 order-first order-lg-0 mb-4 mb-lg-0">
               <div 
                 className="position-relative rounded-4 overflow-hidden shadow-lg border h-100 d-flex flex-column justify-content-between align-items-center p-3 text-center"
@@ -852,7 +852,7 @@ const LandingPage = () => {
                   }}
                 >
                   <Icon name="shield" size={13} color="#00E5FF" />
-                  <span>SRI LANKAN ROTATING SAVINGS</span>
+                  <span>{t('landing.showcase_badge', 'SRI LANKAN ROTATING SAVINGS')}</span>
                 </div>
 
                 {/* Unique 3D Fintech Showcase Illustration */}
@@ -882,11 +882,11 @@ const LandingPage = () => {
                   <div className="d-flex align-items-center gap-2">
                     <span className="d-inline-block rounded-circle" style={{ width: '8px', height: '8px', backgroundColor: '#10B981', boxShadow: '0 0 8px #10B981' }} />
                     <span className="small text-white-50 fw-semibold" style={{ fontSize: '0.76rem' }}>
-                      Certified Cheetus Ledger
+                      {t('landing.showcase_ledger', 'Certified Cheetus Ledger')}
                     </span>
                   </div>
                   <span className="fw-bold" style={{ color: '#00E5FF', fontSize: '0.8rem' }}>
-                    100% Guaranteed
+                    {t('landing.showcase_guarantee', '100% Guaranteed')}
                   </span>
                 </div>
               </div>
@@ -912,10 +912,10 @@ const LandingPage = () => {
                   </div>
                   <div>
                     <h5 className="fw-bold mb-1" style={{ color: '#0F2F3D', fontSize: '1.15rem' }}>
-                      Payment Quality & Payouts
+                      {t('landing.feat_payout_title', 'Payment Quality & Payouts')}
                     </h5>
                     <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
-                      Automated rotation calendar guarantees on-time payouts. Every member receives their lump-sum safely on their scheduled cycle date.
+                      {t('landing.feat_payout_desc', 'Automated rotation calendar guarantees on-time payouts. Every member receives their lump-sum safely on their scheduled cycle date.')}
                     </p>
                   </div>
                 </div>
@@ -936,10 +936,10 @@ const LandingPage = () => {
                   </div>
                   <div>
                     <h5 className="fw-bold mb-1" style={{ color: '#0F2F3D', fontSize: '1.15rem' }}>
-                      Joining Process
+                      {t('landing.feat_joining_title', 'Joining Process')}
                     </h5>
                     <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
-                      Easily join and pay into Seettu circles with zero paperwork. Instant phone verification, member directories, and transparent rules.
+                      {t('landing.feat_joining_desc', 'Easily join and pay into Seettu circles with zero paperwork. Instant phone verification, member directories, and transparent rules.')}
                     </p>
                   </div>
                 </div>
@@ -960,10 +960,10 @@ const LandingPage = () => {
                   </div>
                   <div>
                     <h5 className="fw-bold mb-1" style={{ color: '#0F2F3D', fontSize: '1.15rem' }}>
-                      Secure & Non-Custodial
+                      {t('landing.feat_secure_title', 'Secure & Non-Custodial')}
                     </h5>
                     <p className="text-muted small mb-0" style={{ lineHeight: '1.6' }}>
-                      Pay directly to organizer or members via bank transfer or cash with digital tamper-proof audit trails and duplicate payment prevention.
+                      {t('landing.feat_secure_desc', 'Pay directly to organizer or members via bank transfer or cash with digital tamper-proof audit trails and duplicate payment prevention.')}
                     </p>
                   </div>
                 </div>
