@@ -133,9 +133,18 @@ const Dashboard = () => {
               if (targetCycle) {
                 let recipient = targetCycle.payoutMemberName;
                 if (!recipient || recipient === 'Unassigned' || recipient === 'Pending Rotation Selection') {
-                  if (Array.isArray(g.members) && g.members.length > 0) {
-                    const idx = (targetCycle.cycleNumber - 1) % g.members.length;
-                    recipient = g.members[idx]?.fullName;
+                  if (targetCycle.cycleNumber === 1) {
+                    recipient = g.createdByName || (Array.isArray(g.members) ? g.members[0]?.fullName : 'Organizer');
+                  } else if (Array.isArray(g.members) && g.members.length > 0) {
+                    const organizerId = g.createdById;
+                    const otherMembers = g.members.filter(m => !organizerId || String(m.userId || m.id) !== String(organizerId));
+                    if (otherMembers.length > 0) {
+                      const idx = (targetCycle.cycleNumber - 2) % otherMembers.length;
+                      recipient = otherMembers[idx]?.fullName;
+                    } else {
+                      const idx = (targetCycle.cycleNumber - 1) % g.members.length;
+                      recipient = g.members[idx]?.fullName;
+                    }
                   }
                 }
                 const isUser = (String(targetCycle.payoutMemberId) === String(userId) || (recipient && recipient === user?.fullName));
@@ -147,7 +156,7 @@ const Dashboard = () => {
                   groupId: g.id,
                   groupName: g.name,
                   cycle: `${g.name} • Cycle #${targetCycle.cycleNumber} of ${totalCycles}`,
-                  recipient: isUser ? `${recipient || 'You'} (Your Payout Turn!)` : (recipient || 'Rotation Selection'),
+                  recipient: isUser ? `${recipient || 'You'} (Your Payout Turn)` : (recipient || 'Rotation Selection'),
                   isUserRecipient: isUser,
                   date: targetCycle.endDate || targetCycle.startDate || '-',
                   daysRemaining: `${daysRemaining} days remaining`,
@@ -391,7 +400,7 @@ const Dashboard = () => {
                 <div>
                   <div className="d-flex align-items-center gap-2 mb-2">
                     <Icon
-                      name={item.isCompleted ? 'check-circle' : item.isUserRecipient ? 'award' : 'megaphone'}
+                      name={item.isCompleted ? 'check-circle' : item.isUserRecipient ? 'user-check' : 'bell'}
                       size={20}
                       color={item.isCompleted ? '#34D399' : item.isUserRecipient ? '#FACC15' : '#FFFFFF'}
                     />
@@ -399,7 +408,7 @@ const Dashboard = () => {
                       {item.isCompleted
                         ? 'All Rotation Cycles Completed & Disbursed'
                         : item.isUserRecipient
-                          ? '🎉 Your Scheduled Payout Turn!'
+                          ? 'Your Scheduled Payout Turn'
                           : t('dashboard_page.payout_card.title', 'Upcoming Rotational Payout')}
                     </span>
                   </div>

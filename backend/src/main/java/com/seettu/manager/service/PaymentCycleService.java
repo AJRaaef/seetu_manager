@@ -54,12 +54,19 @@ public class PaymentCycleService {
                     break;
             }
 
+            User initialPayoutMember = null;
+            if (i == 1 && group.getCreatedBy() != null) {
+                // By traditional Seettu law & custom, the organizer receives the 1st cycle fund
+                initialPayoutMember = group.getCreatedBy();
+            }
+
             PaymentCycle cycle = PaymentCycle.builder()
                     .group(group)
                     .cycleNumber(i)
                     .startDate(startDate)
                     .endDate(endDate)
                     .status(i == 1 ? PaymentCycle.CycleStatus.ACTIVE : PaymentCycle.CycleStatus.PENDING)
+                    .payoutMember(initialPayoutMember)
                     .build();
 
             cycles.add(cycleRepository.save(cycle));
@@ -84,15 +91,38 @@ public class PaymentCycleService {
                     ? group.getContributionAmount().multiply(java.math.BigDecimal.valueOf(memberCount))
                     : java.math.BigDecimal.ZERO;
 
-            // Auto-assign payout member if null using active member rotation order
+            // Auto-assign payout member if null: Cycle 1 always goes to the Organizer, subsequent cycles rotate among other members
             List<com.seettu.manager.entity.GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(
                     group.getId(), com.seettu.manager.entity.GroupMember.MemberStatus.ACTIVE);
-            if (cycle.getPayoutMember() == null && !activeMembers.isEmpty()) {
-                int cycleIdx = (cycle.getCycleNumber() - 1) % activeMembers.size();
-                User autoWinner = activeMembers.get(cycleIdx).getUser();
-                if (autoWinner != null) {
-                    cycle.setPayoutMember(autoWinner);
-                    cycleRepository.save(cycle);
+            if (cycle.getPayoutMember() == null) {
+                if (cycle.getCycleNumber() == 1) {
+                    User organizer = group.getCreatedBy();
+                    if (organizer == null && !activeMembers.isEmpty()) {
+                        organizer = activeMembers.stream()
+                                .map(com.seettu.manager.entity.GroupMember::getUser)
+                                .filter(u -> u != null && u.getRole() == User.Role.ORGANIZER)
+                                .findFirst()
+                                .orElse(activeMembers.get(0).getUser());
+                    }
+                    if (organizer != null) {
+                        cycle.setPayoutMember(organizer);
+                        cycleRepository.save(cycle);
+                    }
+                } else if (!activeMembers.isEmpty()) {
+                    Long organizerId = group.getCreatedBy() != null ? group.getCreatedBy().getId() : null;
+                    List<User> otherMembers = activeMembers.stream()
+                            .map(com.seettu.manager.entity.GroupMember::getUser)
+                            .filter(u -> u != null && (organizerId == null || !u.getId().equals(organizerId)))
+                            .toList();
+
+                    User autoWinner = !otherMembers.isEmpty()
+                            ? otherMembers.get((cycle.getCycleNumber() - 2) % otherMembers.size())
+                            : activeMembers.get((cycle.getCycleNumber() - 1) % activeMembers.size()).getUser();
+
+                    if (autoWinner != null) {
+                        cycle.setPayoutMember(autoWinner);
+                        cycleRepository.save(cycle);
+                    }
                 }
             }
 
@@ -110,13 +140,29 @@ public class PaymentCycleService {
                     nextCycle.setStatus(PaymentCycle.CycleStatus.ACTIVE);
                     cycleRepository.save(nextCycle);
                 }
-                // Auto-assign next cycle's payout member if null
-                if (nextCycle.getPayoutMember() == null && !activeMembers.isEmpty()) {
-                    int nextIdx = (nextCycle.getCycleNumber() - 1) % activeMembers.size();
-                    User nextWinner = activeMembers.get(nextIdx).getUser();
-                    if (nextWinner != null) {
-                        nextCycle.setPayoutMember(nextWinner);
-                        cycleRepository.save(nextCycle);
+                // Auto-assign next cycle's payout member if null: Cycle 1 to organizer, others to remaining members
+                if (nextCycle.getPayoutMember() == null) {
+                    if (nextCycle.getCycleNumber() == 1) {
+                        User organizer = group.getCreatedBy();
+                        if (organizer != null) {
+                            nextCycle.setPayoutMember(organizer);
+                            cycleRepository.save(nextCycle);
+                        }
+                    } else if (!activeMembers.isEmpty()) {
+                        Long organizerId = group.getCreatedBy() != null ? group.getCreatedBy().getId() : null;
+                        List<User> otherMembers = activeMembers.stream()
+                                .map(com.seettu.manager.entity.GroupMember::getUser)
+                                .filter(u -> u != null && (organizerId == null || !u.getId().equals(organizerId)))
+                                .toList();
+
+                        User nextWinner = !otherMembers.isEmpty()
+                                ? otherMembers.get((nextCycle.getCycleNumber() - 2) % otherMembers.size())
+                                : activeMembers.get((nextCycle.getCycleNumber() - 1) % activeMembers.size()).getUser();
+
+                        if (nextWinner != null) {
+                            nextCycle.setPayoutMember(nextWinner);
+                            cycleRepository.save(nextCycle);
+                        }
                     }
                 }
             }

@@ -351,11 +351,31 @@ public class SeettuGroupService {
 
                     Long payoutMemberId = c.getPayoutMember() != null ? c.getPayoutMember().getId() : null;
                     String payoutMemberName = c.getPayoutMember() != null ? c.getPayoutMember().getFullName() : null;
-                    if (payoutMemberName == null && activeMemberCount > 0) {
-                        int idx = (c.getCycleNumber() - 1) % activeMemberCount;
-                        if (members.get(idx).getUser() != null) {
-                            payoutMemberId = members.get(idx).getUser().getId();
-                            payoutMemberName = members.get(idx).getUser().getFullName();
+                    if (payoutMemberName == null) {
+                        if (c.getCycleNumber() == 1) {
+                            if (group.getCreatedBy() != null) {
+                                payoutMemberId = group.getCreatedBy().getId();
+                                payoutMemberName = group.getCreatedBy().getFullName();
+                            } else if (activeMemberCount > 0 && members.get(0).getUser() != null) {
+                                payoutMemberId = members.get(0).getUser().getId();
+                                payoutMemberName = members.get(0).getUser().getFullName();
+                            }
+                        } else if (activeMemberCount > 0) {
+                            Long organizerId = group.getCreatedBy() != null ? group.getCreatedBy().getId() : null;
+                            List<GroupMember> otherMembers = members.stream()
+                                    .filter(m -> m.getUser() != null && (organizerId == null || !m.getUser().getId().equals(organizerId)))
+                                    .toList();
+                            if (!otherMembers.isEmpty()) {
+                                int idx = (c.getCycleNumber() - 2) % otherMembers.size();
+                                payoutMemberId = otherMembers.get(idx).getUser().getId();
+                                payoutMemberName = otherMembers.get(idx).getUser().getFullName();
+                            } else {
+                                int idx = (c.getCycleNumber() - 1) % activeMemberCount;
+                                if (members.get(idx).getUser() != null) {
+                                    payoutMemberId = members.get(idx).getUser().getId();
+                                    payoutMemberName = members.get(idx).getUser().getFullName();
+                                }
+                            }
                         }
                     }
                     if (payoutMemberName == null) {

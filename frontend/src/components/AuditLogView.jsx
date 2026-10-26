@@ -143,7 +143,7 @@ const AuditLogView = () => {
             onClick={fetchAuditLogs}
             disabled={loading}
           >
-            🔄 {t('refresh', 'Refresh')}
+            {t('refresh', 'Refresh')}
           </button>
           <button
             type="button"
@@ -151,7 +151,7 @@ const AuditLogView = () => {
             onClick={exportToCSV}
             disabled={loading || filteredRows.length === 0}
           >
-            📤 {t('export_csv', 'Export CSV')}
+            {t('export_csv', 'Export CSV')}
           </button>
         </div>
       </div>
