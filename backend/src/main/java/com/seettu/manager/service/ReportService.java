@@ -202,8 +202,8 @@ public class ReportService {
             int count = 0;
             for (Payment p : allPayments) {
                 if (count++ >= 20) break; // Display up to 20 recent records in PDF
-                String grpName = (p.getCycle() != null && p.getCycle().getGroup() != null) ? p.getCycle().getGroup().getName() : "Seettu Group";
-                String memName = (p.getMember() != null && p.getMember().getFullName() != null) ? p.getMember().getFullName() : "Member #" + (p.getMember() != null ? p.getMember().getId() : "-");
+                String grpName = getPaymentGroupName(p);
+                String memName = getPaymentMemberName(p);
                 String method = p.getPaymentMethod() != null ? p.getPaymentMethod() : "OFFLINE";
 
                 paymentsTable.addCell(new Cell().add(new Paragraph("#" + p.getId()).setFontSize(8)));
@@ -325,12 +325,8 @@ public class ReportService {
                 if (count++ >= 20) {
                     break;
                 }
-                String groupName = payment.getCycle() != null && payment.getCycle().getGroup() != null
-                        ? payment.getCycle().getGroup().getName()
-                        : "Seettu Group";
-                String memberName = payment.getMember() != null && payment.getMember().getFullName() != null
-                        ? payment.getMember().getFullName()
-                        : "Member #" + (payment.getMember() != null ? payment.getMember().getId() : "-");
+                String groupName = getPaymentGroupName(payment);
+                String memberName = getPaymentMemberName(payment);
                 String method = payment.getPaymentMethod() != null ? payment.getPaymentMethod() : "OFFLINE";
 
                 appendCsvRow(
@@ -350,6 +346,22 @@ public class ReportService {
         appendCsvRow(csv, "Certified System Audit", "SeettuManager Core Engine");
 
         Files.writeString(file, csv, StandardCharsets.UTF_8);
+    }
+
+    private String getPaymentGroupName(Payment payment) {
+        String groupName = payment.getCycle() != null && payment.getCycle().getGroup() != null
+                ? payment.getCycle().getGroup().getName()
+                : null;
+        return groupName == null || groupName.isBlank() ? "null" : groupName;
+    }
+
+    private String getPaymentMemberName(Payment payment) {
+        String memberName = payment.getMember() != null ? payment.getMember().getFullName() : null;
+        if (memberName != null && !memberName.isBlank()) {
+            return memberName;
+        }
+        Long memberId = payment.getMember() != null ? payment.getMember().getId() : null;
+        return memberId == null ? "null" : "null (#" + memberId + ")";
     }
 
     private void appendCsvRow(StringBuilder csv, Object... values) {
