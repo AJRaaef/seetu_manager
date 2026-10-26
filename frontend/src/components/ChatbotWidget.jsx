@@ -63,13 +63,13 @@ const getFallbackAnswer = (text) => {
 
   // Handle Tamil responses when language is set to 'ta'
   if (currentLang === 'ta') {
-    if (lower.includes('score') || lower.includes('discipline') || lower.includes('formula')) {
-      return "உங்கள் நிதி ஒழுக்க மதிப்பெண் (Financial Discipline Score) 100 புள்ளிகளில் தொடங்குகிறது:\n\n• 90-100 (சிறந்தது): முன்னுரிமை செலுத்துதல்\n• 75-89 (நன்று): நிலையான தகுதி\n• 50-74 (சராசரி): பிணையாளர் தேவை\n• 50 க்கும் குறைவாக: ஆபத்து";
+    if (lower.includes('score') || lower.includes('discipline') || lower.includes('formula') || lower.includes('மதிப்பெண்')) {
+      return "உங்கள் நிதி ஒழுக்க மதிப்பெண் (Financial Discipline Score) 100 புள்ளிகளில் தொடங்குகிறது:\n\nசூத்திரம்: 100 - [(தாமதமான கட்டணங்கள் × 5) + (தவறவிட்ட சுழற்சிகள் × 10)]\n\n• 90-100 (சிறந்தது): முன்னுரிமை செலுத்துதல் கிடைக்கும்\n• 75-89 (நன்று): நிலையான தகுதி\n• 50-74 (சராசரி): பிணையாளர் தேவை\n• 50 க்கும் குறைவாக: ஆபத்து நிலை";
     }
-    if (lower.includes('pay') || lower.includes('slip') || lower.includes('deposit')) {
-      return "கட்டணம் செலுத்த அல்லது பதிவு செய்ய:\n1. பக்கவாட்டு மெனுவில் 'Payments' என்பதைத் திறக்கவும்.\n2. உங்கள் சீட்டுக் குழுவைத் தேர்ந்தெடுத்து பற்றுச்சீட்டைப் பதிவேற்றவும்.";
+    if (lower.includes('pay') || lower.includes('slip') || lower.includes('deposit') || lower.includes('கட்டணம்')) {
+      return "கட்டணம் செலுத்த அல்லது பதிவு செய்ய:\n1. இடது பக்க மெனுவில் 'Payments' என்பதைத் திறக்கவும்.\n2. உங்கள் சீட்டுக் குழுவைத் தேர்ந்தெடுத்து பற்றுச்சீட்டைப் பதிவேற்றவும்.";
     }
-    if (lower.includes('law') || lower.includes('ordinance')) {
+    if (lower.includes('law') || lower.includes('ordinance') || lower.includes('சட்டம்')) {
       return "சீட்டுமேனேஜர் இலங்கையின் 1935 இன் 61 ஆம் இலக்க சீட்டுச் சட்டத்தின் கீழ் இயங்குகிறது.";
     }
     return "தற்போது சர்வரைத் தொடர்பு கொள்ள முடியவில்லை. தயவுசெய்து ஒரு தலைப்பைத் தேர்ந்தெடுக்கவும்.";
