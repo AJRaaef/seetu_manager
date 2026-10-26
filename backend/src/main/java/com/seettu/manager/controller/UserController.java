@@ -103,7 +103,7 @@ public class UserController {
     }
 
     @GetMapping("/kyc/members")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
     public ResponseEntity<ApiResponse<List<com.seettu.manager.dto.UserKycResponse>>> getAllMembersKyc() {
         return ResponseEntity.ok(ApiResponse.success(userService.getAllMembersWithKyc()));
     }

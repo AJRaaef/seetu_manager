@@ -18,7 +18,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+    // Only redirect to login on 401 Unauthorized (expired/invalid session)
+    // Never wipe session or redirect on 403 Forbidden (insufficient permission for a specific endpoint)
+    if (error.response && error.response.status === 401) {
       const publicPaths = ['/', '/login', '/register', '/forgot-password'];
       const isPublicPath = publicPaths.includes(window.location.pathname);
 

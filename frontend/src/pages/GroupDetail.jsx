@@ -87,7 +87,10 @@ const GroupDetail = () => {
     if (isOrganizer || isAdmin) {
       getAllMembersWithKyc()
         .then(res => setVerifiedMembers(Array.isArray(res) ? res : (res?.data || [])))
-        .catch(err => console.error('Failed to load verified members', err));
+        .catch(err => {
+          console.warn('Could not load verified members list', err);
+          setVerifiedMembers([]);
+        });
     }
   }, [id, isOrganizer, isAdmin]);
 
