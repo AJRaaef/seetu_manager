@@ -495,6 +495,7 @@
     "creating_account": "Creating Account...",
     "have_account": "Already have an account? "
   },
+
   "chatbot_widget": {
     "title": "Seettu Assistant",
     "status": "Instant Help & FAQ",
@@ -515,6 +516,7 @@
       "helplines": "Helplines"
     }
   },
+
   "status": {
     "PAID": "Paid",
     "PENDING": "Pending",
@@ -684,7 +686,8 @@
     "adding": "Adding...",
     "error_select_group": "Please select a group."
   },
-  "landing": {
+
+ "landing": {
     "nav_home": "Home",
     "nav_about": "About Us",
     "nav_how_it_works": "How It Works",
@@ -699,20 +702,107 @@
     "nav_sign_in": "Member Sign In",
     "badge_regulated": "STATUTORY CHIT FUND PLATFORM • SRI LANKA",
     "tagline": "Save Together. Grow Together.",
+
+    "slide_0_tag": "TRADITIONAL SRI LANKAN SEETTU (සීට්ටු / சீட்டு)",
+    "slide_0_banner": "HAPPY AND SATISFIED SEETTU MEMBERS",
+    "slide_0_title": "Traditional Community Savings, Powered by Digital Trust",
+    "slide_0_sub": "Digitize your village or neighborhood Seettu (සීට්ටු / சீட்டு) circle with transparent contribution logs, automated rotation cycles, and mutual financial discipline.",
+    "slide_0_cta": "Explore How It Works",
+
+    "slide_1_tag": "LOCAL TRADERS & COMMUNITY MERCHANTS",
+    "slide_1_banner": "TRANSPARENT ROTATIONS & SCHEDULED PAYOUTS",
+    "slide_1_title": "Automated Record-Keeping for Sri Lankan Savings Groups",
+    "slide_1_sub": "Eliminate forgotten payments and handwritten notebook disputes. Manage cash handovers, bank slip verifications, and scheduled lump-sum payouts seamlessly.",
+    "slide_1_cta": "Create a Seettu Group",
+
+    "slide_2_tag": "TRADITIONAL GOLD SEETTU (රන් සීට්ටු / தங்கச் சீட்டு)",
+    "slide_2_banner": "GOLD & VALUABLE ASSET-BASED SEETTU",
+    "slide_2_title": "Preserve Family Wealth with Traditional Gold Rotations",
+    "slide_2_sub": "Organize high-value rotation pools for sovereign gold jewelry, farming equipment, and vehicles with verified item valuation.",
+    "slide_2_cta": "Learn About Asset Seettu",
+
+    "slide_3_tag": "VERIFIED DISCIPLINE SCORING",
+    "slide_3_banner": "VERIFIED 0–100 FINANCIAL DISCIPLINE RATINGS",
+    "slide_3_title": "Build Community Trust with Tamper-Proof Discipline Scores",
+    "slide_3_sub": "On-time monthly contributions award recognized discipline scores and unlock verified completion certificates for all group members.",
+    "slide_3_cta": "About Our System",
+
+    "stat_tracked_rotations": "Tracked Rotations",
+    "stat_discipline_engine": "Discipline Score Engine",
+    "stat_audit_ledger": "Transparent Audit Ledger",
+    "stat_cash_assets": "Cash & Assets",
+    "stat_assets_sub": "Gold, Vehicles & Goods",
+
+    "welcome_tag": "WELCOME TO",
+    "welcome_sub": "Saving and Investing is a lifelong process. The sooner you start; the better off you'll be in the long run. Smart way to save and borrow.",
+    "feat_1_title": "Financial Discipline Score",
+    "feat_1_desc": "Algorithmic 0–100 reliability scoring based on payment punctuality. Builds trusted creditability and eliminates default risks.",
+    "feat_2_title": "Become an Organizer",
+    "feat_2_desc": "Your community calling: create private or village circles, set custom rules, and lead your circle with automated rotations.",
+    "feat_2_btn_account": "Manage in Account",
+    "feat_2_btn_register": "Register to Organize",
+    "feat_3_title": "Option to Pay Your Installment",
+    "feat_3_desc": "Flexible contribution periods on a daily, weekly, or monthly basis with offline cash tracking and instant bank slip verification.",
+    "badge_rotating_savings": "SRI LANKAN ROTATING SAVINGS",
+    "badge_guaranteed": "100% Guaranteed",
+    "badge_certified_ledger": "Certified Cheetus Ledger",
+    "feat_4_title": "Payment Quality & Payouts",
+    "feat_4_desc": "Automated rotation calendar guarantees on-time payouts. Every member receives their lump-sum safely on their scheduled cycle date.",
+    "feat_5_title": "Joining Process",
+    "feat_5_desc": "Easily join and pay into Seettu circles with zero paperwork. Instant phone verification, member directories, and transparent rules.",
+    "feat_6_title": "Secure & Non-Custodial",
+    "feat_6_desc": "Pay directly to organizer or members via bank transfer or cash with digital tamper-proof audit trails and duplicate payment prevention.",
+
+    "how_tag": "Simple 4-Step Process",
     "how_title": "How Digital Seettu Works",
-    "how_sub": "Four simple steps from enrollment to guaranteed rotation payout",
-    "step_1_title": "1. Join or Create a Group",
-    "step_1_desc": "Choose monthly contribution, member size, and Seettu type (Fixed queue, Auction bidding, Lottery draw, or Gold).",
-    "step_2_title": "2. Verify NIC & Collateral",
-    "step_2_desc": "Every member is verified with Sri Lankan NIC and optional Grama Niladhari certificate for mutual trust.",
-    "step_3_title": "3. Pay Monthly Installment",
-    "step_3_desc": "Transfer via online banking or cash to organizer. Real-time digital ledger updates instantly.",
-    "step_4_title": "4. Receive Guaranteed Payout",
-    "step_4_desc": "Collect the full pooled sum on your rotation cycle, complete with verified completion certificates.",
-    "legal_banner_title": "Governed by The Cheetus Ordinance No. 61 of 1935",
-    "legal_banner_desc": "Sri Lanka's recognized statutory framework for rotating savings. Every group maintains digital bylaws, audit trails, and formal default remediation procedures.",
-    "footer_rights": "SeettuManager Sri Lanka. All Rights Reserved. Regulated under statutory rotating savings practices."
+    "how_sub": "A frictionless workflow designed specifically for organizers and members of Sri Lankan rotating savings circles.",
+    "step_1_title": "01. Create or Join Circle",
+    "step_1_desc": "Organizers set contribution amount, rotation frequency, and total member count for cash or goods.",
+    "step_2_title": "02. Track Contributions",
+    "step_2_desc": "Record offline cash deposits or bank slip uploads with immediate transparent confirmation.",
+    "step_3_title": "03. Scheduled Lump Payout",
+    "step_3_desc": "Each cycle designates the next member in line to receive the pooled lump-sum safely.",
+    "step_4_title": "04. Earn Discipline Score",
+    "step_4_desc": "Punctual payments award verified 0–100 scores and unlock downloadable completion certificates.",
+
+    "faq_tag": "Common Questions",
+    "faq_title": "Frequently Asked Questions",
+    "faq_sub": "Everything you need to know about setting up and participating in digital Seettu circles.",
+    "faq_cat_all": "All Questions",
+    "faq_cat_basics": "Basics & Legal",
+    "faq_cat_auctions": "Auctions & Payouts",
+    "faq_cat_payments": "Payments & Discipline",
+    "faq_search_placeholder": "Search questions (e.g. loan, bidding)...",
+
+    "contact_tag": "Get In Touch",
+    "contact_title": "We Are Here to Assist Your Savings Group",
+    "contact_sub": "Have questions regarding group setup, non-monetary asset evaluation, or audit compliance? Reach out to our dedicated customer support team.",
+    "contact_email_title": "Email Support",
+    "contact_phone_title": "Direct Helpline",
+    "contact_form_title": "Send Direct Inquiry",
+    "contact_form_name": "Your Name",
+    "contact_form_name_placeholder": "Full name",
+    "contact_form_phone": "Phone Number",
+    "contact_form_email": "Email Address",
+    "contact_form_msg": "Your Message",
+    "contact_form_msg_placeholder": "How can we assist your Seettu circle?",
+    "contact_form_btn": "Submit Inquiry →",
+    "contact_form_sending": "Sending Inquiry to seetumanager@gmail.com...",
+    "contact_form_success": "Thank you! Your message has been forwarded directly to our support desk (seetumanager@gmail.com). Our team will contact you soon.",
+
+    "footer_desc": "Sri Lanka's dedicated digital platform for rotating savings groups. Empowering organizers and members with automated payment tracking, rotation cycles, dispute protection, and verified 0–100 discipline ratings.",
+    "footer_quick_links": "QUICK LINKS",
+    "footer_support": "SUPPORT",
+    "footer_helpline": "Direct Helplines",
+    "footer_email_support": "Email Support",
+    "footer_headquarters": "Platform Headquarters",
+    "footer_hq_location": "Colombo, Western Province, Sri Lanka",
+    "footer_hours": "Mon – Sat (8:30 AM – 6:00 PM IST)",
+    "footer_statutory_notice_title": "Statutory & Legal Notice:",
+    "footer_statutory_notice_text": "SeettuManager is an administrative digital record-keeping and rotation management software operating in alignment with The Cheetus Ordinance No. 61 of 1935 (Chapter 190), the Electronic Transactions Act No. 19 of 2006, and the Personal Data Protection Act No. 9 of 2022 of Sri Lanka. SeettuManager does not accept public deposits, act as a banking institution, or provide loan facilities. All financial pooling is peer-to-peer and executed between enrolled circle members and verified organizers.",
+    "footer_rights": "© 2026 SeettuManager. All rights reserved. • Sri Lanka Digital Rotating Savings Platform"
   },
+
   "common": {
     "date": "Date",
     "group": "Group",
