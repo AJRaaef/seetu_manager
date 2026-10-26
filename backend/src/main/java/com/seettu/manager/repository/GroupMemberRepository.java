@@ -29,6 +29,9 @@ public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> 
     @Query("SELECT COUNT(gm) FROM GroupMember gm WHERE gm.group.id = :groupId AND gm.status = :status")
     long countByGroupIdAndStatus(@Param("groupId") Long groupId, @Param("status") GroupMember.MemberStatus status);
 
+    @Query("SELECT COUNT(gm) FROM GroupMember gm WHERE gm.status = :status")
+    long countByStatus(@Param("status") GroupMember.MemberStatus status);
+
     @Query("SELECT DISTINCT gm FROM GroupMember gm LEFT JOIN FETCH gm.user LEFT JOIN FETCH gm.group WHERE gm.status = 'ACTIVE' ORDER BY gm.id DESC")
     List<GroupMember> findAllActiveWithDetails();
 }

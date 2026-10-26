@@ -28,6 +28,8 @@ public class SeettuGroupService {
     private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
     private final DisciplineScoreService disciplineScoreService;
+    private final PaymentRepository paymentRepository;
+    private final PaymentCycleRepository cycleRepository;
 
     @Transactional(readOnly = true)
     public SeettuGroup getGroupById(Long id) {
@@ -253,10 +255,57 @@ public class SeettuGroupService {
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public GroupResponse toGroupResponse(SeettuGroup group) {
         List<GroupMember> members = memberRepository.findByGroupIdAndStatus(group.getId(), GroupMember.MemberStatus.ACTIVE);
         List<PaymentCycle> cycles = paymentCycleService.getCyclesByGroup(group.getId());
+        List<Payment> groupPayments = paymentRepository.findByGroupId(group.getId());
+        int activeMemberCount = members.size();
+
+        long completedCyclesCount = 0;
+        boolean modifiedAnyCycle = false;
+
+        for (PaymentCycle c : cycles) {
+            long paidMembers = groupPayments.stream()
+                    .filter(p -> p.getCycle() != null && p.getCycle().getId().equals(c.getId()))
+                    .filter(p -> p.getStatus() == Payment.PaymentStatus.PAID || p.getStatus() == Payment.PaymentStatus.LATE)
+                    .map(p -> p.getMember() != null ? p.getMember().getId() : null)
+                    .filter(java.util.Objects::nonNull)
+                    .distinct()
+                    .count();
+
+            boolean isCyclePaid = (activeMemberCount > 0 && paidMembers >= activeMemberCount);
+            if (c.getStatus() == PaymentCycle.CycleStatus.COMPLETED || isCyclePaid) {
+                completedCyclesCount++;
+                if (c.getStatus() != PaymentCycle.CycleStatus.COMPLETED && isCyclePaid) {
+                    paymentCycleService.updateCycleStatus(c.getId(), "COMPLETED");
+                }
+            }
+        }
+
+        if (modifiedAnyCycle) {
+            for (PaymentCycle c : cycles) {
+                if (c.getStatus() == PaymentCycle.CycleStatus.COMPLETED) {
+                    cycleRepository.findByGroupIdAndCycleNumber(group.getId(), c.getCycleNumber() + 1)
+                            .ifPresent(next -> {
+                                if (next.getStatus() == PaymentCycle.CycleStatus.PENDING) {
+                                    next.setStatus(PaymentCycle.CycleStatus.ACTIVE);
+                                    cycleRepository.save(next);
+                                }
+                            });
+                }
+            }
+        }
+
+        int totalCycles = cycles.isEmpty() ? (group.getMemberCount() != null ? group.getMemberCount() : 1) : cycles.size();
+        if (completedCyclesCount >= totalCycles && group.getStatus() != SeettuGroup.GroupStatus.COMPLETED) {
+            group.setStatus(SeettuGroup.GroupStatus.COMPLETED);
+            groupRepository.save(group);
+        }
+
+        double completionRate = (group.getStatus() == SeettuGroup.GroupStatus.COMPLETED || completedCyclesCount >= totalCycles)
+                ? 100.0
+                : (totalCycles > 0 ? Math.min(100.0, Math.round(((double) completedCyclesCount / totalCycles) * 100.0)) : 0.0);
 
         String createdByName = group.getCreatedBy() != null ? group.getCreatedBy().getFullName() : "System";
         Long createdById = group.getCreatedBy() != null ? group.getCreatedBy().getId() : null;
@@ -277,6 +326,8 @@ public class SeettuGroupService {
                 .createdByName(createdByName)
                 .createdById(createdById)
                 .createdAt(group.getCreatedAt())
+                .completedCycles((int) completedCyclesCount)
+                .completionRate(completionRate)
                 .members(members.stream().map(m -> GroupResponse.MemberInfo.builder()
                         .id(m.getId())
                         .userId(m.getUser().getId())
@@ -287,15 +338,42 @@ public class SeettuGroupService {
                         .role(m.getUser().getRole() != null ? m.getUser().getRole().name() : "MEMBER")
                         .status(m.getStatus().name())
                         .build()).collect(Collectors.toList()))
-                .cycles(cycles.stream().map(c -> GroupResponse.CycleInfo.builder()
-                        .id(c.getId())
-                        .cycleNumber(c.getCycleNumber())
-                        .startDate(c.getStartDate().toString())
-                        .endDate(c.getEndDate().toString())
-                        .payoutMemberId(c.getPayoutMember() != null ? c.getPayoutMember().getId() : null)
-                        .payoutMemberName(c.getPayoutMember() != null ? c.getPayoutMember().getFullName() : "Unassigned")
-                        .status(c.getStatus().name())
-                        .build()).collect(Collectors.toList()))
+                .cycles(cycles.stream().map(c -> {
+                    long paidMembers = groupPayments.stream()
+                            .filter(p -> p.getCycle() != null && p.getCycle().getId().equals(c.getId()))
+                            .filter(p -> p.getStatus() == Payment.PaymentStatus.PAID || p.getStatus() == Payment.PaymentStatus.LATE)
+                            .map(p -> p.getMember() != null ? p.getMember().getId() : null)
+                            .filter(java.util.Objects::nonNull)
+                            .distinct()
+                            .count();
+                    boolean isFullyPaid = (activeMemberCount > 0 && paidMembers >= activeMemberCount)
+                            || c.getStatus() == PaymentCycle.CycleStatus.COMPLETED;
+
+                    Long payoutMemberId = c.getPayoutMember() != null ? c.getPayoutMember().getId() : null;
+                    String payoutMemberName = c.getPayoutMember() != null ? c.getPayoutMember().getFullName() : null;
+                    if (payoutMemberName == null && activeMemberCount > 0) {
+                        int idx = (c.getCycleNumber() - 1) % activeMemberCount;
+                        if (members.get(idx).getUser() != null) {
+                            payoutMemberId = members.get(idx).getUser().getId();
+                            payoutMemberName = members.get(idx).getUser().getFullName();
+                        }
+                    }
+                    if (payoutMemberName == null) {
+                        payoutMemberName = "Unassigned";
+                    }
+
+                    return GroupResponse.CycleInfo.builder()
+                            .id(c.getId())
+                            .cycleNumber(c.getCycleNumber())
+                            .startDate(c.getStartDate().toString())
+                            .endDate(c.getEndDate().toString())
+                            .payoutMemberId(payoutMemberId)
+                            .payoutMemberName(payoutMemberName)
+                            .status(c.getStatus() != null ? c.getStatus().name() : "PENDING")
+                            .paidCount(paidMembers)
+                            .isFullyPaid(isFullyPaid)
+                            .build();
+                }).collect(Collectors.toList()))
                 .build();
     }
 }

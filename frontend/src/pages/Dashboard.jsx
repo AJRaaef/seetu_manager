@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { getAdminDashboard, getUserDashboard } from '../api/dashboardApi';
 import { getAllPayments, getPaymentsByMember, getAdvancePayments, getAllAdvancePayments } from '../api/paymentApi';
 import { getGroupsByUser } from '../api/groupApi';
+import api from '../api/axios';
 import Icon from '../components/Icons';
 import ReviewPayoutModal from '../components/ReviewPayoutModal';
 import PaymentDetailsModal from '../components/PaymentDetailsModal';
@@ -24,6 +25,8 @@ const Dashboard = () => {
   const [payoutApproved, setPayoutApproved] = useState(false);
   const [advanceTotal, setAdvanceTotal] = useState(0);
   const [realUpcomingPayout, setRealUpcomingPayout] = useState(null);
+  const [upcomingPayouts, setUpcomingPayouts] = useState([]);
+  const [selectedUpcomingPayout, setSelectedUpcomingPayout] = useState(null);
 
   const userId = user?.userId || user?.id;
 
@@ -93,38 +96,77 @@ const Dashboard = () => {
     const fetchUpcomingPayout = async () => {
       if (isAdmin || !userId) {
         setRealUpcomingPayout(null);
+        setUpcomingPayouts([]);
         return;
       }
       try {
         const res = await getGroupsByUser(userId);
         const groupList = res?.data || res || [];
-        if (Array.isArray(groupList)) {
+        if (Array.isArray(groupList) && groupList.length > 0) {
+          const upcomingList = [];
           for (const g of groupList) {
-            if (Array.isArray(g.cycles)) {
-              const matchedCycle = g.cycles.find(
-                (c) => (String(c.payoutMemberId) === String(userId) || String(c.payoutMember?.id) === String(userId)) && c.status !== 'COMPLETED'
-              );
-              if (matchedCycle) {
-                const totalPot = Number(g.contributionAmount || 0) * (g.memberCount || 1);
-                const daysRemaining = matchedCycle.endDate
-                  ? Math.max(0, Math.ceil((new Date(matchedCycle.endDate) - new Date()) / 86400000))
+            const totalCycles = (Array.isArray(g.cycles) && g.cycles.length > 0) ? g.cycles.length : (g.memberCount || 1);
+            const totalPot = Number(g.contributionAmount || 0) * (g.memberCount || (g.members?.length) || 1);
+            const isGroupCompleted = g.status === 'COMPLETED' || (Array.isArray(g.cycles) && g.cycles.length > 0 && g.cycles.every(c => c.status === 'COMPLETED' || c.isFullyPaid));
+
+            if (isGroupCompleted) {
+              upcomingList.push({
+                groupId: g.id,
+                groupName: g.name,
+                cycle: `${g.name} • All ${totalCycles} Cycles Completed`,
+                recipient: 'All Circle Members Received Rotational Payouts',
+                isUserRecipient: false,
+                date: 'All Cycles Complete',
+                daysRemaining: '100% Fully Settled & Disbursed',
+                amount: `${totalPot.toLocaleString()} LKR`,
+                isCompleted: true,
+                cycleId: null
+              });
+              continue;
+            }
+
+            if (Array.isArray(g.cycles) && g.cycles.length > 0) {
+              const targetCycle = g.cycles.find(c => c.status === 'ACTIVE' && !c.isFullyPaid)
+                || g.cycles.find(c => c.status !== 'COMPLETED' && !c.isFullyPaid)
+                || g.cycles[0];
+
+              if (targetCycle) {
+                let recipient = targetCycle.payoutMemberName;
+                if (!recipient || recipient === 'Unassigned' || recipient === 'Pending Rotation Selection') {
+                  if (Array.isArray(g.members) && g.members.length > 0) {
+                    const idx = (targetCycle.cycleNumber - 1) % g.members.length;
+                    recipient = g.members[idx]?.fullName;
+                  }
+                }
+                const isUser = (String(targetCycle.payoutMemberId) === String(userId) || (recipient && recipient === user?.fullName));
+                const daysRemaining = targetCycle.endDate
+                  ? Math.max(0, Math.ceil((new Date(targetCycle.endDate) - new Date()) / 86400000))
                   : (stats?.nextPaymentDueDays || 0);
-                setRealUpcomingPayout({
-                  cycle: `${g.name} • Cycle #${matchedCycle.cycleNumber}`,
-                  recipient: matchedCycle.payoutMemberName || user?.fullName || 'Member',
-                  date: matchedCycle.endDate || matchedCycle.startDate || '-',
+
+                upcomingList.push({
+                  groupId: g.id,
+                  groupName: g.name,
+                  cycle: `${g.name} • Cycle #${targetCycle.cycleNumber} of ${totalCycles}`,
+                  recipient: isUser ? `${recipient || 'You'} (Your Payout Turn!)` : (recipient || 'Rotation Selection'),
+                  isUserRecipient: isUser,
+                  date: targetCycle.endDate || targetCycle.startDate || '-',
                   daysRemaining: `${daysRemaining} days remaining`,
                   amount: `${totalPot.toLocaleString()} LKR`,
-                  cycleId: matchedCycle.id
+                  isCompleted: false,
+                  cycleId: targetCycle.id
                 });
-                return;
               }
             }
           }
+          setUpcomingPayouts(upcomingList);
+          setRealUpcomingPayout(upcomingList[0] || null);
+        } else {
+          setUpcomingPayouts([]);
+          setRealUpcomingPayout(null);
         }
-        setRealUpcomingPayout(null);
       } catch (err) {
         console.error('Failed to load real upcoming payout from database', err);
+        setUpcomingPayouts([]);
         setRealUpcomingPayout(null);
       }
     };
@@ -152,10 +194,19 @@ const Dashboard = () => {
   const hasUpcomingPayout = !isAdmin && !!realUpcomingPayout;
   const upcomingPayout = realUpcomingPayout || {};
 
-  const handleApprovePayout = (data) => {
-    setPayoutApproved(true);
-    alert(`Payout of ${data.amount} to ${data.recipient} approved successfully!`);
-    fetchRecentPayments();
+  const handleApprovePayout = async (data) => {
+    try {
+      if (data?.cycleId) {
+        await api.put(`/payment-cycles/${data.cycleId}/status?status=COMPLETED`);
+      }
+      setPayoutApproved(true);
+      alert(`Payout of ${data.amount} to ${data.recipient} approved successfully! All circle members have been notified.`);
+      fetchUpcomingPayout();
+      fetchRecentPayments();
+    } catch (err) {
+      console.error('Failed to approve payout', err);
+      alert(err.response?.data?.message || 'Failed to approve payout in database.');
+    }
   };
 
   const handleRowClick = (payment) => {
@@ -326,49 +377,74 @@ const Dashboard = () => {
 
       {/* Upcoming Payout Banner Card (For Members & Organizers participating in Seettu) */}
       {!isAdmin && (
-        hasUpcomingPayout ? (
-          <div className="upcoming-payout-banner mb-4">
-            <div>
-              <div className="d-flex align-items-center gap-2 mb-2">
-                <Icon name={payoutApproved ? 'check-circle' : 'megaphone'} size={20} color={payoutApproved ? '#34D399' : '#FACC15'} />
-                <span className="fw-bold fs-6" style={{ color: payoutApproved ? '#34D399' : '#FFFFFF' }}>
-                  {payoutApproved 
-                    ? t('dashboard_page.payout_card.approved_btn', 'Payout Approved & Disbursed') 
-                    : t('dashboard_page.payout_card.title', 'Upcoming Rotational Payout')}
-                </span>
-              </div>
-              <div className="small text-white-50 mb-1" style={{ fontSize: '0.8rem' }}>
-                {upcomingPayout.cycle}
-              </div>
-              <h3 className="fw-bold mb-1 text-white">{upcomingPayout.recipient}</h3>
-              <div className="small text-white-50 mb-2">
-                {t('common.date', 'Date')} : {upcomingPayout.date}
-              </div>
-              <div className="fw-bold small" style={{ color: payoutApproved ? '#34D399' : '#FACC15' }}>
-                {payoutApproved ? t('dashboard_page.payout_card.approved_btn', 'Disbursed to Member') : upcomingPayout.daysRemaining}
-              </div>
-            </div>
-
-            <div className="text-end">
-              <div className="display-6 fw-bold text-white mb-3" style={{ letterSpacing: '0.5px' }}>
-                {upcomingPayout.amount}
-              </div>
-              {payoutApproved ? (
-                <div className="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill bg-success text-white fw-semibold small shadow-sm">
-                  <span>✓</span> {t('dashboard_page.payout_card.approved_btn', 'Approved & Disbursed')}
+        upcomingPayouts.length > 0 ? (
+          <div className="d-flex flex-column gap-3 mb-4">
+            {upcomingPayouts.map((item, idx) => (
+              <div
+                key={item.groupId || idx}
+                className="upcoming-payout-banner"
+                style={item.isCompleted ? {
+                  background: 'linear-gradient(135deg, #0F5132 0%, #198754 100%)',
+                  boxShadow: '0 8px 24px rgba(25, 135, 84, 0.2)'
+                } : undefined}
+              >
+                <div>
+                  <div className="d-flex align-items-center gap-2 mb-2">
+                    <Icon
+                      name={item.isCompleted ? 'check-circle' : item.isUserRecipient ? 'award' : 'megaphone'}
+                      size={20}
+                      color={item.isCompleted ? '#34D399' : item.isUserRecipient ? '#FACC15' : '#FFFFFF'}
+                    />
+                    <span className="fw-bold fs-6" style={{ color: item.isCompleted ? '#34D399' : item.isUserRecipient ? '#FACC15' : '#FFFFFF' }}>
+                      {item.isCompleted
+                        ? 'All Rotation Cycles Completed & Disbursed'
+                        : item.isUserRecipient
+                          ? '🎉 Your Scheduled Payout Turn!'
+                          : t('dashboard_page.payout_card.title', 'Upcoming Rotational Payout')}
+                    </span>
+                  </div>
+                  <div className="small text-white-50 mb-1" style={{ fontSize: '0.8rem' }}>
+                    {item.cycle}
+                  </div>
+                  <h3 className="fw-bold mb-1 text-white">{item.recipient}</h3>
+                  <div className="small text-white-50 mb-2">
+                    {t('common.date', 'Date')} : {item.date}
+                  </div>
+                  <div className="fw-bold small" style={{ color: item.isCompleted ? '#34D399' : '#FACC15' }}>
+                    {item.daysRemaining}
+                  </div>
                 </div>
-              ) : (
-                <button
-                  onClick={() => setShowPayoutModal(true)}
-                  className="btn btn-light rounded-pill px-4 py-2 fw-semibold text-dark shadow-sm border-0"
-                  style={{ fontSize: '0.9rem' }}
-                >
-                  {canManagePayout 
-                    ? t('dashboard_page.payout_card.review_btn', 'Review Payout') 
-                    : t('common.view', 'View Payout Details')}
-                </button>
-              )}
-            </div>
+
+                <div className="text-end">
+                  <div className="display-6 fw-bold text-white mb-3" style={{ letterSpacing: '0.5px' }}>
+                    {item.amount}
+                  </div>
+                  {item.isCompleted ? (
+                    <Link
+                      to={`/groups/${item.groupId}`}
+                      className="btn btn-light rounded-pill px-4 py-2 fw-semibold text-success shadow-sm border-0 d-inline-flex align-items-center gap-1.5"
+                      style={{ fontSize: '0.9rem' }}
+                    >
+                      <Icon name="check-circle" size={16} color="#198754" />
+                      <span>View Circle Ledger</span>
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setSelectedUpcomingPayout(item);
+                        setShowPayoutModal(true);
+                      }}
+                      className="btn btn-light rounded-pill px-4 py-2 fw-semibold text-dark shadow-sm border-0"
+                      style={{ fontSize: '0.9rem' }}
+                    >
+                      {canManagePayout
+                        ? t('dashboard_page.payout_card.review_btn', 'Review Payout')
+                        : t('common.view', 'View Payout Details')}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="card shadow-sm border-0 mb-4 p-4 text-center rounded-4" style={{ backgroundColor: '#FFFFFF' }}>
@@ -443,10 +519,11 @@ const Dashboard = () => {
         show={showPayoutModal}
         onHide={() => setShowPayoutModal(false)}
         payoutData={{
-          recipient: upcomingPayout.recipient,
-          cycle: upcomingPayout.cycle,
-          scheduledDate: upcomingPayout.date,
-          amount: upcomingPayout.amount
+          recipient: selectedUpcomingPayout?.recipient || upcomingPayout.recipient,
+          cycle: selectedUpcomingPayout?.cycle || upcomingPayout.cycle,
+          scheduledDate: selectedUpcomingPayout?.date || upcomingPayout.date,
+          amount: selectedUpcomingPayout?.amount || upcomingPayout.amount,
+          cycleId: selectedUpcomingPayout?.cycleId || upcomingPayout.cycleId
         }}
         onApprove={handleApprovePayout}
         canManage={canManagePayout}

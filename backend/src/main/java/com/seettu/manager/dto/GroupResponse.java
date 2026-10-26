@@ -31,6 +31,8 @@ public class GroupResponse {
     private LocalDateTime createdAt;
     private List<MemberInfo> members;
     private List<CycleInfo> cycles;
+    private Integer completedCycles;
+    private Double completionRate;
 
     @Data
     @Builder
@@ -59,5 +61,7 @@ public class GroupResponse {
         private Long payoutMemberId;
         private String payoutMemberName;
         private String status;
+        private Long paidCount;
+        private Boolean isFullyPaid;
     }
 }

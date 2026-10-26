@@ -1,5 +1,7 @@
 package com.seettu.manager.service;
 
+import com.seettu.manager.entity.GroupMember;
+
 import com.seettu.manager.dto.DashboardResponse;
 import com.seettu.manager.entity.Dispute;
 import com.seettu.manager.entity.EmergencyRequest;
@@ -36,7 +38,7 @@ public class DashboardService {
     public DashboardResponse getAdminDashboardStats() {
         long totalGroups = groupRepository.count();
         long activeGroups = groupRepository.countByStatus(SeettuGroup.GroupStatus.ACTIVE);
-        long totalMembers = memberRepository.count();
+        long totalMembers = memberRepository.countByStatus(GroupMember.MemberStatus.ACTIVE);
         long totalPayments = paymentRepository.count();
         long pendingPayments = paymentRepository.findByStatus(Payment.PaymentStatus.PENDING).size();
         long overduePayments = paymentRepository.findByStatus(Payment.PaymentStatus.OVERDUE).size();
@@ -123,9 +125,10 @@ public class DashboardService {
         }
 
         long totalGroupMembers = userGroups.stream()
-                .flatMap(g -> memberRepository.findByGroupId(g.getId()).stream())
+                .filter(g -> g.getStatus() == SeettuGroup.GroupStatus.ACTIVE || g.getStatus() == SeettuGroup.GroupStatus.COMPLETED)
+                .flatMap(g -> memberRepository.findByGroupIdAndStatus(g.getId(), GroupMember.MemberStatus.ACTIVE).stream())
                 .map(gm -> gm.getUser() != null ? gm.getUser().getId() : null)
-                .filter(id -> id != null)
+                .filter(java.util.Objects::nonNull)
                 .distinct()
                 .count();
 

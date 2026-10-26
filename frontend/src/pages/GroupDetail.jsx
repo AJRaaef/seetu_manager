@@ -177,7 +177,8 @@ const GroupDetail = () => {
   }
 
   const totalPool = (group.contributionAmount || 0) * (group.memberCount || 1);
-  const activeCycle = group.cycles?.find(c => c.status === 'ACTIVE') || group.cycles?.[0];
+  const isAllCompleted = group.status === 'COMPLETED' || (Array.isArray(group.cycles) && group.cycles.length > 0 && group.cycles.every(c => c.status === 'COMPLETED'));
+  const activeCycle = group.cycles?.find(c => c.status === 'ACTIVE') || (isAllCompleted ? null : group.cycles?.[0]);
 
   const formatModelLabel = (cat, typeObj) => {
     if (cat === 'AUCTION') return { label: 'Auction / Bidding Seettu', cls: 'bg-warning text-dark border' };
@@ -195,7 +196,7 @@ const GroupDetail = () => {
         <div>
           <div className="d-flex align-items-center gap-2 mb-1 flex-wrap">
             <h2 className="fw-bold text-dark mb-0">{group.name}</h2>
-            <span className="badge bg-primary fs-6">{group.status || 'ACTIVE'}</span>
+            <span className={`badge ${isAllCompleted ? 'bg-success' : 'bg-primary'} fs-6`}>{isAllCompleted ? 'COMPLETED' : (group.status || 'ACTIVE')}</span>
             <span className={`badge ${modelInfo.cls}`}>{modelInfo.label}</span>
             <span className="badge bg-info-subtle text-info border">Cycle Frequency: {group.cycleFrequency}</span>
           </div>
@@ -227,7 +228,11 @@ const GroupDetail = () => {
           <div className="card shadow-sm border-0 h-100 overflow-hidden" style={{ borderRadius: '12px' }}>
             <div className="card-header text-white fw-bold d-flex justify-content-between align-items-center py-3 px-4" style={{ backgroundColor: '#134A5A' }}>
               <span>Group & Pool Summary</span>
-              {activeCycle && <span className="badge rounded-pill bg-light text-dark">Active Cycle #{activeCycle.cycleNumber}</span>}
+              {isAllCompleted ? (
+                <span className="badge rounded-pill bg-success text-white">All Cycles Completed</span>
+              ) : activeCycle ? (
+                <span className="badge rounded-pill bg-light text-dark">Active Cycle #{activeCycle.cycleNumber}</span>
+              ) : null}
             </div>
             <div className="card-body p-0">
               <ul className="list-group list-group-flush">

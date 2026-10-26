@@ -54,22 +54,26 @@ const MyGroups = () => {
           let completedCyclesCount = 0;
           if (g.status === 'COMPLETED') {
             completedCyclesCount = totalCycles;
+          } else if (typeof g.completedCycles === 'number') {
+            completedCyclesCount = g.completedCycles;
           } else if (Array.isArray(g.cycles) && g.cycles.length > 0) {
-            completedCyclesCount = g.cycles.filter(c => c.status === 'COMPLETED').length;
+            completedCyclesCount = g.cycles.filter(c => c.status === 'COMPLETED' || c.isFullyPaid).length;
           } else {
             completedCyclesCount = Math.max(0, (g.currentCycle || 1) - 1);
           }
 
           const completionRate = (g.status === 'COMPLETED' || completedCyclesCount >= totalCycles)
             ? 100
-            : (totalCycles > 0 ? Math.min(100, Math.max(0, Math.round((completedCyclesCount / totalCycles) * 100))) : 0);
+            : (typeof g.completionRate === 'number'
+                ? Math.round(g.completionRate)
+                : (totalCycles > 0 ? Math.min(100, Math.max(0, Math.round((completedCyclesCount / totalCycles) * 100))) : 0));
 
           // Determine active/current cycle number
           let currentCycleNumber = 1;
           if (g.status === 'COMPLETED' || completedCyclesCount >= totalCycles) {
             currentCycleNumber = totalCycles;
           } else if (Array.isArray(g.cycles) && g.cycles.length > 0) {
-            const activeCycle = g.cycles.find(c => c.status === 'ACTIVE');
+            const activeCycle = g.cycles.find(c => c.status === 'ACTIVE' && !c.isFullyPaid);
             const nextPending = g.cycles.find(c => c.status === 'PENDING');
             currentCycleNumber = activeCycle?.cycleNumber || nextPending?.cycleNumber || (completedCyclesCount > 0 ? Math.min(totalCycles, completedCyclesCount + 1) : 1);
           } else {
@@ -87,7 +91,7 @@ const MyGroups = () => {
             currentCycle: currentCycleNumber,
             totalCycles: totalCycles,
             completionRate: completionRate,
-            status: g.status === 'ACTIVE' ? 'Active' : g.status || 'Active'
+            status: (g.status === 'COMPLETED' || completionRate === 100) ? 'Completed' : (g.status === 'ACTIVE' ? 'Active' : (g.status || 'Active'))
           };
         });
         setGroups(formatted);
@@ -287,7 +291,7 @@ const MyGroups = () => {
 
                   <div className="mb-3 small">
                     <span className="fw-bold text-dark">{t('common.cycle', 'Current')}: </span>
-                    <span className="text-muted">Cycle {group.currentCycle} of {group.totalCycles}</span>
+                    <span className="text-muted">Cycle {group.currentCycle} of {group.totalCycles}{group.completionRate === 100 && " (Completed)"}</span>
                   </div>
 
                   {/* Completion Progress */}
@@ -303,8 +307,8 @@ const MyGroups = () => {
 
                   {/* Active Status Badge */}
                   <div className="mb-4">
-                    <span className="badge-mint">
-                      {t(`status.${group.status?.toUpperCase()}`, group.status)}
+                    <span className={group.status === 'Completed' || group.completionRate === 100 ? "badge bg-success text-white px-2.5 py-1 rounded-pill fw-semibold" : "badge-mint"}>
+                      {group.status === 'Completed' || group.completionRate === 100 ? "Completed" : t(`status.${group.status?.toUpperCase()}`, group.status)}
                     </span>
                   </div>
                 </div>

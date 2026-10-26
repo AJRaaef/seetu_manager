@@ -2,6 +2,7 @@ package com.seettu.manager.service;
 
 import com.seettu.manager.entity.PaymentCycle;
 import com.seettu.manager.entity.SeettuGroup;
+import com.seettu.manager.entity.User;
 import com.seettu.manager.repository.PaymentCycleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -83,6 +84,18 @@ public class PaymentCycleService {
                     ? group.getContributionAmount().multiply(java.math.BigDecimal.valueOf(memberCount))
                     : java.math.BigDecimal.ZERO;
 
+            // Auto-assign payout member if null using active member rotation order
+            List<com.seettu.manager.entity.GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(
+                    group.getId(), com.seettu.manager.entity.GroupMember.MemberStatus.ACTIVE);
+            if (cycle.getPayoutMember() == null && !activeMembers.isEmpty()) {
+                int cycleIdx = (cycle.getCycleNumber() - 1) % activeMembers.size();
+                User autoWinner = activeMembers.get(cycleIdx).getUser();
+                if (autoWinner != null) {
+                    cycle.setPayoutMember(autoWinner);
+                    cycleRepository.save(cycle);
+                }
+            }
+
             String winnerName = (cycle.getPayoutMember() != null) ? cycle.getPayoutMember().getFullName() : "Assigned Winner";
 
             // 1. Auto-roll next cycle in group to ACTIVE if it exists
@@ -92,9 +105,20 @@ public class PaymentCycleService {
                     .filter(c -> c.getCycleNumber() == nextCycleNumber)
                     .findFirst()
                     .orElse(null);
-            if (nextCycle != null && nextCycle.getStatus() == PaymentCycle.CycleStatus.PENDING) {
-                nextCycle.setStatus(PaymentCycle.CycleStatus.ACTIVE);
-                cycleRepository.save(nextCycle);
+            if (nextCycle != null) {
+                if (nextCycle.getStatus() == PaymentCycle.CycleStatus.PENDING) {
+                    nextCycle.setStatus(PaymentCycle.CycleStatus.ACTIVE);
+                    cycleRepository.save(nextCycle);
+                }
+                // Auto-assign next cycle's payout member if null
+                if (nextCycle.getPayoutMember() == null && !activeMembers.isEmpty()) {
+                    int nextIdx = (nextCycle.getCycleNumber() - 1) % activeMembers.size();
+                    User nextWinner = activeMembers.get(nextIdx).getUser();
+                    if (nextWinner != null) {
+                        nextCycle.setPayoutMember(nextWinner);
+                        cycleRepository.save(nextCycle);
+                    }
+                }
             }
 
             // If all cycles in group are now completed, mark group as COMPLETED
@@ -106,9 +130,6 @@ public class PaymentCycleService {
             }
 
             // 2. Broadcast cycle completion & payout notification to all active circle members
-            List<com.seettu.manager.entity.GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(
-                    group.getId(), com.seettu.manager.entity.GroupMember.MemberStatus.ACTIVE);
-
             String circleBroadcastMsg = "Cycle #" + cycle.getCycleNumber() + " for '" + groupName + "' has officially completed! The total rotational pot of "
                     + potAmount.toPlainString() + " LKR has been disbursed to " + winnerName
                     + ". Payout verification voucher is available for download. "
@@ -119,6 +140,21 @@ public class PaymentCycleService {
                     try {
                         notificationService.sendNotification(gm.getUser().getId(), circleBroadcastMsg, "CYCLE_COMPLETED");
                     } catch (Exception ignored) {}
+                }
+            }
+
+            // Broadcast upcoming payout notice for the next cycle to all members
+            if (nextCycle != null) {
+                String nextRecipient = (nextCycle.getPayoutMember() != null) ? nextCycle.getPayoutMember().getFullName() : "Assigned Member";
+                String upcomingNotice = "Upcoming Payout Notice: Cycle #" + nextCycleNumber + " for '" + groupName
+                        + "' is now in progress! Scheduled rotational payout of " + potAmount.toPlainString()
+                        + " LKR to " + nextRecipient + " on or before " + nextCycle.getEndDate() + ". Track it in your dashboard.";
+                for (com.seettu.manager.entity.GroupMember gm : activeMembers) {
+                    if (gm.getUser() != null && gm.getUser().getId() != null) {
+                        try {
+                            notificationService.sendNotification(gm.getUser().getId(), upcomingNotice, "UPCOMING_PAYOUT");
+                        } catch (Exception ignored) {}
+                    }
                 }
             }
 

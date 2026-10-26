@@ -26,6 +26,8 @@ public class PaymentService {
     private final NotificationService notificationService;
     private final com.seettu.manager.repository.GroupMemberRepository groupMemberRepository;
     private final com.seettu.manager.repository.PaymentEvidenceRepository paymentEvidenceRepository;
+    private final com.seettu.manager.repository.PaymentCycleRepository cycleRepository;
+    private final com.seettu.manager.repository.SeettuGroupRepository groupRepository;
 
     @Transactional
     public Payment recordPayment(PaymentRecordRequest request, User recorder) {
@@ -311,6 +313,30 @@ public class PaymentService {
             }
         }
         return remindersSent;
+    }
+
+
+    private void checkAndUpdateCycleProgress(PaymentCycle cycle) {
+        if (cycle == null || cycle.getGroup() == null) return;
+        SeettuGroup group = cycle.getGroup();
+
+        List<GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(group.getId(), GroupMember.MemberStatus.ACTIVE);
+        int memberCount = activeMembers.size();
+        if (memberCount == 0) return;
+
+        List<Payment> cyclePayments = paymentRepository.findByCycleId(cycle.getId());
+        long paidMembers = cyclePayments.stream()
+                .filter(p -> p.getStatus() == Payment.PaymentStatus.PAID || p.getStatus() == Payment.PaymentStatus.LATE)
+                .map(p -> p.getMember() != null ? p.getMember().getId() : null)
+                .filter(java.util.Objects::nonNull)
+                .distinct()
+                .count();
+
+        if (paidMembers >= memberCount) {
+            if (cycle.getStatus() != PaymentCycle.CycleStatus.COMPLETED) {
+                paymentCycleService.updateCycleStatus(cycle.getId(), "COMPLETED");
+            }
+        }
     }
 
     public PaymentResponse toPaymentResponse(Payment payment) {

@@ -57,6 +57,8 @@ public class NotificationService {
             case "LEGAL_NOTICE": return "Formal Notice Under The Cheetus Ordinance";
             case "PAYMENT_RECEIVED": return "Contribution Payment Receipt";
             case "PAYOUT_APPROVED": return "Seettu Circle Lump-Sum Payout Approved";
+            case "CYCLE_COMPLETED": return "Seettu Cycle Completion & Payout Notification";
+            case "UPCOMING_PAYOUT": return "Upcoming Seettu Rotational Payout Notice";
             case "GROUP": return "Seettu Circle Membership Update";
             case "KYC_VERIFIED": return "KYC Verification Approved";
             case "KYC_REJECTED": return "KYC Verification Status";
