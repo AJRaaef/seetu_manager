@@ -11,7 +11,7 @@ export const getPaymentsByGroup = async (groupId) => {
 };
 
 export const getPaymentsByMember = async (memberId) => {
-  const response = await api.get(`/payments/member/${memberId}`);
+  const response = await api.get(`/payments/member/${memberId}/pending-dues`);
   return response.data;
 };
 
@@ -74,3 +74,13 @@ export const triggerPaymentReminders = async () => {
   return response.data;
 };
 
+
+export const getMyPendingDues = async () => {
+  const response = await api.get('/payments/my-pending-dues');
+  return response.data;
+};
+
+export const getMemberPendingDues = async (memberId) => {
+  const response = await api.get(`/payments/member/${memberId}/pending-dues`);
+  return response.data;
+};

@@ -3,6 +3,7 @@ package com.seettu.manager.controller;
 import com.seettu.manager.dto.ApiResponse;
 import com.seettu.manager.dto.PaymentRecordRequest;
 import com.seettu.manager.dto.PaymentResponse;
+import com.seettu.manager.dto.PendingDueResponse;
 import com.seettu.manager.entity.Payment;
 import com.seettu.manager.entity.User;
 import com.seettu.manager.service.PaymentService;
@@ -115,6 +116,24 @@ public class PaymentController {
     public ResponseEntity<ApiResponse<Void>> deletePayment(@PathVariable Long id) {
         paymentService.deletePayment(id);
         return ResponseEntity.ok(ApiResponse.success("Payment deleted successfully", null));
+    }
+
+
+    @GetMapping("/my-pending-dues")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER') or hasRole('MEMBER')")
+    public ResponseEntity<ApiResponse<List<PendingDueResponse>>> getMyPendingDues(@AuthenticationPrincipal User authUser) {
+        if (authUser == null) {
+            throw new IllegalArgumentException("User not authenticated");
+        }
+        List<PendingDueResponse> dues = paymentService.getPendingDuesForMember(authUser.getId());
+        return ResponseEntity.ok(ApiResponse.success(dues));
+    }
+
+    @GetMapping("/member/{memberId}/pending-dues")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER') or #memberId == authentication.principal.id")
+    public ResponseEntity<ApiResponse<List<PendingDueResponse>>> getMemberPendingDues(@PathVariable Long memberId) {
+        List<PendingDueResponse> dues = paymentService.getPendingDuesForMember(memberId);
+        return ResponseEntity.ok(ApiResponse.success(dues));
     }
 
     @PostMapping("/send-reminders")

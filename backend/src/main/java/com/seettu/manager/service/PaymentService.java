@@ -2,6 +2,7 @@ package com.seettu.manager.service;
 
 import com.seettu.manager.dto.PaymentRecordRequest;
 import com.seettu.manager.dto.PaymentResponse;
+import com.seettu.manager.dto.PendingDueResponse;
 import com.seettu.manager.entity.*;
 import com.seettu.manager.exception.DuplicateResourceException;
 import com.seettu.manager.exception.ResourceNotFoundException;
@@ -337,6 +338,112 @@ public class PaymentService {
                 paymentCycleService.updateCycleStatus(cycle.getId(), "COMPLETED");
             }
         }
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<PendingDueResponse> getPendingDuesForMember(Long memberId) {
+        LocalDate today = LocalDate.now();
+        List<SeettuGroup> userGroups = groupRepository.findGroupsByMemberId(memberId);
+        List<PendingDueResponse> dues = new java.util.ArrayList<>();
+
+        for (SeettuGroup group : userGroups) {
+            if (group.getStatus() != SeettuGroup.GroupStatus.ACTIVE) {
+                continue;
+            }
+
+            List<PaymentCycle> cycles = cycleRepository.findByGroupIdOrderByCycleNumberAsc(group.getId());
+            int totalCycles = cycles.isEmpty() ? (group.getMemberCount() != null ? group.getMemberCount() : 1) : cycles.size();
+
+            PaymentCycle currentCycle = cycles.stream()
+                    .filter(c -> c.getStatus() == PaymentCycle.CycleStatus.ACTIVE)
+                    .findFirst()
+                    .orElse(null);
+
+            if (currentCycle == null) {
+                currentCycle = cycles.stream()
+                        .filter(c -> c.getStatus() != PaymentCycle.CycleStatus.COMPLETED)
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            if (currentCycle == null) {
+                continue;
+            }
+
+            Optional<Payment> paymentOpt = paymentRepository.findByCycleIdAndMemberId(currentCycle.getId(), memberId);
+            boolean isFullySettled = paymentOpt.isPresent() &&
+                    (paymentOpt.get().getStatus() == Payment.PaymentStatus.PAID || paymentOpt.get().getStatus() == Payment.PaymentStatus.LATE);
+
+            if (isFullySettled) {
+                continue;
+            }
+
+            java.math.BigDecimal contributionAmount = group.getContributionAmount() != null
+                    ? group.getContributionAmount()
+                    : java.math.BigDecimal.ZERO;
+
+            LocalDate dueDate = currentCycle.getEndDate() != null
+                    ? currentCycle.getEndDate()
+                    : (currentCycle.getStartDate() != null ? currentCycle.getStartDate().plusDays(30) : today);
+
+            long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(today, dueDate);
+            boolean isOverdue = today.isAfter(dueDate);
+            long daysOverdue = isOverdue ? java.time.temporal.ChronoUnit.DAYS.between(dueDate, today) : 0;
+
+            String status;
+            Long existingPaymentId = null;
+            boolean hasSlipUploaded = false;
+
+            if (paymentOpt.isPresent()) {
+                Payment p = paymentOpt.get();
+                existingPaymentId = p.getId();
+                hasSlipUploaded = !paymentEvidenceRepository.findByPaymentId(p.getId()).isEmpty();
+
+                if (hasSlipUploaded || p.getStatus() == Payment.PaymentStatus.PENDING) {
+                    status = "AWAITING_APPROVAL";
+                } else if (p.getStatus() == Payment.PaymentStatus.OVERDUE || isOverdue) {
+                    status = "OVERDUE";
+                } else if (daysRemaining == 0) {
+                    status = "DUE_TODAY";
+                } else if (daysRemaining <= 7) {
+                    status = "DUE_SOON";
+                } else {
+                    status = "UPCOMING";
+                }
+            } else {
+                if (isOverdue) {
+                    status = "OVERDUE";
+                } else if (daysRemaining == 0) {
+                    status = "DUE_TODAY";
+                } else if (daysRemaining <= 7) {
+                    status = "DUE_SOON";
+                } else {
+                    status = "UPCOMING";
+                }
+            }
+
+            String organizerName = group.getCreatedBy() != null ? group.getCreatedBy().getFullName() : "Organizer";
+
+            dues.add(PendingDueResponse.builder()
+                    .groupId(group.getId())
+                    .groupName(group.getName())
+                    .cycleId(currentCycle.getId())
+                    .cycleNumber(currentCycle.getCycleNumber())
+                    .totalCycles(totalCycles)
+                    .amount(contributionAmount)
+                    .dueDate(dueDate)
+                    .daysRemaining(daysRemaining)
+                    .isOverdue(isOverdue)
+                    .daysOverdue(daysOverdue)
+                    .status(status)
+                    .existingPaymentId(existingPaymentId)
+                    .hasSlipUploaded(hasSlipUploaded)
+                    .organizerName(organizerName)
+                    .build());
+        }
+
+        return dues;
     }
 
     public PaymentResponse toPaymentResponse(Payment payment) {

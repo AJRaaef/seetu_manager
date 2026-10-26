@@ -3,11 +3,21 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { getAdminDashboard, getUserDashboard } from '../api/dashboardApi';
-import { getAllPayments, getPaymentsByMember, getAdvancePayments, getAllAdvancePayments } from '../api/paymentApi';
+import {
+  getAllPayments,
+  getPaymentsByMember,
+  getAdvancePayments,
+  getAllAdvancePayments,
+  getMyPendingDues,
+  recordPayment,
+  updatePayment,
+  uploadPaymentEvidence
+} from '../api/paymentApi';
 import { getGroupsByUser } from '../api/groupApi';
 import api from '../api/axios';
 import Icon from '../components/Icons';
 import ReviewPayoutModal from '../components/ReviewPayoutModal';
+import SettlePaymentModal from '../components/SettlePaymentModal';
 import PaymentDetailsModal from '../components/PaymentDetailsModal';
 import DashboardAnalytics from '../components/DashboardAnalytics';
 
@@ -27,6 +37,10 @@ const Dashboard = () => {
   const [realUpcomingPayout, setRealUpcomingPayout] = useState(null);
   const [upcomingPayouts, setUpcomingPayouts] = useState([]);
   const [selectedUpcomingPayout, setSelectedUpcomingPayout] = useState(null);
+  const [pendingDues, setPendingDues] = useState([]);
+  const [loadingDues, setLoadingDues] = useState(true);
+  const [settleModalItem, setSettleModalItem] = useState(null);
+  const [showSettleModal, setShowSettleModal] = useState(false);
 
   const userId = user?.userId || user?.id;
 
@@ -180,11 +194,32 @@ const Dashboard = () => {
       }
     };
 
+
+    const fetchPendingDues = async () => {
+      if (isAdmin || !userId) {
+        setPendingDues([]);
+        setLoadingDues(false);
+        return;
+      }
+      setLoadingDues(true);
+      try {
+        const res = await getMyPendingDues();
+        const list = res?.data || (Array.isArray(res) ? res : []);
+        setPendingDues(Array.isArray(list) ? list : []);
+      } catch (err) {
+        console.error('Failed to load pending dues from database', err);
+        setPendingDues([]);
+      } finally {
+        setLoadingDues(false);
+      }
+    };
+
     if (isAdmin || userId) {
       fetchDashboard();
       fetchRecentPayments();
       fetchAdvance();
       fetchUpcomingPayout();
+      fetchPendingDues();
     } else {
       setLoading(false);
       setLoadingPayments(false);
@@ -215,6 +250,78 @@ const Dashboard = () => {
     } catch (err) {
       console.error('Failed to approve payout', err);
       alert(err.response?.data?.message || 'Failed to approve payout in database.');
+    }
+  };
+
+
+  const handleOpenSettle = (dueItem) => {
+    setSettleModalItem({
+      id: dueItem.existingPaymentId || null,
+      cycleId: dueItem.cycleId,
+      memberId: userId,
+      member: user?.fullName || 'You',
+      amount: dueItem.amount,
+      group: dueItem.groupName,
+      cycle: `Cycle ${dueItem.cycleNumber}`,
+      status: dueItem.isOverdue ? 'LATE' : 'PAID',
+      date: new Date().toISOString().split('T')[0],
+      method: 'Bank Transfer (Slip Uploaded)',
+      notes: dueItem.isOverdue
+        ? `Settled overdue contribution (${dueItem.daysOverdue} days late)`
+        : `Settled contribution for Cycle #${dueItem.cycleNumber}`
+    });
+    setShowSettleModal(true);
+  };
+
+  const handleConfirmSettleModal = async (form) => {
+    try {
+      let paymentId = form.id;
+      if (paymentId) {
+        await updatePayment(paymentId, {
+          cycleId: form.cycleId,
+          memberId: form.memberId,
+          amount: form.amount,
+          status: form.status,
+          paymentDate: form.date,
+          paymentMethod: form.method,
+          notes: form.notes
+        }, userId);
+      } else {
+        const res = await recordPayment({
+          cycleId: form.cycleId,
+          memberId: form.memberId,
+          amount: form.amount,
+          status: isOrganizer ? form.status : 'PENDING',
+          paymentDate: form.date,
+          paymentMethod: form.method,
+          notes: form.notes
+        }, userId);
+        paymentId = res?.data?.id || res?.id;
+      }
+
+      if (form.evidenceFile && paymentId) {
+        await uploadPaymentEvidence(paymentId, form.evidenceFile);
+      }
+
+      alert('Payment submitted successfully! Your record is now updated in the database.');
+      setShowSettleModal(false);
+      setSettleModalItem(null);
+      // Reload metrics and dues
+      const duesRes = await getMyPendingDues();
+      setPendingDues(duesRes?.data || []);
+      const payRes = await getPaymentsByMember(userId);
+      setRecentPayments((payRes?.data || payRes || []).slice(0, 5).map(p => ({
+        id: p.id,
+        member: p.memberName || 'Member',
+        amount: Number(p.amount) || 0,
+        status: (p.status || 'PAID').toUpperCase(),
+        date: p.paymentDate || p.createdAt?.split('T')[0] || '-',
+        group: p.groupName || 'General Group',
+        cycle: p.cycleNumber ? `Cycle ${p.cycleNumber}` : 'Cycle 1'
+      })));
+    } catch (err) {
+      console.error('Failed to submit payment settlement', err);
+      alert(err?.response?.data?.message || 'Failed to submit payment settlement to database.');
     }
   };
 
@@ -384,6 +491,178 @@ const Dashboard = () => {
         />
       )}
 
+
+      {/* Active Installments & Payment Reminders (Action Required for Unsettled Members) */}
+      {!isAdmin && pendingDues.length > 0 && (
+        <div className="mb-4">
+          <div className="d-flex align-items-center justify-content-between mb-2">
+            <h5 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+              <Icon name="alert-circle" size={20} color="#D97706" />
+              <span>Pending Installments & Payment Reminders</span>
+            </h5>
+            <span className="badge rounded-pill bg-light text-dark border px-2.5 py-1 small">
+              {pendingDues.length} {pendingDues.length === 1 ? 'Action Required' : 'Actions Required'}
+            </span>
+          </div>
+
+          <div className="d-flex flex-column gap-3">
+            {pendingDues.map((due, idx) => {
+              const isOverdue = due.status === 'OVERDUE' || due.isOverdue;
+              const isDueToday = due.status === 'DUE_TODAY';
+              const isAwaiting = due.status === 'AWAITING_APPROVAL' || due.hasSlipUploaded;
+              const isDueSoon = due.status === 'DUE_SOON';
+
+              const theme = isOverdue
+                ? {
+                    bg: '#FEF2F2',
+                    border: '#F87171',
+                    badgeBg: '#DC2626',
+                    badgeText: '#FFFFFF',
+                    accentColor: '#991B1B',
+                    icon: 'alert-triangle',
+                    iconColor: '#DC2626',
+                    btnClass: 'btn-danger'
+                  }
+                : isDueToday
+                ? {
+                    bg: '#FFFBEB',
+                    border: '#FBBF24',
+                    badgeBg: '#D97706',
+                    badgeText: '#FFFFFF',
+                    accentColor: '#92400E',
+                    icon: 'clock',
+                    iconColor: '#D97706',
+                    btnClass: 'btn-warning text-dark'
+                  }
+                : isAwaiting
+                ? {
+                    bg: '#F0FDF4',
+                    border: '#86EFAC',
+                    badgeBg: '#16A34A',
+                    badgeText: '#FFFFFF',
+                    accentColor: '#166534',
+                    icon: 'check-circle',
+                    iconColor: '#16A34A',
+                    btnClass: 'btn-outline-success'
+                  }
+                : {
+                    bg: '#F8FAFC',
+                    border: '#CBD5E1',
+                    badgeBg: '#0284C7',
+                    badgeText: '#FFFFFF',
+                    accentColor: '#0F172A',
+                    icon: 'bell',
+                    iconColor: '#0284C7',
+                    btnClass: 'btn-primary'
+                  };
+
+              return (
+                <div
+                  key={due.cycleId || idx}
+                  className="card border shadow-sm rounded-4 p-3 p-md-4"
+                  style={{
+                    backgroundColor: theme.bg,
+                    borderColor: theme.border,
+                    borderWidth: '1.5px'
+                  }}
+                >
+                  <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                    <div className="d-flex align-items-start gap-3">
+                      <div
+                        className="rounded-circle p-2.5 d-flex align-items-center justify-content-center flex-shrink-0"
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', border: `1px solid ${theme.border}` }}
+                      >
+                        <Icon name={theme.icon} size={24} color={theme.iconColor} />
+                      </div>
+                      <div>
+                        <div className="d-flex align-items-center gap-2 flex-wrap mb-1">
+                          <span
+                            className="badge rounded-pill fw-semibold px-2.5 py-1"
+                            style={{ backgroundColor: theme.badgeBg, color: theme.badgeText, fontSize: '0.75rem' }}
+                          >
+                            {isOverdue
+                              ? `Overdue (${due.daysOverdue} days late)`
+                              : isDueToday
+                              ? 'Due Today'
+                              : isAwaiting
+                              ? 'Verification Pending'
+                              : `Due in ${due.daysRemaining} days`}
+                          </span>
+                          <span className="small text-muted fw-semibold">
+                            {due.groupName} • Cycle #{due.cycleNumber} of {due.totalCycles}
+                          </span>
+                        </div>
+
+                        <h5 className="fw-bold mb-1" style={{ color: theme.accentColor }}>
+                          {isOverdue
+                            ? (due.daysOverdue >= 7
+                              ? `Critical Overdue: Installment ${due.daysOverdue} Days Late!`
+                              : `Payment Overdue: Installment ${due.daysOverdue} Days Late`)
+                            : isDueToday
+                            ? 'Installment Payment Due Today'
+                            : isAwaiting
+                            ? 'Deposit Slip Under Review by Organizer'
+                            : 'Upcoming Installment Reminder'}
+                        </h5>
+
+                        <p className="small text-secondary mb-0" style={{ maxWidth: '650px' }}>
+                          {isOverdue
+                            ? (due.daysOverdue >= 7
+                              ? `This installment was due on ${due.dueDate}. A 7-day overdue status applies a penalty on your Discipline Score (-10 pts). Please settle immediately with organizer ${due.organizerName}.`
+                              : `This installment was due on ${due.dueDate} (${due.daysOverdue} days ago). Please settle to maintain your 100% on-time reputation rating.`)
+                            : isDueToday
+                            ? `Your installment of ${Number(due.amount).toLocaleString()} LKR is due today (${due.dueDate}). Settle today to prevent delay penalties.`
+                            : isAwaiting
+                            ? `You uploaded your payment slip. Organizer ${due.organizerName} is reviewing and confirming your payment.`
+                            : `Cycle #${due.cycleNumber} collection is active. Due date is ${due.dueDate} (${due.daysRemaining} days remaining).`}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="d-flex flex-row flex-md-column align-items-center align-items-md-end justify-content-between w-100 w-md-auto pt-2 pt-md-0 border-top border-md-top-0 gap-2">
+                      <div className="text-start text-md-end">
+                        <div className="small text-muted" style={{ fontSize: '0.78rem' }}>Amount Due</div>
+                        <div className="fs-4 fw-bold" style={{ color: theme.accentColor, letterSpacing: '-0.5px' }}>
+                          {Number(due.amount).toLocaleString()} LKR
+                        </div>
+                      </div>
+
+                      <div className="d-flex align-items-center gap-2">
+                        {isAwaiting ? (
+                          <Link
+                            to={`/groups/${due.groupId}`}
+                            className="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold"
+                          >
+                            View Circle
+                          </Link>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleOpenSettle(due)}
+                              className={`btn btn-sm rounded-pill px-3.5 py-1.5 fw-semibold shadow-sm d-inline-flex align-items-center gap-1.5 ${theme.btnClass}`}
+                            >
+                              <Icon name="credit-card" size={15} />
+                              <span>{isOverdue ? 'Settle Overdue Now' : 'Pay / Upload Slip'}</span>
+                            </button>
+                            <Link
+                              to={`/groups/${due.groupId}`}
+                              className="btn btn-sm btn-light border rounded-pill px-2.5 py-1.5 text-muted"
+                              title="View Group"
+                            >
+                              <Icon name="arrow-right" size={15} />
+                            </Link>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Upcoming Payout Banner Card (For Members & Organizers participating in Seettu) */}
       {!isAdmin && (
         upcomingPayouts.length > 0 ? (
@@ -543,6 +822,20 @@ const Dashboard = () => {
         onHide={() => setShowPaymentModal(false)}
         payment={selectedPayment}
       />
+
+      {/* Settle Payment Modal for Direct Dashboard Submissions */}
+      {showSettleModal && settleModalItem && (
+        <SettlePaymentModal
+          show={showSettleModal}
+          onHide={() => {
+            setShowSettleModal(false);
+            setSettleModalItem(null);
+          }}
+          payment={settleModalItem}
+          onSettle={handleConfirmSettleModal}
+        />
+      )}
+
     </div>
   );
 };
