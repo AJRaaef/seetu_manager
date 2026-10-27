@@ -36,6 +36,11 @@ public class JoinGroupRequestService {
             throw new IllegalArgumentException("You are already an active member of this group. Duplicate membership is prohibited.");
         }
 
+        long activeMembers = groupMemberRepository.countByGroupIdAndStatus(groupId, GroupMember.MemberStatus.ACTIVE);
+        if (activeMembers >= group.getMemberCount()) {
+            throw new IllegalArgumentException("Group has reached maximum member count");
+        }
+
         if (user.getRole() == User.Role.MEMBER && user.getKycStatus() != User.KycStatus.VERIFIED) {
             throw new IllegalStateException("Identity Verification Required: You must submit your NIC and Grama Niladhari Character Certificate in your Profile and receive System Admin verification before requesting to join a Seettu group.");
         }
@@ -82,6 +87,11 @@ public class JoinGroupRequestService {
         if (request.getUser().getRole() == User.Role.MEMBER && request.getUser().getKycStatus() != User.KycStatus.VERIFIED) {
             throw new IllegalStateException("Cannot approve join request: Member '" + request.getUser().getFullName() + 
                     "' has not completed Admin identity and Grama Niladhari Certificate verification.");
+        }
+
+        long activeMembers = groupMemberRepository.countByGroupIdAndStatus(request.getGroup().getId(), GroupMember.MemberStatus.ACTIVE);
+        if (activeMembers >= request.getGroup().getMemberCount()) {
+            throw new IllegalArgumentException("Group has reached maximum member count");
         }
 
         request.setStatus(JoinGroupRequest.RequestStatus.APPROVED);

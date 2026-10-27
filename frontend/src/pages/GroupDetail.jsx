@@ -98,6 +98,13 @@ const GroupDetail = () => {
     e.preventDefault();
     setActionMsg('');
     setErrorMsg('');
+
+    if ((group.members?.length || 0) >= (group.memberCount || 0)) {
+      setErrorMsg('Group has reached maximum member count');
+      setShowAddMemberModal(false);
+      return;
+    }
+
     try {
       await addMember(id, memberUserId);
       setActionMsg('Member added successfully to group!');
@@ -514,6 +521,12 @@ const GroupDetail = () => {
                 </div>
                 <form onSubmit={handleAddMember}>
                   <div className="modal-body py-3">
+                    {((group.members?.length || 0) >= (group.memberCount || 0)) && (
+                      <div className="alert alert-danger py-2 px-3 small fw-bold mb-3 d-flex align-items-center gap-2">
+                        <Icon name="alert-circle" size={16} color="#DC2626" />
+                        <span>Group has reached maximum member count ({group.members?.length || 0} / {group.memberCount || 0})</span>
+                      </div>
+                    )}
                     <p className="small text-muted mb-3">
                       Only the <strong>Member ID</strong> is required to add a member to this Seettu group.
                     </p>
