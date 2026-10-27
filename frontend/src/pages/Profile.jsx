@@ -108,6 +108,14 @@ const Profile = () => {
         if (kycRes.data.nicNumber) {
           setNicInput(kycRes.data.nicNumber);
         }
+        if (kycRes.data.kycStatus) {
+          updateUser({
+            kycStatus: kycRes.data.kycStatus,
+            nicNumber: kycRes.data.nicNumber,
+            requestedRole: kycRes.data.requestedRole,
+            role: kycRes.data.role || user?.role
+          });
+        }
       } else if (data.user?.nicNumber) {
         setNicInput(data.user.nicNumber);
       }

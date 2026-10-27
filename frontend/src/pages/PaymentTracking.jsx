@@ -2055,7 +2055,7 @@ style={{ cursor: 'pointer' }}
 
 <td className="py-3 px-3 text-muted small text-nowrap">{p.cycle}</td>
 
-<td className="py-3 px-3 fw-semibold text-dark small text-nowrap">{p.amount.toLocaleString()} LKR</td>
+<td className="py-3 px-3 fw-semibold text-dark small text-nowrap">{Number(p.amount || 0).toLocaleString()} LKR</td>
 
 <td
 

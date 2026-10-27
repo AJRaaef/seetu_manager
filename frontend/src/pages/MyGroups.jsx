@@ -4,16 +4,57 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { getGroupsByUser, getAllGroups, deleteGroup } from '../api/groupApi';
 import { createJoinRequest } from '../api/joinRequestApi';
+import { getMyKycStatus } from '../api/userApi';
 import Icon from '../components/Icons';
 import OrganizerRequestModal from '../components/OrganizerRequestModal';
 
 const MyGroups = () => {
   const { t } = useTranslation();
-  const { user, isOrganizer, isAdmin } = useAuth();
+  const { user, isOrganizer, isAdmin, updateUser } = useAuth();
   const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showOrganizerModal, setShowOrganizerModal] = useState(false);
+
+  // Sync latest verification status on page load
+  useEffect(() => {
+    if (user?.role === 'MEMBER' && user?.kycStatus !== 'VERIFIED') {
+      getMyKycStatus()
+        .then((res) => {
+          if (res?.data?.kycStatus === 'VERIFIED') {
+            updateUser({
+              kycStatus: 'VERIFIED',
+              nicNumber: res.data.nicNumber,
+              role: res.data.role || user?.role
+            });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [user?.role, user?.kycStatus]);
+
+  const handleOpenJoinModal = async () => {
+    // If not verified in memory, sync fresh status from server before blocking
+    if (user?.role === 'MEMBER' && user?.kycStatus !== 'VERIFIED') {
+      try {
+        const kycRes = await getMyKycStatus();
+        if (kycRes?.data?.kycStatus === 'VERIFIED') {
+          updateUser({
+            kycStatus: 'VERIFIED',
+            nicNumber: kycRes.data.nicNumber,
+            role: kycRes.data.role || user?.role
+          });
+          setShowJoinModal(true);
+          return;
+        }
+      } catch (err) {}
+
+      alert('⚠️ Verification Required: To prevent fraud, duplicate accounts, and financial risks, you must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before joining Seettu groups.\n\nPlease visit your Profile page to complete verification.');
+      navigate('/profile');
+      return;
+    }
+    setShowJoinModal(true);
+  };
 
   const userId = user?.userId || user?.id;
 
@@ -207,14 +248,7 @@ const MyGroups = () => {
               </button>
             )}
             <button
-              onClick={() => {
-                if (user?.role === 'MEMBER' && user?.kycStatus !== 'VERIFIED') {
-                  alert('⚠️ Verification Required: To prevent fraud, duplicate accounts, and financial risks, you must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before joining Seettu groups.\n\nPlease visit your Profile page to complete verification.');
-                  navigate('/profile');
-                  return;
-                }
-                setShowJoinModal(true);
-              }}
+              onClick={handleOpenJoinModal}
               className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm text-white"
               style={{ backgroundColor: '#1A5265', borderColor: '#1A5265' }}
             >
@@ -239,14 +273,7 @@ const MyGroups = () => {
           </p>
           {!isOrganizer && !isAdmin && (
             <button
-              onClick={() => {
-                if (user?.role === 'MEMBER' && user?.kycStatus !== 'VERIFIED') {
-                  alert('⚠️ Verification Required: To prevent fraud, duplicate accounts, and financial risks, you must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before joining Seettu groups.\n\nPlease visit your Profile page to complete verification.');
-                  navigate('/profile');
-                  return;
-                }
-                setShowJoinModal(true);
-              }}
+              onClick={handleOpenJoinModal}
               className="btn btn-teal px-4 py-2 fw-semibold"
             >
               {t('my_groups_page.explore_btn', 'Explore & Join a Group')}

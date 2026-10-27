@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import * as authApi from '../api/authApi';
+import { getMyKycStatus } from '../api/userApi';
 
 export const AuthContext = createContext();
 
@@ -18,6 +19,34 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
 
+  const refreshUser = async () => {
+    const activeToken = token || localStorage.getItem('token');
+    if (!activeToken) return null;
+    try {
+      const res = await getMyKycStatus();
+      if (res?.data) {
+        const freshData = res.data;
+        setUser((prev) => {
+          const base = prev || JSON.parse(localStorage.getItem('user')) || {};
+          const updated = normalizeUser({
+            ...base,
+            ...freshData,
+            id: freshData.id || base.id,
+            userId: freshData.id || base.userId,
+            kycStatus: freshData.kycStatus || base.kycStatus,
+            role: freshData.role || base.role
+          });
+          localStorage.setItem('user', JSON.stringify(updated));
+          return updated;
+        });
+        return freshData;
+      }
+    } catch (e) {
+      // Background sync silent catch
+    }
+    return null;
+  };
+
   useEffect(() => {
     if (token) {
       try {
@@ -34,28 +63,48 @@ export const AuthProvider = ({ children }) => {
         setToken(null);
         localStorage.removeItem('token');
       }
+
+      // Sync latest KYC and profile status from database
+      refreshUser();
     }
     setLoading(false);
   }, [token]);
 
   const login = async (credentials) => {
     const data = await authApi.login(credentials);
-    const { token, ...rawUserData } = data.data;
+    const { token: receivedToken, ...rawUserData } = data.data;
     const userData = normalizeUser(rawUserData);
-    setToken(token);
+    setToken(receivedToken);
     setUser(userData);
-    localStorage.setItem('token', token);
+    localStorage.setItem('token', receivedToken);
     localStorage.setItem('user', JSON.stringify(userData));
+
+    // Immediately fetch freshest KYC & verification state
+    try {
+      const kycRes = await getMyKycStatus();
+      if (kycRes?.data) {
+        const freshUser = normalizeUser({
+          ...userData,
+          ...kycRes.data,
+          id: kycRes.data.id || userData.id,
+          userId: kycRes.data.id || userData.userId
+        });
+        setUser(freshUser);
+        localStorage.setItem('user', JSON.stringify(freshUser));
+        return freshUser;
+      }
+    } catch (e) {}
+
     return userData;
   };
 
   const register = async (details) => {
     const data = await authApi.register(details);
-    const { token, ...rawUserData } = data.data;
+    const { token: receivedToken, ...rawUserData } = data.data;
     const userData = normalizeUser(rawUserData);
-    setToken(token);
+    setToken(receivedToken);
     setUser(userData);
-    localStorage.setItem('token', token);
+    localStorage.setItem('token', receivedToken);
     localStorage.setItem('user', JSON.stringify(userData));
     return userData;
   };
@@ -68,9 +117,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUser = (updatedData) => {
-    const newUser = normalizeUser({ ...user, ...updatedData });
-    setUser(newUser);
-    localStorage.setItem('user', JSON.stringify(newUser));
+    setUser((prev) => {
+      const base = prev || JSON.parse(localStorage.getItem('user')) || {};
+      const newUser = normalizeUser({ ...base, ...updatedData });
+      localStorage.setItem('user', JSON.stringify(newUser));
+      return newUser;
+    });
   };
 
   const isAdmin = user?.role === 'ADMIN';
@@ -79,11 +131,13 @@ export const AuthProvider = ({ children }) => {
   const isVerified = user?.kycStatus === 'VERIFIED';
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUser, isAdmin, isOrganizer, isMember, isVerified }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateUser, refreshUser, isAdmin, isOrganizer, isMember, isVerified }}>
       {children}
     </AuthContext.Provider>
   );
-};export const useAuth = () => {
+};
+
+export const useAuth = () => {
   const context = React.useContext(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
