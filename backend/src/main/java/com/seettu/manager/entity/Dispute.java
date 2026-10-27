@@ -21,7 +21,7 @@ public class Dispute {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id", nullable = false)
+    @JoinColumn(name = "group_id", nullable = true)
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"members", "cycles", "hibernateLazyInitializer", "handler"})
     private SeettuGroup group;
 

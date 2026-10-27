@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Modal } from 'react-bootstrap';
 import Icon from '../components/Icons';
 import { getAllDisputes, getDisputesByUser, createDispute, updateDisputeStatus } from '../api/disputeApi';
-import { getAllGroups } from '../api/groupApi';
+import { getAllGroups, getGroupsByUser } from '../api/groupApi';
 import { useAuth } from '../hooks/useAuth';
 import { getErrorMessage } from '../utils/errorHandler';
 
@@ -19,7 +19,7 @@ const Disputes = () => {
   const [actionMsg, setActionMsg] = useState('');
 
   // Form state
-  const [selectedGroupId, setSelectedGroupId] = useState('');
+  const [selectedGroupId, setSelectedGroupId] = useState('general');
   const [disputeType, setDisputeType] = useState('Payment');
   const [description, setDescription] = useState('');
   const [fileName, setFileName] = useState('');
@@ -35,18 +35,50 @@ const Disputes = () => {
       setLoading(true);
       setErrorMsg('');
 
+      let gList = [];
+      const disputesPromise = (isAdmin || isOrganizer
+        ? getAllDisputes()
+        : (user?.id ? getDisputesByUser(user.id) : getAllDisputes())
+      ).catch(() => ({ data: [] }));
+
+      let groupsPromise;
+      if (isAdmin || isOrganizer) {
+        groupsPromise = getAllGroups().catch(() => ({ data: [] }));
+      } else if (user?.id) {
+        // For members, fetch joined groups first, or fallback to all groups
+        groupsPromise = getGroupsByUser(user.id)
+          .catch(() => getAllGroups())
+          .catch(() => ({ data: [] }));
+      } else {
+        groupsPromise = getAllGroups().catch(() => ({ data: [] }));
+      }
+
       const [groupsRes, disputesRes] = await Promise.all([
-        getAllGroups().catch(() => ({ data: [] })),
-        (isAdmin || isOrganizer ? getAllDisputes() : (user?.id ? getDisputesByUser(user.id) : getAllDisputes()))
-          .catch(() => ({ data: [] }))
+        groupsPromise,
+        disputesPromise
       ]);
 
-      const gList = groupsRes?.data || groupsRes || [];
-      const dList = disputesRes?.data || disputesRes || [];
+      gList = groupsRes?.data || groupsRes || [];
+      if (!isAdmin && !isOrganizer && (!Array.isArray(gList) || gList.length === 0)) {
+        try {
+          const fallbackRes = await getAllGroups();
+          gList = fallbackRes?.data || fallbackRes || [];
+        } catch {
+          // ignore
+        }
+      }
 
-      setGroups(Array.isArray(gList) ? gList : []);
-      if (Array.isArray(gList) && gList.length > 0 && !selectedGroupId) {
-        setSelectedGroupId(gList[0].id);
+      const dList = disputesRes?.data || disputesRes || [];
+      const safeGroups = Array.isArray(gList) ? gList : [];
+
+      setGroups(safeGroups);
+      if (safeGroups.length > 0) {
+        const exists = safeGroups.some(g => String(g.id) === String(selectedGroupId));
+        if (!selectedGroupId || (!exists && selectedGroupId !== 'general')) {
+          setSelectedGroupId(String(safeGroups[0].id));
+        }
+      } else {
+        setSelectedGroupId('general');
       }
 
       setDisputes(Array.isArray(dList) ? dList : []);
@@ -64,16 +96,12 @@ const Disputes = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isAdmin) {
-      alert('System Admins cannot submit disputes as they serve as platform arbitrators.');
+    if (isAdmin || isOrganizer) {
+      alert('Organizers and Admins cannot submit disputes as they serve as circle managers and platform arbitrators.');
       return;
     }
     if (!description.trim()) {
       alert('Please enter dispute description.');
-      return;
-    }
-    if (!selectedGroupId) {
-      alert('Please select a group.');
       return;
     }
 
@@ -82,13 +110,17 @@ const Disputes = () => {
     setErrorMsg('');
 
     try {
+      const payloadGroupId = (selectedGroupId && selectedGroupId !== 'general')
+        ? Number(selectedGroupId)
+        : null;
+
       await createDispute({
-        groupId: Number(selectedGroupId),
+        groupId: payloadGroupId,
         type: disputeType,
         description: description.trim()
       }, user?.id);
 
-      setActionMsg('Dispute submitted successfully! Organizer has been notified.');
+      setActionMsg('Dispute submitted successfully! It has been recorded for review.');
       setDescription('');
       setFileName('');
       await fetchDisputesAndGroups();
@@ -243,100 +275,119 @@ const Disputes = () => {
         </div>
       </div>
 
-      {/* Submit New Dispute Card */}
-      {!isAdmin ? (
-        <div className="ui-card p-4 shadow-sm">
+      {/* Submit New Dispute Card - Members Only */}
+      {(!isAdmin && !isOrganizer) && (
+        <div className="ui-card p-4 shadow-sm mb-4">
           <h4 className="fw-bold text-dark mb-3" style={{ fontSize: '1.2rem' }}>Submit New Dispute</h4>
 
-        <form onSubmit={handleSubmit}>
-          <div className="row g-3 mb-3">
-            <div className="col-12 col-md-6">
-              <label className="form-label text-dark fw-semibold small">Select Group</label>
-              <select
-                className="form-select bg-white"
-                value={selectedGroupId}
-                onChange={(e) => setSelectedGroupId(e.target.value)}
-                required
-              >
-                {groups.length === 0 ? (
-                  <option value="">No Groups Available</option>
-                ) : (
-                  groups.map((g) => (
+          <form onSubmit={handleSubmit}>
+            <div className="row g-3 mb-3">
+              <div className="col-12 col-md-6">
+                <label className="form-label text-dark fw-semibold small">Select Group / Scope</label>
+                <select
+                  className="form-select bg-white"
+                  value={selectedGroupId}
+                  onChange={(e) => setSelectedGroupId(e.target.value)}
+                >
+                  <option value="general">General Platform / Account Issue</option>
+                  {groups.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name}
                     </option>
-                  ))
-                )}
-              </select>
+                  ))}
+                </select>
+              </div>
+
+              <div className="col-12 col-md-6">
+                <label className="form-label text-dark fw-semibold small">Dispute Type</label>
+                <select
+                  className="form-select bg-white"
+                  value={disputeType}
+                  onChange={(e) => setDisputeType(e.target.value)}
+                >
+                  <option value="Payment">Payment</option>
+                  <option value="Payout">Payout</option>
+                  <option value="Member">Member</option>
+                  <option value="Cycle">Cycle Schedule</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
             </div>
 
-            <div className="col-12 col-md-6">
-              <label className="form-label text-dark fw-semibold small">Dispute Type</label>
-              <select
-                className="form-select bg-white"
-                value={disputeType}
-                onChange={(e) => setDisputeType(e.target.value)}
-              >
-                <option value="Payment">Payment</option>
-                <option value="Payout">Payout</option>
-                <option value="Member">Member</option>
-                <option value="Cycle">Cycle Schedule</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label text-dark fw-semibold small">{t('disputes_page.col_subject', 'Subject')}</label>
-            <textarea
-              className="form-control"
-              rows="3"
-              placeholder="Describe the issue in detail..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="form-label text-dark fw-semibold small">Upload Evidence (Optional)</label>
-            <div
-              className="border border-dashed rounded-3 p-4 text-center"
-              style={{ borderColor: '#CBD5E1', backgroundColor: '#FAFAFA', cursor: 'pointer' }}
-              onClick={() => document.getElementById('evidenceFileInput').click()}
-            >
-              <div className="text-muted mb-2">
-                <Icon name="upload" size={28} color="#94A3B8" />
-              </div>
-              <div className="fw-semibold text-dark small">
-                {fileName ? fileName : 'Click to Upload or Drag and Drop'}
-              </div>
-              <div className="text-muted small" style={{ fontSize: '0.75rem' }}>
-                PDF, PNG, JPG (max 5MB)
-              </div>
-              <input
-                id="evidenceFileInput"
-                type="file"
-                className="d-none"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    setFileName(e.target.files[0].name);
-                  }
-                }}
+            <div className="mb-3">
+              <label className="form-label text-dark fw-semibold small">{t('disputes_page.col_subject', 'Subject / Details')}</label>
+              <textarea
+                className="form-control"
+                rows="3"
+                placeholder="Describe the issue in detail..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                required
               />
             </div>
-          </div>
 
-          <button type="submit" className="btn btn-teal w-100 py-2 fw-semibold" disabled={submitting || groups.length === 0}>
-            {submitting ? t('common.loading', 'Loading...') : t('disputes_page.raise_btn', 'Raise Dispute')}
-          </button>
-        </form>
-      </div>
-      ) : (
-        <div className="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3" style={{ backgroundColor: '#E0F2FE', color: '#0369A1' }}>
+            <div className="mb-4">
+              <label className="form-label text-dark fw-semibold small">Upload Evidence (Optional)</label>
+              <div
+                className="border border-dashed rounded-3 p-4 text-center"
+                style={{ borderColor: '#CBD5E1', backgroundColor: '#FAFAFA', cursor: 'pointer' }}
+                onClick={() => document.getElementById('evidenceFileInput').click()}
+              >
+                <div className="text-muted mb-2">
+                  <Icon name="upload" size={28} color="#94A3B8" />
+                </div>
+                <div className="fw-semibold text-dark small">
+                  {fileName ? fileName : 'Click to Upload or Drag and Drop'}
+                </div>
+                <div className="text-muted small" style={{ fontSize: '0.75rem' }}>
+                  PDF, PNG, JPG (max 5MB)
+                </div>
+                <input
+                  id="evidenceFileInput"
+                  type="file"
+                  className="d-none"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      setFileName(e.target.files[0].name);
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-teal w-100 py-2 fw-semibold"
+              disabled={submitting}
+            >
+              {submitting ? t('common.loading', 'Submitting...') : t('disputes_page.raise_btn', 'Raise Dispute')}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Organizer Mediation Banner */}
+      {isOrganizer && (
+        <div className="alert border-0 shadow-sm d-flex align-items-center gap-3 p-3 mb-4" style={{ backgroundColor: '#F0FDF4', color: '#166534', border: '1px solid #BBF7D0' }}>
+          <Icon name="shield" size={24} color="#166534" />
+          <div>
+            <strong className="d-block mb-1">Organizer Mediation Portal</strong>
+            <span className="small">
+              As a Seettu Organizer, you review, arbitrate, and record resolutions for grievances raised by circle members. Review open disputes using the table above.
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Admin Arbitrator Banner */}
+      {isAdmin && (
+        <div className="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3 p-3 mb-4" style={{ backgroundColor: '#E0F2FE', color: '#0369A1' }}>
           <Icon name="shield" size={24} />
           <div>
-            <strong>System Admin Notice:</strong> System Admins serve as platform arbitrators and overseers. Admins review and resolve dispute grievances submitted by group members/organizers and do not raise disputes.
+            <strong className="d-block mb-1">System Admin Notice</strong>
+            <span className="small">
+              System Admins serve as platform arbitrators and overseers. Admins review and resolve dispute grievances across all groups and do not raise disputes.
+            </span>
           </div>
         </div>
       )}

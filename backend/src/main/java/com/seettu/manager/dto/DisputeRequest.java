@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Data
 public class DisputeRequest {
-    @NotNull(message = "Group ID is required")
     private Long groupId;
 
     @NotBlank(message = "Dispute type is required")

@@ -20,14 +20,20 @@ public class DisputeService {
     private final SeettuGroupService groupService;
     private final AuditLogService auditLogService;
     private final NotificationService notificationService;
+    private final com.seettu.manager.repository.UserRepository userRepository;
 
     @Transactional
     public Dispute createDispute(DisputeRequest request, User raisedBy) {
         if (raisedBy != null && raisedBy.getRole() == User.Role.ADMIN) {
             throw new IllegalArgumentException("System Admins cannot submit disputes as they serve as platform arbitrators.");
         }
+        if (raisedBy != null && raisedBy.getRole() == User.Role.ORGANIZER) {
+            throw new IllegalArgumentException("Organizers cannot submit disputes as they serve as circle managers.");
+        }
 
-        SeettuGroup group = groupService.getGroupById(request.getGroupId());
+        SeettuGroup group = (request.getGroupId() != null && request.getGroupId() > 0)
+                ? groupService.getGroupById(request.getGroupId())
+                : null;
 
         Dispute dispute = Dispute.builder()
                 .group(group)
@@ -38,11 +44,18 @@ public class DisputeService {
                 .build();
         dispute = disputeRepository.save(dispute);
 
+        String grpLabel = group != null ? "group: " + group.getName() : "General Platform Grievance";
         auditLogService.log(raisedBy, "DISPUTE_RAISED", "disputes", dispute.getId(),
-                "Dispute raised for group: " + group.getName());
+                "Dispute raised for " + grpLabel);
         
-        notificationService.sendNotification(group.getCreatedBy().getId(), 
-                "New dispute raised in group: " + group.getName(), "DISPUTE");
+        if (group != null && group.getCreatedBy() != null) {
+            notificationService.sendNotification(group.getCreatedBy().getId(), 
+                    "New dispute raised in group: " + group.getName(), "DISPUTE");
+        } else {
+            userRepository.findByRole(User.Role.ADMIN).forEach(admin -> 
+                notificationService.sendNotification(admin.getId(), "New platform grievance filed: " + request.getType(), "DISPUTE")
+            );
+        }
 
         return dispute;
     }
@@ -79,14 +92,16 @@ public class DisputeService {
         
         if (status.equals("RESOLVED") || status.equals("REJECTED")) {
             dispute.setResolvedBy(resolvedBy);
-            notificationService.sendNotification(dispute.getRaisedBy().getId(), 
-                    "Your dispute has been " + status.toLowerCase(), "DISPUTE");
+            if (dispute.getRaisedBy() != null) {
+                notificationService.sendNotification(dispute.getRaisedBy().getId(), 
+                        "Your dispute has been " + status.toLowerCase(), "DISPUTE");
+            }
         }
         
         Dispute saved = disputeRepository.save(dispute);
-        String groupName = saved.getGroup() != null ? saved.getGroup().getName() : "Group";
+        String groupName = saved.getGroup() != null ? saved.getGroup().getName() : "General Platform";
         auditLogService.log(resolvedBy, "DISPUTE_" + status, "disputes", saved.getId(),
-                "Dispute #" + saved.getId() + " marked as " + status + " for group: " + groupName);
+                "Dispute #" + saved.getId() + " marked as " + status + " for " + groupName);
 
         return saved;
     }

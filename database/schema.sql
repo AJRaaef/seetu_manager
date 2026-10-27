@@ -189,7 +189,7 @@ CREATE TABLE join_group_requests (
 -- ============================================================
 CREATE TABLE disputes (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    group_id BIGINT NOT NULL,
+    group_id BIGINT NULL,
     raised_by_id BIGINT NOT NULL,
     type VARCHAR(50) NOT NULL,
     description TEXT NOT NULL,
