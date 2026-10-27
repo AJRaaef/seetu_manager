@@ -40,8 +40,9 @@ export const getAllPayments = async () => {
   return response.data;
 };
 
-export const updatePayment = async (paymentId, data) => {
-  const response = await api.put(`/payments/${paymentId}`, data);
+export const updatePayment = async (paymentId, data, recorderId) => {
+  const url = recorderId ? `/payments/${paymentId}?recorderId=${recorderId}` : `/payments/${paymentId}`;
+  const response = await api.put(url, data);
   return response.data;
 };
 
