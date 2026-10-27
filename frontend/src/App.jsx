@@ -23,6 +23,8 @@ import PaymentAuditTrail from './pages/PaymentAuditTrail';
 import Reports from './pages/Reports';
 import Certificates from './pages/Certificates';
 import Notifications from './pages/Notifications';
+import MemberVerification from './pages/MemberVerification';
+import VerificationManagement from './pages/VerificationManagement';
 import ChitLaw from './pages/ChitLaw';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import LegalPage from './pages/LegalPage';
@@ -113,6 +115,8 @@ const MainLayout = () => {
       <Route path="/reports" element={<ProtectedRoute><AppLayout><Reports /></AppLayout></ProtectedRoute>} />
       <Route path="/certificates" element={<ProtectedRoute><AppLayout><Certificates /></AppLayout></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><AppLayout><Notifications /></AppLayout></ProtectedRoute>} />
+      <Route path="/verification" element={<ProtectedRoute><AppLayout><MemberVerification /></AppLayout></ProtectedRoute>} />
+      <Route path="/verifications/manage" element={<ProtectedRoute roles={['ORGANIZER', 'ADMIN']}><AppLayout><VerificationManagement /></AppLayout></ProtectedRoute>} />
 
       {/* Default Catch-all redirects to Landing Page */}
       <Route path="*" element={<Navigate to="/" replace />} />

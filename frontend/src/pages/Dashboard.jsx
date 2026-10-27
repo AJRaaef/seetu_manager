@@ -14,6 +14,7 @@ import {
   uploadPaymentEvidence
 } from '../api/paymentApi';
 import { getGroupsByUser, getGroupById } from '../api/groupApi';
+import { getMyVerification } from '../api/verificationApi';
 import api from '../api/axios';
 import Icon from '../components/Icons';
 import ReviewPayoutModal from '../components/ReviewPayoutModal';
@@ -47,6 +48,7 @@ const Dashboard = () => {
   const [overdueMembersList, setOverdueMembersList] = useState([]);
   const [reminderTargetPayment, setReminderTargetPayment] = useState(null);
   const [legalNoticeTargetPayment, setLegalNoticeTargetPayment] = useState(null);
+  const [myVerification, setMyVerification] = useState(null);
 
   const userId = user?.userId || user?.id;
 
@@ -61,6 +63,12 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
+
+    if (!isAdmin && !isOrganizer && userId) {
+      getMyVerification(userId)
+        .then(res => setMyVerification(res?.data || res || null))
+        .catch(() => {});
+    }
 
     const fetchAdvance = async () => {
       try {
@@ -370,6 +378,27 @@ const Dashboard = () => {
             : t('dashboard_page.subtitles.member', 'Here is a quick look at your current Seettu circles, savings progress, and upcoming payouts.')}
         </p>
       </div>
+
+      {/* Verification Notice Banner for Unverified Members */}
+      {!isAdmin && !isOrganizer && (!myVerification || myVerification.verificationStatus !== 'VERIFIED') && (
+        <div
+          className="alert alert-warning border-0 shadow-sm rounded-3 mb-4 p-3 d-flex align-items-center justify-content-between flex-wrap gap-2"
+          style={{ backgroundColor: '#FFFBEB', borderLeft: '5px solid #FFC107' }}
+        >
+          <div className="d-flex align-items-center gap-2">
+            <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+            <span className="fw-semibold text-dark">
+              Your identity is not verified. Complete verification to join groups.
+            </span>
+          </div>
+          <Link
+            to="/verification"
+            className="btn btn-sm btn-warning text-dark fw-bold px-3 py-1.5 shadow-sm rounded-pill text-decoration-none"
+          >
+            Complete Now
+          </Link>
+        </div>
+      )}
 
       {/* Metric Cards Row */}
       <div className="row g-3 mb-4">

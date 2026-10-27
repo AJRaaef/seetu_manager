@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import Icon from '../components/Icons';
-import OrganizerRequestModal from '../components/OrganizerRequestModal';
-import { getUserProfileStats, updateUserProfile, submitKyc, getMyKycStatus, uploadProfilePicture, deleteProfilePicture } from '../api/userApi';
+import { getUserProfileStats, updateUserProfile, uploadProfilePicture, deleteProfilePicture } from '../api/userApi';
 import { changePassword } from '../api/authApi';
 import { getErrorMessage } from '../utils/errorHandler';
 
@@ -24,16 +23,6 @@ const Profile = () => {
   const [uploadingPic, setUploadingPic] = useState(false);
   const [failedProfilePictureUrl, setFailedProfilePictureUrl] = useState('');
   const fileInputRef = useRef(null);
-
-  // KYC Verification state
-  const [nicInput, setNicInput] = useState('');
-  const [certFile, setCertFile] = useState(null);
-  const [wantsOrganizer, setWantsOrganizer] = useState(false);
-  const [kycSubmitting, setKycSubmitting] = useState(false);
-  const [kycError, setKycError] = useState('');
-  const [kycSuccess, setKycSuccess] = useState('');
-  const [kycStatusData, setKycStatusData] = useState(null);
-  const [showOrganizerModal, setShowOrganizerModal] = useState(false);
 
   const currentUserId = user?.id || user?.userId;
 
@@ -93,81 +82,18 @@ const Profile = () => {
     try {
       setLoading(true);
       setErrorMsg('');
-      const [res, kycRes] = await Promise.all([
-        getUserProfileStats(currentUserId),
-        getMyKycStatus().catch(() => null)
-      ]);
+      const res = await getUserProfileStats(currentUserId);
       const data = res?.data || res || {};
       setProfileData(data);
       if (data.user) {
         setFullName(data.user.fullName || '');
         setPhone(data.user.phone || '');
       }
-      if (kycRes?.data) {
-        setKycStatusData(kycRes.data);
-        if (kycRes.data.nicNumber) {
-          setNicInput(kycRes.data.nicNumber);
-        }
-        if (kycRes.data.kycStatus && kycRes.data.kycStatus !== user?.kycStatus) {
-          updateUser({
-            kycStatus: kycRes.data.kycStatus,
-            nicNumber: kycRes.data.nicNumber,
-            requestedRole: kycRes.data.requestedRole,
-            role: kycRes.data.role || user?.role
-          });
-        }
-      } else if (data.user?.nicNumber) {
-        setNicInput(data.user.nicNumber);
-      }
     } catch (err) {
       console.error('Failed to load profile:', err);
       setErrorMsg(getErrorMessage(err, 'Failed to fetch profile details from database.'));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleKycSubmit = async (e) => {
-    e.preventDefault();
-    setKycError('');
-    setKycSuccess('');
-
-    const cleanNic = nicInput.trim().toUpperCase();
-    if (!cleanNic) {
-      setKycError('Please enter your National Identity Card (NIC) number.');
-      return;
-    }
-
-    // Sri Lankan NIC format validation: 9 digits + V/X OR 12 digits
-    const isValid = /^[0-9]{9}[VX]$/.test(cleanNic) || /^[0-9]{12}$/.test(cleanNic);
-    if (!isValid) {
-      setKycError('Invalid Sri Lankan NIC format. Must be 9 digits ending with V/X (e.g., 951234567V) or 12 digits (e.g., 199512345678).');
-      return;
-    }
-
-    if (!certFile) {
-      setKycError('Please select and upload your Grama Niladhari Character Certificate file (JPG, PNG, or PDF).');
-      return;
-    }
-
-    setKycSubmitting(true);
-    try {
-      const requestedRole = wantsOrganizer ? 'ORGANIZER' : null;
-      const res = await submitKyc(cleanNic, certFile, requestedRole);
-      setKycSuccess('NIC and Grama Niladhari Certificate submitted successfully! System Admin has been notified for verification.');
-      setCertFile(null);
-      if (updateUser) {
-        updateUser({
-          nicNumber: cleanNic,
-          kycStatus: 'PENDING',
-          gnCertificateUrl: res?.data?.gnCertificateUrl
-        });
-      }
-      await fetchProfile();
-    } catch (err) {
-      setKycError(getErrorMessage(err, 'Failed to submit verification proof.'));
-    } finally {
-      setKycSubmitting(false);
     }
   };
 
@@ -332,7 +258,7 @@ const Profile = () => {
       )}
 
       <div className="row g-4">
-        {/* Left Column: User Profile Card & KYC Verification */}
+        {/* Left Column: User Profile Card */}
         <div className="col-12 col-lg-4 d-flex flex-column gap-4">
           <div className="ui-card p-4 text-center shadow-sm">
             {/* Avatar Circle with Initials or Profile Picture + Camera Upload Badge */}
@@ -519,261 +445,6 @@ const Profile = () => {
             )}
           </div>
 
-          {/* KYC Identity & Grama Niladhari Character Verification Card */}
-          <div 
-            className="ui-card p-4 shadow-sm text-start"
-            style={{
-              borderLeft: !isAdmin ? `4px solid ${ (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'VERIFIED' ? '#198754' :
-                (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'PENDING' ? '#FFC107' :
-                (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'REJECTED' ? '#DC3545' : '#0D6EFD'
-              }` : undefined
-            }}
-          >
-            <div className="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
-              <div>
-                <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-1.5" style={{ color: '#0F2F3D' }}>
-                  <Icon name="shield" size={17} color="#1A5265" />
-                  <span>Identity & Trust Verification</span>
-                </h6>
-                <small className="text-muted" style={{ fontSize: '0.78rem' }}>NIC & Grama Niladhari Anti-Fraud Proof</small>
-              </div>
-
-              {isAdmin ? (
-                <span className="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1 rounded-pill small fw-bold">
-                  ADMIN OVERSIGHT
-                </span>
-              ) : (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'VERIFIED' ? (
-                <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1 rounded-pill small fw-bold">
-                  <Icon name="check" size={12} className="me-1" />VERIFIED
-                </span>
-              ) : (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'PENDING' ? (
-                <span className="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 px-2.5 py-1 rounded-pill small fw-bold">
-                  <Icon name="clock" size={12} className="me-1" />PENDING REVIEW
-                </span>
-              ) : (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'REJECTED' ? (
-                <span className="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1 rounded-pill small fw-bold">
-                  <Icon name="alert-circle" size={12} className="me-1" />REJECTED
-                </span>
-              ) : (
-                <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2.5 py-1 rounded-pill small fw-bold">
-                  UNVERIFIED
-                </span>
-              )}
-            </div>
-
-            {isAdmin ? (
-              <div className="p-3 bg-light rounded-3 text-muted small" style={{ fontSize: '0.82rem' }}>
-                <p className="mb-1 fw-semibold text-dark">Platform Administrator Authority</p>
-                As System Admin, your credentials provide root administrative oversight to verify applicant Grama Niladhari certificates and prevent duplicate member accounts.
-              </div>
-            ) : (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'VERIFIED' ? (
-              <div>
-                <div className="p-3 rounded-3 mb-3" style={{ backgroundColor: '#DEF7EC' }}>
-                  <div className="d-flex align-items-center gap-2 text-success fw-bold small mb-1">
-                    <Icon name="check" size={16} />
-                    <span>Identity Verified & Cleared</span>
-                  </div>
-                  <p className="mb-0 text-dark small" style={{ fontSize: '0.8rem' }}>
-                    Your Sri Lankan NIC and Grama Niladhari Character Certificate have been officially approved by the System Administrator. You can freely join Seettu contribution groups.
-                  </p>
-                </div>
-
-                <div className="small">
-                  <div className="d-flex justify-content-between py-1.5 border-bottom">
-                    <span className="text-muted">Verified NIC:</span>
-                    <span className="fw-bold font-monospace text-dark">{kycStatusData?.nicNumber || userInfo?.nicNumber || '-'}</span>
-                  </div>
-                  {(kycStatusData?.gnCertificateUrl || userInfo?.gnCertificateUrl) && (
-                    <div className="d-flex justify-content-between py-1.5 border-bottom align-items-center">
-                      <span className="text-muted">Grama Niladhari Proof:</span>
-                      <a 
-                        href={`http://localhost:8081${kycStatusData?.gnCertificateUrl || userInfo?.gnCertificateUrl}`} 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        className="btn btn-sm btn-outline-success py-0 px-2 fw-semibold"
-                        style={{ fontSize: '0.75rem' }}
-                      >
-                        View Certificate
-                      </a>
-                    </div>
-                  )}
-                  <div className="d-flex justify-content-between py-1.5">
-                    <span className="text-muted">Anti-Fraud Status:</span>
-                    <span className="text-success fw-semibold">No Duplicate Flags</span>
-                  </div>
-                </div>
-
-                {/* In-App Organizer Upgrade Section for Verified Members */}
-                {(userInfo?.role === 'MEMBER' || user?.role === 'MEMBER') && (
-                  <>
-                    {(kycStatusData?.requestedRole === 'ORGANIZER' || userInfo?.requestedRole === 'ORGANIZER' || user?.requestedRole === 'ORGANIZER') ? (
-                      <div className="p-3 rounded-3 mt-3 border" style={{ backgroundColor: '#FFFBEB', borderColor: '#FDE68A' }}>
-                        <div className="d-flex align-items-center gap-2 text-warning-emphasis fw-bold small mb-1">
-                          <Icon name="clock" size={16} />
-                          <span>Organizer Application Under Review</span>
-                        </div>
-                        <p className="mb-0 text-muted small" style={{ fontSize: '0.78rem', lineHeight: '1.45' }}>
-                          You have applied to become a Group Organizer. System Administrator is reviewing your verified credentials. You will unlock the Create Group feature as soon as approved.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="p-3 rounded-3 mt-3 border" style={{ backgroundColor: '#F0F9FF', borderColor: '#BAE6FD' }}>
-                        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                          <div>
-                            <div className="fw-bold text-dark small d-flex align-items-center gap-1.5">
-                              <Icon name="award" size={16} color="#0097B2" />
-                              <span>Want to start your own Seettu circles?</span>
-                            </div>
-                            <div className="text-muted small mt-0.5" style={{ fontSize: '0.76rem' }}>
-                              Upgrade to an authorized Organizer directly without logging out.
-                            </div>
-                          </div>
-                          <button 
-                            type="button"
-                            onClick={() => setShowOrganizerModal(true)} 
-                            className="btn btn-sm btn-teal fw-semibold px-3 py-1.5 text-white shadow-sm"
-                            style={{ backgroundColor: '#0097B2', fontSize: '0.78rem' }}
-                          >
-                            Become an Organizer
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            ) : (kycStatusData?.kycStatus || userInfo?.kycStatus) === 'PENDING' ? (
-              <div>
-                <div className="p-3 rounded-3 mb-3" style={{ backgroundColor: '#FEF08A' }}>
-                  <div className="d-flex align-items-center gap-2 text-dark fw-bold small mb-1">
-                    <Icon name="clock" size={16} />
-                    <span>Submitted for Admin Review</span>
-                  </div>
-                  <p className="mb-0 text-dark small" style={{ fontSize: '0.8rem' }}>
-                    Your documents have been received by the platform security desk. System Administrator is currently verifying your Grama Niladhari Certificate and NIC records against duplicate profiles.
-                  </p>
-                </div>
-
-                <div className="small mb-3">
-                  <div className="d-flex justify-content-between py-1.5 border-bottom">
-                    <span className="text-muted">Submitted NIC:</span>
-                    <span className="fw-bold font-monospace text-dark">{kycStatusData?.nicNumber || userInfo?.nicNumber || '-'}</span>
-                  </div>
-                  {(kycStatusData?.gnCertificateUrl || userInfo?.gnCertificateUrl) && (
-                    <div className="d-flex justify-content-between py-1.5 border-bottom align-items-center">
-                      <span className="text-muted">Certificate Proof:</span>
-                      <a 
-                        href={`http://localhost:8081${kycStatusData?.gnCertificateUrl || userInfo?.gnCertificateUrl}`} 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        className="btn btn-sm btn-outline-secondary py-0 px-2 fw-semibold"
-                        style={{ fontSize: '0.75rem' }}
-                      >
-                        View Proof
-                      </a>
-                    </div>
-                  )}
-                </div>
-                <div className="text-muted small fst-italic" style={{ fontSize: '0.75rem' }}>
-                  * Joining groups is locked until approval to protect group members from fraud.
-                </div>
-              </div>
-            ) : (
-              <div>
-                {(kycStatusData?.kycStatus || userInfo?.kycStatus) === 'REJECTED' && (
-                  <div className="alert alert-danger p-2.5 mb-3 rounded-3 small">
-                    <div className="fw-bold mb-1">⚠️ Verification Rejected by Admin:</div>
-                    <div className="text-dark small">
-                      {kycStatusData?.kycRejectionReason || userInfo?.kycRejectionReason || 'Submitted document does not meet verification requirements. Please upload a clear official Grama Niladhari certificate.'}
-                    </div>
-                  </div>
-                )}
-
-                <div className="p-2.5 bg-light rounded-3 mb-3 small text-muted" style={{ fontSize: '0.78rem' }}>
-                  <div className="fw-semibold text-dark mb-1">Pre-requisite for Group Participation:</div>
-                  All members must verify their Sri Lankan National Identity Card (NIC) and Grama Niladhari Character Certificate to eliminate fake accounts and financial default risk.
-                </div>
-
-                {kycError && (
-                  <div className="alert alert-danger p-2 mb-2 rounded-2 small fw-semibold" style={{ fontSize: '0.78rem' }}>
-                    {kycError}
-                  </div>
-                )}
-                {kycSuccess && (
-                  <div className="alert alert-success p-2 mb-2 rounded-2 small fw-semibold" style={{ fontSize: '0.78rem' }}>
-                    {kycSuccess}
-                  </div>
-                )}
-
-                <form onSubmit={handleKycSubmit}>
-                  <div className="mb-2.5">
-                    <label className="form-label small fw-semibold text-dark mb-1" style={{ fontSize: '0.8rem' }}>
-                      Sri Lankan NIC Number <span className="text-danger">*</span>
-                    </label>
-                    <input 
-                      type="text"
-                      className="form-control form-control-sm font-monospace text-uppercase"
-                      placeholder="e.g. 199512345678 or 951234567V"
-                      value={nicInput}
-                      onChange={(e) => setNicInput(e.target.value.toUpperCase())}
-                      maxLength={15}
-                      required
-                    />
-                    <div className="text-muted small mt-1" style={{ fontSize: '0.72rem' }}>
-                      9 digits ending with V/X or modern 12 digits.
-                    </div>
-                  </div>
-
-                  <div className="mb-3">
-                    <label className="form-label small fw-semibold text-dark mb-1" style={{ fontSize: '0.8rem' }}>
-                      Grama Niladhari Character Certificate <span className="text-danger">*</span>
-                    </label>
-                    <input 
-                      type="file"
-                      className="form-control form-control-sm"
-                      accept=".jpg,.jpeg,.png,.pdf"
-                      onChange={(e) => setCertFile(e.target.files[0] || null)}
-                      required
-                    />
-                    <div className="text-muted small mt-1" style={{ fontSize: '0.72rem' }}>
-                      Official Character & Residency proof (JPG, PNG, or PDF).
-                    </div>
-                  </div>
-
-                  <div className="form-check p-2.5 bg-light rounded-2 border mb-3 text-start">
-                    <input 
-                      className="form-check-input ms-0 me-2" 
-                      type="checkbox" 
-                      id="requestOrganizerRole"
-                      checked={wantsOrganizer}
-                      onChange={(e) => setWantsOrganizer(e.target.checked)}
-                    />
-                    <label className="form-check-label small fw-semibold text-dark cursor-pointer d-inline-flex align-items-center gap-1.5" htmlFor="requestOrganizerRole" style={{ fontSize: '0.8rem' }}>
-                      <Icon name="users" size={14} color="#1A5265" />
-                      <span>Request Organizer Privileges</span>
-                    </label>
-                    <div className="text-muted small mt-0.5" style={{ fontSize: '0.72rem' }}>
-                      Check this box if you intend to create and manage your own Seettu schemes. System Admin will review your Grama Niladhari proof for organizer authority.
-                    </div>
-                  </div>
-
-                  <button 
-                    type="submit" 
-                    className="btn btn-teal btn-sm w-100 fw-bold py-2 shadow-sm text-white"
-                    style={{ backgroundColor: '#1A5265' }}
-                    disabled={kycSubmitting}
-                  >
-                    {kycSubmitting ? (
-                      <span className="spinner-border spinner-border-sm me-1" role="status"></span>
-                    ) : (
-                      <Icon name="upload" size={14} className="me-1" />
-                    )}
-                    {kycSubmitting ? 'Uploading & Verifying...' : 'Submit Proofs for Verification'}
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Right Column: Groups & Statistics */}
@@ -1077,11 +748,6 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      <OrganizerRequestModal
-        isOpen={showOrganizerModal}
-        onClose={() => setShowOrganizerModal(false)}
-        onSuccess={fetchProfile}
-      />
     </div>
   );
 };

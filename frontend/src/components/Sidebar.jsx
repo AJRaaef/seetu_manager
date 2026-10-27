@@ -203,6 +203,17 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
 
             <li>
               <NavLink
+                to={(isAdmin || isOrganizer) ? "/verifications/manage" : "/verification"}
+                className={linkClass}
+                onClick={onCloseMobile}
+              >
+                <Icon name="shield" size={18} />
+                <span>{(isAdmin || isOrganizer) ? t("sidebar.verifications", "Verifications") : t("sidebar.verification", "Verification")}</span>
+              </NavLink>
+            </li>
+
+            <li>
+              <NavLink
                 to="/profile"
                 className={linkClass}
                 onClick={onCloseMobile}

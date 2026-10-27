@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../hooks/useLanguage';
 import { useNotification } from '../hooks/useNotification';
 import { useTheme } from '../contexts/ThemeContext';
+import { getPendingVerifications } from '../api/verificationApi';
 import Icon from './Icons';
 
 const Navbar = () => {
@@ -15,6 +16,18 @@ const Navbar = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
+  const [pendingVerificationsCount, setPendingVerificationsCount] = useState(0);
+
+  useEffect(() => {
+    if (isAdmin || isOrganizer) {
+      getPendingVerifications('PENDING')
+        .then(res => {
+          const list = res?.data || res || [];
+          setPendingVerificationsCount(Array.isArray(list) ? list.length : 0);
+        })
+        .catch(() => {});
+    }
+  }, [isAdmin, isOrganizer, location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -89,6 +102,24 @@ const Navbar = () => {
                 <Icon name="certificates" size={16} className="me-1" /> {t('certificates', 'Certificates')}
               </Link>
             </li>
+            {(isAdmin || isOrganizer) ? (
+              <li className="nav-item">
+                <Link className={`nav-link ${isActive('/verifications/manage')}`} to="/verifications/manage">
+                  <Icon name="shield" size={16} className="me-1" /> {t('verifications', 'Verifications')}
+                  {pendingVerificationsCount > 0 && (
+                    <span className="badge bg-warning text-dark ms-1 rounded-pill" style={{ fontSize: '0.68rem' }}>
+                      {pendingVerificationsCount}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            ) : (
+              <li className="nav-item">
+                <Link className={`nav-link ${isActive('/verification')}`} to="/verification">
+                  <Icon name="shield" size={16} className="me-1" /> {t('verification', 'Verification')}
+                </Link>
+              </li>
+            )}
           </ul>
 
           <ul className="navbar-nav align-items-lg-center">

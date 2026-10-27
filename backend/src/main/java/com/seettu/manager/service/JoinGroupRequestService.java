@@ -24,6 +24,7 @@ public class JoinGroupRequestService {
     private final UserRepository userRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final NotificationService notificationService;
+    private final com.seettu.manager.repository.MemberVerificationRepository memberVerificationRepository;
 
     @Transactional
     public JoinGroupRequest createJoinRequest(Long groupId, Long userId) {
@@ -41,8 +42,13 @@ public class JoinGroupRequestService {
             throw new IllegalArgumentException("Group has reached maximum member count");
         }
 
-        if (user.getRole() == User.Role.MEMBER && user.getKycStatus() != User.KycStatus.VERIFIED) {
-            throw new IllegalStateException("Identity Verification Required: You must submit your NIC and Grama Niladhari Character Certificate in your Profile and receive System Admin verification before requesting to join a Seettu group.");
+        boolean isVerified = (user.getKycStatus() == User.KycStatus.VERIFIED) ||
+                memberVerificationRepository.findByUserId(userId)
+                        .map(v -> v.getVerificationStatus() == com.seettu.manager.entity.VerificationStatus.VERIFIED)
+                        .orElse(false);
+
+        if (user.getRole() == User.Role.MEMBER && !isVerified) {
+            throw new IllegalStateException("Please complete your identity verification first. Go to Verification page.");
         }
 
         if (joinGroupRequestRepository.existsByGroupIdAndUserIdAndStatus(groupId, userId, JoinGroupRequest.RequestStatus.PENDING)) {

@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { getGroupsByUser, getAllGroups, deleteGroup } from '../api/groupApi';
 import { createJoinRequest } from '../api/joinRequestApi';
 import { getMyKycStatus } from '../api/userApi';
+import { getMyVerification } from '../api/verificationApi';
 import Icon from '../components/Icons';
 import OrganizerRequestModal from '../components/OrganizerRequestModal';
 
@@ -34,23 +35,23 @@ const MyGroups = () => {
   }, [user?.role, user?.kycStatus]);
 
   const handleOpenJoinModal = async () => {
-    // If not verified in memory, sync fresh status from server before blocking
-    if (user?.role === 'MEMBER' && user?.kycStatus !== 'VERIFIED') {
+    if (user?.role === 'MEMBER') {
       try {
-        const kycRes = await getMyKycStatus();
-        if (kycRes?.data?.kycStatus === 'VERIFIED') {
-          updateUser({
-            kycStatus: 'VERIFIED',
-            nicNumber: kycRes.data.nicNumber,
-            role: kycRes.data.role || user?.role
-          });
+        const [kycRes, verifRes] = await Promise.allSettled([
+          getMyKycStatus(),
+          getMyVerification(userId),
+        ]);
+        const kycStatus = kycRes.status === 'fulfilled' ? kycRes.value?.data?.kycStatus : null;
+        const verifStatus = verifRes.status === 'fulfilled' ? (verifRes.value?.data?.verificationStatus || verifRes.value?.verificationStatus) : null;
+
+        if (kycStatus === 'VERIFIED' || verifStatus === 'VERIFIED' || user?.kycStatus === 'VERIFIED') {
           setShowJoinModal(true);
           return;
         }
       } catch (err) {}
 
-      alert('⚠️ Verification Required: To prevent fraud, duplicate accounts, and financial risks, you must verify your Sri Lankan NIC and submit a Grama Niladhari Character Certificate before joining Seettu groups.\n\nPlease visit your Profile page to complete verification.');
-      navigate('/profile');
+      alert('Please complete your identity verification first. Go to Verification page.');
+      navigate('/verification');
       return;
     }
     setShowJoinModal(true);
