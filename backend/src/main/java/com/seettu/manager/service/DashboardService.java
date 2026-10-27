@@ -102,7 +102,23 @@ public class DashboardService {
         long overduePayments = userPayments.stream().filter(p -> p.getStatus() == Payment.PaymentStatus.OVERDUE).count();
         long latePayments = userPayments.stream().filter(p -> p.getStatus() == Payment.PaymentStatus.LATE).count();
         
-        double completionRate = totalPayments > 0 ? (double) paidPaymentsCount / totalPayments * 100 : 100.0;
+        // Calculate real DB completion rate: percentage of rotational cycles completed in user's groups (starts at 0% for new members)
+        long totalExpectedCycles = 0;
+        long totalCompletedCycles = 0;
+        for (SeettuGroup g : userGroups) {
+            int gTotal = (g.getMemberCount() != null && g.getMemberCount() > 0) ? g.getMemberCount() : 0;
+            List<PaymentCycle> gCycles = paymentCycleRepository.findByGroupIdOrderByCycleNumberAsc(g.getId());
+            if (!gCycles.isEmpty() && gCycles.size() > gTotal) {
+                gTotal = gCycles.size();
+            }
+            long gComp = gCycles.stream().filter(c -> c.getStatus() == PaymentCycle.CycleStatus.COMPLETED).count();
+            if (g.getStatus() == SeettuGroup.GroupStatus.COMPLETED) {
+                gComp = gTotal;
+            }
+            totalExpectedCycles += gTotal;
+            totalCompletedCycles += gComp;
+        }
+        double completionRate = totalExpectedCycles > 0 ? ((double) totalCompletedCycles / totalExpectedCycles) * 100.0 : 0.0;
 
         // Calculate Discipline Score dynamically using the unified DisciplineScoreService engine
         int calculatedScore = disciplineScoreService.getScoreValue(userId);

@@ -283,7 +283,7 @@ const Dashboard = () => {
   const disciplineScore = stats?.disciplineScore ?? 100;
   const completionRate = stats?.overallCompletionRate != null
     ? Math.round(stats.overallCompletionRate)
-    : 100;
+    : 0;
 
   // Real Upcoming Payout strictly from MySQL database
   const hasUpcomingPayout = !isAdmin && !!realUpcomingPayout;
