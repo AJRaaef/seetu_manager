@@ -1,4 +1,5 @@
 import React from 'react';
+import { FileText, Image as ImageIcon, Download, ExternalLink, ShieldCheck } from 'lucide-react';
 import { getVerificationFileUrl } from '../api/verificationApi';
 
 const DocumentPreview = ({
@@ -43,7 +44,7 @@ const DocumentPreview = ({
           {/* Header */}
           <div className="modal-header text-white px-4 py-3" style={{ backgroundColor: '#235665' }}>
             <div className="d-flex align-items-center gap-2">
-              <span style={{ fontSize: '1.2rem' }}>{isPdf ? '📄' : '🖼️'}</span>
+              <span className="d-flex align-items-center">{isPdf ? <FileText size={20} className="text-white" /> : <ImageIcon size={20} className="text-white" />}</span>
               <div>
                 <h6 className="modal-title fw-bold mb-0 text-white" style={{ fontSize: '1rem' }}>
                   {title}
@@ -60,18 +61,19 @@ const DocumentPreview = ({
                 className="btn btn-sm btn-light fw-semibold d-inline-flex align-items-center gap-1.5 px-3 py-1.5 shadow-sm"
                 style={{ fontSize: '0.8rem', color: '#235665' }}
               >
-                <span>⬇️</span>
+                <Download size={14} />
                 <span>Download</span>
               </button>
               <a
                 href={fullUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="btn btn-sm btn-outline-light fw-semibold px-2.5 py-1.5"
+                className="btn btn-sm btn-outline-light fw-semibold d-inline-flex align-items-center gap-1 px-2.5 py-1.5"
                 style={{ fontSize: '0.8rem' }}
                 title="Open in new window"
               >
-                ↗ New Tab
+                <ExternalLink size={13} />
+                <span>New Tab</span>
               </a>
               <button
                 type="button"
@@ -128,7 +130,7 @@ const DocumentPreview = ({
           {/* Footer */}
           <div className="modal-footer bg-light px-4 py-2.5 d-flex justify-content-between align-items-center">
             <span className="text-muted small" style={{ fontSize: '0.78rem' }}>
-              🔒 Official Verification Evidence • Identity Integrity System
+              <ShieldCheck size={14} className="d-inline me-1 text-muted" /> Official Verification Evidence • Identity Integrity System
             </span>
             <button
               type="button"

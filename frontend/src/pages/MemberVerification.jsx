@@ -11,6 +11,7 @@ import {
 import VerificationStatusBadge from '../components/VerificationStatusBadge';
 import DocumentUpload from '../components/DocumentUpload';
 import DocumentPreview from '../components/DocumentPreview';
+import { Shield, RefreshCw, AlertTriangle, CheckCircle2, XCircle, Clock, Eye, FileText, X } from 'lucide-react';
 import { getErrorMessage } from '../utils/errorHandler';
 
 const NIC_REGEX = /^([0-9]{9}[vVxX]|[0-9]{12})$/;
@@ -229,7 +230,7 @@ const MemberVerification = () => {
       <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
         <div>
           <h3 className="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
-            <span>🛡️</span>
+            <Shield size={24} style={{ color: '#235665' }} />
             <span>Member Identity Verification</span>
           </h3>
           <p className="text-muted mb-0 small">
@@ -244,7 +245,7 @@ const MemberVerification = () => {
               className="btn btn-sm btn-primary fw-bold"
               style={{ backgroundColor: '#235665', borderColor: '#235665' }}
             >
-              🔄 Re-Submit Verification
+              <RefreshCw size={13} className="me-1.5" /> Re-Submit Verification
             </button>
           )}
         </div>
@@ -254,7 +255,7 @@ const MemberVerification = () => {
       {error && (
         <div className="alert alert-danger shadow-sm border-0 rounded-3 mb-4 d-flex align-items-center justify-content-between">
           <div className="d-flex align-items-center gap-2">
-            <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+            <AlertTriangle size={18} className="text-danger flex-shrink-0" />
             <span>{error}</span>
           </div>
           <button type="button" className="btn-close" onClick={() => setError('')} />
@@ -264,7 +265,7 @@ const MemberVerification = () => {
       {success && (
         <div className="alert alert-success shadow-sm border-0 rounded-3 mb-4 d-flex align-items-center justify-content-between">
           <div className="d-flex align-items-center gap-2">
-            <span style={{ fontSize: '1.2rem' }}>✓</span>
+            <CheckCircle2 size={18} className="text-success flex-shrink-0" />
             <span>{success}</span>
           </div>
           <button type="button" className="btn-close" onClick={() => setSuccess('')} />
@@ -276,7 +277,7 @@ const MemberVerification = () => {
         <div className="card border-0 shadow-sm mb-4 rounded-3" style={{ borderLeft: '5px solid #DC3545', backgroundColor: '#FEF2F2' }}>
           <div className="card-body p-4">
             <div className="d-flex align-items-start gap-3">
-              <span style={{ fontSize: '2rem' }}>🛑</span>
+              <XCircle size={32} className="text-danger flex-shrink-0" />
               <div className="flex-grow-1">
                 <h5 className="fw-bold text-danger mb-1">Verification Rejected by Organizer / Admin</h5>
                 <p className="text-dark mb-2" style={{ fontSize: '0.9rem' }}>
@@ -303,7 +304,7 @@ const MemberVerification = () => {
         <div className="card border-0 shadow-sm mb-4 rounded-3" style={{ borderLeft: '5px solid #198754', backgroundColor: '#F0FDF4' }}>
           <div className="card-body p-4">
             <div className="d-flex align-items-start gap-3">
-              <span style={{ fontSize: '2.2rem' }}>✅</span>
+              <CheckCircle2 size={32} className="text-success flex-shrink-0" />
               <div>
                 <h5 className="fw-bold text-success mb-1">Identity Officially Verified</h5>
                 <p className="text-dark mb-2" style={{ fontSize: '0.9rem' }}>
@@ -335,7 +336,7 @@ const MemberVerification = () => {
         <div className="card border-0 shadow-sm mb-4 rounded-3" style={{ borderLeft: '5px solid #FFC107', backgroundColor: '#FFFBEB' }}>
           <div className="card-body p-4">
             <div className="d-flex align-items-start gap-3">
-              <span style={{ fontSize: '2.2rem' }}>⏳</span>
+              <Clock size={32} className="text-warning flex-shrink-0" />
               <div>
                 <h5 className="fw-bold text-dark mb-1">Verification Review in Progress</h5>
                 <p className="text-dark mb-2" style={{ fontSize: '0.9rem' }}>
@@ -637,7 +638,7 @@ const MemberVerification = () => {
                       className="btn btn-sm btn-outline-secondary w-100 py-1"
                       style={{ fontSize: '0.78rem' }}
                     >
-                      🔍 View Document
+                      <Eye size={13} className="me-1" /> View Document
                     </button>
                   </div>
                 </div>
@@ -665,7 +666,7 @@ const MemberVerification = () => {
                       className="btn btn-sm btn-outline-secondary w-100 py-1"
                       style={{ fontSize: '0.78rem' }}
                     >
-                      🔍 View Document
+                      <Eye size={13} className="me-1" /> View Document
                     </button>
                   </div>
                 </div>
@@ -683,7 +684,7 @@ const MemberVerification = () => {
                     >
                       {verification.gnCertificateImagePath.toLowerCase().endsWith('.pdf') ? (
                         <div className="text-center p-3">
-                          <span style={{ fontSize: '36px' }}>📄</span>
+                          <FileText size={36} className="text-danger" />
                           <div className="text-danger fw-bold small">Official GN PDF</div>
                         </div>
                       ) : (
@@ -700,7 +701,7 @@ const MemberVerification = () => {
                       className="btn btn-sm btn-outline-secondary w-100 py-1"
                       style={{ fontSize: '0.78rem' }}
                     >
-                      🔍 View Document
+                      <Eye size={13} className="me-1" /> View Document
                     </button>
                   </div>
                 </div>
@@ -717,7 +718,7 @@ const MemberVerification = () => {
                       style={{ width: '24px', height: '24px', fontSize: '11px' }}
                       title="Delete document"
                     >
-                      ✕
+                      <X size={12} />
                     </button>
                     <div className="fw-semibold text-dark small mb-1 text-truncate pe-3">
                       {doc.documentName || doc.documentType}
@@ -732,7 +733,7 @@ const MemberVerification = () => {
                     >
                       {doc.documentImagePath.toLowerCase().endsWith('.pdf') ? (
                         <div className="text-center">
-                          <span style={{ fontSize: '32px' }}>📄</span>
+                          <FileText size={32} className="text-danger" />
                           <div className="text-danger fw-bold small">PDF File</div>
                         </div>
                       ) : (
@@ -754,7 +755,7 @@ const MemberVerification = () => {
                       className="btn btn-sm btn-outline-secondary w-100 py-1"
                       style={{ fontSize: '0.78rem' }}
                     >
-                      🔍 View Document
+                      <Eye size={13} className="me-1" /> View Document
                     </button>
                   </div>
                 </div>
