@@ -6,11 +6,15 @@ import Icon from '../components/Icons';
 import { getUserProfileStats, updateUserProfile, uploadProfilePicture, deleteProfilePicture } from '../api/userApi';
 import { changePassword } from '../api/authApi';
 import { getErrorMessage } from '../utils/errorHandler';
+import OrganizerApplicationModal from '../components/OrganizerApplicationModal';
 
 const Profile = () => {
   const { t } = useTranslation();
   const { user, updateUser, isAdmin } = useAuth();
   const navigate = useNavigate();
+
+  const [showOrgModal, setShowOrgModal] = useState(false);
+  const [orgSuccess, setOrgSuccess] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false);
   const [fullName, setFullName] = useState(user?.fullName || '');
@@ -353,6 +357,30 @@ const Profile = () => {
 
             <h4 className="fw-bold text-dark mb-1">{fullName || userInfo?.fullName || 'User'}</h4>
             <div className="text-muted small mb-3 text-uppercase">{userInfo?.role || 'MEMBER'}</div>
+
+            {/* Become an Organizer / Pending Badge (MEMBER only, VERIFIED) */}
+            {user?.role === 'MEMBER' && user?.kycStatus === 'VERIFIED' && (
+              <div className="mb-3">
+                {user?.requestedRole === 'ORGANIZER' ? (
+                  <div
+                    className="d-flex align-items-center justify-content-center gap-2 py-2 px-3 rounded-3"
+                    style={{ background: '#FFFBEB', border: '1px solid #FDE68A', color: '#92400E', fontSize: '0.82rem' }}
+                  >
+                    ⏳ <span className="fw-semibold">Organizer Application Pending Admin Review</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn w-100 fw-semibold d-flex align-items-center justify-content-center gap-2"
+                    style={{ background: 'linear-gradient(135deg, #0F2F3D, #0097B2)', color: '#fff', borderRadius: '10px' }}
+                    onClick={() => setShowOrgModal(true)}
+                  >
+                    <Icon name="award" size={16} color="#fff" />
+                    Become an Organizer
+                  </button>
+                )}
+              </div>
+            )}
 
             <button
               onClick={() => setIsEditing(!isEditing)}
@@ -748,6 +776,17 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* Organizer Application Modal */}
+      <OrganizerApplicationModal
+        show={showOrgModal}
+        onClose={() => setShowOrgModal(false)}
+        onSuccess={() => {
+          setOrgSuccess(true);
+          setActionMsg('Your organizer application has been submitted. Admin will review shortly.');
+          setTimeout(() => setOrgSuccess(false), 4000);
+        }}
+      />
     </div>
   );
 };

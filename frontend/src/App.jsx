@@ -29,6 +29,7 @@ import ChitLaw from './pages/ChitLaw';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import LegalPage from './pages/LegalPage';
 import ContactPage from './pages/ContactPage';
+import AdminOrganizerRequests from './pages/AdminOrganizerRequests';
 
 // Components
 import AppLayout from './components/AppLayout';
@@ -117,6 +118,7 @@ const MainLayout = () => {
       <Route path="/notifications" element={<ProtectedRoute><AppLayout><Notifications /></AppLayout></ProtectedRoute>} />
       <Route path="/verification" element={<ProtectedRoute><AppLayout><MemberVerification /></AppLayout></ProtectedRoute>} />
       <Route path="/verifications/manage" element={<ProtectedRoute roles={['ORGANIZER', 'ADMIN']}><AppLayout><VerificationManagement /></AppLayout></ProtectedRoute>} />
+      <Route path="/admin/organizer-requests" element={<ProtectedRoute roles={['ADMIN']}><AppLayout><AdminOrganizerRequests /></AppLayout></ProtectedRoute>} />
 
       {/* Default Catch-all redirects to Landing Page */}
       <Route path="*" element={<Navigate to="/" replace />} />

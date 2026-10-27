@@ -1,12 +1,16 @@
 package com.seettu.manager.service;
 
 import com.seettu.manager.dto.KycVerificationRequest;
+import com.seettu.manager.dto.OrganizerApplicationRequest;
+import com.seettu.manager.dto.OrganizerApplicationResponse;
 import com.seettu.manager.dto.UserKycResponse;
 import com.seettu.manager.entity.User;
 import com.seettu.manager.exception.DuplicateResourceException;
 import com.seettu.manager.exception.ResourceNotFoundException;
+import com.seettu.manager.repository.MemberVerificationRepository;
 import com.seettu.manager.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,9 +30,11 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
+    private final MemberVerificationRepository memberVerificationRepository;
     private final AuditLogService auditLogService;
     private final NotificationService notificationService;
 
@@ -374,5 +380,176 @@ public class UserService {
                     "User " + user.getFullName() + " removed their profile picture.");
         }
         return user;
+    }
+
+    @Transactional
+    public void applyForOrganizer(Long userId, OrganizerApplicationRequest request) {
+        User user = getUserById(userId);
+
+        if (user.getKycStatus() != User.KycStatus.VERIFIED) {
+            throw new IllegalStateException("You must be a verified member to apply as an organizer.");
+        }
+
+        if ("ORGANIZER".equalsIgnoreCase(user.getRequestedRole())) {
+            throw new IllegalStateException("You already have a pending application.");
+        }
+
+        if (user.getRole() == User.Role.ORGANIZER) {
+            throw new IllegalStateException("You are already an authorized Organizer.");
+        }
+
+        user.setRequestedRole("ORGANIZER");
+        user.setDistrict(request.getOperatingDistrict());
+
+        String notes = request.getProposalNotes() != null ? request.getProposalNotes().trim() : "";
+        String modelStr = (request.getPlannedSeettuModel() != null && !request.getPlannedSeettuModel().trim().isEmpty())
+                ? "Model: " + request.getPlannedSeettuModel().trim() + " | "
+                : "";
+        String formattedNote = modelStr +
+                "Target: " + request.getTargetMemberCount() + " members" +
+                " | Amount: " + request.getPlannedContributionAmount() +
+                " | Experience: " + request.getExperienceLevel() +
+                " | Notes: " + notes;
+
+        user.setOrganizerApplicationNote(formattedNote);
+        userRepository.save(user);
+
+        auditLogService.log(user, "ORGANIZER_APPLICATION_SUBMITTED", "users", user.getId(),
+                "User " + user.getFullName() + " submitted application for Organizer role in district " + user.getDistrict());
+
+        // Notify all admins
+        try {
+            List<User> admins = userRepository.findByRole(User.Role.ADMIN);
+            for (User admin : admins) {
+                notificationService.sendNotification(
+                        admin.getId(),
+                        "New organizer application from " + user.getFullName() + " in " + user.getDistrict(),
+                        "ORGANIZER_APPLICATION"
+                );
+            }
+        } catch (Exception e) {
+            log.warn("Could not dispatch admin notification for organizer application: {}", e.getMessage());
+        }
+
+        // Notify member applicant
+        try {
+            notificationService.sendNotification(
+                    user.getId(),
+                    "Your application to become a Seettu Organizer has been submitted for Administrative review.",
+                    "ORGANIZER_APPLICATION_SUBMITTED"
+            );
+        } catch (Exception ignored) {}
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrganizerApplicationResponse> getPendingOrganizerApplications() {
+        List<User> applicants = userRepository.findByRequestedRole("ORGANIZER");
+        return applicants.stream()
+                .filter(u -> u.getRole() != User.Role.ORGANIZER)
+                .sorted((a, b) -> {
+                    if (a.getCreatedAt() == null || b.getCreatedAt() == null) return 0;
+                    return b.getCreatedAt().compareTo(a.getCreatedAt());
+                })
+                .map(u -> {
+                    com.seettu.manager.entity.MemberVerification mv = memberVerificationRepository.findByUserId(u.getId()).orElse(null);
+
+                    String note = u.getOrganizerApplicationNote() != null ? u.getOrganizerApplicationNote() : "";
+                    String model = parseField(note, "Model:", "|");
+                    String targetStr = parseField(note, "Target:", "members");
+                    String amountStr = parseField(note, "Amount:", "|");
+                    String exp = parseField(note, "Experience:", "|");
+                    String notes = parseField(note, "Notes:", null);
+
+                    Integer targetMembers = null;
+                    try {
+                        if (!targetStr.isEmpty()) targetMembers = Integer.parseInt(targetStr.replaceAll("[^0-9]", ""));
+                    } catch (Exception ignored) {}
+
+                    Double plannedAmount = null;
+                    try {
+                        if (!amountStr.isEmpty()) plannedAmount = Double.parseDouble(amountStr.replaceAll("[^0-9.]", ""));
+                    } catch (Exception ignored) {}
+
+                    String nic = mv != null && mv.getNicNumber() != null ? mv.getNicNumber() : u.getNicNumber();
+                    String gnUrl = mv != null && mv.getGnCertificateImagePath() != null ? mv.getGnCertificateImagePath() : u.getGnCertificateUrl();
+
+                    return OrganizerApplicationResponse.builder()
+                            .userId(u.getId())
+                            .fullName(u.getFullName())
+                            .email(u.getEmail())
+                            .phone(u.getPhone())
+                            .district(u.getDistrict())
+                            .plannedSeettuModel(!model.isEmpty() ? model : null)
+                            .targetMemberCount(targetMembers != null ? targetMembers : 10)
+                            .plannedContributionAmount(plannedAmount != null ? plannedAmount : 10000.0)
+                            .experienceLevel(!exp.isEmpty() ? exp : "Beginner")
+                            .proposalNotes(notes)
+                            .organizerApplicationNote(note)
+                            .nicNumber(nic)
+                            .gnCertificateUrl(gnUrl)
+                            .nicFrontImagePath(mv != null ? mv.getNicFrontImagePath() : null)
+                            .nicBackImagePath(mv != null ? mv.getNicBackImagePath() : null)
+                            .gnCertificateImagePath(mv != null ? mv.getGnCertificateImagePath() : gnUrl)
+                            .kycStatus(u.getKycStatus() != null ? u.getKycStatus().name() : "VERIFIED")
+                            .appliedAt(u.getCreatedAt())
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    private String parseField(String note, String prefix, String delimiter) {
+        if (note == null || !note.contains(prefix)) return "";
+        try {
+            int start = note.indexOf(prefix) + prefix.length();
+            if (delimiter != null && note.indexOf(delimiter, start) != -1) {
+                return note.substring(start, note.indexOf(delimiter, start)).trim();
+            } else {
+                return note.substring(start).trim();
+            }
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    @Transactional
+    public void approveOrganizer(Long userId, User admin) {
+        User user = getUserById(userId);
+
+        user.setRole(User.Role.ORGANIZER);
+        user.setRequestedRole(null);
+        user.setVerifiedAt(LocalDateTime.now());
+        if (admin != null) {
+            user.setVerifiedBy(admin);
+        }
+        userRepository.save(user);
+
+        notificationService.sendNotification(
+                user.getId(),
+                "Your application to become an organizer has been approved!",
+                "ORGANIZER_APPROVED"
+        );
+
+        auditLogService.log(admin != null ? admin : user, "ORGANIZER_APPROVED", "users", user.getId(),
+                "Admin approved organizer status for " + user.getFullName() + ".");
+    }
+
+    @Transactional
+    public void rejectOrganizer(Long userId, String reason, User admin) {
+        User user = getUserById(userId);
+
+        user.setRequestedRole(null);
+        String currentNote = user.getOrganizerApplicationNote() != null ? user.getOrganizerApplicationNote() : "";
+        String cleanReason = reason != null && !reason.trim().isEmpty() ? reason.trim() : "Application did not meet administrative criteria";
+        user.setOrganizerApplicationNote(currentNote + " | REJECTED: " + cleanReason);
+        userRepository.save(user);
+
+        notificationService.sendNotification(
+                user.getId(),
+                "Your organizer application was rejected. Reason: " + cleanReason,
+                "ORGANIZER_REJECTED"
+        );
+
+        auditLogService.log(admin != null ? admin : user, "ORGANIZER_REJECTED", "users", user.getId(),
+                "Admin rejected organizer status for " + user.getFullName() + ". Reason: " + cleanReason);
     }
 }

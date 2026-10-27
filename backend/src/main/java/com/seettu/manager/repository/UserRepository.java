@@ -18,4 +18,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByRole(User.Role role);
     List<User> findByIsLockedTrue();
     List<User> findByKycStatusOrderByCreatedAtDesc(User.KycStatus kycStatus);
+    List<User> findByRequestedRole(String requestedRole);
 }

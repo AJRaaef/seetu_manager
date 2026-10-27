@@ -1,6 +1,8 @@
 package com.seettu.manager.controller;
 
 import com.seettu.manager.dto.ApiResponse;
+import com.seettu.manager.dto.OrganizerApplicationRequest;
+import com.seettu.manager.dto.OrganizerApplicationResponse;
 import com.seettu.manager.entity.Certificate;
 import com.seettu.manager.entity.GroupMember;
 import com.seettu.manager.entity.SeettuGroup;
@@ -10,8 +12,10 @@ import com.seettu.manager.repository.GroupMemberRepository;
 import com.seettu.manager.repository.PaymentRepository;
 import com.seettu.manager.repository.SeettuGroupRepository;
 import com.seettu.manager.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -117,6 +121,44 @@ public class UserController {
         com.seettu.manager.dto.UserKycResponse response = userService.verifyKyc(id, request, admin);
         String msg = "VERIFIED".equalsIgnoreCase(request.getStatus()) ? "Member verified successfully" : "Member verification rejected";
         return ResponseEntity.ok(ApiResponse.success(msg, response));
+    }
+
+    @PostMapping("/apply-organizer")
+    public ResponseEntity<ApiResponse<Void>> applyForOrganizer(
+            @Valid @RequestBody OrganizerApplicationRequest request,
+            @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Authentication required to apply as an organizer."));
+        }
+        userService.applyForOrganizer(currentUser.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success("Application submitted successfully", null));
+    }
+
+    @GetMapping("/pending-organizer-applications")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<OrganizerApplicationResponse>>> getPendingOrganizerApplications() {
+        List<OrganizerApplicationResponse> list = userService.getPendingOrganizerApplications();
+        return ResponseEntity.ok(ApiResponse.success(list));
+    }
+
+    @PutMapping("/{userId}/approve-organizer")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> approveOrganizer(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal User admin) {
+        userService.approveOrganizer(userId, admin);
+        return ResponseEntity.ok(ApiResponse.success("Organizer application approved successfully", null));
+    }
+
+    @PutMapping("/{userId}/reject-organizer")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> rejectOrganizer(
+            @PathVariable Long userId,
+            @RequestParam(value = "reason", required = false) String reason,
+            @AuthenticationPrincipal User admin) {
+        userService.rejectOrganizer(userId, reason, admin);
+        return ResponseEntity.ok(ApiResponse.success("Organizer application rejected", null));
     }
 
     @PostMapping("/request-organizer")

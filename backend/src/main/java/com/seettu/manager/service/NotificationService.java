@@ -66,6 +66,10 @@ public class NotificationService {
             case "VERIFICATION_PENDING": return "Identity Verification Under Review";
             case "VERIFICATION_APPROVED": return "Identity Verification Approved";
             case "VERIFICATION_REJECTED": return "Identity Verification Update";
+            case "ORGANIZER_APPLICATION": return "New Organizer Application Submitted";
+            case "ORGANIZER_APPLICATION_SUBMITTED": return "Organizer Application Under Review";
+            case "ORGANIZER_APPROVED": return "Organizer Application Approved!";
+            case "ORGANIZER_REJECTED": return "Organizer Application Status";
             default: return "Seettu Notification: " + type.replace('_', ' ');
         }
     }

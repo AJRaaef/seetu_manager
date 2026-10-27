@@ -13,7 +13,7 @@ import {
 import { getMyKycStatus } from '../api/userApi';
 import { getMyVerification } from '../api/verificationApi';
 import Icon from '../components/Icons';
-import OrganizerRequestModal from '../components/OrganizerRequestModal';
+import OrganizerApplicationModal from '../components/OrganizerApplicationModal';
 
 const MyGroups = () => {
   const { t } = useTranslation();
@@ -1144,8 +1144,8 @@ const MyGroups = () => {
       )}
 
       {/* In-App Organizer Upgrade Modal */}
-      <OrganizerRequestModal
-        isOpen={showOrganizerModal}
+      <OrganizerApplicationModal
+        show={showOrganizerModal}
         onClose={() => setShowOrganizerModal(false)}
         onSuccess={() => setShowOrganizerModal(false)}
       />

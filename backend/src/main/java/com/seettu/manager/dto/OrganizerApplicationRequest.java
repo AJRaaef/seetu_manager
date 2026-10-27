@@ -1,30 +1,65 @@
 package com.seettu.manager.dto;
 
-import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrganizerApplicationRequest {
 
-    @NotBlank(message = "Full name is required")
-    @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters")
+    // --- Required Fields per Specification ---
+    @NotBlank(message = "Operating district is required")
+    private String operatingDistrict;
+
+    // Planned Seettu model (optional / removed from application form)
+    private String plannedSeettuModel;
+
+    @NotNull(message = "Target member count is required")
+    @Min(value = 2, message = "Target member count must be at least 2")
+    private Integer targetMemberCount;
+
+    @NotNull(message = "Planned contribution amount is required")
+    @Min(value = 100, message = "Planned contribution amount must be at least 100 LKR")
+    private Double plannedContributionAmount;
+
+    @NotBlank(message = "Experience level is required")
+    private String experienceLevel;
+
+    private String proposalNotes;
+
+    @NotNull(message = "Terms agreement must be accepted")
+    @AssertTrue(message = "You must agree to the Organizer Terms & Conditions")
+    private Boolean agreementAccepted;
+
+    // --- Optional / Legacy Backward Compatibility Fields ---
     private String fullName;
-
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
     private String email;
-
-    @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^[0-9]{9,15}$", message = "Phone number must be between 9 and 15 digits")
     private String phone;
-
     private String addressLine1;
     private String addressLine2;
-    private String district;
     private String postalCode;
-    private String province;
+    private String district;
     private String message;
+
+    public String getDistrict() {
+        if (district != null && !district.trim().isEmpty()) {
+            return district;
+        }
+        return operatingDistrict;
+    }
+
+    public String getMessage() {
+        if (message != null && !message.trim().isEmpty()) {
+            return message;
+        }
+        return proposalNotes;
+    }
 }

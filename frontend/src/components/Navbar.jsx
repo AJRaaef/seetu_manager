@@ -120,6 +120,14 @@ const Navbar = () => {
                 </Link>
               </li>
             )}
+            {isAdmin && (
+              <li className="nav-item">
+                <Link className={`nav-link ${isActive('/admin/organizer-requests')}`} to="/admin/organizer-requests">
+                  <Icon name="award" size={16} className="me-1" /> Organizer Requests
+                </Link>
+              </li>
+            )}
+
           </ul>
 
           <ul className="navbar-nav align-items-lg-center">
