@@ -12,9 +12,9 @@ INSERT INTO seettu_types (name, description) VALUES
 -- Insert Admin User (password: Admin@123)
 -- BCrypt hash generated for: Admin@123
 -- ============================================================
-INSERT INTO users (full_name, email, phone, password_hash, role, preferred_language, is_locked, failed_login_attempts) 
-VALUES ('System Admin', 'admin@seetumanager.com', '0712345678', 
-        '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iK6VXMmG', 
+INSERT INTO users (id, full_name, email, phone, nic_number, kyc_status, password_hash, role, preferred_language, is_locked, failed_login_attempts) 
+VALUES (1, 'System Admin', 'admin@seetumanager.com', '0712345678', '200008304373', 'VERIFIED',
+        '$2a$10$kd1JJkcQmTRCCJwpihNoYeKcV.Hv/RIapDLIXyatldG.bAtELCLVW', 
         'ADMIN', 'EN', FALSE, 0);
 
 -- ============================================================
