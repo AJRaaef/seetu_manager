@@ -84,11 +84,12 @@ const AdvancePayments = () => {
   };
 
   const handleOpenModal = () => {
+    if (!isAdminOrOrg) return;
     const activeGroupId = formData.groupId || (groups.length > 0 ? String(groups[0].id) : '');
     const uid = user ? String(user.userId || user.id) : '';
     setFormData({
       groupId: activeGroupId,
-      memberId: formData.memberId || uid,
+      memberId: formData.memberId || '',
       amount: '',
       notes: ''
     });
@@ -178,20 +179,17 @@ const AdvancePayments = () => {
           </span>
         ) : isOrganizer ? (
           <button 
-            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2" 
+            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm fw-semibold" 
             onClick={handleOpenModal}
           >
             <Icon name="plus" size={16} />
             <span>{t('advance_page.apply_btn', 'Record Advance Payment')}</span>
           </button>
         ) : (
-          <button 
-            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm fw-semibold" 
-            onClick={handleOpenModal}
-          >
-            <Icon name="upload" size={16} />
-            <span>{t('advance_page.submit_advance', 'Submit Advance Contribution')}</span>
-          </button>
+          <span className="badge bg-light text-muted border px-3 py-2 small fw-semibold d-inline-flex align-items-center gap-1.5">
+            <Icon name="check-circle" size={15} color="#0097B2" />
+            <span>Official Organizer-Recorded Ledger</span>
+          </span>
         )}
       </div>
 
@@ -284,12 +282,12 @@ const AdvancePayments = () => {
       )}
 
       {/* Record Modal (Admin/Organizer only) */}
-      {showModal && !isAdmin && (
+      {showModal && isOrganizer && (
         <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
               <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#134A5A' }}>
-                <h5 className="modal-title fw-bold">{isOrganizer ? 'Record Advance Contribution' : 'Submit Advance Contribution'}</h5>
+                <h5 className="modal-title fw-bold">Record Advance Contribution</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleCreate}>

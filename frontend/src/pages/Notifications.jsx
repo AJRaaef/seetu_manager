@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import * as notificationApi from '../api/notificationApi';
 import { triggerPaymentReminders } from '../api/paymentApi';
 import Icon from '../components/Icons';
+import DisbursementVoucherModal from '../components/DisbursementVoucherModal';
+import { getGroupsByUser, getAllGroups, getGroupById } from '../api/groupApi';
 
 const Notifications = () => {
   const { t } = useTranslation();
@@ -15,6 +17,10 @@ const Notifications = () => {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [isTriggering, setIsTriggering] = useState(false);
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
+  const [voucherCycle, setVoucherCycle] = useState(null);
+  const [voucherGroup, setVoucherGroup] = useState(null);
+  const [cachedGroups, setCachedGroups] = useState([]);
 
   const currentUserId = user?.userId || user?.id;
 
@@ -23,6 +29,22 @@ const Notifications = () => {
       fetchNotifications();
     }
   }, [currentUserId, scope]);
+
+
+  useEffect(() => {
+    if (currentUserId) {
+      const loadGroups = async () => {
+        try {
+          const res = isAdmin ? await getAllGroups() : await getGroupsByUser(currentUserId);
+          const list = res?.data || (Array.isArray(res) ? res : []);
+          setCachedGroups(list);
+        } catch (err) {
+          console.warn('Failed to pre-cache groups for voucher links', err);
+        }
+      };
+      loadGroups();
+    }
+  }, [currentUserId, isAdmin]);
 
   const fetchNotifications = async () => {
     if (!currentUserId) return;
@@ -41,6 +63,58 @@ const Notifications = () => {
       setError('Failed to load notifications.');
     } finally {
       setLoading(false);
+    }
+  };
+
+
+  const handleOpenNotificationVoucher = async (n) => {
+    try {
+      const msg = n.message || '';
+      const cycleMatch = msg.match(/Cycle\s*#?(\d+)/i);
+      const cycleNum = cycleMatch ? parseInt(cycleMatch[1], 10) : 1;
+
+      const groupMatch = msg.match(/for\s*['"]([^'"]+)['"]/i);
+      const groupName = groupMatch ? groupMatch[1].trim() : '';
+
+      let targetGroup = cachedGroups.find(
+        (g) => g.name && groupName && g.name.toLowerCase() === groupName.toLowerCase()
+      );
+
+      if (!targetGroup) {
+        const res = isAdmin ? await getAllGroups() : await getGroupsByUser(currentUserId);
+        const list = res?.data || (Array.isArray(res) ? res : []);
+        setCachedGroups(list);
+        targetGroup = list.find(
+          (g) => g.name && groupName && g.name.toLowerCase() === groupName.toLowerCase()
+        ) || list[0];
+      }
+
+      if (targetGroup) {
+        let fullGroup = targetGroup;
+        if (!Array.isArray(fullGroup.cycles) || fullGroup.cycles.length === 0) {
+          const detailedRes = await getGroupById(targetGroup.id);
+          fullGroup = detailedRes?.data || detailedRes || targetGroup;
+        }
+
+        const cycles = fullGroup.cycles || [];
+        let targetCycle = cycles.find((c) => c.cycleNumber === cycleNum);
+        if (!targetCycle) {
+          targetCycle = cycles.find((c) => c.status === 'COMPLETED') || cycles[0];
+        }
+
+        if (targetCycle) {
+          setVoucherCycle(targetCycle);
+          setVoucherGroup(fullGroup);
+          setShowVoucherModal(true);
+          return;
+        }
+      }
+
+      window.location.href = targetGroup ? `/groups/${targetGroup.id}` : '/groups';
+    } catch (err) {
+      console.error('Failed to open voucher from notification', err);
+      alert('Unable to load voucher. Redirecting to your groups...');
+      window.location.href = '/groups';
     }
   };
 
@@ -295,6 +369,19 @@ const Notifications = () => {
                     <p className="mb-0 text-dark fw-medium mt-2" style={{ lineHeight: 1.5 }}>
                       {n.message}
                     </p>
+
+                    {(n.type === 'CYCLE_COMPLETED' || (n.message && (n.message.toLowerCase().includes('payout verification voucher') || n.message.toLowerCase().includes('disbursed to')))) && (
+                      <div className="mt-2 pt-2 border-top d-flex align-items-center gap-2">
+                        <button
+                          className="btn btn-sm btn-outline-success fw-bold rounded-pill px-3 py-1 shadow-xs d-inline-flex align-items-center gap-1.5"
+                          style={{ fontSize: '0.8rem' }}
+                          onClick={() => handleOpenNotificationVoucher(n)}
+                        >
+                          <Icon name="award" size={14} color="#166534" />
+                          <span>View Payout Voucher (PDF)</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {unread && (
@@ -314,6 +401,22 @@ const Notifications = () => {
           })}
         </div>
       )}
+
+      {/* Official Disbursement Voucher Modal from Notification */}
+      {showVoucherModal && voucherCycle && voucherGroup && (
+        <DisbursementVoucherModal
+          show={showVoucherModal}
+          onHide={() => {
+            setShowVoucherModal(false);
+            setVoucherCycle(null);
+            setVoucherGroup(null);
+          }}
+          cycle={voucherCycle}
+          group={voucherGroup}
+          organizerName={voucherGroup?.organizerName || voucherGroup?.createdByName || user?.fullName}
+        />
+      )}
+
     </div>
   );
 };

@@ -13,10 +13,13 @@ import {
   updatePayment,
   uploadPaymentEvidence
 } from '../api/paymentApi';
-import { getGroupsByUser } from '../api/groupApi';
+import { getGroupsByUser, getGroupById } from '../api/groupApi';
 import api from '../api/axios';
 import Icon from '../components/Icons';
 import ReviewPayoutModal from '../components/ReviewPayoutModal';
+import DisbursementVoucherModal from '../components/DisbursementVoucherModal';
+import PaymentReminderModal from '../components/PaymentReminderModal';
+import LegalNoticeModal from '../components/LegalNoticeModal';
 import PaymentDetailsModal from '../components/PaymentDetailsModal';
 import DashboardAnalytics from '../components/DashboardAnalytics';
 
@@ -36,8 +39,14 @@ const Dashboard = () => {
   const [realUpcomingPayout, setRealUpcomingPayout] = useState(null);
   const [upcomingPayouts, setUpcomingPayouts] = useState([]);
   const [selectedUpcomingPayout, setSelectedUpcomingPayout] = useState(null);
+  const [showVoucherModal, setShowVoucherModal] = useState(false);
+  const [voucherCycle, setVoucherCycle] = useState(null);
+  const [voucherGroup, setVoucherGroup] = useState(null);
   const [pendingDues, setPendingDues] = useState([]);
   const [loadingDues, setLoadingDues] = useState(true);
+  const [overdueMembersList, setOverdueMembersList] = useState([]);
+  const [reminderTargetPayment, setReminderTargetPayment] = useState(null);
+  const [legalNoticeTargetPayment, setLegalNoticeTargetPayment] = useState(null);
 
   const userId = user?.userId || user?.id;
 
@@ -192,6 +201,50 @@ const Dashboard = () => {
     };
 
 
+
+    const fetchOverdueMembers = async () => {
+      if (!isAdmin && !isOrganizer) {
+        setOverdueMembersList([]);
+        return;
+      }
+      try {
+        const payRes = await getAllPayments();
+        const list = payRes?.data || payRes || [];
+        const today = new Date();
+        const overdue = list
+          .filter((p) => {
+            const status = (p.status || '').toUpperCase();
+            const isPast = p.paymentDate ? new Date(p.paymentDate) < today : false;
+            return status === 'OVERDUE' || (status !== 'PAID' && status !== 'LATE' && isPast);
+          })
+          .map((p) => {
+            const dueDate = p.paymentDate || p.createdAt?.split('T')[0] || '-';
+            const daysOverdue = p.paymentDate
+              ? Math.max(1, Math.ceil((today - new Date(p.paymentDate)) / 86400000))
+              : 1;
+            return {
+              id: p.id,
+              member: p.memberName || 'Member',
+              memberId: p.memberId,
+              memberPhone: p.memberPhone || '',
+              memberEmail: p.memberEmail || '',
+              amount: Number(p.amount) || 0,
+              status: (p.status || 'OVERDUE').toUpperCase(),
+              date: dueDate,
+              group: p.groupName || 'General Group',
+              groupName: p.groupName || 'General Group',
+              cycle: p.cycleNumber ? `Cycle #${p.cycleNumber}` : 'Cycle 1',
+              daysOverdue: daysOverdue,
+              isCritical: daysOverdue >= 7
+            };
+          });
+        setOverdueMembersList(overdue);
+      } catch (err) {
+        console.error('Failed to load overdue members for organizer desk', err);
+        setOverdueMembersList([]);
+      }
+    };
+
     const fetchPendingDues = async () => {
       if (isAdmin || !userId) {
         setPendingDues([]);
@@ -217,6 +270,7 @@ const Dashboard = () => {
       fetchAdvance();
       fetchUpcomingPayout();
       fetchPendingDues();
+      fetchOverdueMembers();
     } else {
       setLoading(false);
       setLoadingPayments(false);
@@ -250,6 +304,24 @@ const Dashboard = () => {
     }
   };
 
+
+
+  const handleOpenCompletedVoucher = async (item) => {
+    try {
+      const res = await getGroupById(item.groupId);
+      const groupData = res?.data || res;
+      if (groupData) {
+        const cycles = groupData.cycles || [];
+        const completedCycle = cycles.find((c) => c.status === 'COMPLETED') || cycles[0];
+        setVoucherCycle(completedCycle);
+        setVoucherGroup(groupData);
+        setShowVoucherModal(true);
+      }
+    } catch (err) {
+      console.error('Failed to load completed voucher', err);
+      window.location.href = `/groups/${item.groupId}`;
+    }
+  };
 
   const handleRowClick = (payment) => {
     setSelectedPayment(payment);
@@ -417,6 +489,116 @@ const Dashboard = () => {
         />
       )}
 
+
+
+      {/* Overdue Member Collections & Legal Demand Desk (Organizer / Admin Oversight) */}
+      {(isOrganizer || isAdmin) && overdueMembersList.length > 0 && (
+        <div className="card border-0 shadow-sm rounded-4 p-4 mb-4" style={{ backgroundColor: '#FEF2F2', border: '1.5px solid #FCA5A5' }}>
+          <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-2 border-bottom border-danger-subtle">
+            <div className="d-flex align-items-center gap-2">
+              <div className="rounded-circle p-2 d-flex align-items-center justify-content-center bg-danger text-white" style={{ width: '38px', height: '38px' }}>
+                <Icon name="alert-triangle" size={18} color="#FFFFFF" />
+              </div>
+              <div>
+                <h5 className="fw-bold mb-0 text-danger" style={{ fontSize: '1.1rem' }}>
+                  Overdue Member Collections & Notice Desk
+                </h5>
+                <p className="text-muted small mb-0">
+                  {overdueMembersList.length} member installment(s) currently past due across your circles. Follow up via WhatsApp, SMS, or issue formal statutory legal demand notices.
+                </p>
+              </div>
+            </div>
+            <span className="badge rounded-pill bg-danger px-3 py-1.5 fw-bold fs-6">
+              {overdueMembersList.length} Overdue
+            </span>
+          </div>
+
+          <div className="table-responsive bg-white rounded-3 border overflow-hidden">
+            <table className="table table-hover align-middle mb-0">
+              <thead className="table-light">
+                <tr>
+                  <th className="py-2.5 px-3 small fw-semibold text-muted">Member / Contact</th>
+                  <th className="py-2.5 px-3 small fw-semibold text-muted">Circle & Cycle</th>
+                  <th className="py-2.5 px-3 small fw-semibold text-muted">Overdue Amount</th>
+                  <th className="py-2.5 px-3 small fw-semibold text-muted">Delay Duration</th>
+                  <th className="py-2.5 px-3 small fw-semibold text-muted text-end">Action & Recovery Channels</th>
+                </tr>
+              </thead>
+              <tbody>
+                {overdueMembersList.map((item, idx) => {
+                  const isCritical = item.daysOverdue >= 7;
+                  return (
+                    <tr key={item.id || idx}>
+                      <td className="py-3 px-3">
+                        <div className="fw-bold text-dark">{item.member}</div>
+                        <div className="small text-muted d-flex align-items-center gap-2 mt-0.5">
+                          {item.memberPhone && (
+                            <span className="d-inline-flex align-items-center gap-1">
+                              <Icon name="phone" size={12} color="#64748B" />
+                              <span>{item.memberPhone}</span>
+                            </span>
+                          )}
+                          {item.memberEmail && (
+                            <span className="d-inline-flex align-items-center gap-1">
+                              <Icon name="mail" size={12} color="#64748B" />
+                              <span>{item.memberEmail}</span>
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-3">
+                        <div className="fw-semibold text-dark">{item.group}</div>
+                        <div className="small text-muted">{item.cycle}</div>
+                      </td>
+                      <td className="py-3 px-3">
+                        <div className="fw-bold text-danger fs-6">{Number(item.amount).toLocaleString()} LKR</div>
+                        <div className="small text-muted" style={{ fontSize: '0.75rem' }}>Due: {item.date}</div>
+                      </td>
+                      <td className="py-3 px-3">
+                        <span className={`badge rounded-pill fw-semibold px-2.5 py-1 ${isCritical ? 'bg-danger text-white' : 'bg-warning text-dark'}`}>
+                          {isCritical ? `${item.daysOverdue} Days Late (Critical)` : `${item.daysOverdue} Days Late`}
+                        </span>
+                        {isCritical && (
+                          <div className="text-danger small fw-semibold mt-1" style={{ fontSize: '0.72rem' }}>
+                            -10 pts Score Penalty Applied
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-3 px-3 text-end">
+                        <div className="d-inline-flex align-items-center gap-2">
+                          {/* Multi-Channel Reminder Button (WhatsApp / SMS / Email) */}
+                          <button
+                            type="button"
+                            onClick={() => setReminderTargetPayment(item)}
+                            className="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-xs"
+                            title="Send payment reminder via WhatsApp, SMS, or Email"
+                          >
+                            <Icon name="message-square" size={14} />
+                            <span>Remind (WhatsApp/SMS)</span>
+                          </button>
+
+                          {/* Formal Legal Notice Demand */}
+                          <button
+                            type="button"
+                            onClick={() => setLegalNoticeTargetPayment(item)}
+                            className={`btn btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-xs ${
+                              isCritical ? 'btn-danger text-white' : 'btn-outline-danger'
+                            }`}
+                            title="Issue formal statutory demand notice under The Cheetus Ordinance"
+                          >
+                            <Icon name="shield" size={14} />
+                            <span>{isCritical ? 'Issue Legal Notice' : 'Legal Notice'}</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Active Installments & Payment Reminders (Action Required for Unsettled Members) */}
       {!isAdmin && pendingDues.length > 0 && (
@@ -614,14 +796,24 @@ const Dashboard = () => {
                     {item.amount}
                   </div>
                   {item.isCompleted ? (
-                    <Link
-                      to={`/groups/${item.groupId}`}
-                      className="btn btn-light rounded-pill px-4 py-2 fw-semibold text-success shadow-sm border-0 d-inline-flex align-items-center gap-1.5"
-                      style={{ fontSize: '0.9rem' }}
-                    >
-                      <Icon name="check-circle" size={16} color="#198754" />
-                      <span>View Circle Ledger</span>
-                    </Link>
+                    <div className="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                      <button
+                        onClick={() => handleOpenCompletedVoucher(item)}
+                        className="btn btn-light rounded-pill px-3.5 py-2 fw-semibold text-success shadow-sm border-0 d-inline-flex align-items-center gap-1.5"
+                        style={{ fontSize: '0.88rem' }}
+                      >
+                        <Icon name="award" size={16} color="#198754" />
+                        <span>Payout Voucher</span>
+                      </button>
+                      <Link
+                        to={`/groups/${item.groupId}`}
+                        className="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold shadow-sm d-inline-flex align-items-center gap-1"
+                        style={{ fontSize: '0.88rem' }}
+                      >
+                        <span>View Ledger</span>
+                        <Icon name="arrow-right" size={14} />
+                      </Link>
+                    </div>
                   ) : (
                     <button
                       onClick={() => {
@@ -730,6 +922,42 @@ const Dashboard = () => {
       />
 
 
+
+
+      
+      {/* Multi-Channel Payment Reminder Modal (WhatsApp / SMS / Email / In-App) */}
+      {reminderTargetPayment && (
+        <PaymentReminderModal
+          show={!!reminderTargetPayment}
+          onHide={() => setReminderTargetPayment(null)}
+          payment={reminderTargetPayment}
+        />
+      )}
+
+      {/* Formal Statutory Legal Demand Notice Modal (The Cheetus Ordinance No. 61 of 1935) */}
+      {legalNoticeTargetPayment && (
+        <LegalNoticeModal
+          show={!!legalNoticeTargetPayment}
+          onHide={() => setLegalNoticeTargetPayment(null)}
+          payment={legalNoticeTargetPayment}
+          organizerName={user?.fullName || 'Circle Organizer'}
+        />
+      )}
+
+      {/* Official Rotational Payout Disbursement Voucher Modal */}
+      {showVoucherModal && voucherCycle && voucherGroup && (
+        <DisbursementVoucherModal
+          show={showVoucherModal}
+          onHide={() => {
+            setShowVoucherModal(false);
+            setVoucherCycle(null);
+            setVoucherGroup(null);
+          }}
+          cycle={voucherCycle}
+          group={voucherGroup}
+          organizerName={voucherGroup?.organizerName || voucherGroup?.createdByName || user?.fullName}
+        />
+      )}
 
     </div>
   );
