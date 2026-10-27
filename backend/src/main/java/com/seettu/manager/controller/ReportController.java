@@ -32,14 +32,22 @@ public class ReportController {
             @RequestParam(name = "content", required = false) String content,
             @AuthenticationPrincipal User authUser) {
         try {
-            String finalTitle = (requestBody != null && requestBody.getTitle() != null && !requestBody.getTitle().trim().isEmpty())
-                    ? requestBody.getTitle() : title;
-            String finalType = (requestBody != null && requestBody.getType() != null && !requestBody.getType().trim().isEmpty())
-                    ? requestBody.getType() : type;
+            String finalTitle = (requestBody != null && requestBody.getTitle() != null
+                    && !requestBody.getTitle().trim().isEmpty())
+                            ? requestBody.getTitle()
+                            : title;
+            String finalType = (requestBody != null && requestBody.getType() != null
+                    && !requestBody.getType().trim().isEmpty())
+                            ? requestBody.getType()
+                            : type;
             Long finalUserById = (requestBody != null && requestBody.getGeneratedById() != null)
-                    ? requestBody.getGeneratedById() : (generatedById != null ? generatedById : (authUser != null ? authUser.getId() : 1L));
-            String finalContent = (requestBody != null && requestBody.getContent() != null && !requestBody.getContent().trim().isEmpty())
-                    ? requestBody.getContent() : (requestBody != null && requestBody.getNotes() != null ? requestBody.getNotes() : (content != null ? content : "System generated audit report."));
+                    ? requestBody.getGeneratedById()
+                    : (generatedById != null ? generatedById : (authUser != null ? authUser.getId() : 1L));
+            String finalContent = (requestBody != null && requestBody.getContent() != null
+                    && !requestBody.getContent().trim().isEmpty())
+                            ? requestBody.getContent()
+                            : (requestBody != null && requestBody.getNotes() != null ? requestBody.getNotes()
+                                    : (content != null ? content : "System generated audit report."));
 
             if (finalTitle == null || finalTitle.trim().isEmpty()) {
                 finalTitle = "System Audit Report";
@@ -99,13 +107,15 @@ public class ReportController {
         }
         org.springframework.core.io.Resource resource = new org.springframework.core.io.FileSystemResource(file);
         return ResponseEntity.ok()
-                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getName() + "\"")
                 .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
                 .body(resource);
     }
 
     @GetMapping("/{id}/csv")
-    public ResponseEntity<org.springframework.core.io.Resource> downloadReportCsv(@PathVariable Long id) throws Exception {
+    public ResponseEntity<org.springframework.core.io.Resource> downloadReportCsv(@PathVariable Long id)
+            throws Exception {
         java.io.File file = reportService.getReportCsvFile(id);
         if (file == null) {
             return ResponseEntity.notFound().build();
@@ -113,8 +123,10 @@ public class ReportController {
         org.springframework.core.io.Resource resource = new org.springframework.core.io.FileSystemResource(file);
         String fileName = "Report_" + id + ".csv";
         return ResponseEntity.ok()
-                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                .contentType(new org.springframework.http.MediaType("text", "csv", java.nio.charset.StandardCharsets.UTF_8))
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + fileName + "\"")
+                .contentType(
+                        new org.springframework.http.MediaType("text", "csv", java.nio.charset.StandardCharsets.UTF_8))
                 .body(resource);
     }
 
@@ -130,7 +142,8 @@ public class ReportController {
         }
         org.springframework.core.io.Resource resource = new org.springframework.core.io.FileSystemResource(file);
         return ResponseEntity.ok()
-                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getName() + "\"")
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + file.getName() + "\"")
                 .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
                 .body(resource);
     }
