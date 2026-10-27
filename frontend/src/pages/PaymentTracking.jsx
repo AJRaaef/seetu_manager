@@ -34,8 +34,6 @@ import {
 
 import { getAllGroups, getGroupsByUser, getGroupMembers } from '../api/groupApi';
 
-
-
 const PaymentTracking = () => {
 
   const { t } = useTranslation();
@@ -44,15 +42,11 @@ const PaymentTracking = () => {
 
   const userId = user?.userId || user?.id;
 
-
-
   // Real database payments state (starts empty, loads from API)
 
   const [payments, setPayments] = useState([]);
 
   const [loading, setLoading] = useState(true);
-
-
 
   // Form states for dynamic database recording
 
@@ -80,8 +74,6 @@ const PaymentTracking = () => {
 
   const [submitting, setSubmitting] = useState(false);
 
-
-
   // Modal states
 
   const [viewPayment, setViewPayment] = useState(null);
@@ -90,13 +82,9 @@ const PaymentTracking = () => {
 
   const [deleteTargetPayment, setDeleteTargetPayment] = useState(null);
 
-
-
   // Section Tab state ('recorded' | 'overdue' | 'all')
 
   const [ledgerTab, setLedgerTab] = useState('recorded');
-
-
 
   // Search & Filter states
 
@@ -107,8 +95,6 @@ const PaymentTracking = () => {
   const [filterMember, setFilterMember] = useState('All');
 
   const [filterStatus, setFilterStatus] = useState('All');
-
-
 
   // Fetch real payments from MySQL database
 
@@ -182,8 +168,6 @@ const PaymentTracking = () => {
 
   };
 
-
-
   // Load available groups and initial payments
 
   useEffect(() => {
@@ -224,15 +208,11 @@ const PaymentTracking = () => {
 
     };
 
-
-
     loadGroups();
 
     fetchPayments();
 
   }, [isAdmin, isOrganizer, userId]);
-
-
 
   // Load group members & cycles dynamically when group changes
 
@@ -251,8 +231,6 @@ const PaymentTracking = () => {
       return;
 
     }
-
-
 
     const loadGroupDetails = async () => {
 
@@ -273,8 +251,6 @@ const PaymentTracking = () => {
         setGroupMembers(membersList);
 
         setGroupCycles(cyclesList);
-
-
 
         // Auto-select active or first cycle
 
@@ -306,13 +282,9 @@ const PaymentTracking = () => {
 
     };
 
-
-
     loadGroupDetails();
 
   }, [selectedGroupId]);
-
-
 
   // Handle Record New Payment directly to Database
 
@@ -330,8 +302,6 @@ const PaymentTracking = () => {
 
     }
 
-
-
     if (paymentMethodInput !== 'Cash (Offline)' && !evidenceFile) {
 
       alert('Bank deposit slip / payment proof is mandatory for Bank Deposit / Transfer. Please upload the deposit slip.');
@@ -339,8 +309,6 @@ const PaymentTracking = () => {
       return;
 
     }
-
-
 
     setSubmitting(true);
 
@@ -374,13 +342,9 @@ const PaymentTracking = () => {
 
       );
 
-
-
       const created = createdRes?.data || createdRes;
 
       const paymentId = created?.id;
-
-
 
       if (evidenceFile && paymentId) {
 
@@ -395,8 +359,6 @@ const PaymentTracking = () => {
         }
 
       }
-
-
 
       if (isMemberUser) {
 
@@ -444,8 +406,6 @@ const PaymentTracking = () => {
 
   };
 
-
-
   // Handle Quick Record (mark as Paid)
 
   const handleQuickRecord = async (payment) => {
@@ -477,8 +437,6 @@ const PaymentTracking = () => {
     }
 
   };
-
-
 
   // Handle Save Edit
 
@@ -514,8 +472,6 @@ const PaymentTracking = () => {
 
   };
 
-
-
   // Handle Delete Record (Admin Only)
 
   const handleDeleteRecord = async (target) => {
@@ -548,8 +504,6 @@ const PaymentTracking = () => {
 
   };
 
-
-
   // Handle One-Click Approval for Pending Member Submission (Read-Only Verification)
 
   const handleApprovePayment = async (payment, approvalNotes) => {
@@ -562,8 +516,6 @@ const PaymentTracking = () => {
 
         : (payment.notes || 'Verified and approved by Organizer');
 
-
-
       await updatePayment(payment.id, {
 
         status: 'PAID',
@@ -571,8 +523,6 @@ const PaymentTracking = () => {
         notes: finalNotes
 
       }, userId);
-
-
 
       alert(`Payment of ${Number(payment.amount).toLocaleString()} LKR for ${payment.member} approved successfully! The record is now marked as PAID and moved to the Recorded Payments Ledger.`);
 
@@ -594,8 +544,6 @@ const PaymentTracking = () => {
 
   };
 
-
-
   // Handle Rejection for Invalid/Unverified Pending Submission
 
   const handleRejectPayment = async (payment, rejectionReason) => {
@@ -609,8 +557,6 @@ const PaymentTracking = () => {
         notes: `Rejected by Organizer on ${new Date().toLocaleDateString()}: ${rejectionReason || 'Deposit slip unverified'}`
 
       }, userId);
-
-
 
       alert(`Payment submission for ${payment.member} has been rejected.`);
 
@@ -629,8 +575,6 @@ const PaymentTracking = () => {
     }
 
   };
-
-
 
   // Handle Settle Overdue Payment via Settlement Modal
 
@@ -694,8 +638,6 @@ const PaymentTracking = () => {
 
   };
 
-
-
   const getStatusBadge = (status) => {
 
     switch (status) {
@@ -730,15 +672,11 @@ const PaymentTracking = () => {
 
   };
 
-
-
   // Dynamic filter options from real payments
 
   const dynamicGroups = Array.from(new Set(payments.map((p) => p.group).filter(Boolean)));
 
   const groupOptions = dynamicGroups;
-
-
 
   const dynamicMembers = Array.from(
 
@@ -758,8 +696,6 @@ const PaymentTracking = () => {
 
   const memberOptions = dynamicMembers;
 
-
-
   // Separate counts for Recorded vs Overdue
 
   const recordedCount = payments.filter((p) => p.status === 'PAID' || p.status === 'LATE').length;
@@ -767,8 +703,6 @@ const PaymentTracking = () => {
   const pendingCount = payments.filter((p) => p.status === 'PENDING').length;
 
   const overdueCount = payments.filter((p) => p.status === 'OVERDUE' || p.status === 'MISSED' || p.status === 'PARTIAL').length;
-
-
 
   const filteredPayments = payments.filter((p) => {
 
@@ -788,8 +722,6 @@ const PaymentTracking = () => {
 
     }
 
-
-
     const term = searchQuery.toLowerCase().trim();
 
     const matchesSearch =
@@ -802,21 +734,15 @@ const PaymentTracking = () => {
 
       (p.cycle && p.cycle.toLowerCase().includes(term));
 
-
-
     const matchesGroup = filterGroup === 'All' || p.group === filterGroup;
 
     const matchesMember = filterMember === 'All' || p.member === filterMember;
 
     const matchesStatus = filterStatus === 'All' || p.status === filterStatus;
 
-
-
     return matchesSearch && matchesGroup && matchesMember && matchesStatus;
 
   });
-
-
 
   const isFiltered =
 
@@ -827,8 +753,6 @@ const PaymentTracking = () => {
     filterMember !== 'All' ||
 
     filterStatus !== 'All';
-
-
 
   const handleClearFilters = () => {
 
@@ -842,13 +766,9 @@ const PaymentTracking = () => {
 
   };
 
-
-
   // Dynamic Metric Calculations from real DB payments state
 
   const metricsSource = isFiltered ? filteredPayments : payments;
-
-
 
   const totalCollected = metricsSource
 
@@ -856,15 +776,11 @@ const PaymentTracking = () => {
 
     .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
-
-
   const totalPending = metricsSource
 
     .filter((p) => p.status === 'PENDING')
 
     .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-
-
 
   const totalOverdue = metricsSource
 
@@ -872,21 +788,15 @@ const PaymentTracking = () => {
 
     .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
-
-
   const overdueMembersCount = new Set(
 
     metricsSource.filter((p) => p.status === 'OVERDUE').map((p) => p.member)
 
   ).size;
 
-
-
   const totalAmount = totalCollected + totalPending + totalOverdue;
 
   const onTimeRate = totalAmount > 0 ? Math.round((totalCollected / totalAmount) * 100) : 0;
-
-
 
   return (
 
@@ -900,13 +810,9 @@ const PaymentTracking = () => {
 
         <div className="d-flex align-items-center gap-2">
 
-
-
         </div>
 
       </div>
-
-
 
       {/* 4 Dynamic Metric Cards */}
 
@@ -936,8 +842,6 @@ const PaymentTracking = () => {
 
         </div>
 
-
-
         {/* Pending Payments */}
 
         <div className="col-6 col-lg-3">
@@ -962,8 +866,6 @@ const PaymentTracking = () => {
 
         </div>
 
-
-
         {/* Overdue Payments */}
 
         <div className="col-6 col-lg-3">
@@ -987,8 +889,6 @@ const PaymentTracking = () => {
           </div>
 
         </div>
-
-
 
         {/* On-time Rate */}
 
@@ -1015,8 +915,6 @@ const PaymentTracking = () => {
         </div>
 
       </div>
-
-
 
       {/* Record Payment / Submit Evidence Form Card */}
 
@@ -1086,8 +984,6 @@ const PaymentTracking = () => {
 
           </div>
 
-
-
           <form onSubmit={handleRecordNew}>
 
             {/* Row 1: Target Seettu Group, Member, and Rotation Cycle */}
@@ -1151,8 +1047,6 @@ const PaymentTracking = () => {
                 </select>
 
               </div>
-
-
 
               {/* Member Select */}
 
@@ -1234,8 +1128,6 @@ const PaymentTracking = () => {
 
               </div>
 
-
-
               {/* Cycle Select */}
 
               <div className="col-12 col-md-4">
@@ -1275,8 +1167,6 @@ const PaymentTracking = () => {
               </div>
 
             </div>
-
-
 
             {/* Row 2: Financial Details & Verification Evidence */}
 
@@ -1318,8 +1208,6 @@ const PaymentTracking = () => {
 
               </div>
 
-
-
               {/* Payment Status Dropdown */}
 
               <div className="col-12 col-sm-6 col-md-2">
@@ -1352,8 +1240,6 @@ const PaymentTracking = () => {
 
               </div>
 
-
-
               {/* Date Input */}
 
               <div className="col-12 col-sm-6 col-md-2">
@@ -1379,8 +1265,6 @@ const PaymentTracking = () => {
                 />
 
               </div>
-
-
 
               {/* Settlement Method Select */}
 
@@ -1411,8 +1295,6 @@ const PaymentTracking = () => {
                 </select>
 
               </div>
-
-
 
               {/* Payment Slip / Evidence Attachment */}
 
@@ -1465,8 +1347,6 @@ const PaymentTracking = () => {
                 )}
 
               </div>
-
-
 
               {/* Summary and Submit Bar */}
 
@@ -1532,33 +1412,7 @@ const PaymentTracking = () => {
 
         </div>
 
-      ) : (
-
-        <div className="alert alert-light border shadow-xs d-flex align-items-center gap-3 p-3 mb-4 rounded-3" style={{ background: '#F8FAFC' }}>
-
-          <div className="rounded-circle p-2 d-flex align-items-center justify-content-center bg-teal-subtle text-teal flex-shrink-0" style={{ width: '40px', height: '40px' }}>
-
-            <Icon name="check-circle" size={20} color="#0097B2" />
-
-          </div>
-
-          <div>
-
-            <h6 className="fw-bold text-dark mb-0.5">Official Member Contribution Ledger</h6>
-
-            <div className="text-muted small">
-
-              Below is your verified payment history recorded by your circle organizer. Each entry includes timestamped receipts and rotation cycle verification.
-
-            </div>
-
-          </div>
-
-        </div>
-
-      )}
-
-
+) : null}
 
             {/* Official Payment Ledger Header */}
 
@@ -1576,7 +1430,7 @@ const PaymentTracking = () => {
 
             <h5 className="fw-bold mb-0 text-dark" style={{ fontSize: '1.1rem' }}>Official Payment Ledger</h5>
 
-            <small className="text-muted">Verified member contributions recorded directly by circle organizers</small>
+            <small className="text-muted">Verified member contributions and timestamped receipts recorded directly by circle organizers</small>
 
           </div>
 
@@ -1593,8 +1447,6 @@ const PaymentTracking = () => {
         </div>
 
       </div>
-
-
 
 {/* Search & Filter Bar */}
 
@@ -1650,8 +1502,6 @@ const PaymentTracking = () => {
 
         </div>
 
-
-
         {/* Filter Dropdowns */}
 
         <div className="col-12 col-lg-8 col-md-6">
@@ -1690,8 +1540,6 @@ const PaymentTracking = () => {
 
             )}
 
-
-
             {/* Member Filter */}
 
             {memberOptions.length > 0 && (
@@ -1723,8 +1571,6 @@ const PaymentTracking = () => {
               </select>
 
             )}
-
-
 
             {/* Status Filter */}
 
@@ -1759,8 +1605,6 @@ const PaymentTracking = () => {
         </div>
 
       </div>
-
-
 
       {/* Filter Info Bar */}
 
@@ -1799,8 +1643,6 @@ const PaymentTracking = () => {
         </div>
 
       )}
-
-
 
       {/* Payment Table Card */}
 
@@ -2158,8 +2000,6 @@ const PaymentTracking = () => {
 
       </div>
 
-
-
       {/* Modals */}
 
       <PaymentDetailsModal
@@ -2172,8 +2012,6 @@ const PaymentTracking = () => {
 
       />
 
-
-
       <EditPaymentModal
 
         show={!!editPayment}
@@ -2185,8 +2023,6 @@ const PaymentTracking = () => {
         onSave={handleSaveEdit}
 
       />
-
-
 
       <DeletePaymentModal
 
@@ -2205,8 +2041,6 @@ const PaymentTracking = () => {
   );
 
 };
-
-
 
 export default PaymentTracking;
 

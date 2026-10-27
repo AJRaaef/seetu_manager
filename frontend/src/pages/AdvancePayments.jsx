@@ -170,7 +170,11 @@ const AdvancePayments = () => {
             <Icon name="advance" size={24} color="#235665" />
             <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('advance_page.title', 'Advance Payments')}</h2>
           </div>
-          <p className="text-muted mb-0">{t('advance_page.subtitle', 'Manage advance contributions and early settlements')}</p>
+          <p className="text-muted mb-0">
+            {isAdmin || isOrganizer
+              ? t('advance_page.subtitle_org', 'Record and manage member advance contributions and early settlements')
+              : t('advance_page.subtitle_member', 'View your verified advance contributions and track early cycle settlements')}
+          </p>
         </div>
         {isAdmin ? (
           <span className="badge bg-light text-secondary border px-3 py-2 small fw-semibold d-inline-flex align-items-center gap-1.5">
@@ -201,7 +205,9 @@ const AdvancePayments = () => {
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <span className="text-white-50 text-uppercase fw-semibold" style={{ fontSize: '0.8rem', letterSpacing: '0.5px' }}>
-              {t('advance_page.total_disbursed', 'Total Advance Disbursed')}
+              {isAdmin || isOrganizer
+                ? t('advance_page.total_collected', 'Total Advance Collected')
+                : t('advance_page.total_contributed', 'Total Advance Contributed')}
             </span>
             <h2 className="display-6 fw-bold mb-0 mt-1">LKR {totalAdvance.toLocaleString()}</h2>
           </div>
