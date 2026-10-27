@@ -29,50 +29,7 @@ const Reports = () => {
     content: '',
   });
 
-  const templates = (isAdmin || isOrganizer)
-    ? [
-        {
-          name: 'Group Summary Audit',
-          icon: 'users',
-          bgColor: '#E0F2FE',
-          iconColor: '#0284C7',
-          type: 'GROUP_SUMMARY',
-          title: 'Monthly Group Summary Audit',
-          content: 'Audit report summarizing total active groups, registered member headcount, pot balances, and draw rotation statuses.',
-          desc: 'High-level audit of group health, rotation cycles, and collected funds.'
-        },
-        {
-          name: 'Payment Audit Trail',
-          icon: 'payments',
-          bgColor: '#ECFDF5',
-          iconColor: '#059669',
-          type: 'PAYMENT_AUDIT',
-          title: 'System Payment Audit Trail',
-          content: 'Detailed ledger of all verified member payments, pending installments, and overdue fines across groups.',
-          desc: 'Complete payment reconciliation across all group cycles.'
-        },
-        {
-          name: 'Discipline Score Summary',
-          icon: 'award',
-          bgColor: '#FEF3C7',
-          iconColor: '#D97706',
-          type: 'DISCIPLINE_SCORE_SUMMARY',
-          title: 'Member Discipline Score Summary',
-          content: 'Performance rankings and compliance ratings identifying on-time contributors and frequent default risks.',
-          desc: 'Comprehensive reliability scores and payment discipline analytics.'
-        }
-      ]
-    : [
-      ];
 
-  const openModalWithTemplate = (tpl) => {
-    setFormData({
-      title: tpl.title,
-      type: tpl.type,
-      content: tpl.content
-    });
-    setShowModal(true);
-  };
 
   useEffect(() => {
     fetchReports();
@@ -266,8 +223,7 @@ const Reports = () => {
           <p className="mt-2 text-muted">Loading audit reports...</p>
         </div>
       ) : reports.length === 0 ? (
-        <div>
-          <div className="ui-card text-center p-5 shadow-sm border-0 mb-4">
+        <div className="ui-card text-center p-5 shadow-sm border-0 mb-4">
             <div className="d-inline-flex p-3 rounded-circle mb-3" style={{ backgroundColor: '#E8F0F3' }}>
               <Icon name="reports" size={36} color="#235665" />
             </div>
@@ -275,7 +231,7 @@ const Reports = () => {
             <p className="text-muted small mb-4">
               {isAdmin || isOrganizer
                 ? 'Generate comprehensive group financial audits, payment trails, and member discipline score evaluations.'
-                : 'Select one of the recommended member report templates below or create a custom report.'}
+                : 'Generate your personal payment ledger, receipt history, and discipline score evaluations.'}
             </p>
             <div>
               <button
@@ -294,32 +250,6 @@ const Reports = () => {
             </div>
           </div>
 
-          {/* Quick Start Templates */}
-          <div>
-
-            <div className="row g-3">
-              {templates.map((tpl, idx) => (
-                <div key={idx} className="col-12 col-md-4">
-                  <div className="ui-card h-100 p-4 border-0 shadow-sm d-flex flex-column justify-content-between">
-                    <div>
-                      <div className="d-inline-flex p-2 rounded-3 mb-3" style={{ backgroundColor: tpl.bgColor }}>
-                        <Icon name={tpl.icon} size={22} color={tpl.iconColor} />
-                      </div>
-                      <h6 className="fw-bold text-dark mb-2">{tpl.name}</h6>
-                      <p className="text-muted small mb-3">{tpl.desc}</p>
-                    </div>
-                    <button
-                      className="btn btn-outline-primary w-100 btn-sm py-2 fw-semibold"
-                      onClick={() => openModalWithTemplate(tpl)}
-                    >
-                      {t('reports_page.generate_btn', 'Generate Report')}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       ) : (
         <div className="row g-4">
           {reports.map((r) => (
