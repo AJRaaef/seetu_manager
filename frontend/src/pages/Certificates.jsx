@@ -12,6 +12,7 @@ const Certificates = () => {
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [previewCert, setPreviewCert] = useState(null);
+  const [downloadingCertificate, setDownloadingCertificate] = useState(false);
 
   // Issue modal state
   const [showIssueModal, setShowIssueModal] = useState(false);
@@ -178,8 +179,28 @@ const Certificates = () => {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handleDownloadCertificate = async () => {
+    if (!previewCert) return;
+
+    try {
+      setDownloadingCertificate(true);
+      const response = await api.get(`/certificates/${previewCert.id}/download`, {
+        responseType: 'blob'
+      });
+      const fileUrl = URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = `CERT_${previewCert.certificateUuid || previewCert.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(fileUrl), 1000);
+    } catch (err) {
+      console.error('Error downloading certificate', err);
+      showNotification('danger', err.response?.data?.message || 'Failed to download certificate.');
+    } finally {
+      setDownloadingCertificate(false);
+    }
   };
 
   // Filtered Certificates
@@ -380,7 +401,7 @@ const Certificates = () => {
                     onClick={() => setPreviewCert(c)}
                   >
                     <Icon name="eye" size={15} />
-                    <span>View / Print Certificate</span>
+                    <span>View Certificate</span>
                   </button>
 
                   {(isAdmin || isOrganizer) && (
@@ -594,10 +615,20 @@ const Certificates = () => {
                   <button 
                     type="button" 
                     className="btn btn-teal btn-sm px-4 fw-bold text-white d-inline-flex align-items-center gap-1.5"
-                    onClick={handlePrint}
+                    onClick={handleDownloadCertificate}
+                    disabled={downloadingCertificate}
                   >
-                    <Icon name="reports" size={14} />
-                    <span>Print Official Certificate</span>
+                    {downloadingCertificate ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm" role="status" />
+                        <span>Downloading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="download" size={14} />
+                        <span>Download Certificate</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
