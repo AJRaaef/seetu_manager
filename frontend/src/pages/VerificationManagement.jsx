@@ -8,6 +8,7 @@ import {
 } from '../api/verificationApi';
 import VerificationStatusBadge from '../components/VerificationStatusBadge';
 import DocumentPreview from '../components/DocumentPreview';
+import { Shield, RefreshCw, Clock, CheckCircle2, XCircle, Folder, AlertTriangle, Search, ClipboardList, Eye, Check, X, FileText } from 'lucide-react';
 import { getErrorMessage } from '../utils/errorHandler';
 
 const VerificationManagement = () => {
@@ -131,7 +132,7 @@ const VerificationManagement = () => {
       <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
         <div>
           <h3 className="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
-            <span>🛡️</span>
+            <Shield size={24} style={{ color: '#235665' }} />
             <span>Member Verification Management</span>
           </h3>
           <p className="text-muted mb-0 small">
@@ -143,7 +144,7 @@ const VerificationManagement = () => {
           className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1.5"
           disabled={loading}
         >
-          <span>🔄</span>
+          <RefreshCw size={13} />
           <span>Refresh</span>
         </button>
       </div>
@@ -161,7 +162,7 @@ const VerificationManagement = () => {
                 <div className="text-warning-emphasis fw-bold small text-uppercase">Pending Review</div>
                 <h3 className="fw-bold text-dark mb-0">{pendingCount}</h3>
               </div>
-              <div style={{ fontSize: '24px' }}>⏳</div>
+              <Clock size={28} className="text-warning" />
             </div>
           </div>
         </div>
@@ -177,7 +178,7 @@ const VerificationManagement = () => {
                 <div className="text-success fw-bold small text-uppercase">Verified Members</div>
                 <h3 className="fw-bold text-dark mb-0">{verifiedCount}</h3>
               </div>
-              <div style={{ fontSize: '24px' }}>✅</div>
+              <CheckCircle2 size={28} className="text-success" />
             </div>
           </div>
         </div>
@@ -193,7 +194,7 @@ const VerificationManagement = () => {
                 <div className="text-danger fw-bold small text-uppercase">Rejected</div>
                 <h3 className="fw-bold text-dark mb-0">{rejectedCount}</h3>
               </div>
-              <div style={{ fontSize: '24px' }}>🛑</div>
+              <XCircle size={28} className="text-danger" />
             </div>
           </div>
         </div>
@@ -209,7 +210,7 @@ const VerificationManagement = () => {
                 <div className="text-muted fw-bold small text-uppercase">All Records</div>
                 <h3 className="fw-bold text-dark mb-0">{verifications.length}</h3>
               </div>
-              <div style={{ fontSize: '24px' }}>📁</div>
+              <Folder size={28} style={{ color: '#235665' }} />
             </div>
           </div>
         </div>
@@ -219,7 +220,7 @@ const VerificationManagement = () => {
       {error && (
         <div className="alert alert-danger shadow-sm border-0 rounded-3 mb-4 d-flex align-items-center justify-content-between">
           <div className="d-flex align-items-center gap-2">
-            <span>⚠️</span>
+            <AlertTriangle size={18} className="text-danger flex-shrink-0" />
             <span>{error}</span>
           </div>
           <button type="button" className="btn-close" onClick={() => setError('')} />
@@ -229,7 +230,7 @@ const VerificationManagement = () => {
       {success && (
         <div className="alert alert-success shadow-sm border-0 rounded-3 mb-4 d-flex align-items-center justify-content-between">
           <div className="d-flex align-items-center gap-2">
-            <span>✓</span>
+            <CheckCircle2 size={18} className="text-success flex-shrink-0" />
             <span>{success}</span>
           </div>
           <button type="button" className="btn-close" onClick={() => setSuccess('')} />
@@ -254,7 +255,7 @@ const VerificationManagement = () => {
           </div>
           <div className="col-md-7">
             <div className="input-group input-group-sm">
-              <span className="input-group-text bg-light border-end-0">🔍</span>
+              <span className="input-group-text bg-light border-end-0"><Search size={14} className="text-muted" /></span>
               <input
                 type="text"
                 className="form-control form-control-sm border-start-0"
@@ -303,7 +304,7 @@ const VerificationManagement = () => {
               ) : verifications.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center py-5">
-                    <div style={{ fontSize: '36px' }} className="mb-2">📋</div>
+                    <div className="mb-2 d-flex justify-content-center"><ClipboardList size={38} className="text-muted" /></div>
                     <h6 className="fw-bold text-dark mb-1">No Verification Records Found</h6>
                     <p className="text-muted small mb-0">
                       {filterStatus === 'PENDING'
@@ -368,7 +369,7 @@ const VerificationManagement = () => {
                           className="btn btn-sm btn-outline-teal fw-semibold"
                           style={{ color: '#235665', borderColor: '#235665', fontSize: '0.78rem' }}
                         >
-                          👁️ Review
+                          <Eye size={13} className="me-1" /> Review
                         </button>
                         {v.verificationStatus === 'PENDING' && (
                           <>
@@ -380,7 +381,7 @@ const VerificationManagement = () => {
                               disabled={actionLoading}
                               title="Approve verification"
                             >
-                              ✓ Approve
+                              <Check size={13} className="me-1" /> Approve
                             </button>
                             <button
                               type="button"
@@ -390,7 +391,7 @@ const VerificationManagement = () => {
                               disabled={actionLoading}
                               title="Reject verification"
                             >
-                              ✕ Reject
+                              <X size={13} className="me-1" /> Reject
                             </button>
                           </>
                         )}
@@ -411,7 +412,7 @@ const VerificationManagement = () => {
             <div className="modal-content border-0 shadow-2xl rounded-4 overflow-hidden">
               <div className="modal-header text-white px-4 py-3" style={{ backgroundColor: '#235665' }}>
                 <div className="d-flex align-items-center gap-2">
-                  <span style={{ fontSize: '1.4rem' }}>🛡️</span>
+                  <Shield size={20} className="text-white" />
                   <div>
                     <h5 className="modal-title fw-bold mb-0 text-white">
                       Verification Dossier: {selectedVerification.userName}
@@ -489,7 +490,7 @@ const VerificationManagement = () => {
                         className="btn btn-sm btn-outline-secondary w-100 py-1"
                         style={{ fontSize: '0.78rem' }}
                       >
-                        🔍 Enlarge NIC Front
+                        <Eye size={13} className="me-1" /> Enlarge NIC Front
                       </button>
                     </div>
                   </div>
@@ -515,7 +516,7 @@ const VerificationManagement = () => {
                         className="btn btn-sm btn-outline-secondary w-100 py-1"
                         style={{ fontSize: '0.78rem' }}
                       >
-                        🔍 Enlarge NIC Back
+                        <Eye size={13} className="me-1" /> Enlarge NIC Back
                       </button>
                     </div>
                   </div>
@@ -531,7 +532,7 @@ const VerificationManagement = () => {
                       >
                         {selectedVerification.gnCertificateImagePath.toLowerCase().endsWith('.pdf') ? (
                           <div className="text-center p-3">
-                            <span style={{ fontSize: '42px' }}>📄</span>
+                            <FileText size={42} className="text-danger" />
                             <div className="text-danger fw-bold small">Official PDF Document</div>
                           </div>
                         ) : (
@@ -548,7 +549,7 @@ const VerificationManagement = () => {
                         className="btn btn-sm btn-outline-secondary w-100 py-1"
                         style={{ fontSize: '0.78rem' }}
                       >
-                        🔍 Enlarge GN Certificate
+                        <Eye size={13} className="me-1" /> Enlarge GN Certificate
                       </button>
                     </div>
                   </div>
@@ -573,7 +574,7 @@ const VerificationManagement = () => {
                             >
                               {doc.documentImagePath.toLowerCase().endsWith('.pdf') ? (
                                 <div className="text-center">
-                                  <span style={{ fontSize: '36px' }}>📄</span>
+                                  <FileText size={36} className="text-danger" />
                                   <div className="text-danger fw-bold small">PDF File</div>
                                 </div>
                               ) : (
@@ -595,7 +596,7 @@ const VerificationManagement = () => {
                               className="btn btn-sm btn-outline-secondary w-100 py-1"
                               style={{ fontSize: '0.78rem' }}
                             >
-                              🔍 View Document
+                              <Eye size={13} className="me-1" /> View Document
                             </button>
                           </div>
                         </div>
@@ -622,7 +623,7 @@ const VerificationManagement = () => {
                     className="btn btn-danger fw-bold px-3 shadow-sm"
                     disabled={actionLoading}
                   >
-                    ✕ Reject Verification
+                    <X size={13} className="me-1" /> Reject Verification
                   </button>
                   <button
                     type="button"
@@ -630,7 +631,15 @@ const VerificationManagement = () => {
                     className="btn btn-success fw-bold px-4 shadow-sm"
                     disabled={actionLoading || selectedVerification.verificationStatus === 'VERIFIED'}
                   >
-                    {selectedVerification.verificationStatus === 'VERIFIED' ? '✓ Verified' : '✓ Approve Verification'}
+                    {selectedVerification.verificationStatus === 'VERIFIED' ? (
+                      <span className="d-inline-flex align-items-center gap-1">
+                        <Check size={14} /> Verified
+                      </span>
+                    ) : (
+                      <span className="d-inline-flex align-items-center gap-1">
+                        <Check size={14} /> Approve Verification
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>

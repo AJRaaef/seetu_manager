@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { FileText, Image as ImageIcon, X, UploadCloud, Paperclip, AlertCircle } from 'lucide-react';
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
 
@@ -139,7 +140,7 @@ const DocumentUpload = ({
             >
               {isPdf ? (
                 <div className="text-center">
-                  <span style={{ fontSize: '24px' }}>📄</span>
+                  <FileText size={24} className="text-danger" />
                   <div className="fw-bold text-danger" style={{ fontSize: '9px', letterSpacing: '0.5px' }}>PDF</div>
                 </div>
               ) : localPreview ? (
@@ -149,7 +150,7 @@ const DocumentUpload = ({
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : (
-                <span style={{ fontSize: '24px' }}>🖼️</span>
+                <ImageIcon size={24} className="text-secondary" />
               )}
             </div>
 
@@ -174,7 +175,7 @@ const DocumentUpload = ({
                 style={{ fontSize: '0.78rem' }}
                 title="Remove file"
               >
-                <span>✕</span>
+                <X size={13} className="me-1" />
                 <span className="d-none d-sm-inline">Remove</span>
               </button>
             )}
@@ -195,8 +196,8 @@ const DocumentUpload = ({
             transition: 'all 0.2s ease',
           }}
         >
-          <div style={{ fontSize: '28px' }} className="mb-1">
-            {dragActive ? '📥' : '📎'}
+          <div className="mb-2 d-flex justify-content-center">
+            {dragActive ? <UploadCloud size={28} style={{ color: '#235665' }} /> : <Paperclip size={26} className="text-muted" />}
           </div>
           <div className="fw-semibold text-dark" style={{ fontSize: '0.85rem' }}>
             Click to upload or drag & drop
@@ -225,7 +226,7 @@ const DocumentUpload = ({
 
       {displayError && (
         <div className="text-danger small mt-1 fw-medium" style={{ fontSize: '0.75rem' }}>
-          ⚠️ {displayError}
+          <AlertCircle size={13} className="me-1 d-inline text-danger" />{displayError}
         </div>
       )}
     </div>

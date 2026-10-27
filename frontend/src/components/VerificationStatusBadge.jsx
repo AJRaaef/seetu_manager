@@ -1,4 +1,5 @@
 import React from 'react';
+import { CheckCircle2, Clock, XCircle, AlertCircle } from 'lucide-react';
 
 const VerificationStatusBadge = ({ status, className = '' }) => {
   const normStatus = (status || 'INCOMPLETE').toUpperCase();
@@ -7,7 +8,7 @@ const VerificationStatusBadge = ({ status, className = '' }) => {
     backgroundColor: '#6C757D',
     color: '#FFFFFF',
     text: 'INCOMPLETE',
-    icon: '○'
+    Icon: AlertCircle
   };
 
   switch (normStatus) {
@@ -16,7 +17,7 @@ const VerificationStatusBadge = ({ status, className = '' }) => {
         backgroundColor: '#198754',
         color: '#FFFFFF',
         text: 'VERIFIED',
-        icon: '✓'
+        Icon: CheckCircle2
       };
       break;
     case 'PENDING':
@@ -24,7 +25,7 @@ const VerificationStatusBadge = ({ status, className = '' }) => {
         backgroundColor: '#FFC107',
         color: '#000000',
         text: 'PENDING',
-        icon: '⏳'
+        Icon: Clock
       };
       break;
     case 'REJECTED':
@@ -32,7 +33,7 @@ const VerificationStatusBadge = ({ status, className = '' }) => {
         backgroundColor: '#DC3545',
         color: '#FFFFFF',
         text: 'REJECTED',
-        icon: '✕'
+        Icon: XCircle
       };
       break;
     case 'INCOMPLETE':
@@ -42,14 +43,16 @@ const VerificationStatusBadge = ({ status, className = '' }) => {
         backgroundColor: '#6C757D',
         color: '#FFFFFF',
         text: normStatus === 'UNVERIFIED' ? 'UNVERIFIED' : 'INCOMPLETE',
-        icon: '○'
+        Icon: AlertCircle
       };
       break;
   }
 
+  const { Icon } = badgeStyle;
+
   return (
     <span
-      className={`badge rounded-pill fw-bold d-inline-flex align-items-center gap-1 px-2.5 py-1 ${className}`}
+      className={`badge rounded-pill fw-bold d-inline-flex align-items-center gap-1.5 px-2.5 py-1 ${className}`}
       style={{
         backgroundColor: badgeStyle.backgroundColor,
         color: badgeStyle.color,
@@ -57,7 +60,7 @@ const VerificationStatusBadge = ({ status, className = '' }) => {
         letterSpacing: '0.3px',
       }}
     >
-      <span style={{ fontSize: '0.75rem' }}>{badgeStyle.icon}</span>
+      <Icon size={13} strokeWidth={2.2} />
       <span>{badgeStyle.text}</span>
     </span>
   );
