@@ -12,6 +12,7 @@ const Certificates = () => {
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [previewCert, setPreviewCert] = useState(null);
+  const [downloadingCertificate, setDownloadingCertificate] = useState(false);
 
   // Issue modal state
   const [showIssueModal, setShowIssueModal] = useState(false);
@@ -178,8 +179,28 @@ const Certificates = () => {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handleDownloadCertificate = async () => {
+    if (!previewCert) return;
+
+    try {
+      setDownloadingCertificate(true);
+      const response = await api.get(`/certificates/${previewCert.id}/download`, {
+        responseType: 'blob'
+      });
+      const fileUrl = URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = `CERT_${previewCert.certificateUuid || previewCert.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(fileUrl), 1000);
+    } catch (err) {
+      console.error('Error downloading certificate', err);
+      showNotification('danger', err.response?.data?.message || 'Failed to download certificate.');
+    } finally {
+      setDownloadingCertificate(false);
+    }
   };
 
   // Filtered Certificates
@@ -238,7 +259,6 @@ const Certificates = () => {
         ) : isOrganizer ? (
           <button 
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm fw-bold text-white" 
-            style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
             onClick={() => setShowIssueModal(true)}
           >
             <Icon name="plus" size={16} />
@@ -319,7 +339,6 @@ const Certificates = () => {
             <div>
               <button 
                 className="btn btn-teal btn-sm fw-bold px-3 py-1.5 text-white"
-                style={{ backgroundColor: '#0097B2' }}
                 onClick={() => setShowIssueModal(true)}
               >
                 + Issue Certificate Now
@@ -379,11 +398,10 @@ const Certificates = () => {
                 <div className="d-flex flex-column gap-2 mt-auto">
                   <button 
                     className="btn btn-teal w-100 fw-bold text-white d-flex align-items-center justify-content-center gap-2 py-2"
-                    style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
                     onClick={() => setPreviewCert(c)}
                   >
                     <Icon name="eye" size={15} />
-                    <span>View / Print Certificate</span>
+                    <span>View Certificate</span>
                   </button>
 
                   {(isAdmin || isOrganizer) && (
@@ -597,11 +615,20 @@ const Certificates = () => {
                   <button 
                     type="button" 
                     className="btn btn-teal btn-sm px-4 fw-bold text-white d-inline-flex align-items-center gap-1.5"
-                    style={{ backgroundColor: '#0097B2' }}
-                    onClick={handlePrint}
+                    onClick={handleDownloadCertificate}
+                    disabled={downloadingCertificate}
                   >
-                    <Icon name="reports" size={14} />
-                    <span>Print Official Certificate</span>
+                    {downloadingCertificate ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm" role="status" />
+                        <span>Downloading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="download" size={14} />
+                        <span>Download Certificate</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -677,7 +704,6 @@ const Certificates = () => {
                   <button 
                     type="submit" 
                     className="btn btn-teal btn-sm px-4 fw-bold text-white d-flex align-items-center gap-2"
-                    style={{ backgroundColor: '#0097B2' }}
                     disabled={issuing}
                   >
                     {issuing ? (
@@ -776,7 +802,6 @@ const Certificates = () => {
                   <button 
                     type="submit" 
                     className="btn btn-teal btn-sm px-4 fw-bold text-white d-flex align-items-center gap-2"
-                    style={{ backgroundColor: '#0097B2' }}
                     disabled={updating}
                   >
                     {updating ? (
