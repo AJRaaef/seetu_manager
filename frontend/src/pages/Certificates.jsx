@@ -238,7 +238,6 @@ const Certificates = () => {
         ) : isOrganizer ? (
           <button 
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm fw-bold text-white" 
-            style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
             onClick={() => setShowIssueModal(true)}
           >
             <Icon name="plus" size={16} />
@@ -319,7 +318,6 @@ const Certificates = () => {
             <div>
               <button 
                 className="btn btn-teal btn-sm fw-bold px-3 py-1.5 text-white"
-                style={{ backgroundColor: '#0097B2' }}
                 onClick={() => setShowIssueModal(true)}
               >
                 + Issue Certificate Now
@@ -379,7 +377,6 @@ const Certificates = () => {
                 <div className="d-flex flex-column gap-2 mt-auto">
                   <button 
                     className="btn btn-teal w-100 fw-bold text-white d-flex align-items-center justify-content-center gap-2 py-2"
-                    style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
                     onClick={() => setPreviewCert(c)}
                   >
                     <Icon name="eye" size={15} />
@@ -597,7 +594,6 @@ const Certificates = () => {
                   <button 
                     type="button" 
                     className="btn btn-teal btn-sm px-4 fw-bold text-white d-inline-flex align-items-center gap-1.5"
-                    style={{ backgroundColor: '#0097B2' }}
                     onClick={handlePrint}
                   >
                     <Icon name="reports" size={14} />
@@ -677,7 +673,6 @@ const Certificates = () => {
                   <button 
                     type="submit" 
                     className="btn btn-teal btn-sm px-4 fw-bold text-white d-flex align-items-center gap-2"
-                    style={{ backgroundColor: '#0097B2' }}
                     disabled={issuing}
                   >
                     {issuing ? (
@@ -776,7 +771,6 @@ const Certificates = () => {
                   <button 
                     type="submit" 
                     className="btn btn-teal btn-sm px-4 fw-bold text-white d-flex align-items-center gap-2"
-                    style={{ backgroundColor: '#0097B2' }}
                     disabled={updating}
                   >
                     {updating ? (
