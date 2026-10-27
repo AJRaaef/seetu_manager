@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../api/axios';
 import * as groupApi from '../api/groupApi';
@@ -184,20 +186,31 @@ const Certificates = () => {
 
     try {
       setDownloadingCertificate(true);
-      const response = await api.get(`/certificates/${previewCert.id}/download`, {
-        responseType: 'blob'
+      const certificateElement = document.getElementById('printableCertificate');
+      if (!certificateElement) {
+        throw new Error('Certificate preview is not available for download.');
+      }
+
+      await document.fonts.ready;
+      const canvas = await html2canvas(certificateElement, {
+        backgroundColor: '#FFFFFF',
+        scale: 2,
+        useCORS: true
       });
-      const fileUrl = URL.createObjectURL(response.data);
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = `CERT_${previewCert.certificateUuid || previewCert.id}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.setTimeout(() => URL.revokeObjectURL(fileUrl), 1000);
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imageRatio = canvas.width / canvas.height;
+      const imageWidth = Math.min(pageWidth, pageHeight * imageRatio);
+      const imageHeight = imageWidth / imageRatio;
+      const imageX = (pageWidth - imageWidth) / 2;
+      const imageY = (pageHeight - imageHeight) / 2;
+
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', imageX, imageY, imageWidth, imageHeight);
+      pdf.save(`CERT_${previewCert.certificateUuid || previewCert.id}.pdf`);
     } catch (err) {
       console.error('Error downloading certificate', err);
-      showNotification('danger', err.response?.data?.message || 'Failed to download certificate.');
+      showNotification('danger', err.message || 'Failed to download certificate.');
     } finally {
       setDownloadingCertificate(false);
     }
