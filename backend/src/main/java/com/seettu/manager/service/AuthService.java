@@ -34,6 +34,7 @@ public class AuthService {
     private final EmailService emailService;
 
     private static final int MAX_FAILED_ATTEMPTS = 5;
+    private static final int LOCKOUT_DURATION_HOURS = 2;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -88,8 +89,27 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + request.getEmail()));
 
-        if (user.getIsLocked()) {
-            throw new UnauthorizedException("Account is locked due to too many failed login attempts. Please contact admin.");
+        if (Boolean.TRUE.equals(user.getIsLocked())) {
+            if (user.getLockedUntil() != null) {
+                if (LocalDateTime.now().isBefore(user.getLockedUntil())) {
+                    long minutesLeft = java.time.temporal.ChronoUnit.MINUTES.between(LocalDateTime.now(), user.getLockedUntil());
+                    long hoursLeft = minutesLeft / 60;
+                    long remMins = minutesLeft % 60;
+                    String timeRemaining = (hoursLeft > 0)
+                            ? (hoursLeft + " hour" + (hoursLeft > 1 ? "s" : "") + (remMins > 0 ? " and " + remMins + " minute" + (remMins > 1 ? "s" : "") : ""))
+                            : (Math.max(1, minutesLeft) + " minute" + (minutesLeft > 1 ? "s" : ""));
+                    throw new UnauthorizedException("Account is locked due to too many failed login attempts. Please try again after " + timeRemaining + " or reset your password.");
+                } else {
+                    // Lockout expired: automatically unlock
+                    user.setIsLocked(false);
+                    user.setFailedLoginAttempts(0);
+                    user.setLockedUntil(null);
+                    userRepository.save(user);
+                    auditLogService.log(user, "ACCOUNT_AUTO_UNLOCKED", "users", user.getId(), "Account lockout expired after 2 hours. Auto-unlocked: " + user.getEmail());
+                }
+            } else {
+                throw new UnauthorizedException("Account is locked. Please contact administrator.");
+            }
         }
 
         try {
@@ -103,6 +123,7 @@ public class AuthService {
 
         // Reset failed attempts on successful login
         user.setFailedLoginAttempts(0);
+        user.setLockedUntil(null);
         userRepository.save(user);
 
         auditLogService.log(user, "USER_LOGIN", "users", user.getId(), "User logged in: " + user.getEmail());
@@ -149,6 +170,7 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         user.setFailedLoginAttempts(0);
         user.setIsLocked(false);
+        user.setLockedUntil(null);
         userRepository.save(user);
 
         auditLogService.log(user, "PASSWORD_RESET", "users", user.getId(), "Password reset for: " + email);
@@ -284,6 +306,7 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(password));
         user.setIsLocked(false);
         user.setFailedLoginAttempts(0);
+        user.setLockedUntil(null);
         user = userRepository.save(user);
 
         auditLogService.log(user, "ORGANIZER_ACTIVATED", "users", user.getId(),
@@ -305,12 +328,13 @@ public class AuthService {
     }
 
     private void handleFailedLogin(User user) {
-        int attempts = user.getFailedLoginAttempts() + 1;
+        int attempts = (user.getFailedLoginAttempts() != null ? user.getFailedLoginAttempts() : 0) + 1;
         user.setFailedLoginAttempts(attempts);
         if (attempts >= MAX_FAILED_ATTEMPTS) {
             user.setIsLocked(true);
+            user.setLockedUntil(LocalDateTime.now().plusHours(LOCKOUT_DURATION_HOURS));
             auditLogService.log(user, "ACCOUNT_LOCKED", "users", user.getId(),
-                    "Account locked after " + MAX_FAILED_ATTEMPTS + " failed attempts: " + user.getEmail());
+                    "Account locked for 2 hours after " + MAX_FAILED_ATTEMPTS + " failed attempts: " + user.getEmail());
         }
         userRepository.save(user);
     }

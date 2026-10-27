@@ -269,6 +269,7 @@ public class UserService {
         User user = getUserById(id);
         user.setIsLocked(false);
         user.setFailedLoginAttempts(0);
+        user.setLockedUntil(null);
         userRepository.save(user);
     }
 
