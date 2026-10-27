@@ -114,7 +114,7 @@ const CreateGroup = () => {
     setError('');
 
     if (parseFloat(formData.contributionAmount) <= 0) {
-      setError('Contribution amount must be greater than 0 LKR.');
+      setError('Contribution amount must be greater than 0');
       return;
     }
 
@@ -323,9 +323,7 @@ const CreateGroup = () => {
                                   placeholder={t('create_group_page.amount_placeholder', 'e.g. 10000')}
                                   value={formData.contributionAmount}
                                   onChange={e => setFormData({...formData, contributionAmount: e.target.value})}
-                                  min="1"
                                   step="any"
-                                  onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
                                   style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                                   required
                                 />
@@ -340,8 +338,6 @@ const CreateGroup = () => {
                                   placeholder={t('create_group_page.member_placeholder', 'e.g. 12')}
                                   value={formData.memberCount}
                                   onChange={e => setFormData({...formData, memberCount: e.target.value})}
-                                  min="1"
-                                  onKeyDown={e => { if (e.key === '-' || e.key === '.' || e.key === 'e') e.preventDefault(); }}
                                   style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                                   required
                                 />

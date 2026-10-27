@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import Icon from '../components/Icons';
 import OrganizerRequestModal from '../components/OrganizerRequestModal';
 import { getUserProfileStats, updateUserProfile, submitKyc, getMyKycStatus, uploadProfilePicture, deleteProfilePicture } from '../api/userApi';
+import { changePassword } from '../api/authApi';
 import { getErrorMessage } from '../utils/errorHandler';
 
 const Profile = () => {
@@ -35,6 +36,54 @@ const Profile = () => {
   const [showOrganizerModal, setShowOrganizerModal] = useState(false);
 
   const currentUserId = user?.id || user?.userId;
+
+  // Change Password state (for all 3 roles: Admin, Organizer, Member)
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [passLoading, setPassLoading] = useState(false);
+  const [passError, setPassError] = useState('');
+  const [passSuccess, setPassSuccess] = useState('');
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    setPassError('');
+    setPassSuccess('');
+
+    if (!passwordForm.currentPassword) {
+      setPassError('Please enter your current password.');
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      setPassError('New password must be at least 6 characters long.');
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPassError('New password and confirm password do not match.');
+      return;
+    }
+    if (passwordForm.currentPassword === passwordForm.newPassword) {
+      setPassError('New password cannot be the same as your current password.');
+      return;
+    }
+
+    setPassLoading(true);
+    try {
+      await changePassword(currentUserId, passwordForm.currentPassword, passwordForm.newPassword);
+      setPassSuccess('Password changed successfully');
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      console.error('Password change failed:', err);
+      setPassError(getErrorMessage(err, 'Failed to change password. Please verify your current password.'));
+    } finally {
+      setPassLoading(false);
+    }
+  };
 
   const fetchProfile = async () => {
     if (!currentUserId) {
@@ -886,6 +935,137 @@ const Profile = () => {
                 </div>
               </div>
             )}
+
+            {/* Security & Password Change Card (Accessible to All Roles: Admin, Organizer, Member) */}
+            <div className="ui-card p-4 shadow-sm border-0 mt-4 bg-white rounded-3">
+              <div className="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                <div className="d-flex align-items-center gap-2">
+                  <div className="rounded-circle p-2 d-flex align-items-center justify-content-center bg-teal-subtle text-teal" style={{ width: '38px', height: '38px' }}>
+                    <Icon name="lock" size={18} color="#0097B2" />
+                  </div>
+                  <div>
+                    <h5 className="fw-bold mb-0 text-dark" style={{ fontSize: '1.05rem' }}>Security & Change Password</h5>
+                    <small className="text-muted">Update your login password to safeguard your account and Seettu funds</small>
+                  </div>
+                </div>
+                <span className="badge bg-light text-secondary border px-2.5 py-1 small fw-semibold">
+                  All Roles Protected
+                </span>
+              </div>
+
+              {passSuccess && (
+                <div className="alert alert-success d-flex align-items-center gap-2 py-2 px-3 mb-3 small rounded-3 border-0">
+                  <Icon name="check-circle" size={16} color="#059669" />
+                  <span className="fw-semibold">{passSuccess}</span>
+                </div>
+              )}
+
+              {passError && (
+                <div className="alert alert-danger d-flex align-items-center gap-2 py-2 px-3 mb-3 small rounded-3 border-0">
+                  <Icon name="alert-circle" size={16} color="#DC2626" />
+                  <span>{passError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handlePasswordChange}>
+                <div className="row g-3">
+                  {/* Current Password */}
+                  <div className="col-12 col-md-4">
+                    <label className="form-label text-secondary fw-medium small mb-1">
+                      Current Password <span className="text-danger">*</span>
+                    </label>
+                    <div className="input-group">
+                      <input
+                        type={showCurrentPass ? 'text' : 'password'}
+                        className="form-control"
+                        placeholder="Current password"
+                        value={passwordForm.currentPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowCurrentPass(!showCurrentPass)}
+                        title={showCurrentPass ? "Hide password" : "Show password"}
+                      >
+                        <Icon name={showCurrentPass ? 'eye-off' : 'eye'} size={15} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* New Password */}
+                  <div className="col-12 col-md-4">
+                    <label className="form-label text-secondary fw-medium small mb-1">
+                      New Password <span className="text-danger">*</span>
+                    </label>
+                    <div className="input-group">
+                      <input
+                        type={showNewPass ? 'text' : 'password'}
+                        className="form-control"
+                        placeholder="Min. 6 characters"
+                        value={passwordForm.newPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowNewPass(!showNewPass)}
+                        title={showNewPass ? "Hide password" : "Show password"}
+                      >
+                        <Icon name={showNewPass ? 'eye-off' : 'eye'} size={15} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="col-12 col-md-4">
+                    <label className="form-label text-secondary fw-medium small mb-1">
+                      Confirm New Password <span className="text-danger">*</span>
+                    </label>
+                    <div className="input-group">
+                      <input
+                        type={showConfirmPass ? 'text' : 'password'}
+                        className="form-control"
+                        placeholder="Re-type new password"
+                        value={passwordForm.confirmPassword}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setShowConfirmPass(!showConfirmPass)}
+                        title={showConfirmPass ? "Hide password" : "Show password"}
+                      >
+                        <Icon name={showConfirmPass ? 'eye-off' : 'eye'} size={15} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-end mt-3">
+                  <button
+                    type="submit"
+                    className="btn btn-teal px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm"
+                    disabled={passLoading}
+                  >
+                    {passLoading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm" role="status"></span>
+                        <span>Updating Password...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="check" size={16} />
+                        <span>Update Password</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
