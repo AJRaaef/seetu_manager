@@ -63,6 +63,9 @@ public class NotificationService {
             case "GROUP": return "Seettu Circle Membership Update";
             case "KYC_VERIFIED": return "KYC Verification Approved";
             case "KYC_REJECTED": return "KYC Verification Status";
+            case "VERIFICATION_PENDING": return "Identity Verification Under Review";
+            case "VERIFICATION_APPROVED": return "Identity Verification Approved";
+            case "VERIFICATION_REJECTED": return "Identity Verification Update";
             default: return "Seettu Notification: " + type.replace('_', ' ');
         }
     }

@@ -141,6 +141,17 @@ public class MemberVerificationService {
                 "Member submitted identity verification with NIC " + nicNumber
         );
 
+        // Notify submitting Member
+        try {
+            notificationService.sendNotification(
+                    user.getId(),
+                    "Your identity verification (NIC: " + nicNumber + ") has been submitted successfully and is currently under review by administrators.",
+                    "VERIFICATION_PENDING"
+            );
+        } catch (Exception e) {
+            log.warn("Could not dispatch member submission notification: {}", e.getMessage());
+        }
+
         // Notify all Organizers and Admins
         try {
             List<User> organizers = userRepository.findByRole(User.Role.ORGANIZER);
@@ -156,7 +167,7 @@ public class MemberVerificationService {
                 );
             }
         } catch (Exception e) {
-            log.warn("Could not dispatch verification notifications: {}", e.getMessage());
+            log.warn("Could not dispatch reviewer verification notifications: {}", e.getMessage());
         }
 
         return mapToResponse(verification);
@@ -185,8 +196,17 @@ public class MemberVerificationService {
     @Transactional(readOnly = true)
     public List<VerificationResponse> getAllVerifications(VerificationStatus status, String search) {
         String cleanSearch = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
-        return verificationRepository.searchVerifications(status, cleanSearch)
-                .stream()
+        List<MemberVerification> list;
+        if (cleanSearch == null) {
+            if (status == null) {
+                list = verificationRepository.findAllByOrderByCreatedAtDesc();
+            } else {
+                list = verificationRepository.findByVerificationStatusOrderByCreatedAtDesc(status);
+            }
+        } else {
+            list = verificationRepository.searchVerifications(status, cleanSearch);
+        }
+        return list.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

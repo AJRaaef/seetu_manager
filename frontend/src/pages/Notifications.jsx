@@ -184,8 +184,16 @@ const Notifications = () => {
     if (t.includes('EMERGENCY')) {
       return { label: 'Emergency Notice', badgeBg: 'bg-danger text-white', icon: 'emergency', iconColor: '#DC2626', iconBg: '#FEE2E2', borderColor: '#DC2626' };
     }
-    if (t.includes('KYC') || t.includes('ORGANIZER')) {
-      return { label: 'Verification', badgeBg: 'bg-info text-dark', icon: 'shield', iconColor: '#0284C7', iconBg: '#E0F2FE', borderColor: '#0097B2' };
+    if (t.includes('VERIF') || t.includes('KYC') || t.includes('ORGANIZER')) {
+      const isApproved = t.includes('APPROV') || t.includes('VERIFIED');
+      const isRejected = t.includes('REJECT');
+      if (isApproved) {
+        return { label: 'Verified', badgeBg: 'bg-success text-white', icon: 'shield', iconColor: '#059669', iconBg: '#D1FAE5', borderColor: '#10B981' };
+      }
+      if (isRejected) {
+        return { label: 'Verification Rejected', badgeBg: 'bg-danger text-white', icon: 'shield', iconColor: '#DC2626', iconBg: '#FEE2E2', borderColor: '#DC2626' };
+      }
+      return { label: 'Verification Under Review', badgeBg: 'bg-info text-dark', icon: 'shield', iconColor: '#0284C7', iconBg: '#E0F2FE', borderColor: '#0097B2' };
     }
     if (t.includes('JOIN')) {
       return { label: 'Join Request', badgeBg: 'bg-primary text-white', icon: 'groups', iconColor: '#0097B2', iconBg: '#E0F7FA', borderColor: '#0097B2' };

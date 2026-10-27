@@ -25,7 +25,7 @@ const ADDITIONAL_DOC_TYPES = [
 
 const MemberVerification = () => {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
 
   const [verification, setVerification] = useState(null);
@@ -151,6 +151,12 @@ const MemberVerification = () => {
       const updated = res?.data || res;
       setVerification(updated);
       setIsResubmitting(false);
+      if (updateUser && updated) {
+        updateUser({
+          kycStatus: updated.verificationStatus || 'PENDING',
+          nicNumber: updated.nicNumber,
+        });
+      }
       setSuccess('Identity verification and documents submitted successfully! Organizers will review your submission.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {

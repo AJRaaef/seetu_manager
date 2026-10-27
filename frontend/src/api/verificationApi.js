@@ -5,9 +5,7 @@ import api from './axios';
  * @param {FormData} formData - multipart form data with nicNumber, nicFront, nicBack, gnCert, etc.
  */
 export const submitVerification = async (formData) => {
-  const response = await api.post('/verifications', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const response = await api.post('/verifications', formData);
   return response.data;
 };
 
@@ -62,10 +60,7 @@ export const rejectVerification = async (id, reason, reviewerId) => {
  */
 export const uploadAdditionalDocument = async (verificationId, formData, userId) => {
   const params = userId ? { userId } : {};
-  const response = await api.post(`/verifications/${verificationId}/documents`, formData, {
-    params,
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const response = await api.post(`/verifications/${verificationId}/documents`, formData, { params });
   return response.data;
 };
 

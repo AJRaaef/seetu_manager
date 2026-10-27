@@ -34,6 +34,6 @@ public interface MemberVerificationRepository extends JpaRepository<MemberVerifi
            "     OR LOWER(mv.nicNumber) LIKE LOWER(CONCAT('%', :search, '%')) " +
            "     OR u.phone LIKE CONCAT('%', :search, '%')) " +
            "ORDER BY mv.createdAt DESC")
-    List<MemberVerification> searchVerifications(@Param("status") VerificationStatus status,
-                                                  @Param("search") String search);
+    List<MemberVerification> searchVerifications(@Param("status") @org.springframework.lang.Nullable VerificationStatus status,
+                                                  @Param("search") @org.springframework.lang.Nullable String search);
 }
