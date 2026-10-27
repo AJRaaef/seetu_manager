@@ -207,7 +207,14 @@ const Certificates = () => {
       const imageY = (pageHeight - imageHeight) / 2;
 
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', imageX, imageY, imageWidth, imageHeight);
-      pdf.save(`CERT_${previewCert.certificateUuid || previewCert.id}.pdf`);
+      const recipientName = previewCert.user?.fullName || previewCert.user?.email || `Member_${previewCert.id}`;
+      const safeRecipientName = recipientName
+        .normalize('NFKD')
+        .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '')
+        .replace(/\s+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_+|_+$/g, '');
+      pdf.save(`Certificate_${safeRecipientName || previewCert.id}.pdf`);
     } catch (err) {
       console.error('Error downloading certificate', err);
       showNotification('danger', err.message || 'Failed to download certificate.');
