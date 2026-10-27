@@ -11,7 +11,7 @@ export const getPaymentsByGroup = async (groupId) => {
 };
 
 export const getPaymentsByMember = async (memberId) => {
-  const response = await api.get(`/payments/member/${memberId}/pending-dues`);
+  const response = await api.get(`/payments/member/${memberId}`);
   return response.data;
 };
 

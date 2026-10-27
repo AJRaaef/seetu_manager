@@ -108,7 +108,7 @@ const Profile = () => {
         if (kycRes.data.nicNumber) {
           setNicInput(kycRes.data.nicNumber);
         }
-        if (kycRes.data.kycStatus) {
+        if (kycRes.data.kycStatus && kycRes.data.kycStatus !== user?.kycStatus) {
           updateUser({
             kycStatus: kycRes.data.kycStatus,
             nicNumber: kycRes.data.nicNumber,
@@ -179,7 +179,7 @@ const Profile = () => {
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [currentUserId]);
 
   const getInitials = (name) => {
     if (!name) return 'U';

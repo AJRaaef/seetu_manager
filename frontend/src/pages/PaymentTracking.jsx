@@ -72,6 +72,7 @@ const [dateInput, setDateInput] = useState(new Date().toISOString().split('T')[0
 const [paymentMethodInput, setPaymentMethodInput] = useState('Cash (Offline)');
 
 const [evidenceFile, setEvidenceFile] = useState(null);
+const [notesInput, setNotesInput] = useState('');
 
 const [submitting, setSubmitting] = useState(false);
 
@@ -118,41 +119,27 @@ res = await getPaymentsByMember(userId);
 
 }
 
-const list = res?.data || res || [];
+      const rawList = res?.data || res || [];
+      const list = Array.isArray(rawList) ? rawList : [];
+      const formatted = list.map((p, idx) => ({
+        id: p.id || `pay-${idx}`,
+        date: p.paymentDate || p.createdAt?.split('T')[0] || '-',
+        group: p.groupName || 'General Group',
+        member: p.memberName || 'Member',
+        cycle: p.cycleNumber ? `Cycle ${p.cycleNumber}` : 'Cycle 1',
+        cycleId: p.cycleId,
+        memberId: p.memberId,
+        amount: Number(p.amount) || 0,
+        status: (p.status || 'PAID').toUpperCase(),
+        recordedBy: p.recordedByName || (p.status === 'PAID' ? 'Organizer' : '—'),
+        method: p.paymentMethod || 'Cash (Offline)',
+        notes: p.notes || '',
+        memberPhone: p.memberPhone,
+        memberEmail: p.memberEmail,
+        evidenceUrls: Array.isArray(p.evidenceUrls) ? p.evidenceUrls : []
+      }));
 
-const formatted = list.map((p) => ({
 
-id: p.id,
-
-date: p.paymentDate || p.createdAt?.split('T')[0] || '-',
-
-group: p.groupName || 'General Group',
-
-member: p.memberName || 'Member',
-
-cycle: p.cycleNumber ? `Cycle ${p.cycleNumber}` : 'Cycle 1',
-
-cycleId: p.cycleId,
-
-memberId: p.memberId,
-
-amount: Number(p.amount) || 0,
-
-status: (p.status || 'PAID').toUpperCase(),
-
-recordedBy: p.recordedByName || (p.status === 'PAID' ? 'Organizer' : '—'),
-
-method: p.paymentMethod || 'Cash (Offline)',
-
-notes: p.notes || '',
-
-memberPhone: p.memberPhone,
-
-memberEmail: p.memberEmail,
-
-evidenceUrls: p.evidenceUrls || []
-
-}));
 
 setPayments(formatted);
 
@@ -184,7 +171,7 @@ const res = (isAdmin || isOrganizer)
 
 : (userId ? await getGroupsByUser(userId) : null);
 
-const gList = res?.data || res || [];
+const gList = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
 
 setAvailableGroups(gList);
 
@@ -389,6 +376,7 @@ setAmountInput('');
 setStatusInput('PAID');
 
 setEvidenceFile(null);
+setNotesInput('');
 
 fetchPayments();
 
@@ -706,6 +694,8 @@ const pendingCount = payments.filter((p) => p.status === 'PENDING').length;
 
 const overdueCount = payments.filter((p) => p.status === 'OVERDUE' || p.status === 'MISSED' || p.status === 'PARTIAL').length;
 
+const allCount = payments.length;
+
 const filteredPayments = payments.filter((p) => {
 
 // Tab filtering:
@@ -830,7 +820,7 @@ return (
 
 <div className="text-muted small" style={{ fontSize: '0.8rem' }}>{t('payments_page.total_collected', 'Total Collected')}</div>
 
-<div className="fw-bold fs-4 text-dark mt-1">{totalCollected.toLocaleString()} LKR</div>
+<div className="fw-bold fs-4 text-dark mt-1">{Number(totalCollected || 0).toLocaleString()} LKR</div>
 
 </div>
 
@@ -854,7 +844,7 @@ return (
 
 <div className="text-muted small" style={{ fontSize: '0.8rem' }}>Pending Payments</div>
 
-<div className="fw-bold fs-4 text-dark mt-1">{totalPending.toLocaleString()} LKR</div>
+<div className="fw-bold fs-4 text-dark mt-1">{Number(totalPending || 0).toLocaleString()} LKR</div>
 
 </div>
 
@@ -878,7 +868,7 @@ return (
 
 <div className="text-muted small" style={{ fontSize: '0.8rem' }}>Overdue Payments</div>
 
-<div className="fw-bold fs-4 text-dark mt-1">{totalOverdue.toLocaleString()} LKR</div>
+<div className="fw-bold fs-4 text-dark mt-1">{Number(totalOverdue || 0).toLocaleString()} LKR</div>
 
 </div>
 
@@ -2031,11 +2021,11 @@ Reset All Filters
 
 ) : (
 
-filteredPayments.map((p) => (
+filteredPayments.map((p, index) => (
 
 <tr
 
-key={p.id}
+key={p.id || index}
 
 onClick={() => setViewPayment(p)}
 
