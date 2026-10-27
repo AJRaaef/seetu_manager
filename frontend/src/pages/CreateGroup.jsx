@@ -118,8 +118,8 @@ const CreateGroup = () => {
       return;
     }
 
-    if (parseInt(formData.memberCount) < 2) {
-      setError('Seettu groups require at least 2 members.');
+    if (!formData.memberCount || parseInt(formData.memberCount) < 2) {
+      setError('Member count must be at least 2');
       return;
     }
 
