@@ -1928,26 +1928,33 @@ const LandingPage = () => {
               </div>
             </div>
           </div>
-
-          {/* Statutory Legal & Regulatory Compliance Notice */}
+{/* Statutory Legal & Regulatory Compliance Notice */}
           <div className="pt-3 pb-3 border-top border-light border-opacity-10 small text-white-50">
             <div className="row g-2 align-items-center">
-              <div className="col-12 col-lg-8">
+              {/* Notice text column */}
+              <div className="col-12 col-lg-7">
                 <p className="mb-0" style={{ fontSize: '0.78rem', lineHeight: '1.5' }}>
                   <strong className="text-white">{t('landing.footer_statutory_label', 'Statutory & Legal Notice:')}</strong> {t('landing.footer_statutory_text', 'SeettuManager is an administrative digital record-keeping and rotation management software operating in alignment with The Cheetus Ordinance No. 61 of 1935 (Chapter 190), the Electronic Transactions Act No. 19 of 2006, and the Personal Data Protection Act No. 9 of 2022 of Sri Lanka. SeettuManager does not accept public deposits, act as a banking institution, or provide loan facilities. All financial pooling is peer-to-peer and executed between enrolled circle members and verified organizers.')}
                 </p>
               </div>
-              <div className="col-12 col-lg-4 text-lg-end">
-                <div className="d-inline-flex flex-wrap gap-2 text-white-50" style={{ fontSize: '0.78rem' }}>
-                  <Link to="/law" className="text-white-50 text-decoration-none hover-white">{t('quick_links.law', 'Statutory Law')}</Link>
-                  <span>•</span>
-                  <Link to="/rules" className="text-white-50 text-decoration-none hover-white">{t('quick_links.rules', 'Enrollment Rules')}</Link>
-                  <span>•</span>
-                  <Link to="/terms" className="text-white-50 text-decoration-none hover-white">{t('quick_links.terms', 'Terms')}</Link>
-                  <span>•</span>
-                  <Link to="/privacy" className="text-white-50 text-decoration-none hover-white">{t('quick_links.privacy', 'Privacy')}</Link>
-                  <span>•</span>
-                  <Link to="/disclaimer" className="text-white-50 text-decoration-none hover-white">{t('quick_links.disclaimer', 'Disclaimer')}</Link>
+
+              {/* Bottom links column - aligned to right on large screens */}
+              <div className="col-12 col-lg-5 text-lg-end">
+                <div className="d-flex flex-wrap align-items-center justify-content-lg-end gap-1 text-white-50" style={{ fontSize: '0.75rem' }}>
+                  <span className="pe-1">•</span>
+                  <Link to="/law" className="text-white-50 text-decoration-none hover-white">{t('landing.bottom_links.statutory_law', 'Statutory Law')}</Link>
+                  
+                  <span className="px-1">•</span>
+                  <Link to="/rules" className="text-white-50 text-decoration-none hover-white">{t('landing.bottom_links.enrollment_rules', 'Enrollment Rules')}</Link>
+                  
+                  <span className="px-1">•</span>
+                  <Link to="/terms" className="text-white-50 text-decoration-none hover-white">{t('landing.bottom_links.terms', 'Terms')}</Link>
+                  
+                  <span className="px-1">•</span>
+                  <Link to="/privacy" className="text-white-50 text-decoration-none hover-white">{t('landing.bottom_links.privacy', 'Privacy')}</Link>
+                  
+                  <span className="px-1">•</span>
+                  <Link to="/disclaimer" className="text-white-50 text-decoration-none hover-white">{t('landing.bottom_links.disclaimer', 'Disclaimer')}</Link>
                 </div>
               </div>
             </div>
