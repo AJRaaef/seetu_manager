@@ -242,7 +242,6 @@ const Profile = () => {
 
   return (
     <div className="profile-page-container pb-4">
-      {/* Title */}
       <h2 className="fw-bold mb-4" style={{ color: '#0F2F3D' }}>{t('profile_page.title', 'Profile Settings')}</h2>
 
       {actionMsg && (
@@ -266,78 +265,99 @@ const Profile = () => {
         <div className="col-12 col-lg-4 d-flex flex-column gap-4">
           <div className="ui-card p-4 text-center shadow-sm">
             {/* Avatar Circle with Initials or Profile Picture + Camera Upload Badge */}
-            <div className="position-relative d-inline-block mx-auto mb-3">
-              <div
-                className="rounded-circle text-white d-flex align-items-center justify-content-center overflow-hidden position-relative shadow-sm"
-                style={{
-                  width: '104px',
-                  height: '104px',
-                  backgroundColor: '#3E7B8E',
-                  fontSize: '2rem',
-                  fontWeight: 700,
-                  border: '3px solid #E2E8F0'
-                }}
-              >
-                {profilePictureUrl && failedProfilePictureUrl !== profilePictureUrl ? (
-                  <img
-                    src={`http://localhost:8081${profilePictureUrl}`}
-                    alt={fullName || userInfo?.fullName || 'User'}
-                    className="w-100 h-100"
-                    style={{ objectFit: 'cover', display: 'block' }}
-                    onError={() => setFailedProfilePictureUrl(profilePictureUrl)}
-                  />
-                ) : (
-                  <div className="d-flex align-items-center justify-content-center w-100 h-100">
-                    {getInitials(fullName || userInfo?.fullName)}
-                  </div>
-                )}
+            <div className={`profile-photo-row ${isEditing ? 'is-editing' : ''}`}>
+              <div className="position-relative d-inline-block mx-auto mb-3 profile-avatar-wrap">
+                <div
+                  className="rounded-circle text-white d-flex align-items-center justify-content-center overflow-hidden position-relative shadow-sm"
+                  style={{
+                    width: '104px',
+                    height: '104px',
+                    backgroundColor: '#3E7B8E',
+                    fontSize: '2rem',
+                    fontWeight: 700,
+                    border: '3px solid #E2E8F0'
+                  }}
+                >
+                  {profilePictureUrl && failedProfilePictureUrl !== profilePictureUrl ? (
+                    <img
+                      src={`http://localhost:8081${profilePictureUrl}`}
+                      alt={fullName || userInfo?.fullName || 'User'}
+                      className="w-100 h-100"
+                      style={{ objectFit: 'cover', display: 'block' }}
+                      onError={() => setFailedProfilePictureUrl(profilePictureUrl)}
+                    />
+                  ) : (
+                    <div className="d-flex align-items-center justify-content-center w-100 h-100">
+                      {getInitials(fullName || userInfo?.fullName)}
+                    </div>
+                  )}
 
-                {uploadingPic && (
-                  <div
-                    className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-                    style={{ backgroundColor: 'rgba(15, 47, 61, 0.72)', zIndex: 3 }}
-                  >
-                    <div className="spinner-border spinner-border-sm text-white" role="status"></div>
-                  </div>
-                )}
+                  {uploadingPic && (
+                    <div
+                      className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                      style={{ backgroundColor: 'rgba(15, 47, 61, 0.72)', zIndex: 3 }}
+                    >
+                      <div className="spinner-border spinner-border-sm text-white" role="status"></div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Camera Icon Overlay Trigger */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingPic}
+                  className="btn btn-sm position-absolute bottom-0 end-0 rounded-circle p-0 d-flex align-items-center justify-content-center shadow"
+                  style={{
+                    width: '34px',
+                    height: '34px',
+                    backgroundColor: '#0097B2',
+                    color: '#ffffff',
+                    border: '2px solid #ffffff',
+                    cursor: 'pointer',
+                    zIndex: 4,
+                    transition: 'all 0.2s ease'
+                  }}
+                  title="Change Profile Picture"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                    e.currentTarget.style.backgroundColor = '#007A90';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.backgroundColor = '#0097B2';
+                  }}
+                >
+                  <Icon name="camera" size={16} color="#ffffff" />
+                </button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  style={{ display: 'none' }}
+                  onChange={handlePictureChange}
+                />
               </div>
 
-              {/* Camera Icon Overlay Trigger */}
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadingPic}
-                className="btn btn-sm position-absolute bottom-0 end-0 rounded-circle p-0 d-flex align-items-center justify-content-center shadow"
-                style={{
-                  width: '34px',
-                  height: '34px',
-                  backgroundColor: '#0097B2',
-                  color: '#ffffff',
-                  border: '2px solid #ffffff',
-                  cursor: 'pointer',
-                  zIndex: 4,
-                  transition: 'all 0.2s ease'
-                }}
-                title="Change Profile Picture"
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.1)';
-                  e.currentTarget.style.backgroundColor = '#007A90';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.backgroundColor = '#0097B2';
-                }}
-              >
-                <Icon name="camera" size={16} color="#ffffff" />
-              </button>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                style={{ display: 'none' }}
-                onChange={handlePictureChange}
-              />
+              {isEditing && (
+                <div className="profile-photo-actions text-start">
+                  <label className="form-label small text-muted d-block mb-2 fw-semibold">{t('profile_page.upload_photo')}</label>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingPic}
+                    className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1.5"
+                    style={{ fontSize: '0.8rem' }}
+                  >
+                    <Icon name="upload" size={13} />
+                    <span>{t('profile_page.upload_photo')}</span>
+                  </button>
+                  <div className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>
+                    Supported: JPG, PNG, WEBP (Max 5MB)
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Quick Remove Photo Option if Photo is Set */}
@@ -385,64 +405,33 @@ const Profile = () => {
             <button
               onClick={() => setIsEditing(!isEditing)}
               className="btn btn-teal px-4 py-2 w-100 mb-4 fw-semibold"
-              style={{ backgroundColor: '#3E7B8E' }}
             >
               {isEditing ? t('common.cancel') : t('common.edit')}
             </button>
 
             {isEditing ? (
               <form onSubmit={handleSaveProfile} className="text-start border-top pt-3">
-                {/* Photo Change Controls inside Edit Form */}
-                <div className="mb-3 p-2 rounded-2" style={{ backgroundColor: '#F8FAFC', border: '1px dashed #CBD5E1' }}>
-                  <label className="form-label small text-muted d-block mb-1 fw-semibold">{t('profile_page.upload_photo')}</label>
-                  <div className="d-flex align-items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingPic}
-                      className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1.5"
-                      style={{ fontSize: '0.8rem' }}
-                    >
-                      <Icon name="upload" size={13} />
-                      <span>{(userInfo?.profilePictureUrl || user?.profilePictureUrl) ? t('profile_page.upload_photo') : t('profile_page.upload_photo')}</span>
-                    </button>
-                    {(userInfo?.profilePictureUrl || user?.profilePictureUrl) && (
-                      <button
-                        type="button"
-                        onClick={handleDeletePicture}
-                        disabled={uploadingPic}
-                        className="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1.5"
-                        style={{ fontSize: '0.8rem' }}
-                      >
-                        <Icon name="trash" size={13} />
-                        <span>{t('common.delete')}</span>
-                      </button>
-                    )}
+                <div className="row g-3 mb-3">
+                  <div className="col-12 col-xl-6">
+                    <label className="form-label small text-muted">{t('profile_page.full_name')}</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                    />
                   </div>
-                  <div className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>
-                    Supported: JPG, PNG, WEBP (Max 5MB)
+                  <div className="col-12 col-xl-6">
+                    <label className="form-label small text-muted">{t('profile_page.phone')}</label>
+                    <input
+                      type="tel"
+                      className="form-control"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                    />
                   </div>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label small text-muted">{t('profile_page.full_name')}</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label className="form-label small text-muted">{t('profile_page.phone')}</label>
-                  <input
-                    type="tel"
-                    className="form-control"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                  />
                 </div>
                 <button type="submit" className="btn btn-teal w-100 py-2 fw-semibold" disabled={saving || uploadingPic}>
                   {saving ? t('profile_page.saving') : t('profile_page.save_changes')}
@@ -478,7 +467,7 @@ const Profile = () => {
         {/* Right Column: Groups & Statistics */}
         <div className="col-12 col-lg-8">
           {/* My Groups Card */}
-          <div className="ui-card p-4 shadow-sm mb-4">
+          <div className="ui-card profile-section-card p-4 shadow-sm mb-4">
             <h5 className="fw-bold text-dark mb-3">
               {isAdmin ? 'System Group Oversight' : 'My Groups'}
             </h5>
@@ -531,7 +520,7 @@ const Profile = () => {
           </div>
 
           {/* Statistics Card */}
-          <div className="ui-card p-4 shadow-sm">
+          <div className="ui-card profile-section-card p-4 shadow-sm">
             <h5 className="fw-bold text-dark mb-3">
               {isAdmin ? 'Administrative Overview' : 'Statistics'}
             </h5>
@@ -643,9 +632,11 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Security & Password Change Card (Accessible to All Roles: Admin, Organizer, Member) */}
-            <div className="ui-card p-4 shadow-sm border-0 mt-4 bg-white rounded-3">
-              <div className="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+          </div>
+
+          {/* Security & Password Change Card (Accessible to All Roles: Admin, Organizer, Member) */}
+          <div className="ui-card profile-security-card p-4 shadow-sm mt-4">
+              <div className="profile-security-header d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom">
                 <div className="d-flex align-items-center gap-2">
                   <div className="rounded-circle p-2 d-flex align-items-center justify-content-center bg-teal-subtle text-teal" style={{ width: '38px', height: '38px' }}>
                     <Icon name="lock" size={18} color="#0097B2" />
@@ -677,7 +668,7 @@ const Profile = () => {
               <form onSubmit={handlePasswordChange}>
                 <div className="row g-3">
                   {/* Current Password */}
-                  <div className="col-12 col-md-4">
+                  <div className="col-12 col-xl-4">
                     <label className="form-label text-secondary fw-medium small mb-1">
                       Current Password <span className="text-danger">*</span>
                     </label>
@@ -702,7 +693,7 @@ const Profile = () => {
                   </div>
 
                   {/* New Password */}
-                  <div className="col-12 col-md-4">
+                  <div className="col-12 col-xl-4">
                     <label className="form-label text-secondary fw-medium small mb-1">
                       New Password <span className="text-danger">*</span>
                     </label>
@@ -727,7 +718,7 @@ const Profile = () => {
                   </div>
 
                   {/* Confirm Password */}
-                  <div className="col-12 col-md-4">
+                  <div className="col-12 col-xl-4">
                     <label className="form-label text-secondary fw-medium small mb-1">
                       Confirm New Password <span className="text-danger">*</span>
                     </label>
@@ -774,7 +765,6 @@ const Profile = () => {
               </form>
             </div>
           </div>
-        </div>
       </div>
 
       {/* Organizer Application Modal */}
