@@ -128,7 +128,7 @@ const OrganizerApplicationModal = ({ show, onClose, onSuccess }) => {
             {/* Header */}
             <div
               className="modal-header px-4 py-3 text-white border-0"
-              style={{ background: 'linear-gradient(135deg, #0F2F3D 0%, #0097B2 100%)' }}
+              style={{ background: '#134A5A' }}
             >
               <div className="d-flex align-items-center gap-3">
                 <div
