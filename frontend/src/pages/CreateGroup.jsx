@@ -50,7 +50,6 @@ const CreateGroup = () => {
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
-  const [success, setSuccess] = useState(false);
 
   // Shop registration modal state
   const [showAddShopModal, setShowAddShopModal] = useState(false);
@@ -164,8 +163,7 @@ const CreateGroup = () => {
       };
 
       await createGroup(payload, creatorId);
-      setSuccess(true);
-      setTimeout(() => navigate('/groups'), 1200);
+      navigate('/groups');
     } catch (err) {
       setSubmitError(getErrorMessage(err, 'Failed to create group. Please check your form inputs.'));
     } finally {
@@ -212,7 +210,7 @@ const CreateGroup = () => {
   };
 
   return (
-    <div className="row justify-content-center py-4">
+    <div className="row justify-content-center">
       <div className="col-12 col-lg-8 col-xl-7">
         <div className="card shadow-sm border-0" style={{ borderRadius: '12px', overflow: 'hidden' }}>
           {/* Header */}
@@ -226,14 +224,6 @@ const CreateGroup = () => {
           </div>
 
           <div className="card-body p-4">
-            {/* Success */}
-            {success && (
-              <div className="alert alert-success border-0 mb-4 d-flex align-items-center gap-2">
-                <CheckCircle2 size={18} />
-                <span>Group created successfully! Redirecting…</span>
-              </div>
-            )}
-
             {/* Global error */}
             {submitError && (
               <div className="alert alert-danger border-0 mb-4 rounded-3">

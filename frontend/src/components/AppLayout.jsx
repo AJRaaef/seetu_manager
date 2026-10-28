@@ -23,7 +23,7 @@ const AppLayout = ({ children }) => {
           </div>
 
           {/* Portal Legal & Statutory Compliance Footer */}
-          <footer className="mt-5 pt-3 pb-2 border-top text-muted small d-flex flex-wrap justify-content-between align-items-center gap-2" style={{ fontSize: '0.78rem' }}>
+          <footer className="mt-4 pt-2 pb-2 border-top text-muted small d-flex flex-wrap justify-content-between align-items-center gap-2" style={{ fontSize: '0.78rem' }}>
             <div className="d-flex align-items-center gap-2 flex-wrap">
               <span className="fw-semibold text-dark">SeettuManager Platform</span>
               <span>•</span>

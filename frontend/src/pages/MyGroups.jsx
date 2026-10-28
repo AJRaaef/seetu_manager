@@ -334,7 +334,7 @@ const MyGroups = () => {
   };
 
   return (
-    <div className="my-groups-container pb-5">
+    <div className="my-groups-container">
       {/* Page Title & Top Actions */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
