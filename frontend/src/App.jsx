@@ -30,6 +30,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import LegalPage from './pages/LegalPage';
 import ContactPage from './pages/ContactPage';
 import AdminOrganizerRequests from './pages/AdminOrganizerRequests';
+import MonthlyRotationPage from './pages/MonthlyRotationPage';
 
 // Components
 import AppLayout from './components/AppLayout';
@@ -119,6 +120,7 @@ const MainLayout = () => {
       <Route path="/verification" element={<ProtectedRoute><AppLayout><MemberVerification /></AppLayout></ProtectedRoute>} />
       <Route path="/verifications/manage" element={<ProtectedRoute roles={['ORGANIZER', 'ADMIN']}><AppLayout><VerificationManagement /></AppLayout></ProtectedRoute>} />
       <Route path="/admin/organizer-requests" element={<ProtectedRoute roles={['ADMIN']}><AppLayout><AdminOrganizerRequests /></AppLayout></ProtectedRoute>} />
+      <Route path="/rotation/:cycleId" element={<ProtectedRoute><AppLayout><MonthlyRotationPage /></AppLayout></ProtectedRoute>} />
 
       {/* Default Catch-all redirects to Landing Page */}
       <Route path="*" element={<Navigate to="/" replace />} />

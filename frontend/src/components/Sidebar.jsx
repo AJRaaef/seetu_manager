@@ -203,12 +203,12 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
 
             <li>
               <NavLink
-                to={(isAdmin || isOrganizer) ? "/verifications/manage" : "/verification"}
+                to={isAdmin ? "/verifications/manage" : "/verification"}
                 className={linkClass}
                 onClick={onCloseMobile}
               >
                 <Icon name="shield" size={18} />
-                <span>{(isAdmin || isOrganizer) ? t("sidebar.verifications", "Verifications") : t("sidebar.verification", "Verification")}</span>
+                <span>{isAdmin ? t("sidebar.verifications", "Verifications") : t("sidebar.verification", "Verification")}</span>
               </NavLink>
             </li>
 
