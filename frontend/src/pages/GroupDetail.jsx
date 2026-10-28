@@ -425,6 +425,14 @@ const GroupDetail = () => {
                           </td>
                           <td>
                             <div className="d-flex gap-1 flex-wrap">
+                              <Link
+                                to={`/rotation/${c.id}`}
+                                className="btn btn-sm text-white fw-bold d-inline-flex align-items-center gap-1 shadow-xs"
+                                style={{ background: 'linear-gradient(135deg, #0097B2 0%, #0F2F3D 100%)' }}
+                                title="Open Spinning Wheel for this cycle"
+                              >
+                                <span>🎡 Spin Wheel</span>
+                              </Link>
                               {(isOrganizer || isAdmin) && (
                                 <>
                                   <button

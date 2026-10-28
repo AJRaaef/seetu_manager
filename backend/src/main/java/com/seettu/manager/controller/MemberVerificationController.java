@@ -122,7 +122,7 @@ public class MemberVerificationController {
     }
 
     @GetMapping("/pending")
-    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<VerificationResponse>>> getPendingVerifications(
             @RequestParam(value = "status", required = false) String statusStr,
             @RequestParam(value = "search", required = false) String search) {
@@ -146,7 +146,7 @@ public class MemberVerificationController {
     }
 
     @PutMapping("/{id}/approve")
-    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<VerificationResponse>> approveVerification(
             @PathVariable Long id,
             @RequestParam(value = "reviewerId", required = false) Long paramReviewerId,
@@ -162,7 +162,7 @@ public class MemberVerificationController {
     }
 
     @PutMapping("/{id}/reject")
-    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<VerificationResponse>> rejectVerification(
             @PathVariable Long id,
             @RequestBody @Valid VerificationRejectRequest request,

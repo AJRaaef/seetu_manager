@@ -43,9 +43,16 @@ public class PaymentCycle {
     @Column(nullable = false)
     private CycleStatus status;
 
+    @Column(name = "max_payout_slots")
+    private Integer maxPayoutSlots;
+
+    @Column(name = "rotation_status", length = 50, nullable = false)
+    private String rotationStatus;
+
     @PrePersist
     protected void onCreate() {
         if (status == null) status = CycleStatus.PENDING;
+        if (rotationStatus == null) rotationStatus = "PENDING";
     }
 
     public enum CycleStatus {

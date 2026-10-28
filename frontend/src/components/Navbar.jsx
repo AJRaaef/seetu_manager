@@ -66,6 +66,11 @@ const Navbar = () => {
                 <Icon name="groups" size={16} className="me-1" /> {t('my_groups') || 'My Groups'}
               </Link>
             </li>
+            <li className="nav-item">
+              <Link className={`nav-link ${location.pathname.startsWith('/rotation') ? 'active fw-bold' : ''}`} to="/groups" title="View groups and draw your payout position">
+                <span className="me-1">🎡</span> {t('spin_wheel', 'Spin Wheel')}
+              </Link>
+            </li>
             {(isAdmin || isOrganizer) && (
               <li className="nav-item">
                 <Link className={`nav-link ${isActive('/payments')}`} to="/payments">
@@ -102,7 +107,7 @@ const Navbar = () => {
                 <Icon name="certificates" size={16} className="me-1" /> {t('certificates', 'Certificates')}
               </Link>
             </li>
-            {(isAdmin || isOrganizer) ? (
+            {isAdmin ? (
               <li className="nav-item">
                 <Link className={`nav-link ${isActive('/verifications/manage')}`} to="/verifications/manage">
                   <Icon name="shield" size={16} className="me-1" /> {t('verifications', 'Verifications')}
