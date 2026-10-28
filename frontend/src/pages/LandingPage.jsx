@@ -65,16 +65,16 @@ const LandingPage = () => {
   };
 
   // Structured Professional Quick Links (Statutory Law, Rules, Governance & Policies)
-  const quickLinksList = [
-    { label: t('quick_links.law', 'Chit Law & Governance'), path: '/law' },
-    { label: t('quick_links.rules', 'Member Enrollment Rules'), path: '/rules' },
-    { label: t('quick_links.complaints', 'Complaints & Disputes'), path: '/complaints' },
-    { label: t('quick_links.contact', 'Contact Us'), path: '/contact' },
-    { label: t('quick_links.privacy', 'Privacy & Policy'), path: '/privacy' },
-    { label: t('quick_links.terms', 'Terms & Conditions'), path: '/terms' },
-    { label: t('quick_links.cancellation', 'Cancellation Policy'), path: '/cancellation' },
-    { label: t('quick_links.refund', 'Refund Policy'), path: '/refund' },
-    { label: t('quick_links.disclaimer', 'Disclaimer'), path: '/disclaimer' },
+ const quickLinksList = [
+    { label: t('landing.quick_links.law'), path: '/law' },
+    { label: t('landing.quick_links.rules'), path: '/rules' },
+    { label: t('landing.quick_links.complaints'), path: '/complaints' },
+    { label: t('landing.quick_links.contact'), path: '/contact' },
+    { label: t('landing.quick_links.privacy'), path: '/privacy' },
+    { label: t('landing.quick_links.terms'), path: '/terms' },
+    { label: t('landing.quick_links.cancellation'), path: '/cancellation' },
+    { label: t('landing.quick_links.refund'), path: '/refund' },
+    { label: t('landing.quick_links.disclaimer'), path: '/disclaimer' },
   ];
 
   // Navigatable Hero Slides (Traditional Sri Lankan Seettu Themes)
@@ -1869,21 +1869,21 @@ const LandingPage = () => {
 
            {/* Col 2: QUICK LINKS */}
             <div className="col-lg-3 col-md-6 col-6">
-              <h6 className="fw-bold text-white mb-2 text-uppercase fs-7" style={{ letterSpacing: '1.2px' }}>
-                {t('landing.footer_quick_links', 'QUICK LINKS')}
-              </h6>
-              <div style={{ width: '38px', height: '3px', backgroundColor: '#C01920', marginBottom: '16px', borderRadius: '2px' }} />
-              <ul className="footer-quick-links-list">
-                {quickLinksList.map((item, idx) => (
-                  <li key={idx}>
-                    <Link to={item.path} className="footer-nav-item">
-                      <span className="footer-nav-bullet">›</span>
-                      <span>{item.label}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+      <h6 className="fw-bold text-white mb-2 text-uppercase fs-7" style={{ letterSpacing: '1.2px' }}>
+        {t('landing.footer_quick_links', 'QUICK LINKS')}
+      </h6>
+      <div style={{ width: '38px', height: '3px', backgroundColor: '#C01920', marginBottom: '16px', borderRadius: '2px' }} />
+      <ul className="footer-quick-links-list">
+        {quickLinksList.map((item, idx) => (
+          <li key={idx}>
+            <Link to={item.path} className="footer-nav-item">
+              <span className="footer-nav-bullet">›</span>
+              <span>{item.label}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
             
            {/* Col 3: SUPPORT Section */}
             <div className="col-lg-4 col-md-6 col-6">
