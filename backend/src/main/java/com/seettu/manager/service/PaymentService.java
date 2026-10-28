@@ -41,6 +41,17 @@ public class PaymentService {
         PaymentCycle cycle = paymentCycleService.getCycleById(request.getCycleId());
         User member = userService.getUserById(request.getMemberId());
 
+        // Validate that circle is not still forming
+        if (cycle.getGroup() != null) {
+            int targetMembers = (cycle.getGroup().getMemberCount() != null && cycle.getGroup().getMemberCount() > 0)
+                    ? cycle.getGroup().getMemberCount() : 1;
+            long currentMembers = groupMemberRepository.countByGroupIdAndStatus(cycle.getGroup().getId(), GroupMember.MemberStatus.ACTIVE);
+            if (currentMembers < targetMembers && cycle.getStatus() == PaymentCycle.CycleStatus.PENDING) {
+                throw new IllegalStateException("Circle Forming: This Seettu group currently has " + currentMembers + " of " 
+                        + targetMembers + " members. Rotational cycles and contributions will open once all members have joined.");
+            }
+        }
+
         // Prevent duplicate payments
         if (paymentRepository.existsByCycleIdAndMemberId(request.getCycleId(), request.getMemberId())) {
             Payment existing = paymentRepository.findByCycleIdAndMemberId(request.getCycleId(), request.getMemberId())
@@ -108,6 +119,10 @@ public class PaymentService {
                 .build();
 
         payment = paymentRepository.save(payment);
+
+        if (payment.getStatus() == Payment.PaymentStatus.PAID || payment.getStatus() == Payment.PaymentStatus.LATE) {
+            checkAndUpdateCycleProgress(cycle);
+        }
 
         auditLogService.log(recorder, "PAYMENT_RECORDED", "payments", payment.getId(),
                 "Payment recorded for member: " + member.getFullName() + " in cycle: " + cycle.getCycleNumber());
@@ -191,6 +206,10 @@ public class PaymentService {
         }
         Payment updated = paymentRepository.save(payment);
 
+        if (updated.getStatus() == Payment.PaymentStatus.PAID || updated.getStatus() == Payment.PaymentStatus.LATE) {
+            checkAndUpdateCycleProgress(updated.getCycle());
+        }
+
         User logUser = (recorder != null) ? recorder : payment.getRecordedBy();
         auditLogService.log(logUser, "PAYMENT_UPDATED", "payments", payment.getId(),
                 "Payment #" + payment.getId() + " updated: amount=" + payment.getAmount() + " LKR, status=" + payment.getStatus());
@@ -227,45 +246,96 @@ public class PaymentService {
         paymentRepository.delete(payment);
     }
 
+        public int getGracePeriodDays(SeettuGroup.CycleFrequency frequency) {
+        if (frequency == null) return 5;
+        switch (frequency) {
+            case DAILY:
+                return 1;
+            case WEEKLY:
+                return 2;
+            case BI_WEEKLY:
+                return 3;
+            case MONTHLY:
+            default:
+                return 5;
+        }
+    }
+
     @Transactional
     public void markOverduePayments() {
         LocalDate today = LocalDate.now();
+
+        // Self-healing: Clean up any premature auto-detected OVERDUE payments
+        // if the circle is not yet at full capacity OR today is still within the grace period
+        List<Payment> allOverdue = paymentRepository.findByStatus(Payment.PaymentStatus.OVERDUE);
+        for (Payment p : allOverdue) {
+            if (p.getNotes() != null && p.getNotes().contains("System Auto-Detected") && p.getCycle() != null) {
+                PaymentCycle cycle = p.getCycle();
+                SeettuGroup grp = cycle.getGroup();
+                if (grp != null) {
+                    int targetMembers = (grp.getMemberCount() != null && grp.getMemberCount() > 0) ? grp.getMemberCount() : 1;
+                    long activeCount = groupMemberRepository.countByGroupIdAndStatus(grp.getId(), GroupMember.MemberStatus.ACTIVE);
+                    int graceDays = getGracePeriodDays(grp.getCycleFrequency());
+                    LocalDate overdueThreshold = (cycle.getEndDate() != null) ? cycle.getEndDate().plusDays(graceDays) : today.plusDays(1);
+                    
+                    if (activeCount < targetMembers || !today.isAfter(overdueThreshold)) {
+                        paymentRepository.delete(p);
+                    }
+                }
+            }
+        }
+
+        // Mark overdue payments ONLY for active cycles in fully formed groups where today is past the grace period
         List<PaymentCycle> activeCycles = paymentCycleService.getActiveCycles();
         for (PaymentCycle cycle : activeCycles) {
-            LocalDate dueDate = cycle.getEndDate();
-            if (dueDate != null && !dueDate.isAfter(today) && cycle.getGroup() != null) {
-                List<GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(
-                        cycle.getGroup().getId(), GroupMember.MemberStatus.ACTIVE);
-                java.math.BigDecimal contributionAmount = cycle.getGroup().getContributionAmount() != null
-                        ? cycle.getGroup().getContributionAmount()
-                        : java.math.BigDecimal.ZERO;
+            if (cycle.getGroup() == null) continue;
+            SeettuGroup group = cycle.getGroup();
 
-                for (GroupMember gm : activeMembers) {
-                    if (gm.getUser() != null && gm.getUser().getRole() != User.Role.ADMIN) {
-                        Long memberUserId = gm.getUser().getId();
-                        Optional<Payment> existingPayment = paymentRepository.findByCycleIdAndMemberId(cycle.getId(), memberUserId);
-                        if (existingPayment.isEmpty()) {
-                            Payment overduePayment = Payment.builder()
-                                    .cycle(cycle)
-                                    .member(gm.getUser())
-                                    .amount(contributionAmount)
-                                    .status(Payment.PaymentStatus.OVERDUE)
-                                    .paymentDate(dueDate)
-                                    .paymentMethod("Pending Settlement")
-                                    .notes("System Auto-Detected: Contribution not received by due date (" + dueDate + ")")
-                                    .recordedBy(null)
-                                    .build();
-                            paymentRepository.save(overduePayment);
-                            notificationService.sendNotification(memberUserId,
-                                    "Your installment for '" + cycle.getGroup().getName() + "' (Cycle #" + cycle.getCycleNumber() + ") is overdue!",
-                                    "PAYMENT_OVERDUE");
-                        } else {
-                            Payment p = existingPayment.get();
-                            // Protect PENDING payments: a member who submitted their slip must stay PENDING for organizer approval
-                            boolean hasSlips = !paymentEvidenceRepository.findByPaymentId(p.getId()).isEmpty();
-                            if (hasSlips && p.getStatus() == Payment.PaymentStatus.OVERDUE) {
-                                p.setStatus(Payment.PaymentStatus.PENDING);
-                                paymentRepository.save(p);
+            int targetMemberCount = (group.getMemberCount() != null && group.getMemberCount() > 0) ? group.getMemberCount() : 1;
+            List<GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(
+                    group.getId(), GroupMember.MemberStatus.ACTIVE);
+
+            // Never mark overdue if the circle has not reached full capacity yet
+            if (activeMembers.size() < targetMemberCount) {
+                continue;
+            }
+
+            LocalDate dueDate = cycle.getEndDate();
+            if (dueDate != null) {
+                int graceDays = getGracePeriodDays(group.getCycleFrequency());
+                LocalDate overdueThreshold = dueDate.plusDays(graceDays);
+
+                if (today.isAfter(overdueThreshold)) {
+                    java.math.BigDecimal contributionAmount = group.getContributionAmount() != null
+                            ? group.getContributionAmount()
+                            : java.math.BigDecimal.ZERO;
+
+                    for (GroupMember gm : activeMembers) {
+                        if (gm.getUser() != null && gm.getUser().getRole() != User.Role.ADMIN) {
+                            Long memberUserId = gm.getUser().getId();
+                            Optional<Payment> existingPayment = paymentRepository.findByCycleIdAndMemberId(cycle.getId(), memberUserId);
+                            if (existingPayment.isEmpty()) {
+                                Payment overduePayment = Payment.builder()
+                                        .cycle(cycle)
+                                        .member(gm.getUser())
+                                        .amount(contributionAmount)
+                                        .status(Payment.PaymentStatus.OVERDUE)
+                                        .paymentDate(dueDate)
+                                        .paymentMethod("Pending Settlement")
+                                        .notes("System Auto-Detected: Contribution not received after " + graceDays + "-day grace period (" + overdueThreshold + ")")
+                                        .recordedBy(null)
+                                        .build();
+                                paymentRepository.save(overduePayment);
+                                notificationService.sendNotification(memberUserId,
+                                        "Your installment for '" + group.getName() + "' (Cycle #" + cycle.getCycleNumber() + ") is overdue following the grace period!",
+                                        "PAYMENT_OVERDUE");
+                            } else {
+                                Payment p = existingPayment.get();
+                                boolean hasSlips = !paymentEvidenceRepository.findByPaymentId(p.getId()).isEmpty();
+                                if (hasSlips && p.getStatus() == Payment.PaymentStatus.OVERDUE) {
+                                    p.setStatus(Payment.PaymentStatus.PENDING);
+                                    paymentRepository.save(p);
+                                }
                             }
                         }
                     }
@@ -321,9 +391,11 @@ public class PaymentService {
         if (cycle == null || cycle.getGroup() == null) return;
         SeettuGroup group = cycle.getGroup();
 
+        int targetMemberCount = (group.getMemberCount() != null && group.getMemberCount() > 0) ? group.getMemberCount() : 1;
         List<GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(group.getId(), GroupMember.MemberStatus.ACTIVE);
-        int memberCount = activeMembers.size();
-        if (memberCount == 0) return;
+        
+        // Cycle CANNOT complete unless the group is full
+        if (activeMembers.size() < targetMemberCount) return;
 
         List<Payment> cyclePayments = paymentRepository.findByCycleId(cycle.getId());
         long paidMembers = cyclePayments.stream()
@@ -333,7 +405,8 @@ public class PaymentService {
                 .distinct()
                 .count();
 
-        if (paidMembers >= memberCount) {
+        // Cycle completes ONLY when all required members have paid
+        if (paidMembers >= targetMemberCount) {
             if (cycle.getStatus() != PaymentCycle.CycleStatus.COMPLETED) {
                 paymentCycleService.updateCycleStatus(cycle.getId(), "COMPLETED");
             }
@@ -387,9 +460,14 @@ public class PaymentService {
                     ? currentCycle.getEndDate()
                     : (currentCycle.getStartDate() != null ? currentCycle.getStartDate().plusDays(30) : today);
 
+            int graceDays = getGracePeriodDays(group.getCycleFrequency());
+            LocalDate overdueThreshold = dueDate.plusDays(graceDays);
+
             long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(today, dueDate);
-            boolean isOverdue = today.isAfter(dueDate);
-            long daysOverdue = isOverdue ? java.time.temporal.ChronoUnit.DAYS.between(dueDate, today) : 0;
+            boolean isOverdue = today.isAfter(overdueThreshold);
+            boolean inGracePeriod = today.isAfter(dueDate) && !isOverdue;
+            long daysOverdue = isOverdue ? java.time.temporal.ChronoUnit.DAYS.between(overdueThreshold, today) : 0;
+            int graceDaysRemaining = inGracePeriod ? (int) java.time.temporal.ChronoUnit.DAYS.between(today, overdueThreshold) : 0;
 
             String status;
             Long existingPaymentId = null;
@@ -404,6 +482,8 @@ public class PaymentService {
                     status = "AWAITING_APPROVAL";
                 } else if (p.getStatus() == Payment.PaymentStatus.OVERDUE || isOverdue) {
                     status = "OVERDUE";
+                } else if (inGracePeriod) {
+                    status = "IN_GRACE_PERIOD";
                 } else if (daysRemaining == 0) {
                     status = "DUE_TODAY";
                 } else if (daysRemaining <= 7) {
@@ -414,6 +494,8 @@ public class PaymentService {
             } else {
                 if (isOverdue) {
                     status = "OVERDUE";
+                } else if (inGracePeriod) {
+                    status = "IN_GRACE_PERIOD";
                 } else if (daysRemaining == 0) {
                     status = "DUE_TODAY";
                 } else if (daysRemaining <= 7) {
@@ -436,6 +518,8 @@ public class PaymentService {
                     .daysRemaining(daysRemaining)
                     .isOverdue(isOverdue)
                     .daysOverdue(daysOverdue)
+                    .inGracePeriod(inGracePeriod)
+                    .graceDaysRemaining(graceDaysRemaining)
                     .status(status)
                     .existingPaymentId(existingPaymentId)
                     .hasSlipUploaded(hasSlipUploaded)

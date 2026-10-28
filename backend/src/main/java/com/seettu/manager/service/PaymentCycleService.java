@@ -67,7 +67,7 @@ public class PaymentCycleService {
                     .cycleNumber(i)
                     .startDate(startDate)
                     .endDate(endDate)
-                    .status(i == 1 ? PaymentCycle.CycleStatus.ACTIVE : PaymentCycle.CycleStatus.PENDING)
+                    .status(i == 1 && (group.getMemberCount() != null && group.getMemberCount() <= 1) ? PaymentCycle.CycleStatus.ACTIVE : PaymentCycle.CycleStatus.PENDING)
                     .payoutMember(initialPayoutMember)
                     .build();
 
@@ -87,15 +87,22 @@ public class PaymentCycleService {
 
         if (targetStatus == PaymentCycle.CycleStatus.COMPLETED && cycle.getGroup() != null) {
             SeettuGroup group = cycle.getGroup();
-            String groupName = (group.getName() != null) ? group.getName() : "Seettu Circle";
             int memberCount = (group.getMemberCount() != null && group.getMemberCount() > 0) ? group.getMemberCount() : 1;
+            List<com.seettu.manager.entity.GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(
+                    group.getId(), com.seettu.manager.entity.GroupMember.MemberStatus.ACTIVE);
+
+            // Statutory Seettu Rule: A cycle CANNOT complete unless the circle has reached full capacity
+            if (activeMembers.size() < memberCount) {
+                throw new IllegalStateException("Cannot complete cycle: Circle requires " + memberCount 
+                        + " members but currently only has " + activeMembers.size() + " active members. Circle must reach full capacity before cycle can complete.");
+            }
+
+            String groupName = (group.getName() != null) ? group.getName() : "Seettu Circle";
             java.math.BigDecimal potAmount = (group.getContributionAmount() != null)
                     ? group.getContributionAmount().multiply(java.math.BigDecimal.valueOf(memberCount))
                     : java.math.BigDecimal.ZERO;
 
             // Auto-assign payout member if null: Cycle 1 always goes to the Organizer, subsequent cycles rotate among other members
-            List<com.seettu.manager.entity.GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(
-                    group.getId(), com.seettu.manager.entity.GroupMember.MemberStatus.ACTIVE);
             if (cycle.getPayoutMember() == null) {
                 if (cycle.getCycleNumber() == 1) {
                     User organizer = group.getCreatedBy();

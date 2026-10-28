@@ -222,8 +222,7 @@ const Dashboard = () => {
         const overdue = list
           .filter((p) => {
             const status = (p.status || '').toUpperCase();
-            const isPast = p.paymentDate ? new Date(p.paymentDate) < today : false;
-            return status === 'OVERDUE' || (status !== 'PAID' && status !== 'LATE' && isPast);
+            return status === 'OVERDUE' || status === 'MISSED';
           })
           .map((p) => {
             const dueDate = p.paymentDate || p.createdAt?.split('T')[0] || '-';
@@ -645,6 +644,7 @@ const Dashboard = () => {
           <div className="d-flex flex-column gap-3">
             {pendingDues.map((due, idx) => {
               const isOverdue = due.status === 'OVERDUE' || due.isOverdue;
+              const isInGracePeriod = due.status === 'IN_GRACE_PERIOD' || due.inGracePeriod;
               const isDueToday = due.status === 'DUE_TODAY';
               const isAwaiting = due.status === 'AWAITING_APPROVAL' || due.hasSlipUploaded;
               const isDueSoon = due.status === 'DUE_SOON';
@@ -659,6 +659,17 @@ const Dashboard = () => {
                     icon: 'alert-triangle',
                     iconColor: '#DC2626',
                     btnClass: 'btn-danger'
+                  }
+                : isInGracePeriod
+                ? {
+                    bg: '#FFFBEB',
+                    border: '#FDE68A',
+                    badgeBg: '#F59E0B',
+                    badgeText: '#FFFFFF',
+                    accentColor: '#B45309',
+                    icon: 'clock',
+                    iconColor: '#F59E0B',
+                    btnClass: 'btn-warning text-dark'
                   }
                 : isDueToday
                 ? {
@@ -719,6 +730,8 @@ const Dashboard = () => {
                           >
                             {isOverdue
                               ? `Overdue (${due.daysOverdue} days late)`
+                              : isInGracePeriod
+                              ? `Grace Period (${due.graceDaysRemaining || 5} days left)`
                               : isDueToday
                               ? 'Due Today'
                               : isAwaiting
@@ -735,6 +748,8 @@ const Dashboard = () => {
                             ? (due.daysOverdue >= 7
                               ? `Critical Overdue: Installment ${due.daysOverdue} Days Late!`
                               : `Payment Overdue: Installment ${due.daysOverdue} Days Late`)
+                            : isInGracePeriod
+                            ? `Payment Due: In Grace Period (${due.graceDaysRemaining || 5} Days Left)`
                             : isDueToday
                             ? 'Installment Payment Due Today'
                             : isAwaiting
@@ -747,6 +762,8 @@ const Dashboard = () => {
                             ? (due.daysOverdue >= 7
                               ? `This installment was due on ${due.dueDate}. A 7-day overdue status applies a penalty on your Discipline Score (-10 pts). Please settle immediately with organizer ${due.organizerName}.`
                               : `This installment was due on ${due.dueDate} (${due.daysOverdue} days ago). Please settle to maintain your 100% on-time reputation rating.`)
+                            : isInGracePeriod
+                            ? `Your installment of ${Number(due.amount).toLocaleString()} LKR was due on ${due.dueDate}. You have a fair grace period of ${due.graceDaysRemaining || 5} days remaining to settle without penalty to your Discipline Score.`
                             : isDueToday
                             ? `Your installment of ${Number(due.amount).toLocaleString()} LKR is due today (${due.dueDate}). Settle today to prevent delay penalties.`
                             : isAwaiting

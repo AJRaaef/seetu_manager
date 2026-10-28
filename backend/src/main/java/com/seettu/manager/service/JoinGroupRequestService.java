@@ -25,6 +25,7 @@ public class JoinGroupRequestService {
     private final GroupMemberRepository groupMemberRepository;
     private final NotificationService notificationService;
     private final com.seettu.manager.repository.MemberVerificationRepository memberVerificationRepository;
+    private final com.seettu.manager.repository.PaymentCycleRepository cycleRepository;
 
     @Transactional
     public JoinGroupRequest createJoinRequest(Long groupId, Long userId) {
@@ -122,6 +123,62 @@ public class JoinGroupRequestService {
                 "Your request to join group '" + request.getGroup().getName() + "' has been approved!",
                 "JOIN_APPROVED"
         );
+
+        // Activate circle and Cycle 1 if circle has reached full capacity
+        long newActiveMembers = groupMemberRepository.countByGroupIdAndStatus(request.getGroup().getId(), GroupMember.MemberStatus.ACTIVE);
+        int targetMembers = (request.getGroup().getMemberCount() != null && request.getGroup().getMemberCount() > 0) 
+                ? request.getGroup().getMemberCount() : 1;
+        if (newActiveMembers >= targetMembers) {
+            SeettuGroup group = request.getGroup();
+            if (group.getStatus() != SeettuGroup.GroupStatus.ACTIVE) {
+                group.setStatus(SeettuGroup.GroupStatus.ACTIVE);
+                groupRepository.save(group);
+            }
+            List<com.seettu.manager.entity.PaymentCycle> cycles = cycleRepository.findByGroupIdOrderByCycleNumberAsc(group.getId());
+            if (!cycles.isEmpty() && cycles.get(0).getStatus() == com.seettu.manager.entity.PaymentCycle.CycleStatus.PENDING) {
+                // Recalibrate cycle schedules starting from today so all members get their full, proper collection duration
+                java.time.LocalDate startDate = java.time.LocalDate.now();
+                for (int i = 0; i < cycles.size(); i++) {
+                    com.seettu.manager.entity.PaymentCycle c = cycles.get(i);
+                    java.time.LocalDate endDate;
+                    switch (group.getCycleFrequency()) {
+                        case DAILY:
+                            endDate = startDate;
+                            break;
+                        case WEEKLY:
+                            endDate = startDate.plusWeeks(1).minusDays(1);
+                            break;
+                        case BI_WEEKLY:
+                            endDate = startDate.plusWeeks(2).minusDays(1);
+                            break;
+                        case MONTHLY:
+                        default:
+                            endDate = startDate.plusMonths(1).minusDays(1);
+                            break;
+                    }
+                    c.setStartDate(startDate);
+                    c.setEndDate(endDate);
+                    if (i == 0) {
+                        c.setStatus(com.seettu.manager.entity.PaymentCycle.CycleStatus.ACTIVE);
+                    } else {
+                        c.setStatus(com.seettu.manager.entity.PaymentCycle.CycleStatus.PENDING);
+                    }
+                    cycleRepository.save(c);
+                    startDate = endDate.plusDays(1);
+                }
+
+                List<GroupMember> allMembers = groupMemberRepository.findByGroupIdAndStatus(group.getId(), GroupMember.MemberStatus.ACTIVE);
+                String fullNotice = "Circle Full Notice: '" + group.getName() + "' has officially reached full capacity (" 
+                        + newActiveMembers + "/" + targetMembers + " members)! Rotational Cycle #1 is now ACTIVE and open for contributions.";
+                for (GroupMember gm : allMembers) {
+                    if (gm.getUser() != null && gm.getUser().getId() != null) {
+                        try {
+                            notificationService.sendNotification(gm.getUser().getId(), fullNotice, "GROUP_ACTIVATED");
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
+        }
 
         return request;
     }

@@ -106,7 +106,7 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
                 onClick={onCloseMobile}
               >
                 <Icon name="groups" size={18} />
-                <span>{t("sidebar.my_groups", "My Groups")}</span>
+                <span>{t("sidebar.groups", " Groups")}</span>
               </NavLink>
             </li>
 

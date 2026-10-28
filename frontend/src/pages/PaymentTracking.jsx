@@ -497,6 +497,10 @@ fetchPayments();
 // Handle One-Click Approval for Pending Member Submission (Read-Only Verification)
 
 const handleApprovePayment = async (payment, approvalNotes) => {
+    if (isAdmin) {
+      alert('Access Restricted: Routine bank slip verification is reserved for the Group Organizer who receives member funds in their bank account. Platform Admins retain ledger oversight with Edit and Delete capabilities.');
+      return;
+    }
 
 try {
 
@@ -976,6 +980,21 @@ Log verified monthly contributions or offline deposits directly into the system
 
 </div>
 
+{(() => {
+  const selectedGrp = availableGroups.find(g => String(g.id) === String(selectedGroupId));
+  if (selectedGrp && selectedGrp.status === 'PENDING') {
+    return (
+      <div className="alert alert-warning border-0 shadow-xs rounded-3 mb-3 d-flex align-items-center gap-2 py-2.5 px-3">
+        <Icon name="clock" size={18} color="#D97706" />
+        <div className="small">
+          <strong>Circle Forming ({groupMembers.length}/{selectedGrp.memberCount || 15} members joined):</strong> Rotational cycles and contributions will automatically activate once all {selectedGrp.memberCount || 15} members join.
+        </div>
+      </div>
+    );
+  }
+  return null;
+})()}
+
 <form onSubmit={handleRecordNew}>
 
 {/* Row 1: Target Seettu Group, Member, and Rotation Cycle */}
@@ -1142,17 +1161,24 @@ required
 
 >
 
-<option value="">{selectedGroupId ? (groupCycles.length > 0 ? '-- Select Rotation Cycle --' : 'No cycles available') : '-- Select Group First --'}</option>
+<option value="">{selectedGroupId ? (groupCycles.some(c => c.status === 'ACTIVE') ? '-- Select Rotation Cycle --' : 'No active cycle currently open') : '-- Select Group First --'}</option>
 
-{groupCycles.map((c) => (
-
-<option key={c.id} value={c.id}>
-
-Cycle #{c.cycleNumber} — ({c.status || 'Active'})
-
-</option>
-
-))}
+{groupCycles.map((c) => {
+  const isActive = c.status === 'ACTIVE';
+  const isCompleted = c.status === 'COMPLETED';
+  const isPending = c.status === 'PENDING';
+  const dueInfo = c.endDate ? ` • Due: ${c.endDate}` : '';
+  return (
+    <option
+      key={c.id}
+      value={c.id}
+      disabled={isPending || isCompleted}
+      style={isActive ? { fontWeight: 'bold', color: '#198754' } : { color: '#6C757D' }}
+    >
+      Cycle #{c.cycleNumber} {isActive ? `— Active (Current Collecting${dueInfo})` : (isCompleted ? '— Completed (Disbursed)' : '— Upcoming (Locked)')}
+    </option>
+  );
+})}
 
 </select>
 
@@ -1489,12 +1515,23 @@ disabled={submitting}
                   onChange={(e) => setSelectedCycleId(e.target.value)}
                   required
                 >
-                  <option value="">{selectedGroupId ? '-- Select Cycle --' : '-- Select Group First --'}</option>
-                  {groupCycles.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      Cycle #{c.cycleNumber} ({c.dueDate || c.startDate || 'Current'}) - {c.status}
-                    </option>
-                  ))}
+                  <option value="">{selectedGroupId ? (groupCycles.some(c => c.status === 'ACTIVE') ? '-- Select Active Cycle --' : 'No active cycle currently open') : '-- Select Group First --'}</option>
+                  {groupCycles.map((c) => {
+                    const isActive = c.status === 'ACTIVE';
+                    const isCompleted = c.status === 'COMPLETED';
+                    const isPending = c.status === 'PENDING';
+                    const dueInfo = c.endDate ? ` • Due: ${c.endDate}` : '';
+                    return (
+                      <option
+                        key={c.id}
+                        value={c.id}
+                        disabled={isPending || isCompleted}
+                        style={isActive ? { fontWeight: 'bold', color: '#198754' } : { color: '#6C757D' }}
+                      >
+                        Cycle #{c.cycleNumber} {isActive ? `— Active (Current Collecting${dueInfo})` : (isCompleted ? '— Completed (Disbursed)' : '— Upcoming (Locked)')}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             </div>
@@ -1639,7 +1676,10 @@ disabled={submitting}
         >
           <Icon name="check-circle" size={15} color={ledgerTab === 'recorded' ? '#FFFFFF' : '#188754'} />
           <span>Confirmed Ledger</span>
-          <span className={`badge rounded-pill ${ledgerTab === 'recorded' ? 'bg-white text-teal' : 'bg-secondary-subtle text-secondary'}`}>
+          <span 
+            className={`badge rounded-pill fw-bold ${ledgerTab === 'recorded' ? 'bg-white text-teal' : 'bg-secondary-subtle text-secondary'}`}
+            style={ledgerTab === 'recorded' ? { color: '#1A5265' } : undefined}
+          >
             {recordedCount}
           </span>
         </button>
@@ -2155,7 +2195,7 @@ onClick={(e) => e.stopPropagation()}
 
 <div className="d-flex justify-content-end align-items-center gap-2">
 
-{p.status === 'PENDING' && (isAdmin || isOrganizer) && (
+{p.status === 'PENDING' && isOrganizer && (
                         <button
                           className="btn btn-sm btn-success px-3 py-1 small fw-semibold text-nowrap d-inline-flex align-items-center gap-1 shadow-xs"
                           title="Verify Deposit Slip & Approve Payment"

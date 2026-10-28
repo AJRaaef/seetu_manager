@@ -13,6 +13,7 @@ import {
 import { getMyKycStatus } from '../api/userApi';
 import { getMyVerification } from '../api/verificationApi';
 import Icon from '../components/Icons';
+import { Users, Banknote, Gift, X } from 'lucide-react';
 import OrganizerApplicationModal from '../components/OrganizerApplicationModal';
 
 const MyGroups = () => {
@@ -186,7 +187,7 @@ const MyGroups = () => {
     setActionError('');
     try {
       await createJoinRequest(joinModalTarget.id, userId);
-      setActionSuccess(`🎉 Join request for "${joinModalTarget.name}" submitted successfully! The group organizer will review your request.`);
+      setActionSuccess(`Join request for "${joinModalTarget.name}" submitted successfully! The group organizer will review your request.`);
       setJoinModalTarget(null);
       setJoinNote('');
       setTimeout(() => setActionSuccess(''), 5000);
@@ -206,7 +207,7 @@ const MyGroups = () => {
     setActionSuccess('');
     try {
       await approveJoinRequest(requestId);
-      setActionSuccess(`🎉 ${memberName || 'Member'} has been approved and added to "${groupName || 'the group'}"!`);
+      setActionSuccess(`${memberName || 'Member'} has been approved and added to "${groupName || 'the group'}"!`);
       setTimeout(() => setActionSuccess(''), 5000);
       await Promise.all([fetchGroups(), fetchRequests()]);
     } catch (err) {
@@ -338,7 +339,7 @@ const MyGroups = () => {
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
           <h2 className="fw-bold mb-1 d-flex align-items-center gap-2" style={{ color: '#0F2F3D' }}>
-            <span>🤝</span>
+            <Users size={24} style={{ color: '#0F2F3D' }} />
             <span>{t('my_groups_page.title', 'Seettu Circles & Contribution Pools')}</span>
           </h2>
           <p className="text-muted mb-0 small">
@@ -652,7 +653,7 @@ const MyGroups = () => {
                   />
                   {searchQuery && (
                     <button className="btn btn-outline-secondary" type="button" onClick={() => setSearchQuery('')}>
-                      ✕
+                      <X size={13} />
                     </button>
                   )}
                 </div>
@@ -666,8 +667,8 @@ const MyGroups = () => {
                   onChange={(e) => setFilterType(e.target.value)}
                 >
                   <option value="ALL">All Types</option>
-                  <option value="MONETARY">💰 Monetary</option>
-                  <option value="NON_MONETARY">🎁 Non-Monetary</option>
+                  <option value="MONETARY">Monetary</option>
+                  <option value="NON_MONETARY">Non-Monetary</option>
                 </select>
               </div>
 
@@ -815,7 +816,7 @@ const MyGroups = () => {
                               letterSpacing: '0.5px'
                             }}
                           >
-                            {isMonetary ? '💰 Cash Rotation' : '🎁 Commodity Goods'}
+                            {isMonetary ? (<span className="d-inline-flex align-items-center gap-1"><Banknote size={13} /> Cash Rotation</span>) : (<span className="d-inline-flex align-items-center gap-1"><Gift size={13} /> Commodity Goods</span>)}
                           </span>
 
                           <span

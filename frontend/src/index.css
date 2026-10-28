@@ -272,6 +272,14 @@ body {
   color: var(--primary-teal) !important;
 }
 
+.text-teal {
+  color: var(--primary-teal, #1A5265) !important;
+}
+
+.bg-teal-subtle {
+  background-color: rgba(35, 86, 101, 0.1) !important;
+}
+
 .form-control, .form-select {
   border: 1px solid #D1D5DB;
   border-radius: 8px;
