@@ -384,6 +384,7 @@ const MyGroups = () => {
                   type="button"
                   onClick={() => setShowOrganizerModal(true)}
                   className="btn btn-sm btn-outline-secondary px-3 py-2 d-inline-flex align-items-center gap-1.5 fw-semibold"
+                  style={{ background: '#0F2F3D', color: '#fff'}}
                 >
                   <Icon name="award" size={15} />
                   <span>Become Organizer</span>
