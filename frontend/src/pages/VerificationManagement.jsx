@@ -8,7 +8,7 @@ import {
 } from '../api/verificationApi';
 import VerificationStatusBadge from '../components/VerificationStatusBadge';
 import DocumentPreview from '../components/DocumentPreview';
-import { Shield, RefreshCw, Clock, CheckCircle2, XCircle, Folder, AlertTriangle, Search, ClipboardList, Eye, Check, X, FileText } from 'lucide-react';
+import { Shield, Clock, CheckCircle2, XCircle, Folder, AlertTriangle, Search, ClipboardList, Eye, Check, X, FileText } from 'lucide-react';
 import { getErrorMessage } from '../utils/errorHandler';
 
 const VerificationManagement = () => {
@@ -139,14 +139,6 @@ const VerificationManagement = () => {
             Review applicant Sri Lankan NICs and Grama Niladhari Character Certificates for Anti-Fraud Compliance
           </p>
         </div>
-        <button
-          onClick={loadVerifications}
-          className="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1.5"
-          disabled={loading}
-        >
-          <RefreshCw size={13} />
-          <span>Refresh</span>
-        </button>
       </div>
 
       {/* Stats Cards */}
