@@ -74,11 +74,6 @@ const Topbar = ({ onToggleSidebar }) => {
       </div>
 
       <div className="d-flex align-items-center gap-3">
-        {/* Search Box */}
-        <div className="topbar-search-box d-none d-md-flex">
-          <Icon name="search" size={16} color="#FFFFFF" />
-          <input type="text" placeholder={t('topbar.search', 'Search')} />
-        </div>
 
         {/* Language Dropdown */}
         <div className="position-relative" ref={langMenuRef}>
