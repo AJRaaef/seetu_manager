@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Wheel } from 'react-custom-roulette';
-import Confetti from 'react-confetti';
+import Confetti from './Confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from './Icons';
 

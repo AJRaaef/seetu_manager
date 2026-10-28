@@ -12,7 +12,7 @@ import SpinningWheel from '../components/SpinningWheel';
 import RotationResultCard from '../components/RotationResultCard';
 import Icon from '../components/Icons';
 import { getErrorMessage } from '../utils/errorHandler';
-import Confetti from 'react-confetti';
+import Confetti from '../components/Confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const MonthlyRotationPage = () => {

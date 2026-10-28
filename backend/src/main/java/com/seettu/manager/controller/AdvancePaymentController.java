@@ -21,14 +21,28 @@ public class AdvancePaymentController {
     private final AdvancePaymentService advancePaymentService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ORGANIZER') or hasRole('MEMBER')")
     public ResponseEntity<ApiResponse<AdvancePayment>> recordAdvancePayment(
             @RequestParam(required = false) Long memberId,
             @RequestParam BigDecimal amount,
             @RequestParam(required = false) String notes,
             @RequestParam(required = false) Long groupId,
+            @RequestParam(required = false, defaultValue = "Bank Transfer") String paymentMethod,
             @AuthenticationPrincipal User authUser) {
-        Long finalMemberId = (memberId != null) ? memberId : (authUser != null ? authUser.getId() : null);
+        Long finalMemberId;
+        if (authUser != null && authUser.getRole() == User.Role.MEMBER) {
+            // A regular member can ONLY record advance payments for themselves
+            finalMemberId = authUser.getId();
+
+            // Statutory rule: Member-side advance payments are restricted to Bank Transfer only
+            String method = (paymentMethod != null && !paymentMethod.trim().isEmpty()) ? paymentMethod.trim() : "Bank Transfer";
+            if (!method.equalsIgnoreCase("Bank Transfer") && !method.equalsIgnoreCase("Online Transfer")) {
+                throw new IllegalArgumentException("Members can record advance payments via Bank Transfer only. Cash advances must be paid directly to the organizer.");
+            }
+        } else {
+            finalMemberId = (memberId != null) ? memberId : (authUser != null ? authUser.getId() : null);
+        }
+
         if (finalMemberId == null) {
             throw new IllegalArgumentException("Member ID is required to record advance payment");
         }

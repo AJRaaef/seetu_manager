@@ -23,6 +23,9 @@ const AdvancePayments = () => {
     memberId: '',
     amount: '',
     notes: '',
+    paymentMethod: 'Bank Transfer',
+    bankName: '',
+    referenceNumber: '',
   });
 
   useEffect(() => {
@@ -84,14 +87,16 @@ const AdvancePayments = () => {
   };
 
   const handleOpenModal = () => {
-    if (!isAdminOrOrg) return;
     const activeGroupId = formData.groupId || (groups.length > 0 ? String(groups[0].id) : '');
     const uid = user ? String(user.userId || user.id) : '';
     setFormData({
       groupId: activeGroupId,
-      memberId: formData.memberId || '',
+      memberId: isAdminOrOrg ? (formData.memberId || '') : uid,
       amount: '',
-      notes: ''
+      notes: '',
+      paymentMethod: 'Bank Transfer',
+      bankName: '',
+      referenceNumber: ''
     });
     if (activeGroupId) {
       loadGroupMembers(activeGroupId);
@@ -103,19 +108,39 @@ const AdvancePayments = () => {
     e.preventDefault();
     try {
       const uid = user?.userId || user?.id;
-      const targetMemberId = formData.memberId || uid;
+      const targetMemberId = isAdminOrOrg ? (formData.memberId || uid) : uid;
+
+      let finalNotes = (formData.notes || '').trim();
+      const isBankTransfer = formData.paymentMethod === 'Bank Transfer' || !isAdminOrOrg;
+      
+      if (isBankTransfer) {
+        const details = [];
+        if (formData.bankName) details.push(`Bank: ${formData.bankName}`);
+        if (formData.referenceNumber) details.push(`Ref: ${formData.referenceNumber}`);
+        if (finalNotes) details.push(finalNotes);
+        finalNotes = `[Bank Transfer] ${details.join(' | ')}`;
+      }
 
       const params = new URLSearchParams({
         amount: formData.amount,
-        notes: formData.notes || ''
+        notes: finalNotes,
+        paymentMethod: isBankTransfer ? 'Bank Transfer' : 'Cash'
       });
       if (targetMemberId) params.append('memberId', targetMemberId);
       if (formData.groupId) params.append('groupId', formData.groupId);
 
       await api.post(`/advance-payments?${params.toString()}`);
-      alert('Advance payment recorded successfully!');
+      alert(isAdminOrOrg ? 'Advance payment recorded successfully!' : 'Advance payment submitted via Bank Transfer successfully!');
       setShowModal(false);
-      setFormData({ groupId: '', memberId: '', amount: '', notes: '' });
+      setFormData({ 
+        groupId: '', 
+        memberId: '', 
+        amount: '', 
+        notes: '',
+        paymentMethod: 'Bank Transfer',
+        bankName: '',
+        referenceNumber: ''
+      });
       fetchData();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to submit advance payment.');
@@ -190,10 +215,13 @@ const AdvancePayments = () => {
             <span>{t('advance_page.apply_btn', 'Record Advance Payment')}</span>
           </button>
         ) : (
-          <span className="badge bg-light text-muted border px-3 py-2 small fw-semibold d-inline-flex align-items-center gap-1.5">
-            <Icon name="check-circle" size={15} color="#0097B2" />
-            <span>Official Organizer-Recorded Ledger</span>
-          </span>
+          <button 
+            className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm fw-semibold" 
+            onClick={handleOpenModal}
+          >
+            <Icon name="plus" size={16} />
+            <span>Submit Advance (Bank Transfer)</span>
+          </button>
         )}
       </div>
 
@@ -242,18 +270,36 @@ const AdvancePayments = () => {
                   <th>ID</th>
                   <th>{t('common.member', 'Member')}</th>
                   <th>{t('advance_page.col_amount', 'Amount')}</th>
-                  <th>{t('common.notes', 'Notes')}</th>
+                  <th>Method</th>
+                  <th>{t('common.notes', 'Notes & Reference')}</th>
                   <th>{t('common.date', 'Date')}</th>
                   {isAdminOrOrg && <th className="text-end pe-3">{t('common.actions', 'Actions')}</th>}
                 </tr>
               </thead>
               <tbody>
-                {advancePayments.map((adv) => (
+                {advancePayments.map((adv) => {
+                  const isBank = (adv.notes || '').includes('[Bank Transfer]');
+                  return (
                   <tr key={adv.id}>
                     <td className="fw-bold">#ADV-{adv.id}</td>
                     <td>{adv.member?.fullName || adv.member?.email || 'Member'}</td>
                     <td><strong className="text-success fs-6">LKR {(Number(adv.amount) || 0).toLocaleString()}</strong></td>
-                    <td className="text-muted">{adv.notes || '-'}</td>
+                    <td>
+                      {isBank ? (
+                        <span className="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 small fw-semibold d-inline-flex align-items-center gap-1">
+                          <Icon name="bank" size={12} />
+                          <span>Bank Transfer</span>
+                        </span>
+                      ) : (
+                        <span className="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2.5 py-1 small fw-semibold d-inline-flex align-items-center gap-1">
+                          <Icon name="wallet" size={12} />
+                          <span>Cash</span>
+                        </span>
+                      )}
+                    </td>
+                    <td className="text-muted small">
+                      {adv.notes ? adv.notes.replace('[Bank Transfer]', '').trim() || '-' : '-'}
+                    </td>
                     <td className="text-muted">{adv.paymentDate || (adv.createdAt ? new Date(adv.createdAt).toLocaleDateString() : '-')}</td>
                     {isAdminOrOrg && (
                       <td className="text-end pe-3">
@@ -280,24 +326,39 @@ const AdvancePayments = () => {
                       </td>
                     )}
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* Record Modal (Admin/Organizer only) */}
-      {showModal && isOrganizer && (
-        <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+      {/* Record Modal (Organizers & Members) */}
+      {showModal && (
+        <div className="modal show d-block tab-index-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
               <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#134A5A' }}>
-                <h5 className="modal-title fw-bold">Record Advance Contribution</h5>
+                <h5 className="modal-title fw-bold">
+                  {isAdminOrOrg ? 'Record Advance Contribution' : 'Submit Advance Contribution (Bank Transfer)'}
+                </h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleCreate}>
                 <div className="modal-body p-4">
+
+                  {/* Member-Only Security Notice: Bank Transfer Only */}
+                  {!isAdminOrOrg && (
+                    <div className="alert alert-info py-2.5 px-3 small d-flex align-items-start gap-2 mb-3" style={{ borderRadius: '8px' }}>
+                      <Icon name="bank" size={18} color="#0C5460" className="mt-0.5 flex-shrink-0" />
+                      <div>
+                        <strong>Bank Transfer Only:</strong> Offline cash advances must be handed directly to your Seettu Organizer. Use this portal exclusively to submit advance contributions via <strong>Bank Transfer / Online Banking</strong>.
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Group Selection */}
                   <div className="mb-3">
                     <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Select Group</label>
                     <select
@@ -313,7 +374,8 @@ const AdvancePayments = () => {
                       ))}
                     </select>
                   </div>
-                  {/* Member Selection (Organizer only) */}
+
+                  {/* Member Selection (Organizer only) vs Member Identity Notice */}
                   {isOrganizer ? (
                     <div className="mb-3">
                       <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Select Member</label>
@@ -346,27 +408,101 @@ const AdvancePayments = () => {
                     </div>
                   ) : (
                     <div className="mb-3 p-2.5 bg-light rounded border text-muted small">
-                      Contributing as: <strong className="text-dark">{user?.fullName || 'Member'}</strong>
+                      Contributing Member: <strong className="text-dark">{user?.fullName || 'Member'}</strong> {user?.nicNumber && `(${user.nicNumber})`}
                     </div>
                   )}
+
+                  {/* Payment Method */}
+                  <div className="mb-3">
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Payment Method</label>
+                    {!isAdminOrOrg ? (
+                      <div className="input-group">
+                        <span className="input-group-text bg-light text-muted border-end-0">
+                          <Icon name="bank" size={16} />
+                        </span>
+                        <input 
+                          type="text" 
+                          className="form-control bg-light border-start-0 fw-semibold text-teal" 
+                          value="Bank Transfer (Online / CDM Deposit)" 
+                          disabled 
+                          style={{ borderRadius: '0 8px 8px 0' }}
+                        />
+                      </div>
+                    ) : (
+                      <select
+                        className="form-select"
+                        value={formData.paymentMethod}
+                        onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
+                        style={{ borderRadius: '8px' }}
+                      >
+                        <option value="Bank Transfer">Bank Transfer (Online / CDM)</option>
+                        <option value="Cash">Cash (Physical Handover)</option>
+                      </select>
+                    )}
+                  </div>
+
+                  {/* Bank Details (For Bank Transfer) */}
+                  {(formData.paymentMethod === 'Bank Transfer' || !isAdminOrOrg) && (
+                    <div className="row g-2 mb-3">
+                      <div className="col-12 col-md-6">
+                        <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Bank Name</label>
+                        <select
+                          className="form-select"
+                          value={formData.bankName}
+                          onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                          style={{ borderRadius: '8px' }}
+                          required={!isAdminOrOrg}
+                        >
+                          <option value="">-- Select Bank --</option>
+                          <option value="Bank of Ceylon (BOC)">Bank of Ceylon (BOC)</option>
+                          <option value="Commercial Bank">Commercial Bank</option>
+                          <option value="People's Bank">People's Bank</option>
+                          <option value="Hatton National Bank (HNB)">Hatton National Bank (HNB)</option>
+                          <option value="Sampath Bank">Sampath Bank</option>
+                          <option value="Seylan Bank">Seylan Bank</option>
+                          <option value="Nations Trust Bank (NTB)">Nations Trust Bank (NTB)</option>
+                          <option value="DFCC Bank">DFCC Bank</option>
+                          <option value="National Savings Bank (NSB)">National Savings Bank (NSB)</option>
+                          <option value="Other Bank / Online App">Other Bank / Online App</option>
+                        </select>
+                      </div>
+                      <div className="col-12 col-md-6">
+                        <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Transaction / Slip Ref</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="e.g. TXN-893041"
+                          value={formData.referenceNumber}
+                          onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
+                          style={{ borderRadius: '8px' }}
+                          required={!isAdminOrOrg}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Amount */}
                   <div className="mb-3">
                     <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Advance Amount (LKR)</label>
                     <input
                       type="number"
                       className="form-control"
                       placeholder="e.g. 5000"
+                      min="100"
                       value={formData.amount}
                       onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                       style={{ borderRadius: '8px' }}
                       required
                     />
                   </div>
+
+                  {/* Notes */}
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Notes / Reference</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Additional Notes (Optional)</label>
                     <textarea
                       className="form-control"
-                      rows="3"
-                      placeholder="e.g. Paid 2 months ahead"
+                      rows="2"
+                      placeholder="e.g. Deposited for next cycles"
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                       style={{ borderRadius: '8px' }}
@@ -375,7 +511,9 @@ const AdvancePayments = () => {
                 </div>
                 <div className="modal-footer py-3 px-4 bg-light">
                   <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>Save Advance Payment</button>
+                  <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>
+                    {isAdminOrOrg ? 'Save Advance Payment' : 'Submit Bank Transfer Advance'}
+                  </button>
                 </div>
               </form>
             </div>
