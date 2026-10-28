@@ -195,7 +195,7 @@ const OrganizerApplicationModal = ({ show, onClose, onSuccess }) => {
                 style={{ background: '#F0FDF4', border: '1px solid #BBF7D0' }}
               >
                 <div className="d-flex align-items-start gap-2">
-                  <span style={{ color: '#059669', fontSize: '1rem', marginTop: '2px' }}>✓</span>
+
                   <div>
                     <div className="fw-bold" style={{ color: '#065F46', fontSize: '0.93rem' }}>
                       {fullName} (NIC: {nicNumber})
