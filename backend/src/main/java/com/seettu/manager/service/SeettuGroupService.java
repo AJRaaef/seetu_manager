@@ -86,7 +86,7 @@ public class SeettuGroupService {
                 .contributionAmount(request.getContributionAmount())
                 .memberCount(request.getMemberCount())
                 .cycleFrequency(cycleFrequency)
-                .status(SeettuGroup.GroupStatus.ACTIVE)
+                .status((request.getMemberCount() != null && request.getMemberCount() <= 1) ? SeettuGroup.GroupStatus.ACTIVE : SeettuGroup.GroupStatus.PENDING)
                 .category(request.getCategory())
                 .createdBy(creator)
                 .build();
@@ -261,9 +261,21 @@ public class SeettuGroupService {
         List<PaymentCycle> cycles = paymentCycleService.getCyclesByGroup(group.getId());
         List<Payment> groupPayments = paymentRepository.findByGroupId(group.getId());
         int activeMemberCount = members.size();
+        int targetMemberCount = (group.getMemberCount() != null && group.getMemberCount() > 0) ? group.getMemberCount() : 1;
+        boolean isGroupFull = activeMemberCount >= targetMemberCount;
+
+        // Auto-sync group status: ACTIVE if full, PENDING if still forming
+        if (group.getStatus() != SeettuGroup.GroupStatus.COMPLETED && group.getStatus() != SeettuGroup.GroupStatus.CANCELLED) {
+            if (isGroupFull && group.getStatus() != SeettuGroup.GroupStatus.ACTIVE) {
+                group.setStatus(SeettuGroup.GroupStatus.ACTIVE);
+                groupRepository.save(group);
+            } else if (!isGroupFull && group.getStatus() == SeettuGroup.GroupStatus.ACTIVE) {
+                group.setStatus(SeettuGroup.GroupStatus.PENDING);
+                groupRepository.save(group);
+            }
+        }
 
         long completedCyclesCount = 0;
-        boolean modifiedAnyCycle = false;
 
         for (PaymentCycle c : cycles) {
             long paidMembers = groupPayments.stream()
@@ -274,25 +286,47 @@ public class SeettuGroupService {
                     .distinct()
                     .count();
 
-            boolean isCyclePaid = (activeMemberCount > 0 && paidMembers >= activeMemberCount);
-            if (c.getStatus() == PaymentCycle.CycleStatus.COMPLETED || isCyclePaid) {
+            // Self-healing: If cycle was falsely marked COMPLETED before circle was full or before all members paid, revert it
+            if (c.getStatus() == PaymentCycle.CycleStatus.COMPLETED && (!isGroupFull || paidMembers < targetMemberCount)) {
+                c.setStatus(isGroupFull && c.getCycleNumber() == 1 ? PaymentCycle.CycleStatus.ACTIVE : PaymentCycle.CycleStatus.PENDING);
+                cycleRepository.save(c);
+            }
+
+            // A cycle is legitimately complete ONLY if the circle is full AND all members have paid
+            boolean isCyclePaid = (isGroupFull && paidMembers >= targetMemberCount);
+            if (c.getStatus() == PaymentCycle.CycleStatus.COMPLETED) {
                 completedCyclesCount++;
-                if (c.getStatus() != PaymentCycle.CycleStatus.COMPLETED && isCyclePaid) {
-                    paymentCycleService.updateCycleStatus(c.getId(), "COMPLETED");
-                }
+            } else if (isCyclePaid) {
+                completedCyclesCount++;
+                paymentCycleService.updateCycleStatus(c.getId(), "COMPLETED");
             }
         }
 
-        if (modifiedAnyCycle) {
+        // Ensure cycles adhere to circle status:
+        if (!isGroupFull) {
+            // Circle not full yet: all cycles must be PENDING
             for (PaymentCycle c : cycles) {
-                if (c.getStatus() == PaymentCycle.CycleStatus.COMPLETED) {
-                    cycleRepository.findByGroupIdAndCycleNumber(group.getId(), c.getCycleNumber() + 1)
-                            .ifPresent(next -> {
-                                if (next.getStatus() == PaymentCycle.CycleStatus.PENDING) {
-                                    next.setStatus(PaymentCycle.CycleStatus.ACTIVE);
-                                    cycleRepository.save(next);
-                                }
-                            });
+                if (c.getStatus() == PaymentCycle.CycleStatus.ACTIVE) {
+                    c.setStatus(PaymentCycle.CycleStatus.PENDING);
+                    cycleRepository.save(c);
+                }
+            }
+        } else {
+            // Circle is full: exactly the earliest incomplete cycle must be ACTIVE
+            boolean activeFound = false;
+            for (PaymentCycle c : cycles) {
+                if (c.getStatus() == PaymentCycle.CycleStatus.COMPLETED) continue;
+                if (!activeFound) {
+                    if (c.getStatus() != PaymentCycle.CycleStatus.ACTIVE) {
+                        c.setStatus(PaymentCycle.CycleStatus.ACTIVE);
+                        cycleRepository.save(c);
+                    }
+                    activeFound = true;
+                } else {
+                    if (c.getStatus() == PaymentCycle.CycleStatus.ACTIVE) {
+                        c.setStatus(PaymentCycle.CycleStatus.PENDING);
+                        cycleRepository.save(c);
+                    }
                 }
             }
         }

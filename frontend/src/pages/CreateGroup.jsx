@@ -228,8 +228,9 @@ const CreateGroup = () => {
           <div className="card-body p-4">
             {/* Success */}
             {success && (
-              <div className="alert alert-success border-0 mb-4">
-                ✓ Group created successfully! Redirecting…
+              <div className="alert alert-success border-0 mb-4 d-flex align-items-center gap-2">
+                <CheckCircle2 size={18} />
+                <span>Group created successfully! Redirecting…</span>
               </div>
             )}
 

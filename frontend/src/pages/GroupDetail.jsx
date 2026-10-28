@@ -8,6 +8,7 @@ import { getErrorMessage } from '../utils/errorHandler';
 import DisbursementVoucherModal from '../components/DisbursementVoucherModal';
 import KulukkalDrawModal from '../components/KulukkalDrawModal';
 import Icon from '../components/Icons';
+import { Check, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 const GroupDetail = () => {
   const { id } = useParams();
@@ -448,7 +449,7 @@ const GroupDetail = () => {
                                       className="btn btn-sm btn-success fw-bold"
                                       onClick={() => handleCycleStatusChange(c.id, 'COMPLETED')}
                                     >
-                                      ✓ Complete Cycle
+                                      Complete Cycle
                                     </button>
                                   )}
                                   {c.status === 'PENDING' && (
@@ -581,9 +582,9 @@ const GroupDetail = () => {
                         <div className="fw-bold text-dark">{matchedMember.fullName}</div>
                         <div className="text-muted">{matchedMember.email} • NIC: {matchedMember.nicNumber || 'N/A'}</div>
                         {alreadyEnrolled ? (
-                          <div className="text-danger fw-bold mt-1">⚠️ This member is already enrolled in this group.</div>
+                          <div className="text-danger fw-bold mt-1 d-flex align-items-center gap-1"><AlertTriangle size={14} /> This member is already enrolled in this group.</div>
                         ) : (
-                          <div className="text-success fw-bold mt-1">✓ Identity Verified ({matchedMember.kycStatus})</div>
+                          <div className="text-success fw-bold mt-1 d-flex align-items-center gap-1"><CheckCircle2 size={14} /> Identity Verified ({matchedMember.kycStatus})</div>
                         )}
                       </div>
                     )}

@@ -41,6 +41,17 @@ public class PaymentService {
         PaymentCycle cycle = paymentCycleService.getCycleById(request.getCycleId());
         User member = userService.getUserById(request.getMemberId());
 
+        // Validate that circle is not still forming
+        if (cycle.getGroup() != null) {
+            int targetMembers = (cycle.getGroup().getMemberCount() != null && cycle.getGroup().getMemberCount() > 0)
+                    ? cycle.getGroup().getMemberCount() : 1;
+            long currentMembers = groupMemberRepository.countByGroupIdAndStatus(cycle.getGroup().getId(), GroupMember.MemberStatus.ACTIVE);
+            if (currentMembers < targetMembers && cycle.getStatus() == PaymentCycle.CycleStatus.PENDING) {
+                throw new IllegalStateException("Circle Forming: This Seettu group currently has " + currentMembers + " of " 
+                        + targetMembers + " members. Rotational cycles and contributions will open once all members have joined.");
+            }
+        }
+
         // Prevent duplicate payments
         if (paymentRepository.existsByCycleIdAndMemberId(request.getCycleId(), request.getMemberId())) {
             Payment existing = paymentRepository.findByCycleIdAndMemberId(request.getCycleId(), request.getMemberId())
@@ -108,6 +119,10 @@ public class PaymentService {
                 .build();
 
         payment = paymentRepository.save(payment);
+
+        if (payment.getStatus() == Payment.PaymentStatus.PAID || payment.getStatus() == Payment.PaymentStatus.LATE) {
+            checkAndUpdateCycleProgress(cycle);
+        }
 
         auditLogService.log(recorder, "PAYMENT_RECORDED", "payments", payment.getId(),
                 "Payment recorded for member: " + member.getFullName() + " in cycle: " + cycle.getCycleNumber());
@@ -190,6 +205,10 @@ public class PaymentService {
             payment.setRecordedBy(recorder);
         }
         Payment updated = paymentRepository.save(payment);
+
+        if (updated.getStatus() == Payment.PaymentStatus.PAID || updated.getStatus() == Payment.PaymentStatus.LATE) {
+            checkAndUpdateCycleProgress(updated.getCycle());
+        }
 
         User logUser = (recorder != null) ? recorder : payment.getRecordedBy();
         auditLogService.log(logUser, "PAYMENT_UPDATED", "payments", payment.getId(),
@@ -321,9 +340,11 @@ public class PaymentService {
         if (cycle == null || cycle.getGroup() == null) return;
         SeettuGroup group = cycle.getGroup();
 
+        int targetMemberCount = (group.getMemberCount() != null && group.getMemberCount() > 0) ? group.getMemberCount() : 1;
         List<GroupMember> activeMembers = groupMemberRepository.findByGroupIdAndStatus(group.getId(), GroupMember.MemberStatus.ACTIVE);
-        int memberCount = activeMembers.size();
-        if (memberCount == 0) return;
+        
+        // Cycle CANNOT complete unless the group is full
+        if (activeMembers.size() < targetMemberCount) return;
 
         List<Payment> cyclePayments = paymentRepository.findByCycleId(cycle.getId());
         long paidMembers = cyclePayments.stream()
@@ -333,7 +354,8 @@ public class PaymentService {
                 .distinct()
                 .count();
 
-        if (paidMembers >= memberCount) {
+        // Cycle completes ONLY when all required members have paid
+        if (paidMembers >= targetMemberCount) {
             if (cycle.getStatus() != PaymentCycle.CycleStatus.COMPLETED) {
                 paymentCycleService.updateCycleStatus(cycle.getId(), "COMPLETED");
             }

@@ -25,6 +25,7 @@ public class JoinGroupRequestService {
     private final GroupMemberRepository groupMemberRepository;
     private final NotificationService notificationService;
     private final com.seettu.manager.repository.MemberVerificationRepository memberVerificationRepository;
+    private final com.seettu.manager.repository.PaymentCycleRepository cycleRepository;
 
     @Transactional
     public JoinGroupRequest createJoinRequest(Long groupId, Long userId) {
@@ -122,6 +123,35 @@ public class JoinGroupRequestService {
                 "Your request to join group '" + request.getGroup().getName() + "' has been approved!",
                 "JOIN_APPROVED"
         );
+
+        // Activate circle and Cycle 1 if circle has reached full capacity
+        long newActiveMembers = groupMemberRepository.countByGroupIdAndStatus(request.getGroup().getId(), GroupMember.MemberStatus.ACTIVE);
+        int targetMembers = (request.getGroup().getMemberCount() != null && request.getGroup().getMemberCount() > 0) 
+                ? request.getGroup().getMemberCount() : 1;
+        if (newActiveMembers >= targetMembers) {
+            SeettuGroup group = request.getGroup();
+            if (group.getStatus() != SeettuGroup.GroupStatus.ACTIVE) {
+                group.setStatus(SeettuGroup.GroupStatus.ACTIVE);
+                groupRepository.save(group);
+            }
+            List<com.seettu.manager.entity.PaymentCycle> cycles = cycleRepository.findByGroupIdOrderByCycleNumberAsc(group.getId());
+            if (!cycles.isEmpty() && cycles.get(0).getStatus() == com.seettu.manager.entity.PaymentCycle.CycleStatus.PENDING) {
+                com.seettu.manager.entity.PaymentCycle cycle1 = cycles.get(0);
+                cycle1.setStatus(com.seettu.manager.entity.PaymentCycle.CycleStatus.ACTIVE);
+                cycleRepository.save(cycle1);
+
+                List<GroupMember> allMembers = groupMemberRepository.findByGroupIdAndStatus(group.getId(), GroupMember.MemberStatus.ACTIVE);
+                String fullNotice = "Circle Full Notice: '" + group.getName() + "' has officially reached full capacity (" 
+                        + newActiveMembers + "/" + targetMembers + " members)! Rotational Cycle #1 is now ACTIVE and open for contributions.";
+                for (GroupMember gm : allMembers) {
+                    if (gm.getUser() != null && gm.getUser().getId() != null) {
+                        try {
+                            notificationService.sendNotification(gm.getUser().getId(), fullNotice, "GROUP_ACTIVATED");
+                        } catch (Exception ignored) {}
+                    }
+                }
+            }
+        }
 
         return request;
     }
