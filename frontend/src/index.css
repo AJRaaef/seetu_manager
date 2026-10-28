@@ -964,3 +964,10 @@ a.footer-contact-link:hover {
   color: #00E5FF !important;
   transform: translateX(3px) !important;
 }
+
+/* Custom Login Button Hover Style */
+.btn-outline-dark:hover {
+  background-color: #0F2F3D !important;
+  color: #FFFFFF !important;
+  border-color: #0F2F3D !important;
+}
