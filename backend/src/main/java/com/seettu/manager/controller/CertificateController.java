@@ -32,6 +32,8 @@ public class CertificateController {
             SeettuGroup group = groupService.getGroupById(groupId);
             Certificate certificate = certificateService.generateCertificate(user, group);
             return ResponseEntity.ok(ApiResponse.success("Certificate generated successfully", certificate));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to generate certificate: " + e.getMessage()));
         }
@@ -48,6 +50,8 @@ public class CertificateController {
             SeettuGroup group = groupService.getGroupById(groupId);
             Certificate updated = certificateService.updateCertificate(id, user, group);
             return ResponseEntity.ok(ApiResponse.success("Certificate updated successfully", updated));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(ApiResponse.error("Failed to update certificate: " + e.getMessage()));
         }
@@ -76,15 +80,10 @@ public class CertificateController {
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<org.springframework.core.io.Resource> downloadCertificate(@PathVariable Long id) {
+    public ResponseEntity<org.springframework.core.io.Resource> downloadCertificate(@PathVariable Long id) throws Exception {
         Certificate cert = certificateService.getCertificateById(id);
         String fileName = "CERT_" + cert.getCertificateUuid() + ".pdf";
-        java.io.File file = new java.io.File("./certificates/" + fileName);
-        if (!file.exists()) {
-            try {
-                certificateService.buildPdfFile(cert.getCertificateUuid(), cert.getUser(), cert.getGroup());
-            } catch (Exception ignored) {}
-        }
+        java.io.File file = certificateService.buildPdfFile(cert);
         if (!file.exists()) {
             return ResponseEntity.notFound().build();
         }
