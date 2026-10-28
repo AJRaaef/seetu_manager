@@ -1676,7 +1676,10 @@ disabled={submitting}
         >
           <Icon name="check-circle" size={15} color={ledgerTab === 'recorded' ? '#FFFFFF' : '#188754'} />
           <span>Confirmed Ledger</span>
-          <span className={`badge rounded-pill ${ledgerTab === 'recorded' ? 'bg-white text-teal' : 'bg-secondary-subtle text-secondary'}`}>
+          <span 
+            className={`badge rounded-pill fw-bold ${ledgerTab === 'recorded' ? 'bg-white text-teal' : 'bg-secondary-subtle text-secondary'}`}
+            style={ledgerTab === 'recorded' ? { color: '#1A5265' } : undefined}
+          >
             {recordedCount}
           </span>
         </button>
