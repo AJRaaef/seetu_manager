@@ -497,6 +497,10 @@ fetchPayments();
 // Handle One-Click Approval for Pending Member Submission (Read-Only Verification)
 
 const handleApprovePayment = async (payment, approvalNotes) => {
+    if (isAdmin) {
+      alert('Access Restricted: Routine bank slip verification is reserved for the Group Organizer who receives member funds in their bank account. Platform Admins retain ledger oversight with Edit and Delete capabilities.');
+      return;
+    }
 
 try {
 
@@ -2155,7 +2159,7 @@ onClick={(e) => e.stopPropagation()}
 
 <div className="d-flex justify-content-end align-items-center gap-2">
 
-{p.status === 'PENDING' && (isAdmin || isOrganizer) && (
+{p.status === 'PENDING' && isOrganizer && (
                         <button
                           className="btn btn-sm btn-success px-3 py-1 small fw-semibold text-nowrap d-inline-flex align-items-center gap-1 shadow-xs"
                           title="Verify Deposit Slip & Approve Payment"
