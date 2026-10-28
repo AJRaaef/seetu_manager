@@ -415,7 +415,7 @@ const Profile = () => {
                   <button
                     type="button"
                     className="btn w-100 fw-semibold d-flex align-items-center justify-content-center gap-2 shadow-sm"
-                    style={{ background: 'linear-gradient(135deg, #0F2F3D, #0097B2)', color: '#fff', borderRadius: '10px' }}
+                    style={{ background: '#134A5A', color: '#fff', borderRadius: '10px' }}
                     onClick={() => setShowOrgModal(true)}
                   >
                     <Icon name="award" size={16} color="#fff" />
