@@ -96,8 +96,8 @@ const Disputes = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isAdmin || isOrganizer) {
-      alert('Organizers and Admins cannot submit disputes as they serve as circle managers and platform arbitrators.');
+    if (isAdmin) {
+      alert('System Admins serve as platform arbitrators and do not raise disputes.');
       return;
     }
     if (!description.trim()) {
@@ -179,14 +179,33 @@ const Disputes = () => {
   return (
     <div className="disputes-page-container pb-4">
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
           <h2 className="fw-bold mb-0" style={{ color: '#0F2F3D' }}>{t('disputes_page.title', 'Disputes & Grievances')}</h2>
-          <p className="text-muted small mb-0">{t('disputes_page.subtitle', 'Mediate, investigate, and record resolutions for member grievances')}</p>
+          <p className="text-muted small mb-0">
+            {isOrganizer 
+              ? 'Mediate member grievances and escalate circle disputes or defaults to System Admin' 
+              : t('disputes_page.subtitle', 'Mediate, investigate, and record resolutions for member grievances')}
+          </p>
         </div>
-        <span className="badge-peach px-3 py-2 fs-6 fw-semibold">
-          {openDisputesCount} Open Dispute{openDisputesCount !== 1 ? 's' : ''}
-        </span>
+        <div className="d-flex align-items-center gap-2">
+          {!isAdmin && (
+            <button
+              type="button"
+              className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm fw-semibold"
+              onClick={() => {
+                const el = document.getElementById('raise-dispute-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              <Icon name="plus" size={16} />
+              <span>{isOrganizer ? 'Raise Group Dispute' : t('disputes_page.raise_btn', 'Raise Dispute')}</span>
+            </button>
+          )}
+          <span className="badge-peach px-3 py-2 fs-6 fw-semibold">
+            {openDisputesCount} Open Dispute{openDisputesCount !== 1 ? 's' : ''}
+          </span>
+        </div>
       </div>
 
       {actionMsg && (
@@ -275,19 +294,31 @@ const Disputes = () => {
         </div>
       </div>
 
-      {/* Submit New Dispute Card - Members Only */}
-      {(!isAdmin && !isOrganizer) && (
-        <div className="ui-card p-4 shadow-sm mb-4">
-          <h4 className="fw-bold text-dark mb-3" style={{ fontSize: '1.2rem' }}>Submit New Dispute</h4>
+      {/* Submit New Dispute Card - Members & Organizers */}
+      {!isAdmin && (
+        <div id="raise-dispute-section" className="ui-card p-4 shadow-sm mb-4" style={{ borderRadius: '12px' }}>
+          <div className="mb-2">
+            <h4 className="fw-bold text-dark mb-0" style={{ fontSize: '1.2rem' }}>
+              {isOrganizer ? 'Escalate Group Dispute / Member Delinquency' : 'Submit New Dispute'}
+            </h4>
+          </div>
+          <p className="text-muted small mb-3">
+            {isOrganizer 
+              ? 'Escalate circle disputes, member non-payment, forged slips, or contract breaches directly for System Admin arbitration.'
+              : 'Submit a formal grievance regarding contributions, payout rotation, or circle issues.'}
+          </p>
 
           <form onSubmit={handleSubmit}>
             <div className="row g-3 mb-3">
               <div className="col-12 col-md-6">
-                <label className="form-label text-dark fw-semibold small">Select Group / Scope</label>
+                <label className="form-label text-dark fw-semibold small">
+                  {isOrganizer ? 'Select Affected Circle' : 'Select Group / Scope'}
+                </label>
                 <select
                   className="form-select bg-white"
                   value={selectedGroupId}
                   onChange={(e) => setSelectedGroupId(e.target.value)}
+                  style={{ borderRadius: '8px' }}
                 >
                   <option value="general">General Platform / Account Issue</option>
                   {groups.map((g) => (
@@ -299,17 +330,31 @@ const Disputes = () => {
               </div>
 
               <div className="col-12 col-md-6">
-                <label className="form-label text-dark fw-semibold small">Dispute Type</label>
+                <label className="form-label text-dark fw-semibold small">Dispute Category</label>
                 <select
                   className="form-select bg-white"
                   value={disputeType}
                   onChange={(e) => setDisputeType(e.target.value)}
+                  style={{ borderRadius: '8px' }}
                 >
-                  <option value="Payment">Payment</option>
-                  <option value="Payout">Payout</option>
-                  <option value="Member">Member</option>
-                  <option value="Cycle">Cycle Schedule</option>
-                  <option value="Other">Other</option>
+                  {isOrganizer ? (
+                    <>
+                      <option value="Member Delinquency / Default">Member Delinquency / Default</option>
+                      <option value="Forged Slip / Payment Fraud">Forged Slip / Payment Fraud</option>
+                      <option value="Rule Violation / Contract Breach">Rule Violation / Contract Breach</option>
+                      <option value="Cycle / Payout Conflict">Cycle / Payout Conflict</option>
+                      <option value="Platform Admin Escalation">Platform Admin Escalation</option>
+                      <option value="Other Big Issue">Other Big Issue</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="Payment">Payment</option>
+                      <option value="Payout">Payout</option>
+                      <option value="Member">Member</option>
+                      <option value="Cycle">Cycle Schedule</option>
+                      <option value="Other">Other</option>
+                    </>
+                  )}
                 </select>
               </div>
             </div>
@@ -319,15 +364,18 @@ const Disputes = () => {
               <textarea
                 className="form-control"
                 rows="3"
-                placeholder="Describe the issue in detail..."
+                placeholder={isOrganizer 
+                  ? "Describe the circle issue, specify delinquent member names, amounts involved, or reason for admin arbitration..."
+                  : "Describe the issue in detail..."}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                style={{ borderRadius: '8px' }}
                 required
               />
             </div>
 
             <div className="mb-4">
-              <label className="form-label text-dark fw-semibold small">Upload Evidence (Optional)</label>
+              <label className="form-label text-dark fw-semibold small">Upload Supporting Evidence (Optional)</label>
               <div
                 className="border border-dashed rounded-3 p-4 text-center"
                 style={{ borderColor: '#CBD5E1', backgroundColor: '#FAFAFA', cursor: 'pointer' }}
@@ -357,10 +405,13 @@ const Disputes = () => {
 
             <button
               type="submit"
-              className="btn btn-teal w-100 py-2 fw-semibold"
+              className="btn btn-teal w-100 py-2.5 fw-semibold shadow-sm"
+              style={{ borderRadius: '8px' }}
               disabled={submitting}
             >
-              {submitting ? t('common.loading', 'Submitting...') : t('disputes_page.raise_btn', 'Raise Dispute')}
+              {submitting 
+                ? t('common.loading', 'Submitting...') 
+                : (isOrganizer ? 'Submit & Escalate Dispute to Admin' : t('disputes_page.raise_btn', 'Raise Dispute'))}
             </button>
           </form>
         </div>
@@ -368,12 +419,12 @@ const Disputes = () => {
 
       {/* Organizer Mediation Banner */}
       {isOrganizer && (
-        <div className="alert border-0 shadow-sm d-flex align-items-center gap-3 p-3 mb-4" style={{ backgroundColor: '#F0FDF4', color: '#166534', border: '1px solid #BBF7D0' }}>
-          <Icon name="shield" size={24} color="#166534" />
+        <div className="alert border-0 shadow-sm d-flex align-items-start gap-3 p-3 mb-4" style={{ backgroundColor: '#F0FDF4', color: '#166534', border: '1px solid #BBF7D0', borderRadius: '10px' }}>
+          <Icon name="shield" size={24} color="#166534" className="mt-0.5 flex-shrink-0" />
           <div>
-            <strong className="d-block mb-1">Organizer Mediation Portal</strong>
+            <strong className="d-block mb-1">Organizer Mediation & Escalation Desk</strong>
             <span className="small">
-              As a Seettu Organizer, you review, arbitrate, and record resolutions for grievances raised by circle members. Review open disputes using the table above.
+              As a Seettu Organizer, you can review and resolve grievances filed by your circle members in the table above. You can also <strong>raise and escalate group-level disputes, member defaults, or fraud issues</strong> directly to System Admin arbitration using the form above.
             </span>
           </div>
         </div>

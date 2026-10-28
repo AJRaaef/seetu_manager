@@ -27,9 +27,6 @@ public class DisputeService {
         if (raisedBy != null && raisedBy.getRole() == User.Role.ADMIN) {
             throw new IllegalArgumentException("System Admins cannot submit disputes as they serve as platform arbitrators.");
         }
-        if (raisedBy != null && raisedBy.getRole() == User.Role.ORGANIZER) {
-            throw new IllegalArgumentException("Organizers cannot submit disputes as they serve as circle managers.");
-        }
 
         SeettuGroup group = (request.getGroupId() != null && request.getGroupId() > 0)
                 ? groupService.getGroupById(request.getGroupId())
@@ -46,12 +43,21 @@ public class DisputeService {
 
         String grpLabel = group != null ? "group: " + group.getName() : "General Platform Grievance";
         auditLogService.log(raisedBy, "DISPUTE_RAISED", "disputes", dispute.getId(),
-                "Dispute raised for " + grpLabel);
+                "Dispute raised for " + grpLabel + " by " + (raisedBy != null ? raisedBy.getFullName() : "User"));
         
-        if (group != null && group.getCreatedBy() != null) {
+        // If an Organizer raises a dispute, escalate directly to System Admins for platform arbitration
+        if (raisedBy != null && raisedBy.getRole() == User.Role.ORGANIZER) {
+            String noticeMsg = "Organizer Dispute Escalation: Organizer " + raisedBy.getFullName() 
+                    + " escalated a dispute for " + grpLabel + " (" + request.getType() + ")";
+            userRepository.findByRole(User.Role.ADMIN).forEach(admin -> 
+                notificationService.sendNotification(admin.getId(), noticeMsg, "DISPUTE")
+            );
+        } else if (group != null && group.getCreatedBy() != null) {
+            // If a member raises a dispute, notify the circle organizer
             notificationService.sendNotification(group.getCreatedBy().getId(), 
-                    "New dispute raised in group: " + group.getName(), "DISPUTE");
+                    "New dispute raised in group: " + group.getName() + " by " + (raisedBy != null ? raisedBy.getFullName() : "Member"), "DISPUTE");
         } else {
+            // General issue: notify admins
             userRepository.findByRole(User.Role.ADMIN).forEach(admin -> 
                 notificationService.sendNotification(admin.getId(), "New platform grievance filed: " + request.getType(), "DISPUTE")
             );
