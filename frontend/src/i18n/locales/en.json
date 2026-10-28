@@ -821,6 +821,15 @@
       "refund": "Refund Policy",
       "disclaimer": "Disclaimer"
     },
+
+    "bottom_links": {
+      "statutory_law": "Statutory Law",
+      "enrollment_rules": "Enrollment Rules",
+      "terms": "Terms",
+      "privacy": "Privacy",
+      "disclaimer": "Disclaimer"
+    },
+
     "faq_1_q": "What is a Seettu (Chit Fund / ROSCA)?",
     "faq_1_a": "A Seettu (internationally termed a Chit Fund or Rotating Savings and Credit Association — ROSCA) is a traditional community savings mechanism where members pool fixed contributions at regular intervals (daily, weekly, or monthly). In each cycle, the pooled sum is awarded to one member via fixed rotation, auction bidding, or fair lottery, continuing until every participant receives their complete payout.",
 
