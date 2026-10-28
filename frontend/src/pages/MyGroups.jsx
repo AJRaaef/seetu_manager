@@ -852,7 +852,7 @@ const MyGroups = () => {
                       </div>
 
                       {/* Card Content Body */}
-                      <div className="p-3.5 flex-grow-1 d-flex flex-column justify-content-between">
+                      <div className="p-3 flex-grow-1 d-flex flex-column justify-content-between">
                         <div>
                           {/* Organizer Row */}
                           <div className="d-flex align-items-center justify-content-between mb-3">
