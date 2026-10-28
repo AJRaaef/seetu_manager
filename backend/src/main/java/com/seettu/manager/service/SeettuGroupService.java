@@ -321,6 +321,22 @@ public class SeettuGroupService {
                         c.setStatus(PaymentCycle.CycleStatus.ACTIVE);
                         cycleRepository.save(c);
                     }
+                    // Self-healing: if active cycle's end date was in the past (e.g. group took time to fill),
+                    // reset start to today and end to full frequency duration so members get their full period
+                    if (c.getEndDate() != null && c.getEndDate().isBefore(java.time.LocalDate.now())) {
+                        java.time.LocalDate start = java.time.LocalDate.now();
+                        java.time.LocalDate end;
+                        switch (group.getCycleFrequency()) {
+                            case DAILY: end = start; break;
+                            case WEEKLY: end = start.plusWeeks(1).minusDays(1); break;
+                            case BI_WEEKLY: end = start.plusWeeks(2).minusDays(1); break;
+                            case MONTHLY:
+                            default: end = start.plusMonths(1).minusDays(1); break;
+                        }
+                        c.setStartDate(start);
+                        c.setEndDate(end);
+                        cycleRepository.save(c);
+                    }
                     activeFound = true;
                 } else {
                     if (c.getStatus() == PaymentCycle.CycleStatus.ACTIVE) {

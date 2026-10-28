@@ -23,6 +23,8 @@ public class PendingDueResponse {
     private Long daysRemaining;
     private boolean isOverdue;
     private Long daysOverdue;
+    private boolean inGracePeriod;
+    private Integer graceDaysRemaining;
     private String status; // "UPCOMING", "DUE_SOON", "DUE_TODAY", "OVERDUE", "AWAITING_APPROVAL"
     private Long existingPaymentId;
     private boolean hasSlipUploaded;

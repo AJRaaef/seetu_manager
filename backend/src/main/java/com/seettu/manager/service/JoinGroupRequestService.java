@@ -136,9 +136,36 @@ public class JoinGroupRequestService {
             }
             List<com.seettu.manager.entity.PaymentCycle> cycles = cycleRepository.findByGroupIdOrderByCycleNumberAsc(group.getId());
             if (!cycles.isEmpty() && cycles.get(0).getStatus() == com.seettu.manager.entity.PaymentCycle.CycleStatus.PENDING) {
-                com.seettu.manager.entity.PaymentCycle cycle1 = cycles.get(0);
-                cycle1.setStatus(com.seettu.manager.entity.PaymentCycle.CycleStatus.ACTIVE);
-                cycleRepository.save(cycle1);
+                // Recalibrate cycle schedules starting from today so all members get their full, proper collection duration
+                java.time.LocalDate startDate = java.time.LocalDate.now();
+                for (int i = 0; i < cycles.size(); i++) {
+                    com.seettu.manager.entity.PaymentCycle c = cycles.get(i);
+                    java.time.LocalDate endDate;
+                    switch (group.getCycleFrequency()) {
+                        case DAILY:
+                            endDate = startDate;
+                            break;
+                        case WEEKLY:
+                            endDate = startDate.plusWeeks(1).minusDays(1);
+                            break;
+                        case BI_WEEKLY:
+                            endDate = startDate.plusWeeks(2).minusDays(1);
+                            break;
+                        case MONTHLY:
+                        default:
+                            endDate = startDate.plusMonths(1).minusDays(1);
+                            break;
+                    }
+                    c.setStartDate(startDate);
+                    c.setEndDate(endDate);
+                    if (i == 0) {
+                        c.setStatus(com.seettu.manager.entity.PaymentCycle.CycleStatus.ACTIVE);
+                    } else {
+                        c.setStatus(com.seettu.manager.entity.PaymentCycle.CycleStatus.PENDING);
+                    }
+                    cycleRepository.save(c);
+                    startDate = endDate.plusDays(1);
+                }
 
                 List<GroupMember> allMembers = groupMemberRepository.findByGroupIdAndStatus(group.getId(), GroupMember.MemberStatus.ACTIVE);
                 String fullNotice = "Circle Full Notice: '" + group.getName() + "' has officially reached full capacity (" 
