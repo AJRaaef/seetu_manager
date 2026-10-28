@@ -13,15 +13,22 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.seettu.manager.entity.Certificate;
+import com.seettu.manager.entity.Payment;
+import com.seettu.manager.entity.PaymentCycle;
 import com.seettu.manager.entity.SeettuGroup;
 import com.seettu.manager.entity.User;
 import com.seettu.manager.repository.CertificateRepository;
+import com.seettu.manager.repository.GroupMemberRepository;
+import com.seettu.manager.repository.PaymentCycleRepository;
+import com.seettu.manager.repository.PaymentRepository;
+import com.seettu.manager.dto.ScoreResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,41 +37,58 @@ import java.util.UUID;
 public class CertificateService {
 
     private final CertificateRepository certificateRepository;
+    private final GroupMemberRepository groupMemberRepository;
+    private final PaymentCycleRepository paymentCycleRepository;
+    private final PaymentRepository paymentRepository;
+    private final DisciplineScoreService disciplineScoreService;
 
     @Value("${certificate.output-dir:./certificates}")
     private String certificateOutputDir;
 
     public Certificate generateCertificate(User user, SeettuGroup group) throws Exception {
-        if (certificateRepository.existsByUserIdAndGroupId(user.getId(), group.getId())) {
-            Certificate existing = certificateRepository.findByUserIdAndGroupId(user.getId(), group.getId()).get();
+        validateCompletion(user, group);
+        BigDecimal score = getDisciplineScore(user);
+
+        Certificate existing = certificateRepository.findByUserIdAndGroupId(user.getId(), group.getId()).orElse(null);
+        if (existing != null) {
+            if (existing.getDisciplineScore() == null) {
+                existing.setDisciplineScore(score);
+                certificateRepository.save(existing);
+                buildPdfFile(existing.getCertificateUuid(), user, group, existing.getDisciplineScore());
+            }
             File file = new File(certificateOutputDir + "/CERT_" + existing.getCertificateUuid() + ".pdf");
             if (!file.exists()) {
-                buildPdfFile(existing.getCertificateUuid(), user, group);
+                buildPdfFile(existing.getCertificateUuid(), user, group, existing.getDisciplineScore());
             }
             return existing;
         }
 
         String uuid = UUID.randomUUID().toString();
-        buildPdfFile(uuid, user, group);
 
         Certificate certificate = Certificate.builder()
                 .user(user)
                 .group(group)
                 .certificateUuid(uuid)
+                .disciplineScore(score)
                 .build();
 
-        return certificateRepository.save(certificate);
+        Certificate savedCertificate = certificateRepository.save(certificate);
+        buildPdfFile(uuid, user, group, score);
+        return savedCertificate;
     }
 
     public Certificate updateCertificate(Long id, User newUser, SeettuGroup newGroup) throws Exception {
         Certificate cert = certificateRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Certificate not found with ID: " + id));
 
+        validateCompletion(newUser, newGroup);
+        BigDecimal score = getDisciplineScore(newUser);
         cert.setUser(newUser);
         cert.setGroup(newGroup);
+        cert.setDisciplineScore(score);
 
         // Rebuild PDF file on disk
-        buildPdfFile(cert.getCertificateUuid(), newUser, newGroup);
+        buildPdfFile(cert.getCertificateUuid(), newUser, newGroup, score);
 
         return certificateRepository.save(cert);
     }
@@ -83,7 +107,17 @@ public class CertificateService {
         certificateRepository.delete(cert);
     }
 
-    public void buildPdfFile(String uuid, User user, SeettuGroup group) throws Exception {
+    public File buildPdfFile(Certificate certificate) throws Exception {
+        buildPdfFile(
+                certificate.getCertificateUuid(),
+                certificate.getUser(),
+                certificate.getGroup(),
+                certificate.getDisciplineScore()
+        );
+        return new File(certificateOutputDir + "/CERT_" + certificate.getCertificateUuid() + ".pdf");
+    }
+
+    private void buildPdfFile(String uuid, User user, SeettuGroup group, BigDecimal disciplineScore) throws Exception {
         File dir = new File(certificateOutputDir);
         if (!dir.exists()) {
             dir.mkdirs();
@@ -163,7 +197,10 @@ public class CertificateService {
 
         Cell sealCell = new Cell().setBorder(com.itextpdf.layout.borders.Border.NO_BORDER).setTextAlignment(TextAlignment.CENTER);
         sealCell.add(new Paragraph("★ OFFICIAL DIGITAL SEAL ★").setFontSize(9).setBold().setFontColor(goldAccent));
-        sealCell.add(new Paragraph("FINANCIAL DISCIPLINE RATING: 100/100").setFontSize(8).setBold().setFontColor(navyTeal));
+        String scoreText = disciplineScore != null
+                ? disciplineScore.setScale(1, java.math.RoundingMode.HALF_UP).toPlainString()
+                : "N/A";
+        sealCell.add(new Paragraph("FINANCIAL DISCIPLINE RATING: " + scoreText + "/100").setFontSize(8).setBold().setFontColor(navyTeal));
         bottomTable.addCell(sealCell);
 
         Cell signCell = new Cell().setBorder(com.itextpdf.layout.borders.Border.NO_BORDER).setTextAlignment(TextAlignment.RIGHT);
@@ -177,6 +214,34 @@ public class CertificateService {
         document.add(outerBox);
 
         document.close();
+    }
+
+    private void validateCompletion(User user, SeettuGroup group) {
+        List<PaymentCycle> cycles = paymentCycleRepository.findByGroupIdOrderByCycleNumberAsc(group.getId());
+        if (group.getStatus() != SeettuGroup.GroupStatus.COMPLETED
+                || cycles.isEmpty()
+                || cycles.stream().anyMatch(cycle -> cycle.getStatus() != PaymentCycle.CycleStatus.COMPLETED)) {
+            throw new IllegalArgumentException("A certificate can only be issued after the Seettu group has completed all cycles.");
+        }
+
+        if (!groupMemberRepository.existsByGroupIdAndUserId(group.getId(), user.getId())) {
+            throw new IllegalArgumentException("The selected member did not participate in this Seettu group.");
+        }
+
+        List<Payment> memberPayments = paymentRepository.findByGroupIdAndMemberId(group.getId(), user.getId());
+        boolean paidEveryCycle = cycles.stream().allMatch(cycle -> memberPayments.stream()
+                .anyMatch(payment -> payment.getCycle() != null
+                        && payment.getCycle().getId().equals(cycle.getId())
+                        && (payment.getStatus() == Payment.PaymentStatus.PAID
+                        || payment.getStatus() == Payment.PaymentStatus.LATE)));
+        if (!paidEveryCycle) {
+            throw new IllegalArgumentException("The selected member must complete payments for every cycle before receiving a certificate.");
+        }
+    }
+
+    private BigDecimal getDisciplineScore(User user) {
+        ScoreResponse scoreResponse = disciplineScoreService.calculateScore(user.getId());
+        return BigDecimal.valueOf(scoreResponse.getScore()).setScale(1, java.math.RoundingMode.HALF_UP);
     }
 
     public List<Certificate> getAllCertificates() {

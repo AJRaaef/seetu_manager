@@ -280,6 +280,7 @@ CREATE TABLE certificates (
     user_id BIGINT NOT NULL,
     group_id BIGINT NOT NULL,
     certificate_uuid VARCHAR(36) NOT NULL UNIQUE,
+    discipline_score DECIMAL(4,1),
     issued_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (group_id) REFERENCES seettu_groups(id) ON DELETE CASCADE,
@@ -355,4 +356,3 @@ CREATE TABLE member_additional_documents (
     INDEX idx_mad_verification_id (verification_id),
     INDEX idx_mad_doc_type (document_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-

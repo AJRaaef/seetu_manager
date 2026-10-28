@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,6 +31,9 @@ public class Certificate {
 
     @Column(name = "certificate_uuid", nullable = false, unique = true, length = 36)
     private String certificateUuid;
+
+    @Column(name = "discipline_score", precision = 4, scale = 1)
+    private BigDecimal disciplineScore;
 
     @Column(name = "issued_at", nullable = false, updatable = false)
     private LocalDateTime issuedAt;

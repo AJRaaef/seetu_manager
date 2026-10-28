@@ -587,7 +587,11 @@ const Certificates = () => {
                       </div>
                       <div className="col-3 border-end border-secondary-subtle">
                         <small className="text-muted d-block fw-medium" style={{ fontSize: '0.78rem', fontFamily: "'Arial', sans-serif" }}>Financial Discipline</small>
-                        <strong className="text-success d-block" style={{ fontSize: '0.95rem' }}>100 / 100 Rating</strong>
+                        <strong className="text-success d-block" style={{ fontSize: '0.95rem' }}>
+                          {previewCert.disciplineScore != null
+                            ? `${Number(previewCert.disciplineScore).toFixed(1)} / 100 Rating`
+                            : 'Score not recorded'}
+                        </strong>
                       </div>
                       <div className="col-3">
                         <small className="text-muted d-block fw-medium" style={{ fontSize: '0.78rem', fontFamily: "'Arial', sans-serif" }}>Legal Status</small>
@@ -672,7 +676,7 @@ const Certificates = () => {
               <form onSubmit={handleIssueCertificate}>
                 <div className="modal-body p-4 bg-light-subtle">
                   <p className="text-muted small mb-3">
-                    Award an official completion certificate to a subscriber who completed rotational cycles in a group.
+                    Certificates are available only after the Seettu group and all its cycles are complete, and the selected member has paid every cycle.
                   </p>
 
                   <div className="mb-3">
