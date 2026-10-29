@@ -52,6 +52,12 @@ const Register = () => {
       return;
     }
 
+    const cleanedPhone = (formData.phone || '').replace(/\D/g, '').trim();
+    if (!/^\d{10}$/.test(cleanedPhone)) {
+      setError('Phone Number Guidance: Please enter a valid 10-digit phone number (e.g. 0771234567).');
+      return;
+    }
+
     if (formData.password.length < 6) {
       setError('Password Guidance: Password must be at least 6 characters long.');
       return;
@@ -66,6 +72,7 @@ const Register = () => {
     try {
       await register({
         ...formData,
+        phone: cleanedPhone,
         preferredLanguage: language.toUpperCase()
       });
       navigate('/dashboard');
@@ -174,9 +181,13 @@ const Register = () => {
                     <input
                       type="tel"
                       className="form-control"
-                      placeholder={t('auth.phone_placeholder', 'e.g. 077 123 4567')}
+                      placeholder={t('auth.phone_placeholder', 'e.g. 0771234567')}
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      maxLength={10}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                        setFormData({ ...formData, phone: val });
+                      }}
                       style={{ borderRadius: '8px', border: '1px solid #D1D5DB' }}
                       required
                     />

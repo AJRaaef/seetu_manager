@@ -357,7 +357,7 @@ const MyGroups = () => {
             <Link
               to="/groups/create"
               className="btn btn-teal px-3 py-2 d-inline-flex align-items-center gap-2 shadow-sm text-white fw-semibold"
-              style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
+              style={{ backgroundColor: '#1c4d4b', borderColor: '#0097B2' }}
             >
               <Icon name="plus" size={16} color="#FFFFFF" />
               <span>{t('my_groups_page.create_new', 'Create New Circle')}</span>

@@ -138,7 +138,7 @@ res = await getPaymentsByMember(userId);
         daysOverdue: Number(p.daysOverdue) || 0,
         amount: Number(p.amount) || 0,
         status: (p.status || 'PAID').toUpperCase(),
-        recordedBy: p.recordedByName || (p.status === 'PAID' ? 'Organizer' : '—'),
+        recordedBy: p.recordedByName || (p.status === 'PAID' || p.status === 'LATE' || p.status === 'PARTIAL' ? 'Organizer' : '—'),
         method: p.paymentMethod || 'Cash (Offline)',
         notes: p.notes || '',
         memberPhone: p.memberPhone,
@@ -366,7 +366,7 @@ setLedgerTab('pending');
 
 alert(paymentMethodInput === 'Cash (Offline)' ? 'Offline cash payment recorded successfully! Official electronic receipt is generated and available in payment details.' : `Bank payment recorded successfully with attached deposit slip!`);
 
-if (statusInput === 'OVERDUE' || statusInput === 'PARTIAL') {
+if (statusInput === 'OVERDUE') {
 
 setLedgerTab('overdue');
 
@@ -743,11 +743,11 @@ const memberOptions = dynamicMembers;
 
 // Separate counts for Recorded vs Overdue
 
-const recordedCount = payments.filter((p) => p.status === 'PAID' || p.status === 'LATE').length;
+const recordedCount = payments.filter((p) => p.status === 'PAID' || p.status === 'LATE' || p.status === 'PARTIAL').length;
 
 const pendingCount = payments.filter((p) => p.status === 'PENDING').length;
 
-const overdueCount = payments.filter((p) => p.status === 'OVERDUE' || p.status === 'MISSED' || p.status === 'PARTIAL').length;
+const overdueCount = payments.filter((p) => p.status === 'OVERDUE' || p.status === 'MISSED').length;
 
 const allCount = payments.length;
 
@@ -757,7 +757,7 @@ const filteredPayments = payments.filter((p) => {
 
 if (ledgerTab === 'recorded') {
 
-if (p.status !== 'PAID' && p.status !== 'LATE') return false;
+if (p.status !== 'PAID' && p.status !== 'LATE' && p.status !== 'PARTIAL') return false;
 
 } else if (ledgerTab === 'pending') {
 
@@ -765,7 +765,7 @@ if (p.status !== 'PENDING') return false;
 
 } else if (ledgerTab === 'overdue') {
 
-if (p.status !== 'OVERDUE' && p.status !== 'MISSED' && p.status !== 'PARTIAL') return false;
+if (p.status !== 'OVERDUE' && p.status !== 'MISSED') return false;
 
 }
 
@@ -819,7 +819,7 @@ const metricsSource = isFiltered ? filteredPayments : payments;
 
 const totalCollected = metricsSource
 
-.filter((p) => p.status === 'PAID' || p.status === 'LATE')
+.filter((p) => p.status === 'PAID' || p.status === 'LATE' || p.status === 'PARTIAL')
 
 .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 
@@ -881,7 +881,7 @@ return (
 
 <div className="text-muted small mt-2" style={{ fontSize: '0.75rem' }}>
 
-{metricsSource.filter((p) => p.status === 'PAID' || p.status === 'LATE').length} Paid Payments
+{metricsSource.filter((p) => p.status === 'PAID' || p.status === 'LATE' || p.status === 'PARTIAL').length} Paid Payments
 
 </div>
 
@@ -1920,9 +1920,9 @@ onChange={(e) => setFilterStatus(e.target.value)}
 
 {ledgerTab !== 'overdue' && <option value="LATE">Paid (Late)</option>}
 
-{ledgerTab !== 'recorded' && <option value="OVERDUE">Overdue</option>}
+{ledgerTab !== 'overdue' && <option value="PARTIAL">Partial</option>}
 
-{ledgerTab !== 'recorded' && <option value="PARTIAL">Partial</option>}
+{ledgerTab !== 'recorded' && <option value="OVERDUE">Overdue</option>}
 
 {ledgerTab !== 'recorded' && <option value="PENDING">Pending</option>}
 
