@@ -929,28 +929,42 @@
     "save": "සුරකින්න",
     "back": "ආපසු"
   },
-  "notifications_page": {
+
+ "notifications_page": {
     "title": "දැනුම්දීම්",
-    "unread_badge": "{{count}} ක් කියවා නැත",
-    "personal_sub": "ගිණුම සඳහා වන පෞද්ගලික දැනුම්දීම්",
-    "system_sub": "සියලුම පරිශීලකයින් සහ කවයන් පුරා පවතින පද්ධතිමය දැනුම්දීම්",
+    "unread_badge": "නොකියවූ {{count}} ක්",
+    "personal_sub": "ඔබගේ ගිණුම සඳහා වන පුද්ගලික දැනුම්දීම්",
+    "system_sub": "සියලුම පරිශීලකයින් සහ කවයන් හරහා පද්ධතිය පුරා ඇති දැනුම්දීම් ක්‍රියාකාරකම්",
     "dispatch_btn": "නියමිත මතක් කිරීම් යවන්න",
     "dispatching": "යවමින් පවතී...",
-    "mark_all_read": "සියල්ල කියවූ ලෙස සටහන් කරන්න",
-    "scope_label": "විෂය පථය:",
+    "mark_all_read": "සියල්ල කියවූ ලෙස සලකුණු කරන්න",
+    "scope_label": "විෂයස්ථානය:",
     "my_notifications": "මගේ දැනුම්දීම්",
     "all_system_notifications": "සියලුම පද්ධති දැනුම්දීම්",
     "all_users": "සියලුම පරිශීලකයින්",
     "all_notifications": "සියලුම දැනුම්දීම්",
-    "unread_only": "කියවා නැති ඒවා පමණයි",
+    "unread_only": "නොකියවූ පමණි",
     "loading": "දැනුම්දීම් පූරණය වෙමින් පවතී...",
     "empty_title": "දැනුම්දීම් හමු නොවීය",
     "empty_read_desc": "සුභ පැතුම්! ඔබ මෙම දර්ශනයේ ඇති සියලුම දැනුම්දීම් කියවා ඇත.",
-    "empty_match_desc": "ඔබගේ තේරීමට ගැලපෙන දැනුම්දීම් කිසිවක් නැත.",
+    "empty_match_desc": "ඔබගේ තේරීමට ගැළපෙන දැනුම්දීම් වාර්තා නොමැත.",
     "new_badge": "නව",
     "sent_to": "යවන ලද්දේ:",
-    "mark_read": "කියවූ ලෙස සටහන් කරන්න"
+    "mark_read": "කියවූ ලෙස සලකුණු කරන්න",
+    "view_voucher": "ගෙවීම් වවුචරය බලන්න (PDF)",
+    "overdue_notice": "කල් ඉකුත් වූ දැනුම්දීම",
+    "payment_reminder": "ගෙවීම් මතක් කිරීම",
+    "payment_update": "ගෙවීම් යාවත්කාලීන කිරීම",
+    "dispute_alert": "ආරවුල් අනතුරු ඇඟවීම",
+    "emergency_notice": "හදිසි දැනුම්දීම",
+    "verified": "සත්‍යාපනය කර ඇත",
+    "verification_rejected": "සත්‍යාපනය ප්‍රතික්ෂේප කර ඇත",
+    "verification_review": "සත්‍යාපනය සමාලෝචනය වෙමින් පවතී",
+    "join_request": "සම්බන්ධ වීමේ ඉල්ලීම",
+    "group_notice": "කණ්ඩායම් දැනුම්දීම",
+    "notice": "දැනුම්දීම"
   },
+
   "payments_page": {
     "title": "ගෙවීම් නිරීක්ෂණය",
     "total_collected": "එකතු වූ මුළු මුදල"

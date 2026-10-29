@@ -952,8 +952,21 @@
     "empty_match_desc": "There are no notification records matching your selection.",
     "new_badge": "NEW",
     "sent_to": "Sent to:",
-    "mark_read": "Mark Read"
+    "mark_read": "Mark Read",
+    "view_voucher": "View Payout Voucher (PDF)",
+    "overdue_notice": "Overdue Notice",
+    "payment_reminder": "Payment Reminder",
+    "payment_update": "Payment Update",
+    "dispute_alert": "Dispute Alert",
+    "emergency_notice": "Emergency Notice",
+    "verified": "Verified",
+    "verification_rejected": "Verification Rejected",
+    "verification_review": "Verification Under Review",
+    "join_request": "Join Request",
+    "group_notice": "Group Notice",
+    "notice": "Notice"
   },
+  
   "payments_page": {
     "title": "Payment Tracking",
     "total_collected": "Total Collected"
