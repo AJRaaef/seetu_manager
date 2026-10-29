@@ -2,9 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import * as reportApi from '../api/reportApi';
-import { getAllGroups } from '../api/groupApi';
-import { getAllPayments } from '../api/paymentApi';
+import { getAllGroups, getGroupsByUser } from '../api/groupApi';
+import { getAllPayments, getPaymentsByMember } from '../api/paymentApi';
 import Icon from '../components/Icons';
+
+const getPaymentRecordKey = (payment) => {
+  const cycleId = payment.cycleId ?? payment.cycle?.id;
+  const memberId = payment.memberId ?? payment.member?.id;
+  if (cycleId != null && memberId != null) {
+    return `cycle:${cycleId}:member:${memberId}`;
+  }
+  return payment.id != null ? `payment:${payment.id}` : null;
+};
+
+const deduplicatePayments = (payments) => {
+  const seen = new Set();
+  return payments.filter((payment) => {
+    const key = getPaymentRecordKey(payment);
+    if (key == null) {
+      return true;
+    }
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+};
 
 const Reports = () => {
   const { t } = useTranslation();
@@ -18,7 +42,24 @@ const Reports = () => {
   const [selectedReport, setSelectedReport] = useState(null);
   const [downloadingCsv, setDownloadingCsv] = useState(false);
   const [creatingReport, setCreatingReport] = useState(false);
-  const totalCollections = reportPayments
+  const isPersonalReport = selectedReport?.type?.toUpperCase() === 'PERSONAL_PAYMENT_HISTORY';
+  const reportOwnerId = selectedReport?.generatedBy?.id
+    ?? selectedReport?.generatedBy?.userId
+    ?? user?.userId
+    ?? user?.id;
+  const visibleReportPayments = isPersonalReport
+    ? reportPayments.filter((payment) => {
+        const memberId = payment.memberId ?? payment.member?.id;
+        return reportOwnerId != null && String(memberId) === String(reportOwnerId);
+      })
+    : reportPayments;
+  const visibleReportGroups = isPersonalReport
+    ? reportGroups.filter((group) => group.members?.some((member) => {
+        const memberId = member.userId ?? member.id;
+        return reportOwnerId != null && String(memberId) === String(reportOwnerId);
+      }))
+    : reportGroups;
+  const totalCollections = visibleReportPayments
     .filter((payment) => payment.status === 'PAID')
     .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
 
@@ -52,16 +93,26 @@ const Reports = () => {
       setReports(Array.isArray(list) ? list : []);
 
       // Fetch active groups and payments for rich audit reports
-      getAllGroups().then((gRes) => {
+      const groupsRequest = (isAdmin || isOrganizer)
+        ? getAllGroups()
+        : uid
+          ? getGroupsByUser(uid)
+          : Promise.resolve([]);
+      groupsRequest.then((gRes) => {
         const raw = gRes?.data ?? gRes;
         const gList = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
         setReportGroups(gList);
       }).catch(() => {});
 
-      getAllPayments().then((pRes) => {
+      const paymentsRequest = (isAdmin || isOrganizer)
+        ? getAllPayments()
+        : uid
+          ? getPaymentsByMember(uid)
+          : Promise.resolve([]);
+      paymentsRequest.then((pRes) => {
         const raw = pRes?.data ?? pRes;
         const pList = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
-        setReportPayments(pList);
+        setReportPayments(deduplicatePayments(pList));
       }).catch(() => {});
     } catch (err) {
       console.error(err);
@@ -126,18 +177,18 @@ const Reports = () => {
           ['Auditor', selectedReport.generatedBy?.fullName || user?.fullName || 'Administrator'],
           [],
           ['Executive Summary'],
-          ['ACTIVE GROUPS', reportGroups.length],
-          ['ENROLLED MEMBERS', reportGroups.reduce((sum, group) => sum + Number(group.memberCount || 0), 0)],
+          ['ACTIVE GROUPS', visibleReportGroups.length],
+          ['ENROLLED MEMBERS', isPersonalReport ? (reportOwnerId == null ? 0 : 1) : visibleReportGroups.reduce((sum, group) => sum + Number(group.memberCount || 0), 0)],
           ['COLLECTED FUNDS', `LKR ${totalCollections}`],
           ['COMPLIANCE RATING', '100% VERIFIED'],
           [],
           ['Audit Findings & Operational Notes'],
           [selectedReport.content || 'Comprehensive audit report covering registered groups, active members, contribution ledgers, and rotation schedules.'],
           [],
-          ['Tracked Seettu Groups Ledger', reportGroups.length],
+          ['Tracked Seettu Groups Ledger', visibleReportGroups.length],
           ['ID', 'Group Name', 'Category', 'Target Members', 'Contribution', 'Status'],
-          ...(reportGroups.length
-            ? reportGroups.map((group) => [
+          ...(visibleReportGroups.length
+            ? visibleReportGroups.map((group) => [
                 `#${group.id}`,
                 group.name || 'Unnamed',
                 group.category || 'GENERAL',
@@ -149,11 +200,11 @@ const Reports = () => {
           [],
           ['Payment Contributions & Settlement Trail (Recent Records)'],
           ['TX #', 'Group', 'Member', 'Amount (LKR)', 'Method', 'Status'],
-          ...(reportPayments.length
-            ? reportPayments.slice(0, 20).map((payment) => [
+          ...(visibleReportPayments.length
+            ? visibleReportPayments.slice(0, 20).map((payment) => [
                 `#${payment.id}`,
-                payment.cycle?.group?.name || 'Seettu Group',
-                payment.member?.fullName || `Member #${payment.member?.id || '-'}`,
+                payment.groupName || payment.cycle?.group?.name || 'Seettu Group',
+                payment.memberName || payment.member?.fullName || `Member #${payment.memberId ?? payment.member?.id ?? '-'}`,
                 Number(payment.amount || 0),
                 payment.paymentMethod || 'OFFLINE',
                 payment.status || 'PAID'
@@ -398,7 +449,7 @@ const Reports = () => {
                       <div className="col-6 col-md-3">
                         <div className="p-3 rounded-3 border bg-light text-center">
                           <small className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.72rem' }}>Tracked Groups</small>
-                          <h4 className="fw-bold text-dark mb-0 mt-1">{reportGroups.length || 0}</h4>
+                          <h4 className="fw-bold text-dark mb-0 mt-1">{visibleReportGroups.length || 0}</h4>
                           <span className="small text-success">Active Circles</span>
                         </div>
                       </div>
@@ -412,7 +463,7 @@ const Reports = () => {
                       <div className="col-6 col-md-3">
                         <div className="p-3 rounded-3 border bg-light text-center">
                           <small className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.72rem' }}>Transactions Logged</small>
-                          <h4 className="fw-bold text-dark mb-0 mt-1">{reportPayments.length || 0}</h4>
+                          <h4 className="fw-bold text-dark mb-0 mt-1">{visibleReportPayments.length || 0}</h4>
                           <span className="small text-muted">Ledger Records</span>
                         </div>
                       </div>
@@ -434,7 +485,7 @@ const Reports = () => {
                     </div>
 
                     {/* Table 1: Active Groups Breakdown */}
-                    <div className="mb-4">
+                    {!isPersonalReport && <div className="mb-4">
                       <h6 className="fw-bold text-dark mb-2 d-flex align-items-center gap-1.5">
                         <Icon name="users" size={16} color="#1A5265" />
                         <span>Active Seettu Groups Ledger ({reportGroups.length})</span>
@@ -453,10 +504,10 @@ const Reports = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {reportGroups.length === 0 ? (
+                            {visibleReportGroups.length === 0 ? (
                               <tr><td colSpan="7" className="text-center py-3 text-muted">No group records available.</td></tr>
                             ) : (
-                              reportGroups.map(g => (
+                              visibleReportGroups.map(g => (
                                 <tr key={g.id}>
                                   <td className="font-monospace">#{g.id}</td>
                                   <td className="fw-semibold text-dark">{g.name}</td>
@@ -471,7 +522,7 @@ const Reports = () => {
                           </tbody>
                         </table>
                       </div>
-                    </div>
+                    </div>}
 
                     {/* Table 2: Recent Payment Ledger Transactions */}
                     <div className="mb-4">
@@ -493,14 +544,14 @@ const Reports = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {reportPayments.length === 0 ? (
+                            {visibleReportPayments.length === 0 ? (
                               <tr><td colSpan="7" className="text-center py-3 text-muted">No transaction records found.</td></tr>
                             ) : (
-                              reportPayments.slice(0, 15).map(p => (
+                              visibleReportPayments.slice(0, 15).map(p => (
                                 <tr key={p.id}>
                                   <td className="font-monospace">#{p.id}</td>
-                                  <td>{p.cycle?.group?.name || 'Seettu Group'}</td>
-                                  <td className="fw-semibold">{p.member?.fullName || `Member #${p.member?.id || '-'}`}</td>
+                                  <td>{p.groupName || p.cycle?.group?.name || 'Seettu Group'}</td>
+                                  <td className="fw-semibold">{p.memberName || p.member?.fullName || `Member #${p.memberId ?? p.member?.id ?? '-'}`}</td>
                                   <td className="fw-bold text-dark">LKR {Number(p.amount || 0).toLocaleString()}</td>
                                   <td><span className="badge bg-light text-dark border">{p.paymentMethod || 'Cash'}</span></td>
                                   <td className="text-muted">{p.paymentDate ? String(p.paymentDate).split('T')[0] : 'N/A'}</td>
@@ -546,16 +597,28 @@ const Reports = () => {
                       <Icon name="download" size={16} />
                       <span>{downloadingCsv ? 'Preparing CSV...' : 'Download Excel Sheet'}</span>
                     </button>
-                    <a
-                      href={`http://localhost:8081/api/reports/${selectedReport.id}/download`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="btn btn-outline-primary d-inline-flex align-items-center gap-2"
-                      style={{ borderRadius: '8px' }}
-                    >
-                      <Icon name="download" size={16} />
-                      <span>Download PDF Report</span>
-                    </a>
+                    {isPersonalReport ? (
+                      <button
+                        type="button"
+                        className="btn btn-outline-primary d-inline-flex align-items-center gap-2"
+                        style={{ borderRadius: '8px' }}
+                        onClick={() => window.print()}
+                      >
+                        <Icon name="download" size={16} />
+                        <span>Print / Save Personal Report as PDF</span>
+                      </button>
+                    ) : (
+                      <a
+                        href={`http://localhost:8081/api/reports/${selectedReport.id}/download`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-outline-primary d-inline-flex align-items-center gap-2"
+                        style={{ borderRadius: '8px' }}
+                      >
+                        <Icon name="download" size={16} />
+                        <span>Download PDF Report</span>
+                      </a>
+                    )}
                   </div>
                   <small className="w-100 text-end text-muted">
                     CSV downloads to your device; open the downloaded file with Excel.

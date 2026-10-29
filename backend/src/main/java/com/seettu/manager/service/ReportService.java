@@ -61,10 +61,14 @@ public class ReportService {
         String fileName = safeType + "_" + System.currentTimeMillis() + ".pdf";
         String filePath = reportOutputDir + "/" + fileName;
 
-        // Fetch real database records
-        List<SeettuGroup> allGroups = groupRepository.findAllWithDetails();
-        List<Payment> allPayments = paymentRepository.findAllWithDetails();
-        long totalMembers = memberRepository.count();
+        boolean personalReport = "PERSONAL_PAYMENT_HISTORY".equalsIgnoreCase(safeType);
+        List<SeettuGroup> allGroups = personalReport
+                ? groupRepository.findGroupsByMemberId(generatedBy.getId())
+                : groupRepository.findAllWithDetails();
+        List<Payment> allPayments = personalReport
+                ? paymentRepository.findByMemberIdWithDetails(generatedBy.getId())
+                : paymentRepository.findAllWithDetails();
+        long totalMembers = personalReport ? 1 : memberRepository.count();
 
         BigDecimal totalCollected = BigDecimal.ZERO;
         long paidCount = 0;
@@ -421,9 +425,15 @@ public class ReportService {
         Path csvPath = pdfPath.resolveSibling(pdfFileName.replaceFirst("(?i)\\.pdf$", ".csv"));
         File csvFile = csvPath.toFile();
 
-        if (!csvFile.isFile()) {
-            List<SeettuGroup> groups = groupRepository.findAllWithDetails();
-            List<Payment> payments = paymentRepository.findAllWithDetails();
+        boolean personalReport = "PERSONAL_PAYMENT_HISTORY".equalsIgnoreCase(report.getType());
+        if (!csvFile.isFile() || personalReport) {
+            Long reportOwnerId = report.getGeneratedBy() != null ? report.getGeneratedBy().getId() : null;
+            List<SeettuGroup> groups = personalReport && reportOwnerId != null
+                    ? groupRepository.findGroupsByMemberId(reportOwnerId)
+                    : groupRepository.findAllWithDetails();
+            List<Payment> payments = personalReport && reportOwnerId != null
+                    ? paymentRepository.findByMemberIdWithDetails(reportOwnerId)
+                    : paymentRepository.findAllWithDetails();
             BigDecimal totalCollected = payments.stream()
                     .filter(payment -> payment.getStatus() == Payment.PaymentStatus.PAID)
                     .map(Payment::getAmount)
@@ -446,7 +456,7 @@ public class ReportService {
                     defaultContent,
                     groups,
                     payments,
-                    memberRepository.count(),
+                    personalReport ? 1 : memberRepository.count(),
                     totalCollected
             );
         }
