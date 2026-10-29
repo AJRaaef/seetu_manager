@@ -656,41 +656,23 @@ const daysBetween = (from, to) => {
 };
 const now = new Date();
 const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-const paymentDayDelta = daysBetween(dueDate, date);
-const paidEarlyDays = daysEarly || (cycleStartDate && daysBetween(date, cycleStartDate) > 0
-  ? daysBetween(date, cycleStartDate)
-  : !cycleStartDate && paymentDayDelta < 0
-    ? -paymentDayDelta
-    : 0);
-const paidLateDays = daysLate || (paymentDayDelta > 0 ? paymentDayDelta : 0);
-const overdueDays = daysOverdue || Math.max(0, daysBetween(dueDate, today));
-const paidWithinCycle = cycleStartDate && dueDate && date >= cycleStartDate && date <= dueDate;
-const paidTimingLabel = paidWithinCycle
-  ? date === dueDate
-    ? 'Paid (on due date)'
-    : 'Paid (on time)'
-  : paidEarlyDays > 0
-    ? `Paid (${pluralizeDays(paidEarlyDays)} early)`
-    : paidLateDays > 0
-      ? `Paid (${pluralizeDays(paidLateDays)} late)`
-      : dueDate && date === dueDate
-        ? 'Paid (on due date)'
-        : status === 'LATE'
-          ? 'Paid (Late)'
-          : 'Paid';
+const daysBeforeDue = (dueDate && date) ? daysBetween(date, dueDate) : 0;
+const daysAfterDue = (dueDate && date) ? daysBetween(dueDate, date) : 0;
+const paidEarlyDays = daysEarly || (daysBeforeDue > 0 ? daysBeforeDue : 0);
+const paidLateDays = daysLate || (daysAfterDue > 0 ? daysAfterDue : (status === 'LATE' ? 1 : 0));
+const overdueDays = daysOverdue || (dueDate ? Math.max(0, daysBetween(dueDate, today)) : 0);
 
 switch (status) {
 
 case 'PAID':
-
 return <span className="badge-paid text-nowrap" style={{ cursor: 'pointer' }}>
-  {paidTimingLabel}
+  {paidEarlyDays > 0 ? `Paid (${pluralizeDays(paidEarlyDays)} early)` : (dueDate && date === dueDate ? 'Paid (on due date)' : 'Paid (on time)')}
 </span>;
 
 case 'LATE':
 
 return <span className="badge bg-warning text-dark px-2 py-1 rounded-2 fw-semibold text-nowrap" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>
-  {paidTimingLabel}
+  {paidLateDays > 0 ? `Paid (${pluralizeDays(paidLateDays)} late)` : 'Paid (Late)'}
 </span>;
 
 case 'PENDING':

@@ -584,21 +584,24 @@ public class PaymentService {
     }
 
     private Long calculateDaysEarly(Payment payment) {
-        LocalDate startDate = payment.getCycle().getStartDate();
+        LocalDate dueDate = payment.getCycle().getEndDate();
         LocalDate paymentDate = getPaymentDateForTiming(payment);
-        if (!isSettledStatus(payment.getStatus()) || startDate == null || paymentDate == null || !paymentDate.isBefore(startDate)) {
+        if (payment.getStatus() != Payment.PaymentStatus.PAID || dueDate == null || paymentDate == null || !paymentDate.isBefore(dueDate)) {
             return 0L;
         }
-        return ChronoUnit.DAYS.between(paymentDate, startDate);
+        return ChronoUnit.DAYS.between(paymentDate, dueDate);
     }
 
     private Long calculateDaysLate(Payment payment) {
         LocalDate dueDate = payment.getCycle().getEndDate();
         LocalDate paymentDate = getPaymentDateForTiming(payment);
-        if (!isSettledStatus(payment.getStatus()) || dueDate == null || paymentDate == null || !paymentDate.isAfter(dueDate)) {
-            return 0L;
+        if (dueDate == null || paymentDate == null) {
+            return payment.getStatus() == Payment.PaymentStatus.LATE ? 1L : 0L;
         }
-        return ChronoUnit.DAYS.between(dueDate, paymentDate);
+        if (paymentDate.isAfter(dueDate)) {
+            return ChronoUnit.DAYS.between(dueDate, paymentDate);
+        }
+        return payment.getStatus() == Payment.PaymentStatus.LATE ? 1L : 0L;
     }
 
     private Long calculateDaysOverdue(Payment payment) {
