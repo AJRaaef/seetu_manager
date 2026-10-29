@@ -324,7 +324,7 @@ const Reports = () => {
                     className="btn btn-outline-primary w-100 fw-semibold" 
                     onClick={() => setSelectedReport(r)}
                   >
-                    {t('reports_page.export_pdf', 'View / Print Report')}
+                    {t('reports_page.view_report', 'View Report')}
                   </button>
                 </div>
               </div>
