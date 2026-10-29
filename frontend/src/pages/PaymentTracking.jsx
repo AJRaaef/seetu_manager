@@ -137,6 +137,7 @@ res = await getPaymentsByMember(userId);
         daysLate: Number(p.daysLate) || 0,
         daysOverdue: Number(p.daysOverdue) || 0,
         amount: Number(p.amount) || 0,
+        expectedAmount: Number(p.expectedAmount) || 0,
         status: (p.status || 'PAID').toUpperCase(),
         recordedBy: p.recordedByName || (p.status === 'PAID' || p.status === 'LATE' || p.status === 'PARTIAL' ? 'Organizer' : '—'),
         method: p.paymentMethod || 'Cash (Offline)',
@@ -841,9 +842,9 @@ metricsSource.filter((p) => p.status === 'OVERDUE').map((p) => p.member)
 
 ).size;
 
-const totalAmount = totalCollected + totalPending + totalOverdue;
-
-const onTimeRate = totalAmount > 0 ? Math.round((totalCollected / totalAmount) * 100) : 0;
+const totalPaymentsCount = metricsSource.length;
+const onTimePaymentsCount = metricsSource.filter((p) => p.status === 'PAID').length;
+const onTimeRate = totalPaymentsCount > 0 ? Math.round((onTimePaymentsCount / totalPaymentsCount) * 100) : 0;
 
 return (
 
@@ -954,6 +955,12 @@ return (
 <div className="custom-progress w-100 mt-2">
 
 <div className="custom-progress-bar" style={{ width: `${onTimeRate}%` }}></div>
+
+</div>
+
+<div className="text-muted small mt-2" style={{ fontSize: '0.75rem' }}>
+
+{onTimePaymentsCount} of {totalPaymentsCount} on time
 
 </div>
 
@@ -2134,7 +2141,25 @@ style={{ cursor: 'pointer' }}
 
 <td className="py-3 px-3 text-muted small text-nowrap">{p.cycle}</td>
 
-<td className="py-3 px-3 fw-semibold text-dark small text-nowrap">{Number(p.amount || 0).toLocaleString()} LKR</td>
+<td className="py-3 px-3 fw-semibold text-dark small text-nowrap">
+  <div>{Number(p.amount || 0).toLocaleString()} LKR</div>
+  {p.status === 'PARTIAL' && (
+    <div className="text-danger fw-normal mt-0.5" style={{ fontSize: '0.75rem' }}>
+      {(() => {
+        const fullExpected = Number(p.expectedAmount) 
+          || Number((Array.isArray(availableGroups) ? availableGroups : []).find(g => (g.name && p.group && g.name.toLowerCase() === p.group.toLowerCase()) || g.id === p.groupId)?.contributionAmount)
+          || (Array.isArray(payments) ? payments.find(other => other.group === p.group && (other.status === 'PAID' || other.status === 'LATE') && other.amount > p.amount)?.amount : 0)
+          || 0;
+        const balanceDue = fullExpected > p.amount ? fullExpected - p.amount : 0;
+        return balanceDue > 0 ? (
+          <span>Remaining: <strong className="text-danger">{Number(balanceDue).toLocaleString()} LKR</strong></span>
+        ) : (
+          <span className="text-warning-emphasis">Partial Payment</span>
+        );
+      })()}
+    </div>
+  )}
+</td>
 
 <td
 
