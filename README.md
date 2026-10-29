@@ -350,4 +350,4 @@ This project is developed as the **Final Capstone Project** for the **National D
 
 ---
 
-*Academic Use Only — SeettuManager © 2026 Group 15, ITUM.*
+
