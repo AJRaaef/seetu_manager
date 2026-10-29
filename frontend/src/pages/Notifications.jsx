@@ -167,41 +167,42 @@ const Notifications = () => {
     }
   };
 
+
   const getTypeMeta = (type) => {
-    const t = (type || '').toUpperCase();
-    if (t.includes('OVERDUE')) {
-      return { label: 'Overdue Notice', badgeBg: 'bg-danger text-white', icon: 'warning', iconColor: '#DC2626', iconBg: '#FEE2E2', borderColor: '#DC2626' };
+    const tType = (type || '').toUpperCase();
+    if (tType.includes('OVERDUE')) {
+      return { label: t('notifications_page.overdue_notice', 'Overdue Notice'), badgeBg: 'bg-danger text-white', icon: 'warning', iconColor: '#DC2626', iconBg: '#FEE2E2', borderColor: '#DC2626' };
     }
-    if (t.includes('REMINDER')) {
-      return { label: 'Payment Reminder', badgeBg: 'bg-warning text-dark', icon: 'payments', iconColor: '#D97706', iconBg: '#FEF3C7', borderColor: '#F59E0B' };
+    if (tType.includes('REMINDER')) {
+      return { label: t('notifications_page.payment_reminder', 'Payment Reminder'), badgeBg: 'bg-warning text-dark', icon: 'payments', iconColor: '#D97706', iconBg: '#FEF3C7', borderColor: '#F59E0B' };
     }
-    if (t.includes('PAYMENT')) {
-      return { label: 'Payment Update', badgeBg: 'bg-success text-white', icon: 'payments', iconColor: '#059669', iconBg: '#D1FAE5', borderColor: '#10B981' };
+    if (tType.includes('PAYMENT')) {
+      return { label: t('notifications_page.payment_update', 'Payment Update'), badgeBg: 'bg-success text-white', icon: 'payments', iconColor: '#059669', iconBg: '#D1FAE5', borderColor: '#10B981' };
     }
-    if (t.includes('DISPUTE')) {
-      return { label: 'Dispute Alert', badgeBg: 'bg-dark text-white', icon: 'disputes', iconColor: '#4F46E5', iconBg: '#EEF2FF', borderColor: '#6366F1' };
+    if (tType.includes('DISPUTE')) {
+      return { label: t('notifications_page.dispute_alert', 'Dispute Alert'), badgeBg: 'bg-dark text-white', icon: 'disputes', iconColor: '#4F46E5', iconBg: '#EEF2FF', borderColor: '#6366F1' };
     }
-    if (t.includes('EMERGENCY')) {
-      return { label: 'Emergency Notice', badgeBg: 'bg-danger text-white', icon: 'emergency', iconColor: '#DC2626', iconBg: '#FEE2E2', borderColor: '#DC2626' };
+    if (tType.includes('EMERGENCY')) {
+      return { label: t('notifications_page.emergency_notice', 'Emergency Notice'), badgeBg: 'bg-danger text-white', icon: 'emergency', iconColor: '#DC2626', iconBg: '#FEE2E2', borderColor: '#DC2626' };
     }
-    if (t.includes('VERIF') || t.includes('KYC') || t.includes('ORGANIZER')) {
-      const isApproved = t.includes('APPROV') || t.includes('VERIFIED');
-      const isRejected = t.includes('REJECT');
+    if (tType.includes('VERIF') || tType.includes('KYC') || tType.includes('ORGANIZER')) {
+      const isApproved = tType.includes('APPROV') || tType.includes('VERIFIED');
+      const isRejected = tType.includes('REJECT');
       if (isApproved) {
-        return { label: 'Verified', badgeBg: 'bg-success text-white', icon: 'shield', iconColor: '#059669', iconBg: '#D1FAE5', borderColor: '#10B981' };
+        return { label: t('notifications_page.verified', 'Verified'), badgeBg: 'bg-success text-white', icon: 'shield', iconColor: '#059669', iconBg: '#D1FAE5', borderColor: '#10B981' };
       }
       if (isRejected) {
-        return { label: 'Verification Rejected', badgeBg: 'bg-danger text-white', icon: 'shield', iconColor: '#DC2626', iconBg: '#FEE2E2', borderColor: '#DC2626' };
+        return { label: t('notifications_page.verification_rejected', 'Verification Rejected'), badgeBg: 'bg-danger text-white', icon: 'shield', iconColor: '#DC2626', iconBg: '#FEE2E2', borderColor: '#DC2626' };
       }
-      return { label: 'Verification Under Review', badgeBg: 'bg-info text-dark', icon: 'shield', iconColor: '#0284C7', iconBg: '#E0F2FE', borderColor: '#0097B2' };
+      return { label: t('notifications_page.verification_review', 'Verification Under Review'), badgeBg: 'bg-info text-dark', icon: 'shield', iconColor: '#0284C7', iconBg: '#E0F2FE', borderColor: '#0097B2' };
     }
-    if (t.includes('JOIN')) {
-      return { label: 'Join Request', badgeBg: 'bg-primary text-white', icon: 'groups', iconColor: '#0097B2', iconBg: '#E0F7FA', borderColor: '#0097B2' };
+    if (tType.includes('JOIN')) {
+      return { label: t('notifications_page.join_request', 'Join Request'), badgeBg: 'bg-primary text-white', icon: 'groups', iconColor: '#0097B2', iconBg: '#E0F7FA', borderColor: '#0097B2' };
     }
-    if (t.includes('GROUP')) {
-      return { label: 'Group Notice', badgeBg: 'bg-primary text-white', icon: 'groups', iconColor: '#0097B2', iconBg: '#E0F7FA', borderColor: '#0097B2' };
+    if (tType.includes('GROUP')) {
+      return { label: t('notifications_page.group_notice', 'Group Notice'), badgeBg: 'bg-primary text-white', icon: 'groups', iconColor: '#0097B2', iconBg: '#E0F7FA', borderColor: '#0097B2' };
     }
-    return { label: 'Notice', badgeBg: 'bg-secondary text-white', icon: 'bell', iconColor: '#64748B', iconBg: '#F1F5F9', borderColor: '#94A3B8' };
+    return { label: t('notifications_page.notice', 'Notice'), badgeBg: 'bg-secondary text-white', icon: 'bell', iconColor: '#64748B', iconBg: '#F1F5F9', borderColor: '#94A3B8' };
   };
 
   const unreadCount = notifications.filter(isUnread).length;
@@ -221,14 +222,14 @@ const Notifications = () => {
             <span style={{ color: '#0F2F3D' }}>{t('notifications_page.title', 'Notifications')}</span>
             {unreadCount > 0 && (
               <span className="badge rounded-pill bg-danger fs-6 align-middle ms-2">
-                {unreadCount} unread
+                {t('notifications_page.unread_badge', { count: unreadCount, defaultValue: `${unreadCount} unread` })}
               </span>
             )}
           </h2>
           <p className="text-muted mb-0">
             {scope === 'ALL_SYSTEM'
-              ? 'Viewing all system-wide notification activities across all users and circles'
-              : `Personal notifications for ${user?.fullName || 'your account'} (${user?.email || ''})`}
+              ? t('notifications_page.system_sub', 'Viewing all system-wide notification activities across all users and circles')
+              : `${t('notifications_page.personal_sub', 'Personal notifications for')} ${user?.fullName || 'your account'} (${user?.email || ''})`}
           </p>
         </div>
 
@@ -241,7 +242,7 @@ const Notifications = () => {
               title="Dispatches due payment reminders to members with upcoming cycles"
             >
               <Icon name="payments" size={15} />
-              <span>{isTriggering ? 'Dispatching...' : 'Dispatch Due Reminders'}</span>
+              <span>{isTriggering ? t('notifications_page.dispatching', 'Dispatching...') : t('notifications_page.dispatch_btn', 'Dispatch Due Reminders')}</span>
             </button>
           )}
 
@@ -263,7 +264,7 @@ const Notifications = () => {
       {/* Scope Selector (For Admins & Organizers to view My Notifications vs All System) */}
       {(isAdmin || isOrganizer) && (
         <div className="d-flex align-items-center gap-2 mb-3">
-          <span className="small text-muted fw-bold text-uppercase">Scope:</span>
+          <span className="small text-muted fw-bold text-uppercase">{t('notifications_page.scope_label', 'Scope:')}</span>
           <div className="btn-group btn-group-sm shadow-sm" role="group">
             <button
               type="button"
@@ -272,7 +273,7 @@ const Notifications = () => {
               onClick={() => setScope('MINE')}
             >
               <Icon name="user" size={14} color={scope === 'MINE' ? '#FFFFFF' : 'currentColor'} />
-              <span>My Notifications</span>
+              <span>{t('notifications_page.my_notifications', 'My Notifications')}</span>
             </button>
             <button
               type="button"
@@ -281,7 +282,7 @@ const Notifications = () => {
               onClick={() => setScope('ALL_SYSTEM')}
             >
               <Icon name="globe" size={14} color={scope === 'ALL_SYSTEM' ? '#FFFFFF' : 'currentColor'} />
-              <span>All System Notifications ({scope === 'ALL_SYSTEM' ? notifications.length : 'All Users'})</span>
+              <span>{t('notifications_page.all_system_notifications', 'All System Notifications')} ({scope === 'ALL_SYSTEM' ? notifications.length : t('notifications_page.all_users', 'All Users')})</span>
             </button>
           </div>
         </div>
@@ -295,14 +296,14 @@ const Notifications = () => {
             style={filter === 'ALL' ? { backgroundColor: '#0097B2', borderColor: '#0097B2' } : {}}
             onClick={() => setFilter('ALL')}
           >
-            All Notifications ({notifications.length})
+            {t('notifications_page.all_notifications', 'All Notifications')} ({notifications.length})
           </button>
           <button
             className={`btn btn-sm ${filter === 'UNREAD' ? 'btn-primary fw-bold' : 'btn-light'}`}
             style={filter === 'UNREAD' ? { backgroundColor: '#0097B2', borderColor: '#0097B2' } : {}}
             onClick={() => setFilter('UNREAD')}
           >
-            Unread Only ({unreadCount})
+            {t('notifications_page.unread_only', 'Unread Only')} ({unreadCount})
           </button>
         </div>
       </div>
@@ -310,18 +311,18 @@ const Notifications = () => {
       {loading ? (
         <div className="text-center py-5">
           <div className="spinner-border text-primary" role="status"></div>
-          <p className="mt-2 text-muted">Loading notifications...</p>
+          <p className="mt-2 text-muted">{t('notifications_page.loading', 'Loading notifications...')}</p>
         </div>
       ) : filteredNotifications.length === 0 ? (
         <div className="card text-center p-5 shadow-sm border-0 rounded-4">
           <div className="d-flex justify-content-center mb-2">
             <Icon name="bell" size={48} color="#94A3B8" />
           </div>
-          <h5 className="fw-bold mt-2" style={{ color: '#0F2F3D' }}>No Notifications Found</h5>
+          <h5 className="fw-bold mt-2" style={{ color: '#0F2F3D' }}>{t('notifications_page.empty_title', 'No Notifications Found')}</h5>
           <p className="text-muted mb-0">
             {filter === 'UNREAD'
-              ? 'Great news! You have read all notifications in this view.'
-              : 'There are no notification records matching your selection.'}
+              ? t('notifications_page.empty_read_desc', 'Great news! You have read all notifications in this view.')
+              : t('notifications_page.empty_match_desc', 'There are no notification records matching your selection.')}
           </p>
         </div>
       ) : (
@@ -359,13 +360,13 @@ const Notifications = () => {
                       </span>
                       {unread && (
                         <span className="badge rounded-pill bg-danger small px-2 py-1">
-                              NEW
+                              {t('notifications_page.new_badge', 'NEW')}
                         </span>
                       )}
                       {scope === 'ALL_SYSTEM' && n.user && (
                         <span className="badge bg-secondary-subtle text-dark border px-2 py-0.5 small d-inline-flex align-items-center">
                           <Icon name="user" size={12} color="#475569" className="me-1" />
-                          <span>Sent to: {n.user.fullName || n.user.email || `User #${n.user.id}`}</span>
+                          <span>{t('notifications_page.sent_to', 'Sent to:')} {n.user.fullName || n.user.email || `User #${n.user.id}`}</span>
                         </span>
                       )}
                       <small className="text-muted ms-auto d-inline-flex align-items-center">
@@ -386,7 +387,7 @@ const Notifications = () => {
                           onClick={() => handleOpenNotificationVoucher(n)}
                         >
                           <Icon name="award" size={14} color="#166534" />
-                          <span>View Payout Voucher (PDF)</span>
+                          <span>{t('notifications_page.view_voucher', 'View Payout Voucher (PDF)')}</span>
                         </button>
                       </div>
                     )}
@@ -400,7 +401,7 @@ const Notifications = () => {
                       title="Mark as read"
                     >
                       <Icon name="check" size={13} color="#0097B2" />
-                      <span>Mark Read</span>
+                      <span>{t('notifications_page.mark_read', 'Mark Read')}</span>
                     </button>
                   )}
                 </div>
