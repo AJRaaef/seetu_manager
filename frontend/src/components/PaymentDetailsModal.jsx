@@ -160,6 +160,10 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
         ['Cycle', payment.cycle || 'N/A', 'Date', payment.date || 'N/A'],
         ['Recorded By', payment.recordedBy || (isPaid ? 'Organizer' : 'N/A'), 'Payment Method', payment.method || 'Cash (Offline)']
       ];
+      if (payment.status?.toUpperCase() === 'PARTIAL') {
+        const balDue = (payment.expectedAmount || 0) > payment.amount ? (payment.expectedAmount - payment.amount) : 0;
+        fields.push(['Full Required Installment', `${Number(payment.expectedAmount || 0).toLocaleString()} LKR`, 'Outstanding Balance Due', `${Number(balDue).toLocaleString()} LKR`]);
+      }
 
       fields.forEach(([leftLabel, leftValue, rightLabel, rightValue]) => {
         const leftHeight = addField(leftLabel, leftValue, margin, y, columnWidth);
@@ -232,27 +236,62 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
 
       <div className="custom-modal-body">
         {/* Large Amount Banner */}
-        <div
-          className="p-3 rounded-3 mb-3 d-flex justify-content-between align-items-center border"
-          style={{ backgroundColor: payment.status?.toUpperCase() === 'PARTIAL' ? '#FFFBEB' : '#F0FDF4', borderColor: payment.status?.toUpperCase() === 'PARTIAL' ? '#FDE68A' : '#BBF7D0' }}
-        >
-          <div>
-            <div className="text-uppercase small fw-bold text-muted" style={{ fontSize: '0.725rem', letterSpacing: '0.5px' }}>
-              {payment.status?.toUpperCase() === 'PARTIAL' ? 'AMOUNT PAID (PARTIAL)' : t('modals.payment_details.amount', 'AMOUNT')}
+        {payment.status?.toUpperCase() === 'PARTIAL' ? (
+          <div className="p-3 rounded-3 mb-3 border shadow-xs" style={{ backgroundColor: '#FFFBEB', borderColor: '#FDE68A' }}>
+            <div className="d-flex justify-content-between align-items-center mb-2.5">
+              <span className="fw-bold text-warning-emphasis small text-uppercase letter-spacing-1">
+                Partial Payment Receipt Breakdown
+              </span>
+              {getStatusBadge(payment.status)}
             </div>
-            <div className="fs-3 fw-bold text-dark mt-1">
-              {payment.amount ? `${Number(payment.amount).toLocaleString()} LKR` : '1,000 LKR'}
-            </div>
-            {payment.status?.toUpperCase() === 'PARTIAL' && payment.expectedAmount > payment.amount && (
-              <div className="text-danger small fw-semibold mt-1">
-                Expected: {Number(payment.expectedAmount).toLocaleString()} LKR &bull; Remaining Due: {Number(payment.expectedAmount - payment.amount).toLocaleString()} LKR
+            <div className="row g-2 text-center mb-2">
+              <div className="col-4">
+                <div className="p-2 bg-white rounded border">
+                  <div className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.68rem' }}>Full Required</div>
+                  <div className="fw-bold text-dark fs-6 mt-1">
+                    {Number(payment.expectedAmount || 0).toLocaleString()} LKR
+                  </div>
+                </div>
               </div>
-            )}
+              <div className="col-4">
+                <div className="p-2 bg-white rounded border border-success border-opacity-25">
+                  <div className="text-success text-uppercase fw-semibold" style={{ fontSize: '0.68rem' }}>Amount Paid</div>
+                  <div className="fw-bold text-success fs-6 mt-1">
+                    {Number(payment.amount || 0).toLocaleString()} LKR
+                  </div>
+                </div>
+              </div>
+              <div className="col-4">
+                <div className="p-2 bg-white rounded border border-danger border-opacity-50">
+                  <div className="text-danger text-uppercase fw-semibold" style={{ fontSize: '0.68rem' }}>Balance Remaining</div>
+                  <div className="fw-bold text-danger fs-6 mt-1">
+                    {Number((payment.expectedAmount || 0) > payment.amount ? (payment.expectedAmount - payment.amount) : 0).toLocaleString()} LKR
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="small text-muted fst-italic p-2 bg-white bg-opacity-60 rounded border border-warning border-opacity-25" style={{ fontSize: '0.74rem' }}>
+              ℹ️ Member has paid <strong>{Number(payment.amount || 0).toLocaleString()} LKR</strong> out of the required <strong>{Number(payment.expectedAmount || 0).toLocaleString()} LKR</strong> contribution. Outstanding balance of <strong>{Number((payment.expectedAmount || 0) > payment.amount ? (payment.expectedAmount - payment.amount) : 0).toLocaleString()} LKR</strong> must be settled.
+            </div>
           </div>
-          <div>
-            {getStatusBadge(payment.status)}
+        ) : (
+          <div
+            className="p-3 rounded-3 mb-3 d-flex justify-content-between align-items-center border"
+            style={{ backgroundColor: '#F0FDF4', borderColor: '#BBF7D0' }}
+          >
+            <div>
+              <div className="text-uppercase small fw-bold text-muted" style={{ fontSize: '0.725rem', letterSpacing: '0.5px' }}>
+                {t('modals.payment_details.amount', 'AMOUNT')}
+              </div>
+              <div className="fs-3 fw-bold text-dark mt-1">
+                {payment.amount ? `${Number(payment.amount).toLocaleString()} LKR` : '1,000 LKR'}
+              </div>
+            </div>
+            <div>
+              {getStatusBadge(payment.status)}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* 2-Column Info Grid */}
         <div className="row g-3 mb-3">

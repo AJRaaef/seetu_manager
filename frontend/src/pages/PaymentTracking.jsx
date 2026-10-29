@@ -1310,6 +1310,10 @@ title="Payment Status"
 
 <option value="PARTIAL">Partial Payment</option>
 
+<option value="LATE">Paid (Late)</option>
+
+<option value="OVERDUE">Overdue Payment</option>
+
 </select>
 
 </div>
@@ -2374,7 +2378,18 @@ show={!!viewPayment}
 
 onHide={() => setViewPayment(null)}
 
-payment={viewPayment}
+payment={(() => {
+  if (!viewPayment) return null;
+  const fullExp = Number(viewPayment.expectedAmount)
+    || Number((Array.isArray(availableGroups) ? availableGroups : []).find(g => (g.name && viewPayment.group && g.name.toLowerCase() === viewPayment.group.toLowerCase()) || g.id === viewPayment.groupId)?.contributionAmount)
+    || (Array.isArray(payments) ? payments.find(other => other.group === viewPayment.group && (other.status === 'PAID' || other.status === 'LATE') && other.amount > viewPayment.amount)?.amount : 0)
+    || 0;
+  return {
+    ...viewPayment,
+    expectedAmount: fullExp,
+    remainingAmount: fullExp > viewPayment.amount ? fullExp - viewPayment.amount : 0
+  };
+})()}
 
 />
 
