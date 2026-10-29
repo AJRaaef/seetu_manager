@@ -548,6 +548,7 @@ public class PaymentService {
                 .memberPhone(payment.getMember() != null ? payment.getMember().getPhone() : null)
                 .memberEmail(payment.getMember() != null ? payment.getMember().getEmail() : null)
                 .evidenceUrls(evidenceUrls)
+                .expectedAmount(payment.getCycle() != null && payment.getCycle().getGroup() != null ? payment.getCycle().getGroup().getContributionAmount() : null)
                 .build();
     }
 

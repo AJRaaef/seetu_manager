@@ -234,15 +234,20 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
         {/* Large Amount Banner */}
         <div
           className="p-3 rounded-3 mb-3 d-flex justify-content-between align-items-center border"
-          style={{ backgroundColor: '#F0FDF4', borderColor: '#BBF7D0' }}
+          style={{ backgroundColor: payment.status?.toUpperCase() === 'PARTIAL' ? '#FFFBEB' : '#F0FDF4', borderColor: payment.status?.toUpperCase() === 'PARTIAL' ? '#FDE68A' : '#BBF7D0' }}
         >
           <div>
             <div className="text-uppercase small fw-bold text-muted" style={{ fontSize: '0.725rem', letterSpacing: '0.5px' }}>
-              {t('modals.payment_details.amount', 'AMOUNT')}
+              {payment.status?.toUpperCase() === 'PARTIAL' ? 'AMOUNT PAID (PARTIAL)' : t('modals.payment_details.amount', 'AMOUNT')}
             </div>
             <div className="fs-3 fw-bold text-dark mt-1">
-              {payment.amount ? `${payment.amount.toLocaleString()} LKR` : '1,000 LKR'}
+              {payment.amount ? `${Number(payment.amount).toLocaleString()} LKR` : '1,000 LKR'}
             </div>
+            {payment.status?.toUpperCase() === 'PARTIAL' && payment.expectedAmount > payment.amount && (
+              <div className="text-danger small fw-semibold mt-1">
+                Expected: {Number(payment.expectedAmount).toLocaleString()} LKR &bull; Remaining Due: {Number(payment.expectedAmount - payment.amount).toLocaleString()} LKR
+              </div>
+            )}
           </div>
           <div>
             {getStatusBadge(payment.status)}

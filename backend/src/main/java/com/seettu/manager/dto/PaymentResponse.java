@@ -20,6 +20,7 @@ public class PaymentResponse {
     private Long memberId;
     private String memberName;
     private BigDecimal amount;
+    private BigDecimal expectedAmount;
     private String status;
     private LocalDate paymentDate;
     private LocalDate cycleStartDate;
