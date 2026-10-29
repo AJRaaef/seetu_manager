@@ -22,6 +22,11 @@ public class PaymentResponse {
     private BigDecimal amount;
     private String status;
     private LocalDate paymentDate;
+    private LocalDate cycleStartDate;
+    private LocalDate dueDate;
+    private Long daysEarly;
+    private Long daysLate;
+    private Long daysOverdue;
     private String recordedByName;
     private String notes;
     private String paymentMethod;

@@ -129,6 +129,13 @@ res = await getPaymentsByMember(userId);
         cycle: p.cycleNumber ? `Cycle ${p.cycleNumber}` : 'Cycle 1',
         cycleId: p.cycleId,
         memberId: p.memberId,
+        cycleStartDate: p.cycleStartDate || p.cycle?.startDate,
+        dueDate: p.dueDate
+          || p.cycle?.endDate
+          || p.notes?.match(/after due date (\d{4}-\d{2}-\d{2})/i)?.[1],
+        daysEarly: Number(p.daysEarly) || 0,
+        daysLate: Number(p.daysLate) || 0,
+        daysOverdue: Number(p.daysOverdue) || 0,
         amount: Number(p.amount) || 0,
         status: (p.status || 'PAID').toUpperCase(),
         recordedBy: p.recordedByName || (p.status === 'PAID' ? 'Organizer' : '—'),
@@ -632,31 +639,75 @@ fetchPayments();
 
 };
 
-const getStatusBadge = (status) => {
+const getStatusBadge = (payment) => {
+
+const { status, daysEarly = 0, daysLate = 0, daysOverdue = 0, cycleStartDate, dueDate, date } = payment;
+const pluralizeDays = (days) => `${days} day${days === 1 ? '' : 's'}`;
+const toUtcDay = (value) => {
+  if (!value) return null;
+  const [year, month, day] = String(value).slice(0, 10).split('-').map(Number);
+  return year && month && day ? Date.UTC(year, month - 1, day) : null;
+};
+const daysBetween = (from, to) => {
+  const fromDay = toUtcDay(from);
+  const toDay = toUtcDay(to);
+  return fromDay === null || toDay === null ? 0 : Math.floor((toDay - fromDay) / 86400000);
+};
+const now = new Date();
+const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+const paymentDayDelta = daysBetween(dueDate, date);
+const paidEarlyDays = daysEarly || (cycleStartDate && daysBetween(date, cycleStartDate) > 0
+  ? daysBetween(date, cycleStartDate)
+  : !cycleStartDate && paymentDayDelta < 0
+    ? -paymentDayDelta
+    : 0);
+const paidLateDays = daysLate || (paymentDayDelta > 0 ? paymentDayDelta : 0);
+const overdueDays = daysOverdue || Math.max(0, daysBetween(dueDate, today));
+const paidWithinCycle = cycleStartDate && dueDate && date >= cycleStartDate && date <= dueDate;
+const paidTimingLabel = paidWithinCycle
+  ? date === dueDate
+    ? 'Paid (on due date)'
+    : 'Paid (on time)'
+  : paidEarlyDays > 0
+    ? `Paid (${pluralizeDays(paidEarlyDays)} early)`
+    : paidLateDays > 0
+      ? `Paid (${pluralizeDays(paidLateDays)} late)`
+      : dueDate && date === dueDate
+        ? 'Paid (on due date)'
+        : status === 'LATE'
+          ? 'Paid (Late)'
+          : 'Paid';
 
 switch (status) {
 
 case 'PAID':
 
-return <span className="badge-paid text-nowrap" style={{ cursor: 'pointer' }}>Paid</span>;
+return <span className="badge-paid text-nowrap" style={{ cursor: 'pointer' }}>
+  {paidTimingLabel}
+</span>;
 
 case 'LATE':
 
-return <span className="badge bg-warning text-dark px-2 py-1 rounded-2 fw-semibold text-nowrap" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>Paid (Late)</span>;
+return <span className="badge bg-warning text-dark px-2 py-1 rounded-2 fw-semibold text-nowrap" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>
+  {paidTimingLabel}
+</span>;
 
 case 'PENDING':
 
 return <span className="badge-pending text-nowrap" style={{ cursor: 'pointer' }}>Pending</span>;
 
 case 'OVERDUE':
-
 case 'MISSED':
 
-return <span className="badge-overdue text-nowrap" style={{ cursor: 'pointer' }}>Overdue</span>;
+return <span className="badge-overdue text-nowrap" style={{ cursor: 'pointer' }}>
+  {overdueDays > 0 ? `Overdue (${pluralizeDays(overdueDays)})` : 'Overdue'}
+</span>;
 
 case 'PARTIAL':
 
-return <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 rounded-2 text-nowrap" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>Partial</span>;
+return <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 rounded-2 text-nowrap" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>
+  {overdueDays > 0 ? `Partial (${pluralizeDays(overdueDays)} overdue)` : 'Partial'}
+</span>;
 
 default:
 
@@ -1249,8 +1300,6 @@ title="Payment Status"
 >
 
 <option value="PAID">Paid (Full)</option>
-
-<option value="LATE">Paid (Late)</option>
 
 <option value="PARTIAL">Partial Payment</option>
 
@@ -2097,7 +2146,7 @@ title="Click to view payment details"
 
 >
 
-{getStatusBadge(p.status)}
+{getStatusBadge(p)}
 
 </td>
 
@@ -2349,4 +2398,3 @@ onDelete={handleDeleteRecord}
 };
 
 export default PaymentTracking;
-

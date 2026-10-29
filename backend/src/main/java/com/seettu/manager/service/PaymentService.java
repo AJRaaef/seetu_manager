@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -59,21 +60,17 @@ public class PaymentService {
             if (existing.getStatus() == Payment.PaymentStatus.PAID && (request.getStatus() == null || "PAID".equalsIgnoreCase(request.getStatus()))) {
                 throw new DuplicateResourceException("Payment already recorded for this cycle and member");
             }
-            // Parse requested status if provided, else default to PAID
-            Payment.PaymentStatus updatedStatus = Payment.PaymentStatus.PAID;
+            LocalDate paymentDate = request.getPaymentDate() != null ? request.getPaymentDate() : LocalDate.now();
+            Payment.PaymentStatus updatedStatus = parseStatus(request.getStatus(), Payment.PaymentStatus.PAID);
             if (recorder != null && recorder.getRole() == User.Role.MEMBER) {
                 updatedStatus = Payment.PaymentStatus.PENDING;
-            } else if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
-                try {
-                    updatedStatus = Payment.PaymentStatus.valueOf(request.getStatus().trim().toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    updatedStatus = Payment.PaymentStatus.PAID;
-                }
+            } else if (isSettledStatus(updatedStatus)) {
+                updatedStatus = getPaidStatus(existing.getCycle(), paymentDate);
             }
             // Update existing pending payment
             existing.setAmount(request.getAmount());
             existing.setStatus(updatedStatus);
-            existing.setPaymentDate(request.getPaymentDate() != null ? request.getPaymentDate() : LocalDate.now());
+            existing.setPaymentDate(paymentDate);
             existing.setRecordedBy(recorder != null && recorder.getRole() == User.Role.MEMBER ? null : recorder);
             existing.setNotes(request.getNotes());
             if (request.getPaymentMethod() != null) {
@@ -89,22 +86,17 @@ public class PaymentService {
             return existing;
         }
 
-        // Determine status based on explicit request or timing and contribution amount
-        Payment.PaymentStatus status = Payment.PaymentStatus.PAID;
+        LocalDate paymentDate = request.getPaymentDate() != null ? request.getPaymentDate() : LocalDate.now();
+        Payment.PaymentStatus status = parseStatus(request.getStatus(), null);
         if (recorder != null && recorder.getRole() == User.Role.MEMBER) {
             // Members submitting contributions are always PENDING until Organizer/Admin approves
             status = Payment.PaymentStatus.PENDING;
-        } else if (request.getStatus() != null && !request.getStatus().trim().isEmpty()) {
-            try {
-                status = Payment.PaymentStatus.valueOf(request.getStatus().trim().toUpperCase());
-            } catch (IllegalArgumentException e) {
-                status = Payment.PaymentStatus.PAID;
-            }
-        } else if (cycle.getGroup() != null && cycle.getGroup().getContributionAmount() != null
-                && request.getAmount().compareTo(cycle.getGroup().getContributionAmount()) < 0) {
+        } else if (status == Payment.PaymentStatus.PARTIAL
+                || (status == null && cycle.getGroup() != null && cycle.getGroup().getContributionAmount() != null
+                && request.getAmount().compareTo(cycle.getGroup().getContributionAmount()) < 0)) {
             status = Payment.PaymentStatus.PARTIAL;
-        } else if (LocalDate.now().isAfter(cycle.getEndDate())) {
-            status = Payment.PaymentStatus.LATE;
+        } else {
+            status = getPaidStatus(cycle, paymentDate);
         }
 
         Payment payment = Payment.builder()
@@ -112,7 +104,7 @@ public class PaymentService {
                 .member(member)
                 .amount(request.getAmount())
                 .status(status)
-                .paymentDate(request.getPaymentDate() != null ? request.getPaymentDate() : LocalDate.now())
+                .paymentDate(paymentDate)
                 .recordedBy(recorder)
                 .notes(request.getNotes())
                 .paymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "Cash (Offline)")
@@ -132,13 +124,15 @@ public class PaymentService {
         return payment;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Payment> getPaymentsByGroup(Long groupId) {
+        markOverduePayments();
         return paymentRepository.findByGroupIdWithDetails(groupId);
     }
 
     @Transactional
     public List<Payment> getPaymentsByMember(Long memberId) {
+        markOverduePayments();
         List<Payment> list = paymentRepository.findByMemberIdWithDetails(memberId);
         for (Payment payment : list) {
             if (payment.getStatus() == Payment.PaymentStatus.OVERDUE) {
@@ -151,13 +145,15 @@ public class PaymentService {
         return list;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Payment> getPaymentsByCycle(Long cycleId) {
+        markOverduePayments();
         return paymentRepository.findByCycleIdWithDetails(cycleId);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Payment> getPaymentsByGroupAndMember(Long groupId, Long memberId) {
+        markOverduePayments();
         return paymentRepository.findByGroupIdAndMemberId(groupId, memberId);
     }
 
@@ -197,6 +193,13 @@ public class PaymentService {
         }
         if (request.getPaymentDate() != null) {
             payment.setPaymentDate(request.getPaymentDate());
+        }
+        if (isSettledStatus(payment.getStatus())
+                && (request.getPaymentDate() != null || (request.getStatus() != null && !request.getStatus().trim().isEmpty()))) {
+            if (request.getPaymentDate() == null && payment.getPaymentDate() == null) {
+                payment.setPaymentDate(LocalDate.now());
+            }
+            payment.setStatus(getPaidStatus(payment.getCycle(), payment.getPaymentDate()));
         }
         if (request.getPaymentMethod() != null && !request.getPaymentMethod().trim().isEmpty()) {
             payment.setPaymentMethod(request.getPaymentMethod());
@@ -265,8 +268,7 @@ public class PaymentService {
     public void markOverduePayments() {
         LocalDate today = LocalDate.now();
 
-        // Self-healing: Clean up any premature auto-detected OVERDUE payments
-        // if the circle is not yet at full capacity OR today is still within the grace period
+        // Remove auto-detected records only when the circle is not full or the due date has not passed.
         List<Payment> allOverdue = paymentRepository.findByStatus(Payment.PaymentStatus.OVERDUE);
         for (Payment p : allOverdue) {
             if (p.getNotes() != null && p.getNotes().contains("System Auto-Detected") && p.getCycle() != null) {
@@ -275,17 +277,14 @@ public class PaymentService {
                 if (grp != null) {
                     int targetMembers = (grp.getMemberCount() != null && grp.getMemberCount() > 0) ? grp.getMemberCount() : 1;
                     long activeCount = groupMemberRepository.countByGroupIdAndStatus(grp.getId(), GroupMember.MemberStatus.ACTIVE);
-                    int graceDays = getGracePeriodDays(grp.getCycleFrequency());
-                    LocalDate overdueThreshold = (cycle.getEndDate() != null) ? cycle.getEndDate().plusDays(graceDays) : today.plusDays(1);
-                    
-                    if (activeCount < targetMembers || !today.isAfter(overdueThreshold)) {
+                    if (activeCount < targetMembers || cycle.getEndDate() == null || !today.isAfter(cycle.getEndDate())) {
                         paymentRepository.delete(p);
                     }
                 }
             }
         }
 
-        // Mark overdue payments ONLY for active cycles in fully formed groups where today is past the grace period
+        // Mark unpaid payments overdue the day after the due date for fully formed groups.
         List<PaymentCycle> activeCycles = paymentCycleService.getActiveCycles();
         for (PaymentCycle cycle : activeCycles) {
             if (cycle.getGroup() == null) continue;
@@ -301,41 +300,35 @@ public class PaymentService {
             }
 
             LocalDate dueDate = cycle.getEndDate();
-            if (dueDate != null) {
-                int graceDays = getGracePeriodDays(group.getCycleFrequency());
-                LocalDate overdueThreshold = dueDate.plusDays(graceDays);
+            if (dueDate != null && today.isAfter(dueDate)) {
+                java.math.BigDecimal contributionAmount = group.getContributionAmount() != null
+                        ? group.getContributionAmount()
+                        : java.math.BigDecimal.ZERO;
 
-                if (today.isAfter(overdueThreshold)) {
-                    java.math.BigDecimal contributionAmount = group.getContributionAmount() != null
-                            ? group.getContributionAmount()
-                            : java.math.BigDecimal.ZERO;
-
-                    for (GroupMember gm : activeMembers) {
-                        if (gm.getUser() != null && gm.getUser().getRole() != User.Role.ADMIN) {
-                            Long memberUserId = gm.getUser().getId();
-                            Optional<Payment> existingPayment = paymentRepository.findByCycleIdAndMemberId(cycle.getId(), memberUserId);
-                            if (existingPayment.isEmpty()) {
-                                Payment overduePayment = Payment.builder()
-                                        .cycle(cycle)
-                                        .member(gm.getUser())
-                                        .amount(contributionAmount)
-                                        .status(Payment.PaymentStatus.OVERDUE)
-                                        .paymentDate(dueDate)
-                                        .paymentMethod("Pending Settlement")
-                                        .notes("System Auto-Detected: Contribution not received after " + graceDays + "-day grace period (" + overdueThreshold + ")")
-                                        .recordedBy(null)
-                                        .build();
-                                paymentRepository.save(overduePayment);
-                                notificationService.sendNotification(memberUserId,
-                                        "Your installment for '" + group.getName() + "' (Cycle #" + cycle.getCycleNumber() + ") is overdue following the grace period!",
-                                        "PAYMENT_OVERDUE");
-                            } else {
-                                Payment p = existingPayment.get();
-                                boolean hasSlips = !paymentEvidenceRepository.findByPaymentId(p.getId()).isEmpty();
-                                if (hasSlips && p.getStatus() == Payment.PaymentStatus.OVERDUE) {
-                                    p.setStatus(Payment.PaymentStatus.PENDING);
-                                    paymentRepository.save(p);
-                                }
+                for (GroupMember gm : activeMembers) {
+                    if (gm.getUser() != null && gm.getUser().getRole() != User.Role.ADMIN) {
+                        Long memberUserId = gm.getUser().getId();
+                        Optional<Payment> existingPayment = paymentRepository.findByCycleIdAndMemberId(cycle.getId(), memberUserId);
+                        if (existingPayment.isEmpty()) {
+                            Payment overduePayment = Payment.builder()
+                                    .cycle(cycle)
+                                    .member(gm.getUser())
+                                    .amount(contributionAmount)
+                                    .status(Payment.PaymentStatus.OVERDUE)
+                                    .paymentMethod("Pending Settlement")
+                                    .notes("System Auto-Detected: Contribution unpaid after due date " + dueDate)
+                                    .recordedBy(null)
+                                    .build();
+                            paymentRepository.save(overduePayment);
+                            notificationService.sendNotification(memberUserId,
+                                    "Your installment for '" + group.getName() + "' (Cycle #" + cycle.getCycleNumber() + ") is overdue.",
+                                    "PAYMENT_OVERDUE");
+                        } else {
+                            Payment p = existingPayment.get();
+                            boolean hasSlips = !paymentEvidenceRepository.findByPaymentId(p.getId()).isEmpty();
+                            if (hasSlips && p.getStatus() == Payment.PaymentStatus.OVERDUE) {
+                                p.setStatus(Payment.PaymentStatus.PENDING);
+                                paymentRepository.save(p);
                             }
                         }
                     }
@@ -460,14 +453,11 @@ public class PaymentService {
                     ? currentCycle.getEndDate()
                     : (currentCycle.getStartDate() != null ? currentCycle.getStartDate().plusDays(30) : today);
 
-            int graceDays = getGracePeriodDays(group.getCycleFrequency());
-            LocalDate overdueThreshold = dueDate.plusDays(graceDays);
-
             long daysRemaining = java.time.temporal.ChronoUnit.DAYS.between(today, dueDate);
-            boolean isOverdue = today.isAfter(overdueThreshold);
-            boolean inGracePeriod = today.isAfter(dueDate) && !isOverdue;
-            long daysOverdue = isOverdue ? java.time.temporal.ChronoUnit.DAYS.between(overdueThreshold, today) : 0;
-            int graceDaysRemaining = inGracePeriod ? (int) java.time.temporal.ChronoUnit.DAYS.between(today, overdueThreshold) : 0;
+            boolean isOverdue = today.isAfter(dueDate);
+            boolean inGracePeriod = false;
+            long daysOverdue = isOverdue ? ChronoUnit.DAYS.between(dueDate, today) : 0;
+            int graceDaysRemaining = 0;
 
             String status;
             Long existingPaymentId = null;
@@ -544,7 +534,12 @@ public class PaymentService {
                 .memberName(payment.getMember().getFullName())
                 .amount(payment.getAmount())
                 .status(payment.getStatus().name())
-                .paymentDate(payment.getPaymentDate())
+                .paymentDate(getPaymentDateForTiming(payment))
+                .cycleStartDate(payment.getCycle().getStartDate())
+                .dueDate(payment.getCycle().getEndDate())
+                .daysEarly(calculateDaysEarly(payment))
+                .daysLate(calculateDaysLate(payment))
+                .daysOverdue(calculateDaysOverdue(payment))
                 .recordedByName(payment.getRecordedBy() != null ? payment.getRecordedBy().getFullName() : (payment.getStatus() == Payment.PaymentStatus.PENDING ? "Awaiting Organizer Approval" : "System Auto-Detected"))
                 .notes(payment.getNotes())
                 .paymentMethod(payment.getPaymentMethod() != null ? payment.getPaymentMethod() : "Cash (Offline)")
@@ -554,6 +549,66 @@ public class PaymentService {
                 .memberEmail(payment.getMember() != null ? payment.getMember().getEmail() : null)
                 .evidenceUrls(evidenceUrls)
                 .build();
+    }
+
+    private Payment.PaymentStatus parseStatus(String requestedStatus, Payment.PaymentStatus fallback) {
+        if (requestedStatus == null || requestedStatus.trim().isEmpty()) {
+            return fallback;
+        }
+        try {
+            return Payment.PaymentStatus.valueOf(requestedStatus.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return fallback;
+        }
+    }
+
+    private boolean isSettledStatus(Payment.PaymentStatus status) {
+        return status == Payment.PaymentStatus.PAID || status == Payment.PaymentStatus.LATE;
+    }
+
+    private LocalDate getPaymentDateForTiming(Payment payment) {
+        if (payment.getPaymentDate() != null) {
+            return payment.getPaymentDate();
+        }
+        return isSettledStatus(payment.getStatus()) && payment.getCreatedAt() != null
+                ? payment.getCreatedAt().toLocalDate()
+                : null;
+    }
+
+    private Payment.PaymentStatus getPaidStatus(PaymentCycle cycle, LocalDate paymentDate) {
+        return cycle != null && cycle.getEndDate() != null && paymentDate != null
+                && paymentDate.isAfter(cycle.getEndDate())
+                ? Payment.PaymentStatus.LATE
+                : Payment.PaymentStatus.PAID;
+    }
+
+    private Long calculateDaysEarly(Payment payment) {
+        LocalDate startDate = payment.getCycle().getStartDate();
+        LocalDate paymentDate = getPaymentDateForTiming(payment);
+        if (!isSettledStatus(payment.getStatus()) || startDate == null || paymentDate == null || !paymentDate.isBefore(startDate)) {
+            return 0L;
+        }
+        return ChronoUnit.DAYS.between(paymentDate, startDate);
+    }
+
+    private Long calculateDaysLate(Payment payment) {
+        LocalDate dueDate = payment.getCycle().getEndDate();
+        LocalDate paymentDate = getPaymentDateForTiming(payment);
+        if (!isSettledStatus(payment.getStatus()) || dueDate == null || paymentDate == null || !paymentDate.isAfter(dueDate)) {
+            return 0L;
+        }
+        return ChronoUnit.DAYS.between(dueDate, paymentDate);
+    }
+
+    private Long calculateDaysOverdue(Payment payment) {
+        LocalDate dueDate = payment.getCycle().getEndDate();
+        if ((payment.getStatus() != Payment.PaymentStatus.OVERDUE
+                && payment.getStatus() != Payment.PaymentStatus.MISSED
+                && payment.getStatus() != Payment.PaymentStatus.PARTIAL)
+                || dueDate == null || !LocalDate.now().isAfter(dueDate)) {
+            return 0L;
+        }
+        return ChronoUnit.DAYS.between(dueDate, LocalDate.now());
     }
 
     public List<PaymentResponse> toPaymentResponseList(List<Payment> payments) {

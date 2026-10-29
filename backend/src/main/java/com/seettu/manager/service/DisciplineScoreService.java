@@ -28,7 +28,12 @@ public class DisciplineScoreService {
         }
 
         long latePayments = payments.stream()
-                .filter(p -> p.getStatus() == Payment.PaymentStatus.LATE)
+                .filter(p -> p.getStatus() == Payment.PaymentStatus.LATE
+                        || (p.getStatus() == Payment.PaymentStatus.PAID
+                        && p.getCycle() != null
+                        && p.getCycle().getEndDate() != null
+                        && getPaymentDateForTiming(p) != null
+                        && getPaymentDateForTiming(p).isAfter(p.getCycle().getEndDate())))
                 .count();
 
         long missedPayments = payments.stream()
@@ -41,19 +46,14 @@ public class DisciplineScoreService {
         for (Payment payment : payments) {
             if (payment.getCycle() != null && payment.getCycle().getEndDate() != null) {
                 LocalDate dueDate = payment.getCycle().getEndDate();
-                if (payment.getPaymentDate() != null) {
-                    if (payment.getPaymentDate().isAfter(dueDate)) {
-                        long delay = ChronoUnit.DAYS.between(dueDate, payment.getPaymentDate());
-                        totalDelayDays += delay;
-                        delayedPaymentsCount++;
-                    }
-                } else if (payment.getStatus() == Payment.PaymentStatus.OVERDUE || payment.getStatus() == Payment.PaymentStatus.LATE || payment.getStatus() == Payment.PaymentStatus.PARTIAL) {
-                    LocalDate today = LocalDate.now();
-                    if (today.isAfter(dueDate)) {
-                        long delay = ChronoUnit.DAYS.between(dueDate, today);
-                        totalDelayDays += delay;
-                        delayedPaymentsCount++;
-                    }
+                boolean unpaidOverdue = payment.getStatus() == Payment.PaymentStatus.OVERDUE
+                        || payment.getStatus() == Payment.PaymentStatus.MISSED
+                        || payment.getStatus() == Payment.PaymentStatus.PARTIAL;
+                LocalDate delayEndDate = unpaidOverdue ? LocalDate.now() : getPaymentDateForTiming(payment);
+                if (delayEndDate != null && delayEndDate.isAfter(dueDate)) {
+                    long delay = ChronoUnit.DAYS.between(dueDate, delayEndDate);
+                    totalDelayDays += delay;
+                    delayedPaymentsCount++;
                 }
             }
         }
@@ -77,6 +77,15 @@ public class DisciplineScoreService {
                 missedPayments,
                 Math.round(avgDelayDays * 10.0) / 10.0
         );
+    }
+
+    private LocalDate getPaymentDateForTiming(Payment payment) {
+        if (payment.getPaymentDate() != null) {
+            return payment.getPaymentDate();
+        }
+        boolean settled = payment.getStatus() == Payment.PaymentStatus.PAID
+                || payment.getStatus() == Payment.PaymentStatus.LATE;
+        return settled && payment.getCreatedAt() != null ? payment.getCreatedAt().toLocalDate() : null;
     }
 
     public int getScoreValue(Long memberId) {
