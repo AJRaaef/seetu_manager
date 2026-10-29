@@ -34,6 +34,7 @@ public class DashboardService {
     private final ReportRepository reportRepository;
     private final CertificateRepository certificateRepository;
     private final DisciplineScoreService disciplineScoreService;
+    private final UserRepository userRepository;
 
     public DashboardResponse getAdminDashboardStats() {
         long totalGroups = groupRepository.count();
@@ -95,7 +96,25 @@ public class DashboardService {
         long totalGroupsJoined = userGroups.size();
         long activeGroups = userGroups.stream().filter(g -> g.getStatus() == SeettuGroup.GroupStatus.ACTIVE).count();
         
-        List<Payment> userPayments = paymentRepository.findByMemberId(userId);
+        com.seettu.manager.entity.User currentUser = userRepository.findById(userId).orElse(null);
+        boolean isOrganizer = currentUser != null && currentUser.getRole() == com.seettu.manager.entity.User.Role.ORGANIZER;
+
+        List<Payment> userPayments;
+        if (isOrganizer) {
+            List<Long> organizedGroupIds = userGroups.stream()
+                    .filter(g -> g.getCreatedBy() != null && g.getCreatedBy().getId().equals(userId))
+                    .map(SeettuGroup::getId)
+                    .toList();
+            if (!organizedGroupIds.isEmpty()) {
+                userPayments = paymentRepository.findAll().stream()
+                        .filter(p -> p.getCycle() != null && p.getCycle().getGroup() != null && organizedGroupIds.contains(p.getCycle().getGroup().getId()))
+                        .toList();
+            } else {
+                userPayments = paymentRepository.findByMemberId(userId);
+            }
+        } else {
+            userPayments = paymentRepository.findByMemberId(userId);
+        }
         long totalPayments = userPayments.size();
         long paidPaymentsCount = userPayments.stream().filter(p -> p.getStatus() == Payment.PaymentStatus.PAID).count();
         long pendingPayments = userPayments.stream().filter(p -> p.getStatus() == Payment.PaymentStatus.PENDING).count();

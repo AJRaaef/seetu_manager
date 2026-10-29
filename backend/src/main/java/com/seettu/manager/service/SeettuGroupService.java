@@ -264,14 +264,14 @@ public class SeettuGroupService {
         int targetMemberCount = (group.getMemberCount() != null && group.getMemberCount() > 0) ? group.getMemberCount() : 1;
         boolean isGroupFull = activeMemberCount >= targetMemberCount;
 
-        // Auto-sync group status: ACTIVE if full, PENDING if still forming
+        // Auto-sync group status: ACTIVE if full, or if active payments/cycles exist or already ACTIVE
         if (group.getStatus() != SeettuGroup.GroupStatus.COMPLETED && group.getStatus() != SeettuGroup.GroupStatus.CANCELLED) {
-            if (isGroupFull && group.getStatus() != SeettuGroup.GroupStatus.ACTIVE) {
-                group.setStatus(SeettuGroup.GroupStatus.ACTIVE);
-                groupRepository.save(group);
-            } else if (!isGroupFull && group.getStatus() == SeettuGroup.GroupStatus.ACTIVE) {
-                group.setStatus(SeettuGroup.GroupStatus.PENDING);
-                groupRepository.save(group);
+            boolean hasActiveCyclesOrPayments = !groupPayments.isEmpty() || cycles.stream().anyMatch(c -> c.getStatus() == PaymentCycle.CycleStatus.ACTIVE || c.getStatus() == PaymentCycle.CycleStatus.COMPLETED);
+            if ((isGroupFull || hasActiveCyclesOrPayments || group.getStatus() == SeettuGroup.GroupStatus.ACTIVE) && activeMemberCount > 0) {
+                if (group.getStatus() != SeettuGroup.GroupStatus.ACTIVE) {
+                    group.setStatus(SeettuGroup.GroupStatus.ACTIVE);
+                    groupRepository.save(group);
+                }
             }
         }
 
@@ -303,8 +303,9 @@ public class SeettuGroupService {
         }
 
         // Ensure cycles adhere to circle status:
-        if (!isGroupFull) {
-            // Circle not full yet: all cycles must be PENDING
+        boolean circleIsActive = (group.getStatus() == SeettuGroup.GroupStatus.ACTIVE);
+        if (!circleIsActive && !isGroupFull && groupPayments.isEmpty()) {
+            // Circle not full yet and no payments: all cycles must be PENDING
             for (PaymentCycle c : cycles) {
                 if (c.getStatus() == PaymentCycle.CycleStatus.ACTIVE) {
                     c.setStatus(PaymentCycle.CycleStatus.PENDING);

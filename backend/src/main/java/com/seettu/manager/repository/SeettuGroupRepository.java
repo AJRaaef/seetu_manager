@@ -46,8 +46,9 @@ public interface SeettuGroupRepository extends JpaRepository<SeettuGroup, Long> 
     @Query("SELECT DISTINCT g FROM SeettuGroup g " +
            "JOIN FETCH g.createdBy " +
            "LEFT JOIN FETCH g.seettuType " +
-           "LEFT JOIN GroupMember gm ON gm.group.id = g.id " +
-           "WHERE g.createdBy.id = :userId OR (gm.user.id = :userId AND gm.status = 'ACTIVE')")
+           "WHERE g.createdBy.id = :userId OR EXISTS (" +
+           "    SELECT 1 FROM GroupMember gm WHERE gm.group.id = g.id AND gm.user.id = :userId AND gm.status = 'ACTIVE'" +
+           ")")
     List<SeettuGroup> findGroupsByMemberId(@Param("userId") Long userId);
 
     @Query("SELECT DISTINCT g FROM SeettuGroup g " +

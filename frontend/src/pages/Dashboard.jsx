@@ -440,6 +440,10 @@ const Dashboard = () => {
     switch (status) {
       case "PAID":
         return <span className="badge-paid">{t("status.PAID", "Paid")}</span>;
+      case "LATE":
+        return <span className="badge-late">{t("status.LATE", "Late")}</span>;
+      case "PARTIAL":
+        return <span className="badge-partial">{t("status.PARTIAL", "Partial")}</span>;
       case "PENDING":
         return (
           <span className="badge-pending">
@@ -454,7 +458,7 @@ const Dashboard = () => {
         );
       default:
         return (
-          <span className="badge-paid">{t(`status.${status}`, status)}</span>
+          <span className="badge-secondary" style={{ padding: "0.3em 0.9em", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 600 }}>{t(`status.${status}`, status)}</span>
         );
     }
   };
