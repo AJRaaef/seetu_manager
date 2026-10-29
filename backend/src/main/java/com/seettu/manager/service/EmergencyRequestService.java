@@ -69,11 +69,8 @@ public class EmergencyRequestService {
     public EmergencyRequest updateStatus(Long id, String status, String resolutionNotes, User resolvedBy) {
         EmergencyRequest request = getRequestById(id);
 
-        // Prevent self-approval by non-admin users
-        if (resolvedBy != null && request.getRaisedBy() != null 
-                && resolvedBy.getId().equals(request.getRaisedBy().getId()) 
-                && resolvedBy.getRole() != User.Role.ADMIN) {
-            throw new IllegalArgumentException("Organizers cannot approve their own emergency requests. System Admin review is required.");
+        if (resolvedBy != null && resolvedBy.getRole() == User.Role.MEMBER) {
+            throw new IllegalArgumentException("Only Circle Organizers or System Admins can review emergency requests.");
         }
 
         request.setStatus(EmergencyRequest.EmergencyStatus.valueOf(status));

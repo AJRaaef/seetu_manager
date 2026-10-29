@@ -97,7 +97,7 @@ const EmergencyRequests = () => {
         <div className="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3 mb-4" style={{ backgroundColor: '#E0F2FE', color: '#0369A1' }}>
           <Icon name="shield" size={24} />
           <div>
-            <strong>System Admin Notice:</strong> System Admins act as platform supervisors and do not participate in Seettu contribution draws. Submitting emergency payout applications is restricted to group members.
+            <strong>System Admin Notice:</strong> System Admins act as platform supervisors to oversee emergency payout applications across group circles. Circle Organizers review, approve, or reject member applications directly.
           </div>
         </div>
       )}
@@ -159,18 +159,14 @@ const EmergencyRequests = () => {
                     <td className="text-dark">{r.reason}</td>
                     <td>
                       <span className={`badge ${r.status === 'APPROVED' ? 'bg-success' : r.status === 'REJECTED' ? 'bg-danger' : 'bg-warning text-dark'}`}>
-                        {r.status || 'PENDING'}
+                        {r.status === 'PENDING' ? 'Awaiting Organizer Approval' : (r.status || 'PENDING')}
                       </span>
                     </td>
                     <td className="text-muted">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'N/A'}</td>
                     {(isAdmin || isOrganizer) && (
                       <td className="text-end">
                         {r.status === 'PENDING' ? (
-                          (r.raisedBy?.id === (user?.userId || user?.id) && !isAdmin) ? (
-                            <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1">
-                              Awaiting Admin Review
-                            </span>
-                          ) : (
+                          isOrganizer ? (
                             <div className="d-inline-flex gap-1">
                               <button
                                 className="btn btn-sm btn-success px-2 py-1 fs-7"
@@ -185,9 +181,13 @@ const EmergencyRequests = () => {
                                 Reject
                               </button>
                             </div>
+                          ) : (
+                            <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1">
+                              Supervisory Oversight Only
+                            </span>
                           )
                         ) : (
-                          <span className="text-muted small">Resolved</span>
+                          <span className="text-muted small">{r.status === 'APPROVED' ? 'Approved' : 'Rejected'}</span>
                         )}
                       </td>
                     )}
