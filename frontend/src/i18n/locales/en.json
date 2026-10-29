@@ -11,25 +11,31 @@
   "confirm_password": "Confirm Password",
   "chatbot": "Seettu Assistant",
   "search": "Search",
-  "dashboard": "Dashboard",
-  "my_groups": "My Groups",
-  "members": "Members",
-  "payments": "Payments",
-  "advance": "Advance",
-  "emergency": "Emergency Requests",
-  "reports": "Reports",
-  "disputes": "Disputes",
-  "certificates": "Certificates",
-  "notifications": "Notifications",
-  "settings": "Settings",
-  "profile": "Profile",
-  "logout": "Logout",
-  "audit_trail": "Audit Trail",
-  "help_center": "Help Center",
-  "admin_portal": "ADMIN PORTAL",
-  "organizer_portal": "ORGANIZER PORTAL",
-  "member_portal": "MEMBER PORTAL",
-  "manage_seettu": "Manage your Seettu",
+
+  "sidebar": {
+    "admin_portal": "ADMIN PORTAL",
+    "organizer_portal": "ORGANIZER PORTAL",
+    "member_portal": "MEMBER PORTAL",
+    "manage_seettu": "Manage your Seettu",
+    "dashboard": "Dashboard",
+    "notifications": "Notifications",
+    "groups": "Groups",
+    "members": "Members",
+    "payments": "Payments",
+    "advance": "Advance",
+    "audit_trail": "Audit Trail",
+    "emergency": "Emergency",
+    "reports": "Reports",
+    "disputes": "Disputes",
+    "certificates": "Certificates",
+    "verifications": "Verifications",
+    "verification": "Verification",
+    "settings": "Settings",
+    "help_center": "Help Center",
+    "logout": "Logout"
+  },
+
+  
   "dashboard_page": {
     "welcome": "Welcome back",
     "subtitles": {
@@ -75,8 +81,24 @@
       "col_status": "Status",
       "col_date": "Date",
       "no_payments": "No recent payments found."
-    }
-  },
+    },
+    "verification_notice": "Your identity is not verified. Complete verification to join groups.",
+    "complete_now": "Complete Now",
+    "overdue_desk": {
+      "title": "Overdue Member Collections & Notice Desk",
+      "subtitle": "member installment(s) currently past due across your circles. Follow up via WhatsApp, SMS, or issue formal statutory legal demand notices.",
+      "badge": "Overdue",
+      "col_member": "Member / Contact",
+      "col_circle": "Circle & Cycle",
+      "col_amount": "Overdue Amount",
+      "col_delay": "Delay Duration",
+      "col_action": "Action & Recovery Channels",
+      "remind_btn": "Remind (WhatsApp/SMS)",
+      "legal_btn": "Legal Notice",
+      "critical_notice": "Critical Overdue"
+  }
+},
+
   "dashboard_analytics": {
     "header_title": "System Portfolio & Cashflow Analytics",
     "header_sub": "Real-time operational financial health & payment compliance",

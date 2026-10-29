@@ -387,14 +387,14 @@ const Dashboard = () => {
           <div className="d-flex align-items-center gap-2">
             <span style={{ fontSize: '1.25rem' }}>⚠️</span>
             <span className="fw-semibold text-dark">
-              Your identity is not verified. Complete verification to join groups.
+              {t('dashboard_page.verification_notice', 'Your identity is not verified. Complete verification to join groups.')}
             </span>
           </div>
           <Link
             to="/verification"
             className="btn btn-sm btn-warning text-dark fw-bold px-3 py-1.5 shadow-sm rounded-pill text-decoration-none"
           >
-            Complete Now
+            {t('dashboard_page.complete_now', 'Complete Now')}
           </Link>
         </div>
       )}
@@ -529,15 +529,15 @@ const Dashboard = () => {
               </div>
               <div>
                 <h5 className="fw-bold mb-0 text-danger" style={{ fontSize: '1.1rem' }}>
-                  Overdue Member Collections & Notice Desk
+                  {t('dashboard_page.overdue_desk.title', 'Overdue Member Collections & Notice Desk')}
                 </h5>
                 <p className="text-muted small mb-0">
-                  {overdueMembersList.length} member installment(s) currently past due across your circles. Follow up via WhatsApp, SMS, or issue formal statutory legal demand notices.
+                  {t('dashboard_page.overdue_desk.subtitle', 'Currently past due across your circles. Follow up via WhatsApp, SMS, or issue formal statutory legal demand notices.')}
                 </p>
               </div>
             </div>
             <span className="badge rounded-pill bg-danger px-3 py-1.5 fw-bold fs-6">
-              {overdueMembersList.length} Overdue
+              {t('dashboard_page.overdue_desk.badge', 'Overdue')} {overdueMembersList.length}
             </span>
           </div>
 
@@ -545,11 +545,11 @@ const Dashboard = () => {
             <table className="table table-hover align-middle mb-0">
               <thead className="table-light">
                 <tr>
-                  <th className="py-2.5 px-3 small fw-semibold text-muted">Member / Contact</th>
-                  <th className="py-2.5 px-3 small fw-semibold text-muted">Circle & Cycle</th>
-                  <th className="py-2.5 px-3 small fw-semibold text-muted">Overdue Amount</th>
-                  <th className="py-2.5 px-3 small fw-semibold text-muted">Delay Duration</th>
-                  <th className="py-2.5 px-3 small fw-semibold text-muted text-end">Action & Recovery Channels</th>
+                  <th className="py-2.5 px-3 small fw-semibold text-muted">{t('dashboard_page.overdue_desk.col_member', 'Member / Contact')}</th>
+                  <th className="py-2.5 px-3 small fw-semibold text-muted">{t('dashboard_page.overdue_desk.col_circle', 'Circle & Cycle')}</th>
+                  <th className="py-2.5 px-3 small fw-semibold text-muted">{t('dashboard_page.overdue_desk.col_amount', 'Overdue Amount')}</th>
+                  <th className="py-2.5 px-3 small fw-semibold text-muted">{t('dashboard_page.overdue_desk.col_delay', 'Delay Duration')}</th>
+                  <th className="py-2.5 px-3 small fw-semibold text-muted text-end">{t('dashboard_page.overdue_desk.col_action', 'Action & Recovery Channels')}</th>
                 </tr>
               </thead>
               <tbody>
