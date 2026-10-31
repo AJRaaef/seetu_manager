@@ -217,7 +217,7 @@ public class UserController {
 
         // Average Discipline Score based on unified scoring engine
         com.seettu.manager.dto.ScoreResponse scoreDetail = disciplineScoreService.calculateScore(id);
-        int disciplineScore = (int) Math.round(scoreDetail.getScore());
+        double disciplineScore = scoreDetail.getScore();
 
         // Certificates count
         List<Certificate> certs = certificateRepository.findByUserId(id);

@@ -44,17 +44,22 @@ public class DisciplineScoreService {
         long delayedPaymentsCount = 0;
 
         for (Payment payment : payments) {
-            if (payment.getCycle() != null && payment.getCycle().getEndDate() != null) {
-                LocalDate dueDate = payment.getCycle().getEndDate();
-                boolean unpaidOverdue = payment.getStatus() == Payment.PaymentStatus.OVERDUE
-                        || payment.getStatus() == Payment.PaymentStatus.MISSED
-                        || payment.getStatus() == Payment.PaymentStatus.PARTIAL;
-                LocalDate delayEndDate = unpaidOverdue ? LocalDate.now() : getPaymentDateForTiming(payment);
-                if (delayEndDate != null && delayEndDate.isAfter(dueDate)) {
-                    long delay = ChronoUnit.DAYS.between(dueDate, delayEndDate);
-                    totalDelayDays += delay;
-                    delayedPaymentsCount++;
-                }
+            LocalDate dueDate = payment.getCycle() != null ? payment.getCycle().getEndDate() : null;
+            boolean unpaidOverdue = payment.getStatus() == Payment.PaymentStatus.OVERDUE
+                    || payment.getStatus() == Payment.PaymentStatus.MISSED
+                    || payment.getStatus() == Payment.PaymentStatus.PARTIAL;
+            LocalDate delayEndDate = unpaidOverdue ? LocalDate.now() : getPaymentDateForTiming(payment);
+
+            if (dueDate != null && delayEndDate != null && delayEndDate.isAfter(dueDate)) {
+                long delay = ChronoUnit.DAYS.between(dueDate, delayEndDate);
+                totalDelayDays += delay;
+                delayedPaymentsCount++;
+            } else if (payment.getStatus() == Payment.PaymentStatus.LATE
+                    || payment.getStatus() == Payment.PaymentStatus.OVERDUE
+                    || payment.getStatus() == Payment.PaymentStatus.MISSED) {
+                // When explicitly recorded or marked as LATE, ensure at least 1 day of delay is registered
+                totalDelayDays += 1L;
+                delayedPaymentsCount++;
             }
         }
 
@@ -88,9 +93,9 @@ public class DisciplineScoreService {
         return settled && payment.getCreatedAt() != null ? payment.getCreatedAt().toLocalDate() : null;
     }
 
-    public int getScoreValue(Long memberId) {
+    public double getScoreValue(Long memberId) {
         ScoreResponse response = calculateScore(memberId);
-        return (int) Math.round(response.getScore());
+        return response.getScore();
     }
 
     public String determineCategory(double score) {

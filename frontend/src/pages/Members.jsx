@@ -27,10 +27,12 @@ const getScoreMeta = (scoreNum, category) => {
 
 const calculateScore = (member) => {
   if (member.disciplineScore !== undefined && member.disciplineScore !== null) {
-    return Math.round(Number(member.disciplineScore));
+    const n = Number(member.disciplineScore);
+    return n % 1 === 0 ? n : Number(n.toFixed(1));
   }
   if (member.score !== undefined && member.score !== null) {
-    return Math.round(Number(member.score));
+    const n = Number(member.score);
+    return n % 1 === 0 ? n : Number(n.toFixed(1));
   }
   return 100;
 };

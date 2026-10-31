@@ -24,7 +24,7 @@ public class DashboardResponse {
     private long pendingEmergencies;
     private long reportsGenerated;
     private long certificatesEarned;
-    private int disciplineScore;
+    private Double disciplineScore;
     private int nextPaymentDueDays;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Double overallCompletionRate;

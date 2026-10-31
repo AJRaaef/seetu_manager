@@ -83,7 +83,7 @@ public class DashboardService {
                 .pendingEmergencies(pendingEmergencies)
                 .reportsGenerated(reportsGenerated)
                 .certificatesEarned(certificatesEarned)
-                .disciplineScore(95)
+                .disciplineScore(95.0)
                 .nextPaymentDueDays(nextDueDays)
                 .groupStatusDistribution(groupStatusDistribution)
                 .paymentStatusDistribution(paymentStatusDistribution)
@@ -140,7 +140,7 @@ public class DashboardService {
         double completionRate = totalExpectedCycles > 0 ? ((double) totalCompletedCycles / totalExpectedCycles) * 100.0 : 0.0;
 
         // Calculate Discipline Score dynamically using the unified DisciplineScoreService engine
-        int calculatedScore = disciplineScoreService.getScoreValue(userId);
+        double calculatedScore = disciplineScoreService.getScoreValue(userId);
 
         // Calculate real DB count of certificates earned by user
         long userCertificates = certificateRepository.findByUserId(userId).size();
