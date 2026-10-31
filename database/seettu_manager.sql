@@ -536,7 +536,7 @@ CREATE TABLE `seettu_groups` (
   `description` text DEFAULT NULL,
   `contribution_amount` decimal(12,2) NOT NULL,
   `member_count` int(11) NOT NULL,
-  `cycle_frequency` enum('WEEKLY','BI_WEEKLY','MONTHLY') NOT NULL DEFAULT 'MONTHLY',
+  `cycle_frequency` enum('DAILY','WEEKLY','BI_WEEKLY','MONTHLY') NOT NULL DEFAULT 'MONTHLY',
   `status` enum('ACTIVE','COMPLETED','CANCELLED','PENDING') NOT NULL DEFAULT 'PENDING',
   `seettu_type_id` bigint(20) DEFAULT NULL,
   `category` varchar(50) DEFAULT NULL,
