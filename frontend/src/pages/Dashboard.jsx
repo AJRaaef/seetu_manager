@@ -887,13 +887,13 @@ const Dashboard = () => {
           <div className="d-flex align-items-center justify-content-between mb-2">
             <h5 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
               <Icon name="alert-circle" size={20} color="#D97706" />
-              <span>Pending Installments & Payment Reminders</span>
+              <span>{t('dashboard_page.pending_dues.title', 'Pending Installments & Payment Reminders')}</span>
             </h5>
             <span className="badge rounded-pill bg-light text-dark border px-2.5 py-1 small">
               {pendingDues.length}{" "}
               {pendingDues.length === 1
-                ? "Action Required"
-                : "Actions Required"}
+                ? t('dashboard_page.pending_dues.action_required', 'Action Required')
+                : t('dashboard_page.pending_dues.actions_required', 'Actions Required')}
             </span>
           </div>
 
@@ -1072,7 +1072,7 @@ const Dashboard = () => {
                         to={`/groups/${due.groupId}`}
                         className="btn btn-sm btn-outline-secondary rounded-pill px-3.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm"
                       >
-                        <span>View Circle</span>
+                        <span>{t('dashboard_page.pending_dues.view_circle', 'View Circle')}</span>
                         <Icon name="arrow-right" size={14} />
                       </Link>
                     </div>
@@ -1132,9 +1132,9 @@ const Dashboard = () => {
                       }}
                     >
                       {item.isCompleted
-                        ? "All Rotation Cycles Completed & Disbursed"
+                        ? t("dashboard_page.payout_card.all_completed", "All Rotation Cycles Completed & Disbursed")
                         : item.isUserRecipient
-                          ? "Your Scheduled Payout Turn"
+                          ? t("dashboard_page.payout_card.user_turn", "Your Scheduled Payout Turn")
                           : t(
                               "dashboard_page.payout_card.title",
                               "Upcoming Rotational Payout",
@@ -1147,7 +1147,11 @@ const Dashboard = () => {
                   >
                     {item.cycle}
                   </div>
-                  <h3 className="fw-bold mb-1 text-white">{item.recipient}</h3>
+                  <h3 className="fw-bold mb-1 text-white">
+                    {item.isUserRecipient 
+                       ? `${user?.fullName || "Vichakshi"} (${t("dashboard_page.payout_card.user_turn_label", "ඔබගේ ගෙවීම් වාරය")})` 
+                       : item.recipient}
+                  </h3>
                   <div className="small text-white-50 mb-2">
                     {t("common.date", "Date")} : {item.date}
                   </div>
@@ -1155,7 +1159,9 @@ const Dashboard = () => {
                     className="fw-bold small"
                     style={{ color: item.isCompleted ? "#34D399" : "#FACC15" }}
                   >
-                    {item.daysRemaining}
+                    {item.daysRemaining.includes("days remaining") 
+                      ? item.daysRemaining.replace("days remaining", t("common.days_remaining", "දින ඉතිරිව ඇත")) 
+                      : item.daysRemaining}
                   </div>
                 </div>
 
@@ -1199,7 +1205,7 @@ const Dashboard = () => {
                             "dashboard_page.payout_card.review_btn",
                             "Review Payout",
                           )
-                        : t("common.view", "View Payout Details")}
+                        : t("dashboard_page.payout_card.view_details", "View Payout Details")}
                     </button>
                   )}
                 </div>

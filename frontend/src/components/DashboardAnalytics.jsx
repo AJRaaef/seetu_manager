@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -23,6 +24,7 @@ ChartJS.register(
 );
 
 const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }) => {
+  const { t } = useTranslation();
   // Payment status distribution from database
   const dist = stats?.paymentStatusDistribution || {};
   const paidCount = Number(dist.PAID || 0);
@@ -104,7 +106,15 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
     ? stats.monthlyCashflow
     : [];
 
-  const months = monthlyCashflow.map(item => item.month);
+  const months = monthlyCashflow.map(item =>{
+    if (!item.month) return '';
+    const parts = item.month.split(' ');
+    const monthKey = parts[0]; 
+    const year = parts[1] || ''; 
+    const translatedMonth = t(`dashboard_page.months.${monthKey}`, monthKey);
+    return `${translatedMonth} ${year}`.trim();
+  });
+
   const inflowSeries = monthlyCashflow.map(item => Math.round(Number(item.inflow) || 0));
   const outflowSeries = monthlyCashflow.map(item => Math.round(Number(item.outflow) || 0));
 
@@ -112,7 +122,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
     labels: months.length > 0 ? months : ['No Historical Data'],
     datasets: [
       {
-        label: 'Collected Funds (Inflow)',
+        label: t('dashboard_page.dashboard_analytics.collected_funds', 'Collected Funds (Inflow)'),
         data: inflowSeries.length > 0 ? inflowSeries : [0],
         backgroundColor: '#0097B2',
         borderRadius: 6,
@@ -120,7 +130,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
         categoryPercentage: 0.7
       },
       {
-        label: 'Disbursed Payouts (Outflow)',
+        label: t('dashboard_page.dashboard_analytics.disbursed_payouts', 'Disbursed Payouts (Outflow)'),
         data: outflowSeries.length > 0 ? outflowSeries : [0],
         backgroundColor: '#0F2F3D',
         borderRadius: 6,
@@ -184,10 +194,12 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
           </div>
           <div>
             <h5 className="mb-0 fw-bold text-dark" style={{ fontSize: '1.05rem', letterSpacing: '-0.2px' }}>
-              {isAdmin ? 'System Portfolio & Cashflow Analytics' : 'Circle Portfolio & Performance'}
+              {isAdmin
+               ? t('dashboard_page.dashboard_analytics.header_title', 'System Portfolio & Cashflow Analytics')
+               : t('dashboard_page.dashboard_analytics.circle_portfolio', 'Circle Portfolio & Performance')}
             </h5>
             <span className="text-muted small" style={{ fontSize: '0.78rem' }}>
-              Real-time operational financial health & payment compliance
+              {t('dashboard_page.dashboard_analytics.header_sub', 'Real-time operational financial health & payment compliance')}
             </span>
           </div>
         </div>
@@ -202,10 +214,10 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
             <div className="d-flex justify-content-between align-items-center mb-2">
               <div>
                 <h6 className="fw-bold text-dark mb-0" style={{ fontSize: '0.92rem' }}>
-                  Cashflow Velocity (LKR)
+                  {t('dashboard_page.dashboard_analytics.cashflow_title', 'Cashflow Velocity (LKR)')}
                 </h6>
                 <span className="text-muted" style={{ fontSize: '0.74rem' }}>
-                  Total collected installments vs disbursed pot payouts
+                  {t('dashboard_page.dashboard_analytics.cashflow_sub', 'Total collected installments vs disbursed pot payouts')}
                 </span>
               </div>
 
@@ -222,10 +234,10 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
             <div className="d-flex justify-content-between align-items-center mb-2">
               <div>
                 <h6 className="fw-bold text-dark mb-0" style={{ fontSize: '0.92rem' }}>
-                  Payment Compliance Portfolio
+                  {t('dashboard_page.dashboard_analytics.compliance_title', 'Payment Compliance Portfolio')}
                 </h6>
                 <span className="text-muted" style={{ fontSize: '0.74rem' }}>
-                  Risk tier breakdown across active circles
+                  {t('dashboard_page.dashboard_analytics.compliance_sub', 'Risk tier breakdown across active circles')}
                 </span>
               </div>
             </div>
@@ -258,7 +270,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                   <div className="d-flex justify-content-between align-items-center">
                     <span className="d-flex align-items-center gap-1.5" style={{ fontSize: '0.75rem', color: '#334155' }}>
                       <span className="rounded-circle d-inline-block" style={{ width: '8px', height: '8px', backgroundColor: '#10B981' }}></span>
-                      Paid On-Time
+                      {t('dashboard_page.dashboard_analytics.paid_on_time', 'Paid On-Time')}
                     </span>
                     <span className="fw-bold text-dark" style={{ fontSize: '0.78rem' }}>{chartPaid}</span>
                   </div>
@@ -266,7 +278,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                   <div className="d-flex justify-content-between align-items-center">
                     <span className="d-flex align-items-center gap-1.5" style={{ fontSize: '0.75rem', color: '#334155' }}>
                       <span className="rounded-circle d-inline-block" style={{ width: '8px', height: '8px', backgroundColor: '#0097B2' }}></span>
-                      Pending Verify
+                      {t('dashboard_page.dashboard_analytics.pending_verify', 'Pending Verify')}
                     </span>
                     <span className="fw-bold text-dark" style={{ fontSize: '0.78rem' }}>{chartPending}</span>
                   </div>
@@ -274,7 +286,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                   <div className="d-flex justify-content-between align-items-center">
                     <span className="d-flex align-items-center gap-1.5" style={{ fontSize: '0.75rem', color: '#334155' }}>
                       <span className="rounded-circle d-inline-block" style={{ width: '8px', height: '8px', backgroundColor: '#F59E0B' }}></span>
-                      Late (Grace)
+                      {t('dashboard_page.dashboard_analytics.late_grace', 'Late (Grace)')}
                     </span>
                     <span className="fw-bold text-dark" style={{ fontSize: '0.78rem' }}>{chartLate}</span>
                   </div>
@@ -282,7 +294,7 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                   <div className="d-flex justify-content-between align-items-center">
                     <span className="d-flex align-items-center gap-1.5" style={{ fontSize: '0.75rem', color: '#334155' }}>
                       <span className="rounded-circle d-inline-block" style={{ width: '8px', height: '8px', backgroundColor: '#EF4444' }}></span>
-                      Overdue Risk
+                      {t('dashboard_page.dashboard_analytics.overdue_risk', 'Overdue Risk')}
                     </span>
                     <span className="fw-bold text-dark" style={{ fontSize: '0.78rem' }}>{chartOverdue}</span>
                   </div>
@@ -292,8 +304,10 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
 
             {/* Quick Health Summary Pill */}
             <div className="mt-2 pt-2 border-top d-flex justify-content-between align-items-center" style={{ fontSize: '0.74rem' }}>
-              <span className="text-muted">Total Monitored Installments</span>
-              <span className="fw-semibold text-dark">{displayTotal} records</span>
+              <span className="text-muted">{t('dashboard_page.dashboard_analytics.total_monitored', 'Total Monitored Installments')}</span>
+              <span className="fw-semibold text-dark">
+                {t('dashboard_page.dashboard_analytics.records_count', '{{count}} records', { count: displayTotal })}
+                </span>
             </div>
           </div>
         </div>
@@ -312,10 +326,10 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                   </div>
                   <div>
                     <h6 className="fw-bold text-dark mb-0" style={{ fontSize: '0.9rem' }}>
-                      System Circle Lifecycles
+                      {t('dashboard_page.dashboard_analytics.lifecycles_title', 'System Circle Lifecycles')}
                     </h6>
                     <span className="text-muted" style={{ fontSize: '0.74rem' }}>
-                      Total platform circle status across Sri Lanka
+                      {t('dashboard_page.dashboard_analytics.lifecycles_sub', 'Total platform circle status across Sri Lanka')}
                     </span>
                   </div>
                 </div>
@@ -349,7 +363,9 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                   <div className="p-2 rounded-3 bg-light border">
                     <div className="d-flex align-items-center justify-content-center gap-1 mb-1">
                       <span className="rounded-circle d-inline-block" style={{ width: '7px', height: '7px', backgroundColor: '#0097B2' }}></span>
-                      <span className="text-muted small" style={{ fontSize: '0.72rem' }}>Active</span>
+                      <span className="text-muted small" style={{ fontSize: '0.72rem' }}>
+                        {t('status.ACTIVE', 'Active')}
+                      </span>
                     </div>
                     <div className="fw-bold text-dark fs-6">{activeGroupsCount}</div>
                     <div className="text-muted" style={{ fontSize: '0.65rem' }}>{activeGroupsPct}%</div>
@@ -360,7 +376,9 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                   <div className="p-2 rounded-3 bg-light border">
                     <div className="d-flex align-items-center justify-content-center gap-1 mb-1">
                       <span className="rounded-circle d-inline-block" style={{ width: '7px', height: '7px', backgroundColor: '#10B981' }}></span>
-                      <span className="text-muted small" style={{ fontSize: '0.72rem' }}>Completed</span>
+                      <span className="text-muted small" style={{ fontSize: '0.72rem' }}>
+                        {t('status.COMPLETED', 'Completed')}
+                      </span>
                     </div>
                     <div className="fw-bold text-dark fs-6">{completedGroupsCount}</div>
                     <div className="text-muted" style={{ fontSize: '0.65rem' }}>{completedGroupsPct}%</div>
@@ -371,7 +389,9 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                   <div className="p-2 rounded-3 bg-light border">
                     <div className="d-flex align-items-center justify-content-center gap-1 mb-1">
                       <span className="rounded-circle d-inline-block" style={{ width: '7px', height: '7px', backgroundColor: '#F59E0B' }}></span>
-                      <span className="text-muted small" style={{ fontSize: '0.72rem' }}>Pending</span>
+                      <span className="text-muted small" style={{ fontSize: '0.72rem' }}>
+                        {t('status.PENDING', 'Pending')}
+                      </span>
                     </div>
                     <div className="fw-bold text-dark fs-6">{pendingGroupsCount}</div>
                     <div className="text-muted" style={{ fontSize: '0.65rem' }}>{pendingGroupsPct}%</div>
@@ -391,10 +411,10 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                   </div>
                   <div>
                     <h6 className="fw-bold text-dark mb-0" style={{ fontSize: '0.9rem' }}>
-                      Legal & Dispute Integrity Monitor
+                      {t('dashboard_page.dashboard_analytics.integrity_title', 'Legal & Dispute Integrity Monitor')}
                     </h6>
                     <span className="text-muted" style={{ fontSize: '0.74rem' }}>
-                      Arbitration & Cheetus Ordinance compliance status
+                      {t('dashboard_page.dashboard_analytics.integrity_sub', 'Arbitration & Cheetus Ordinance compliance status')}
                     </span>
                   </div>
                 </div>
@@ -404,7 +424,9 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                 <div className="col-6">
                   <div className="p-2.5 rounded-3 border bg-light d-flex align-items-center justify-content-between">
                     <div>
-                      <div className="text-muted" style={{ fontSize: '0.72rem' }}>Open Disputes</div>
+                      <div className="text-muted" style={{ fontSize: '0.72rem' }}>
+                        {t('dashboard_page.dashboard_analytics.open_disputes', 'Open Disputes')}
+                      </div>
                       <div className={`fw-bold fs-6 ${openDisputesCount > 0 ? 'text-danger' : 'text-dark'}`}>
                         {openDisputesCount}
                       </div>
@@ -416,7 +438,9 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                 <div className="col-6">
                   <div className="p-2.5 rounded-3 border bg-light d-flex align-items-center justify-content-between">
                     <div>
-                      <div className="text-muted" style={{ fontSize: '0.72rem' }}>Emergency Requests</div>
+                      <div className="text-muted" style={{ fontSize: '0.72rem' }}>
+                        {t('dashboard_page.dashboard_analytics.emergency_requests', 'Emergency Requests')}
+                      </div>
                       <div className="fw-bold fs-6 text-dark">{pendingEmergenciesCount}</div>
                     </div>
                     <Icon name="zap" size={20} color="#F59E0B" />
@@ -426,7 +450,9 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                 <div className="col-6">
                   <div className="p-2.5 rounded-3 border bg-light d-flex align-items-center justify-content-between">
                     <div>
-                      <div className="text-muted" style={{ fontSize: '0.72rem' }}>Certificates Issued</div>
+                      <div className="text-muted" style={{ fontSize: '0.72rem' }}>
+                        {t('dashboard_page.dashboard_analytics.certificates_issued', 'Certificates Issued')}
+                      </div>
                       <div className="fw-bold fs-6 text-dark">{certificatesEarnedCount}</div>
                     </div>
                     <Icon name="award" size={20} color="#10B981" />
@@ -436,7 +462,9 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
                 <div className="col-6">
                   <div className="p-2.5 rounded-3 border bg-light d-flex align-items-center justify-content-between">
                     <div>
-                      <div className="text-muted" style={{ fontSize: '0.72rem' }}>Audit Reports</div>
+                      <div className="text-muted" style={{ fontSize: '0.72rem' }}>
+                        {t('dashboard_page.dashboard_analytics.audit_reports', 'Audit Reports')}
+                      </div>
                       <div className="fw-bold fs-6 text-dark">{reportsGeneratedCount}</div>
                     </div>
                     <Icon name="file-text" size={20} color="#0097B2" />
