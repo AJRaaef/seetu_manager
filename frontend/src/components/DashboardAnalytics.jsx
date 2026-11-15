@@ -62,8 +62,13 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
   // Doughnut Chart Data (Payment Compliance & Risk Portfolio)
   const doughnutData = {
     labels: hasData 
-      ? ['Paid (On-Time)', 'Pending Verification', 'Late (Grace)', 'Overdue (At Risk)']
-      : ['No Payments in Database'],
+      ? [
+          t('dashboard_page.dashboard_analytics.paid_on_time'),
+          t('dashboard_page.dashboard_analytics.pending_verify'),
+          t('dashboard_page.dashboard_analytics.late_grace'),
+          t('dashboard_page.dashboard_analytics.overdue_risk'),
+        ]
+      : [t('dashboard_page.dashboard_analytics.no_payments')],
     datasets: [
       {
         data: hasData ? [chartPaid, chartPending, chartLate, chartOverdue] : [1],
@@ -95,7 +100,15 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
         padding: 10,
         cornerRadius: 8,
         callbacks: {
-          label: (ctx) => hasData ? ` ${ctx.label}: ${ctx.raw} payments` : ' No payment records found in database'
+          label: (ctx) =>
+            hasData
+              ? ` ${ctx.label}: ${t(
+                  'dashboard_page.dashboard_analytics.payment_count',
+                  { count: ctx.raw },
+                )}`
+              : ` ${t(
+                  'dashboard_page.dashboard_analytics.no_payment_records',
+                )}`
         }
       }
     }
@@ -119,7 +132,9 @@ const DashboardAnalytics = ({ stats, recentPayments = [], isAdmin, isOrganizer }
   const outflowSeries = monthlyCashflow.map(item => Math.round(Number(item.outflow) || 0));
 
   const barData = {
-    labels: months.length > 0 ? months : ['No Historical Data'],
+    labels: months.length > 0
+      ? months
+      : [t('dashboard_page.dashboard_analytics.no_historical_data')],
     datasets: [
       {
         label: t('dashboard_page.dashboard_analytics.collected_funds', 'Collected Funds (Inflow)'),

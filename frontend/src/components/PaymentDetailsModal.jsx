@@ -93,6 +93,20 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
   };
 
   const isPaid = payment.status?.toUpperCase() === 'PAID' || payment.status?.toUpperCase() === 'LATE';
+  const cycleNumber =
+    payment.cycleNumber ?? payment.cycle?.match(/^Cycle\s+#?(\d+)$/i)?.[1];
+  const cycleLabel =
+    cycleNumber != null
+      ? t('modals.payment_details.cycle_value', { number: cycleNumber })
+      : payment.cycle || t('modals.payment_details.not_available');
+  const notesText =
+    payment.notes === 'Recorded via Payment Management portal'
+      ? t('modals.payment_details.recorded_via_portal')
+      : payment.notes ===
+          'Submitted by member with payment slip (Awaiting Approval)'
+        ? t('modals.payment_details.submitted_by_member_pending')
+        : payment.notes ||
+          t('modals.payment_details.no_notes', 'No extra notes recorded for this transaction.');
 
   const handleDownloadReceipt = () => {
     try {
@@ -157,7 +171,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
       let y = 113;
       const fields = [
         ['Member', payment.member || payment.memberName || 'N/A', 'Group', payment.group || payment.groupName || 'N/A'],
-        ['Cycle', payment.cycle || 'N/A', 'Date', payment.date || 'N/A'],
+        ['Cycle', cycleLabel, 'Date', payment.date || 'N/A'],
         ['Recorded By', payment.recordedBy || (isPaid ? 'Organizer' : 'N/A'), 'Payment Method', payment.method || 'Cash (Offline)']
       ];
       if (payment.status?.toUpperCase() === 'PARTIAL') {
@@ -173,7 +187,10 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
 
       pdf.setFillColor(248, 250, 252);
       pdf.setDrawColor(226, 232, 240);
-      const notes = safeText(payment.notes, 'No extra notes recorded for this transaction.');
+      const notes = safeText(
+        notesText,
+        t('modals.payment_details.no_notes', 'No extra notes recorded for this transaction.'),
+      );
       const noteLines = pdf.splitTextToSize(notes, contentWidth - 14);
       const notesHeight = Math.max(25, 18 + noteLines.length * 5);
       pdf.roundedRect(margin, y, contentWidth, notesHeight, 2, 2, 'FD');
@@ -305,7 +322,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           </div>
           <div className="col-6">
             <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.cycle', 'CYCLE')}</div>
-            <div className="fw-semibold text-dark">{payment.cycle || 'Cycle 3'}</div>
+            <div className="fw-semibold text-dark">{cycleLabel}</div>
           </div>
           <div className="col-6">
             <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.date', 'DATE')}</div>
@@ -327,7 +344,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
             {t('modals.payment_details.notes', 'NOTES / REMARKS')}
           </div>
           <div className="small text-muted">
-            {payment.notes || t('modals.payment_details.no_notes', 'No extra notes recorded for this transaction.')}
+            {notesText}
           </div>
         </div>
 

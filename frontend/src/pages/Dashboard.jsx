@@ -121,12 +121,12 @@ const Dashboard = () => {
           .slice(0, 5)
           .map((p) => ({
             id: p.id,
-            member: p.memberName || "Member",
+            member: p.memberName,
             amount: Number(p.amount) || 0,
             status: (p.status || "PAID").toUpperCase(),
             date: p.paymentDate || p.createdAt?.split("T")[0] || "-",
-            group: p.groupName || "General Group",
-            cycle: p.cycleNumber ? `Cycle ${p.cycleNumber}` : "Cycle 1",
+            group: p.groupName,
+            cycleNumber: p.cycleNumber,
             recordedBy:
               p.recordedByName || (p.status === "PAID" ? "Organizer" : "—"),
             method: "Cash (Offline)",
@@ -172,11 +172,11 @@ const Dashboard = () => {
               upcomingList.push({
                 groupId: g.id,
                 groupName: g.name,
-                cycle: `${g.name} • All ${totalCycles} Cycles Completed`,
-                recipient: "All Circle Members Received Rotational Payouts",
+                totalCycles,
+                recipient: null,
                 isUserRecipient: false,
-                date: "All Cycles Complete",
-                daysRemaining: "100% Fully Settled & Disbursed",
+                date: null,
+                daysRemaining: null,
                 amount: `${totalPot.toLocaleString()} LKR`,
                 isCompleted: true,
                 cycleId: null,
@@ -204,7 +204,7 @@ const Dashboard = () => {
                       g.createdByName ||
                       (Array.isArray(g.members)
                         ? g.members[0]?.fullName
-                        : "Organizer");
+                        : null);
                   } else if (Array.isArray(g.members) && g.members.length > 0) {
                     const organizerId = g.createdById;
                     const otherMembers = g.members.filter(
@@ -238,13 +238,18 @@ const Dashboard = () => {
                 upcomingList.push({
                   groupId: g.id,
                   groupName: g.name,
-                  cycle: `${g.name} • Cycle #${targetCycle.cycleNumber} of ${totalCycles}`,
-                  recipient: isUser
-                    ? `${recipient || "You"} (Your Payout Turn)`
-                    : recipient || "Rotation Selection",
+                  cycleNumber: targetCycle.cycleNumber,
+                  totalCycles,
+                  recipient,
+                  recipientFallback:
+                    !recipient &&
+                    targetCycle.cycleNumber === 1 &&
+                    !Array.isArray(g.members)
+                      ? "organizer"
+                      : null,
                   isUserRecipient: isUser,
                   date: targetCycle.endDate || targetCycle.startDate || "-",
-                  daysRemaining: `${daysRemaining} days remaining`,
+                  daysRemaining,
                   amount: `${totalPot.toLocaleString()} LKR`,
                   isCompleted: false,
                   cycleId: targetCycle.id,
@@ -289,16 +294,16 @@ const Dashboard = () => {
               : 1;
             return {
               id: p.id,
-              member: p.memberName || "Member",
+              member: p.memberName,
               memberId: p.memberId,
               memberPhone: p.memberPhone || "",
               memberEmail: p.memberEmail || "",
               amount: Number(p.amount) || 0,
               status: (p.status || "OVERDUE").toUpperCase(),
               date: dueDate,
-              group: p.groupName || "General Group",
-              groupName: p.groupName || "General Group",
-              cycle: p.cycleNumber ? `Cycle #${p.cycleNumber}` : "Cycle 1",
+              group: p.groupName,
+              groupName: p.groupName,
+              cycleNumber: p.cycleNumber,
               daysOverdue: daysOverdue,
               isCritical: daysOverdue >= 7,
             };
@@ -364,14 +369,18 @@ const Dashboard = () => {
       }
       setPayoutApproved(true);
       alert(
-        `Payout of ${data.amount} to ${data.recipient} approved successfully! All circle members have been notified.`,
+        t("dashboard_page.alerts.payout_approved", {
+          amount: data.amount,
+          recipient: data.recipient,
+        }),
       );
       fetchUpcomingPayout();
       fetchRecentPayments();
     } catch (err) {
       console.error("Failed to approve payout", err);
       alert(
-        err.response?.data?.message || "Failed to approve payout in database.",
+        err.response?.data?.message ||
+          t("dashboard_page.alerts.payout_approval_failed"),
       );
     }
   };
@@ -789,7 +798,10 @@ const Dashboard = () => {
                   return (
                     <tr key={item.id || idx}>
                       <td className="py-3 px-3">
-                        <div className="fw-bold text-dark">{item.member}</div>
+                        <div className="fw-bold text-dark">
+                          {item.member ||
+                            t("dashboard_page.recent_payments.col_member")}
+                        </div>
                         <div className="small text-muted d-flex align-items-center gap-2 mt-0.5">
                           {item.memberPhone && (
                             <span className="d-inline-flex align-items-center gap-1">
@@ -807,9 +819,13 @@ const Dashboard = () => {
                       </td>
                       <td className="py-3 px-3">
                         <div className="fw-semibold text-dark">
-                          {item.group}
+                          {item.group || t("dashboard_page.fallbacks.group")}
                         </div>
-                        <div className="small text-muted">{item.cycle}</div>
+                        <div className="small text-muted">
+                          {t("dashboard_page.fallbacks.cycle", {
+                            number: item.cycleNumber || 1,
+                          })}
+                        </div>
                       </td>
                       <td className="py-3 px-3">
                         <div className="fw-bold text-danger fs-6">
@@ -819,7 +835,9 @@ const Dashboard = () => {
                           className="small text-muted"
                           style={{ fontSize: "0.75rem" }}
                         >
-                          Due: {item.date}
+                          {t("dashboard_page.overdue_desk.due_date", {
+                            date: item.date,
+                          })}
                         </div>
                       </td>
                       <td className="py-3 px-3">
@@ -827,15 +845,21 @@ const Dashboard = () => {
                           className={`badge rounded-pill fw-semibold px-2.5 py-1 ${isCritical ? "bg-danger text-white" : "bg-warning text-dark"}`}
                         >
                           {isCritical
-                            ? `${item.daysOverdue} Days Late (Critical)`
-                            : `${item.daysOverdue} Days Late`}
+                            ? t("dashboard_page.overdue_desk.days_late_critical", {
+                                count: item.daysOverdue,
+                              })
+                            : t("dashboard_page.overdue_desk.days_late", {
+                                count: item.daysOverdue,
+                              })}
                         </span>
                         {isCritical && (
                           <div
                             className="text-danger small fw-semibold mt-1"
                             style={{ fontSize: "0.72rem" }}
                           >
-                            -10 pts Score Penalty Applied
+                            {t("dashboard_page.overdue_desk.score_penalty", {
+                              points: 10,
+                            })}
                           </div>
                         )}
                       </td>
@@ -846,10 +870,14 @@ const Dashboard = () => {
                             type="button"
                             onClick={() => setReminderTargetPayment(item)}
                             className="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-xs"
-                            title="Send payment reminder via WhatsApp, SMS, or Email"
+                            title={t(
+                              "dashboard_page.overdue_desk.reminder_tooltip",
+                            )}
                           >
                             <Icon name="message-square" size={14} />
-                            <span>Remind (WhatsApp/SMS)</span>
+                            <span>
+                              {t("dashboard_page.overdue_desk.remind_btn")}
+                            </span>
                           </button>
 
                           {/* Formal Legal Notice Demand */}
@@ -861,13 +889,15 @@ const Dashboard = () => {
                                 ? "btn-danger text-white"
                                 : "btn-outline-danger"
                             }`}
-                            title="Issue formal statutory demand notice under The Cheetus Ordinance"
+                            title={t(
+                              "dashboard_page.overdue_desk.legal_tooltip",
+                            )}
                           >
                             <Icon name="shield" size={14} />
                             <span>
                               {isCritical
-                                ? "Issue Legal Notice"
-                                : "Legal Notice"}
+                                ? t("dashboard_page.overdue_desk.issue_notice")
+                                : t("dashboard_page.overdue_desk.legal_btn")}
                             </span>
                           </button>
                         </div>
@@ -998,18 +1028,29 @@ const Dashboard = () => {
                             }}
                           >
                             {isOverdue
-                              ? `Overdue (${due.daysOverdue} days late)`
+                              ? t("dashboard_page.pending_dues.overdue_days", {
+                                  count: due.daysOverdue,
+                                })
                               : isInGracePeriod
-                                ? `Grace Period (${due.graceDaysRemaining || 5} days left)`
+                                ? t("dashboard_page.pending_dues.grace_period", {
+                                    count: due.graceDaysRemaining || 5,
+                                  })
                                 : isDueToday
-                                  ? "Due Today"
+                                  ? t("dashboard_page.pending_dues.due_today")
                                   : isAwaiting
-                                    ? "Verification Pending"
-                                    : `Due in ${due.daysRemaining} days`}
+                                    ? t(
+                                        "dashboard_page.pending_dues.verification_pending",
+                                      )
+                                    : t("dashboard_page.pending_dues.due_in_days", {
+                                        count: due.daysRemaining,
+                                      })}
                           </span>
                           <span className="small text-muted fw-semibold">
-                            {due.groupName} • Cycle #{due.cycleNumber} of{" "}
-                            {due.totalCycles}
+                            {t("dashboard_page.pending_dues.cycle_of", {
+                              cycleNumber: due.cycleNumber,
+                              totalCycles: due.totalCycles,
+                              groupName: due.groupName,
+                            })}
                           </span>
                         </div>
 
@@ -1019,15 +1060,30 @@ const Dashboard = () => {
                         >
                           {isOverdue
                             ? due.daysOverdue >= 7
-                              ? `Critical Overdue: Installment ${due.daysOverdue} Days Late!`
-                              : `Payment Overdue: Installment ${due.daysOverdue} Days Late`
+                              ? t(
+                                  "dashboard_page.pending_dues.critical_overdue_title",
+                                  { count: due.daysOverdue },
+                                )
+                              : t(
+                                  "dashboard_page.pending_dues.overdue_title",
+                                  { count: due.daysOverdue },
+                                )
                             : isInGracePeriod
-                              ? `Payment Due: In Grace Period (${due.graceDaysRemaining || 5} Days Left)`
+                              ? t(
+                                  "dashboard_page.pending_dues.grace_period_title",
+                                  { count: due.graceDaysRemaining || 5 },
+                                )
                               : isDueToday
-                                ? "Installment Payment Due Today"
+                                ? t(
+                                    "dashboard_page.pending_dues.due_today_title",
+                                  )
                                 : isAwaiting
-                                  ? "Deposit Slip Under Review by Organizer"
-                                  : "Upcoming Installment Reminder"}
+                                  ? t(
+                                      "dashboard_page.pending_dues.deposit_review_title",
+                                    )
+                                  : t(
+                                      "dashboard_page.pending_dues.upcoming_reminder_title",
+                                    )}
                         </h5>
 
                         <p
@@ -1036,15 +1092,51 @@ const Dashboard = () => {
                         >
                           {isOverdue
                             ? due.daysOverdue >= 7
-                              ? `This installment was due on ${due.dueDate}. A 7-day overdue status applies a penalty on your Discipline Score (-10 pts). Please settle immediately with organizer ${due.organizerName}.`
-                              : `This installment was due on ${due.dueDate} (${due.daysOverdue} days ago). Please settle to maintain your 100% on-time reputation rating.`
+                              ? t(
+                                  "dashboard_page.pending_dues.critical_overdue_description",
+                                  {
+                                    dueDate: due.dueDate,
+                                    organizer: due.organizerName,
+                                    points: 10,
+                                  },
+                                )
+                              : t(
+                                  "dashboard_page.pending_dues.overdue_description",
+                                  {
+                                    dueDate: due.dueDate,
+                                    daysOverdue: due.daysOverdue,
+                                  },
+                                )
                             : isInGracePeriod
-                              ? `Your installment of ${Number(due.amount).toLocaleString()} LKR was due on ${due.dueDate}. You have a fair grace period of ${due.graceDaysRemaining || 5} days remaining to settle without penalty to your Discipline Score.`
+                              ? t(
+                                  "dashboard_page.pending_dues.grace_period_description",
+                                  {
+                                    amount: Number(due.amount).toLocaleString(),
+                                    dueDate: due.dueDate,
+                                    days: due.graceDaysRemaining || 5,
+                                  },
+                                )
                               : isDueToday
-                                ? `Your installment of ${Number(due.amount).toLocaleString()} LKR is due today (${due.dueDate}). Settle today to prevent delay penalties.`
+                                ? t(
+                                    "dashboard_page.pending_dues.due_today_description",
+                                    {
+                                      amount: Number(due.amount).toLocaleString(),
+                                      dueDate: due.dueDate,
+                                    },
+                                  )
                                 : isAwaiting
-                                  ? `You uploaded your payment slip. Organizer ${due.organizerName} is reviewing and confirming your payment.`
-                                  : `Cycle #${due.cycleNumber} collection is active. Due date is ${due.dueDate} (${due.daysRemaining} days remaining).`}
+                                  ? t(
+                                      "dashboard_page.pending_dues.deposit_review_description",
+                                      { organizer: due.organizerName },
+                                    )
+                                  : t(
+                                      "dashboard_page.pending_dues.upcoming_description",
+                                      {
+                                        cycleNumber: due.cycleNumber,
+                                        dueDate: due.dueDate,
+                                        days: due.daysRemaining,
+                                      },
+                                    )}
                         </p>
                       </div>
                     </div>
@@ -1055,7 +1147,7 @@ const Dashboard = () => {
                           className="small text-muted"
                           style={{ fontSize: "0.78rem" }}
                         >
-                          Amount Due
+                          {t("dashboard_page.pending_dues.amount_due")}
                         </div>
                         <div
                           className="fs-4 fw-bold"
@@ -1145,23 +1237,49 @@ const Dashboard = () => {
                     className="small text-white-50 mb-1"
                     style={{ fontSize: "0.8rem" }}
                   >
-                    {item.cycle}
+                    {item.isCompleted
+                      ? t(
+                          "dashboard_page.payout_card.completed_cycle_summary",
+                          {
+                            groupName: item.groupName,
+                            count: item.totalCycles,
+                          },
+                        )
+                      : t("dashboard_page.payout_card.cycle_summary", {
+                          groupName: item.groupName,
+                          cycleNumber: item.cycleNumber,
+                          totalCycles: item.totalCycles,
+                        })}
                   </div>
                   <h3 className="fw-bold mb-1 text-white">
-                    {item.isUserRecipient 
-                       ? `${user?.fullName || "Vichakshi"} (${t("dashboard_page.payout_card.user_turn_label", "ඔබගේ ගෙවීම් වාරය")})` 
-                       : item.recipient}
+                    {item.isCompleted
+                      ? t("dashboard_page.payout_card.all_circle_members_paid")
+                      : item.isUserRecipient
+                        ? `${user?.fullName || t("dashboard_page.payout_card.you")} (${t(
+                            "dashboard_page.payout_card.user_turn_label",
+                          )})`
+                        : item.recipient ||
+                          t(
+                            item.recipientFallback === "organizer"
+                              ? "dashboard_page.roles.organizer"
+                              : "dashboard_page.payout_card.rotation_selection",
+                          )}
                   </h3>
                   <div className="small text-white-50 mb-2">
-                    {t("common.date", "Date")} : {item.date}
+                    {t("common.date", "Date")} :{" "}
+                    {item.isCompleted
+                      ? t("dashboard_page.payout_card.all_cycles_complete")
+                      : item.date}
                   </div>
                   <div
                     className="fw-bold small"
                     style={{ color: item.isCompleted ? "#34D399" : "#FACC15" }}
                   >
-                    {item.daysRemaining.includes("days remaining") 
-                      ? item.daysRemaining.replace("days remaining", t("common.days_remaining", "දින ඉතිරිව ඇත")) 
-                      : item.daysRemaining}
+                    {item.isCompleted
+                      ? t("dashboard_page.payout_card.fully_settled")
+                      : t("dashboard_page.payout_card.days_remaining", {
+                          count: item.daysRemaining,
+                        })}
                   </div>
                 </div>
 
@@ -1180,14 +1298,14 @@ const Dashboard = () => {
                         style={{ fontSize: "0.88rem" }}
                       >
                         <Icon name="award" size={16} color="#198754" />
-                        <span>Payout Voucher</span>
+                        <span>{t("dashboard_page.payout_card.voucher")}</span>
                       </button>
                       <Link
                         to={`/groups/${item.groupId}`}
                         className="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold shadow-sm d-inline-flex align-items-center gap-1"
                         style={{ fontSize: "0.88rem" }}
                       >
-                        <span>View Ledger</span>
+                        <span>{t("dashboard_page.payout_card.view_ledger")}</span>
                         <Icon name="arrow-right" size={14} />
                       </Link>
                     </div>
@@ -1306,7 +1424,8 @@ const Dashboard = () => {
                     style={{ cursor: "pointer" }}
                   >
                     <td className="py-3 px-4 fw-semibold text-dark">
-                      {payment.member}
+                      {payment.member ||
+                        t("dashboard_page.recent_payments.col_member")}
                     </td>
                     <td className="py-3 px-4 text-muted">
                       {payment.amount.toLocaleString()} LKR
@@ -1332,7 +1451,14 @@ const Dashboard = () => {
         payoutData={{
           recipient:
             selectedUpcomingPayout?.recipient || upcomingPayout.recipient,
-          cycle: selectedUpcomingPayout?.cycle || upcomingPayout.cycle,
+          cycle: t("dashboard_page.payout_card.cycle_summary", {
+            groupName:
+              selectedUpcomingPayout?.groupName || upcomingPayout.groupName,
+            cycleNumber:
+              selectedUpcomingPayout?.cycleNumber || upcomingPayout.cycleNumber,
+            totalCycles:
+              selectedUpcomingPayout?.totalCycles || upcomingPayout.totalCycles,
+          }),
           scheduledDate: selectedUpcomingPayout?.date || upcomingPayout.date,
           amount: selectedUpcomingPayout?.amount || upcomingPayout.amount,
           cycleId: selectedUpcomingPayout?.cycleId || upcomingPayout.cycleId,
@@ -1362,7 +1488,9 @@ const Dashboard = () => {
           show={!!legalNoticeTargetPayment}
           onHide={() => setLegalNoticeTargetPayment(null)}
           payment={legalNoticeTargetPayment}
-          organizerName={user?.fullName || "Circle Organizer"}
+          organizerName={
+            user?.fullName || t("dashboard_page.fallbacks.circle_organizer")
+          }
         />
       )}
 
