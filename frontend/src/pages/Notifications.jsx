@@ -60,7 +60,7 @@ const Notifications = () => {
       setNotifications(res.data || []);
     } catch (err) {
       console.error(err);
-      setError('Failed to load notifications.');
+      setError(t('notifications_page.failed_load', 'Failed to load notifications.'));
     } finally {
       setLoading(false);
     }
@@ -113,7 +113,7 @@ const Notifications = () => {
       window.location.href = targetGroup ? `/groups/${targetGroup.id}` : '/groups';
     } catch (err) {
       console.error('Failed to open voucher from notification', err);
-      alert('Unable to load voucher. Redirecting to your groups...');
+      alert(t('notifications_page.unable_load_voucher', 'Unable to load voucher. Redirecting to your groups...'));
       window.location.href = '/groups';
     }
   };
@@ -143,11 +143,11 @@ const Notifications = () => {
         await notificationApi.markAllAsRead(currentUserId);
       }
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true, readStatus: true })));
-      setSuccessMsg('All notifications marked as read.');
+      setSuccessMsg(t('notifications_page.all_marked_read', 'All notifications marked as read.'));
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err) {
       console.error(err);
-      setError('Failed to mark all as read.');
+      setError(t('notifications_page.failed_mark_all_read', 'Failed to mark all as read.'));
     }
   };
 
@@ -156,12 +156,12 @@ const Notifications = () => {
       setIsTriggering(true);
       setError('');
       const res = await triggerPaymentReminders();
-      setSuccessMsg(res.message || 'Payment reminders sent successfully!');
+      setSuccessMsg(res.message || t('notifications_page.payment_reminders_sent', 'Payment reminders sent successfully!'));
       setTimeout(() => setSuccessMsg(''), 4000);
       fetchNotifications();
     } catch (err) {
       console.error(err);
-      setError('Failed to trigger payment reminders.');
+      setError(t('notifications_page.failed_trigger_reminders', 'Failed to trigger payment reminders.'));
     } finally {
       setIsTriggering(false);
     }
@@ -205,6 +205,149 @@ const Notifications = () => {
     return { label: t('notifications_page.notice', 'Notice'), badgeBg: 'bg-secondary text-white', icon: 'bell', iconColor: '#64748B', iconBg: '#F1F5F9', borderColor: '#94A3B8' };
   };
 
+  const getNotificationMessage = (notification) => {
+    const type = (notification.type || '').toUpperCase();
+    const message = notification.message || '';
+    let match;
+
+    switch (type) {
+      case 'PAYMENT':
+        match = message.match(/^Your payment of (.+) has been recorded for cycle (\d+)$/);
+        if (match) return t('notifications_page.payment_recorded', { amount: match[1], cycle: match[2] });
+        break;
+      case 'PAYMENT_OVERDUE':
+        match = message.match(/^Your installment for '(.+)' \(Cycle #(\d+)\) is overdue\.$/);
+        if (match) return t('notifications_page.payment_overdue_message', { group: match[1], cycle: match[2] });
+        break;
+      case 'PAYMENT_REMINDER':
+        match = message.match(/^Payment Reminder: Your installment of LKR (.+) for '(.+)' \(Cycle #(\d+)\) is due on (.+)\. Please ensure your payment is settled on time\.$/);
+        if (match) return t('notifications_page.payment_reminder_message', { amount: match[1], group: match[2], cycle: match[3], date: match[4] });
+        break;
+      case 'CYCLE_COMPLETED':
+        match = message.match(/^Cycle #(\d+) for '(.+)' has officially completed! The total rotational pot of (.+) LKR has been disbursed to (.+?)\. Payout verification voucher is available for download\. (.+)$/);
+        if (match) {
+          const isFinal = match[5] === 'All cycles for this circle are now fully completed!';
+          const nextCycleMatch = match[5].match(/^Cycle #(\d+) is now active\.$/);
+          if (isFinal || nextCycleMatch) {
+            return t(`notifications_page.cycle_completed_${isFinal ? 'final' : 'next'}`, {
+              cycle: match[1],
+              group: match[2],
+              amount: match[3],
+              winner: match[4],
+              ...(isFinal ? {} : { nextCycle: nextCycleMatch[1] })
+            });
+          }
+        }
+        break;
+      case 'UPCOMING_PAYOUT':
+        match = message.match(/^Upcoming Payout Notice: Cycle #(\d+) for '(.+)' is now in progress! Scheduled rotational payout of (.+) LKR to (.+) on or before (.+)\. Track it in your dashboard\.$/);
+        if (match) return t('notifications_page.upcoming_payout_message', { cycle: match[1], group: match[2], amount: match[3], recipient: match[4], date: match[5] });
+        break;
+      case 'PAYOUT_RECEIVED':
+        match = message.match(/^Congratulations (.+)! Your rotational payout pot of (.+) LKR for Cycle #(\d+) in '(.+)' has been officially disbursed to you by your organizer\. Your official Payout Verification Voucher has been issued\.$/);
+        if (match) return t('notifications_page.payout_received_message', { name: match[1], amount: match[2], cycle: match[3], group: match[4] });
+        break;
+      case 'PAYOUT':
+        match = message.match(/^Congratulations! You have been allocated the payout for Cycle #(\d+) in group "(.+)"\.$/);
+        if (match) return t('notifications_page.payout_allocated_message', { cycle: match[1], group: match[2] });
+        break;
+      case 'VERIFICATION_PENDING':
+        match = message.match(/^Your identity verification \(NIC: (.+)\) has been submitted successfully and is currently under review by administrators\.$/);
+        if (match) return t('notifications_page.verification_submitted_message', { nic: match[1] });
+        match = message.match(/^New Member Verification Submitted: (.+) \(NIC: (.+)\) is awaiting approval\.$/);
+        if (match) return t('notifications_page.verification_new_submission_message', { name: match[1], nic: match[2] });
+        break;
+      case 'VERIFICATION_APPROVED':
+        match = message.match(/^(?:🎉 )?Congratulations! Your identity verification \(NIC: (.+)\) has been approved\. You are now authorized to join Seettu circles\.$/);
+        if (match) return t('notifications_page.verification_approved_message', { nic: match[1] });
+        break;
+      case 'VERIFICATION_REJECTED':
+        match = message.match(/^(?:⚠️ )?Your identity verification was rejected: (.+)\. Please re-submit clear documents\.$/);
+        if (match) return t('notifications_page.verification_rejected_message', { reason: match[1] });
+        break;
+      case 'KYC_VERIFIED':
+        if (message.endsWith('You are now an authorized Group Organizer.')) return t('notifications_page.kyc_verified_organizer');
+        if (message.endsWith('You can now participate in Seettu groups.')) return t('notifications_page.kyc_verified_member');
+        break;
+      case 'KYC_REJECTED':
+        match = message.match(/^Your identity verification was rejected: (.+)$/);
+        if (match) return t('notifications_page.kyc_rejected_message', { reason: match[1] });
+        break;
+      case 'JOIN_REQUEST':
+        match = message.match(/^New join request from (.+) for group: (.+)$/);
+        if (match) return t('notifications_page.join_request_message', { name: match[1], group: match[2] });
+        break;
+      case 'JOIN_APPROVED':
+        match = message.match(/^Your request to join group '(.+)' has been approved!$/);
+        if (match) return t('notifications_page.join_approved_message', { group: match[1] });
+        break;
+      case 'JOIN_REJECTED':
+        match = message.match(/^Your request to join group '(.+)' was rejected\.$/);
+        if (match) return t('notifications_page.join_rejected_message', { group: match[1] });
+        break;
+      case 'GROUP':
+        match = message.match(/^You have been added to group: (.+)$/);
+        if (match) return t('notifications_page.group_member_added', { group: match[1] });
+        match = message.match(/^You have been removed from group: (.+)$/);
+        if (match) return t('notifications_page.group_member_removed', { group: match[1] });
+        break;
+      case 'GROUP_ACTIVATED':
+        match = message.match(/^Circle Full Notice: '(.+)' has officially reached full capacity \((\d+)\/(\d+) members\)! Rotational Cycle #1 is now ACTIVE and open for contributions\.$/);
+        if (match) return t('notifications_page.circle_full_message', { group: match[1], members: match[2], capacity: match[3] });
+        break;
+      case 'KULUKKAL_DRAW':
+        match = message.match(/^Kulukkal Lot Drawing Completed for '(.+)'! Cycle #1 is allocated to the Organizer \((.+)\)\. Subsequent cycles were fairly drawn\. View the full rotation schedule in your group dashboard\.$/);
+        if (match) return t('notifications_page.kulukkal_draw_completed', { group: match[1], organizer: match[2] });
+        match = message.match(/^Kulukkal Winner Drawn! For Cycle #(\d+) in '(.+)', the winning lot chit was drawn for (.+)\.$/);
+        if (match) return t('notifications_page.kulukkal_winner_drawn', { cycle: match[1], group: match[2], winner: match[3] });
+        break;
+      case 'ORGANIZER_APPLICATION_SUBMITTED':
+      case 'ORGANIZER_REQUEST_SUBMITTED':
+        if (message === 'Your application to become a Seettu Organizer has been submitted for Administrative review.') return t('notifications_page.organizer_application_submitted');
+        if (message.startsWith('Your application to become a Seettu Organizer has been submitted.')) return t('notifications_page.organizer_request_submitted');
+        break;
+      case 'ORGANIZER_APPLICATION':
+        match = message.match(/^New organizer application from (.+) in (.+)$/);
+        if (match) return t('notifications_page.organizer_application_from', { name: match[1], district: match[2] });
+        break;
+      case 'ORGANIZER_APPROVED':
+        if (message === 'Your application to become an organizer has been approved!') return t('notifications_page.organizer_approved_message');
+        break;
+      case 'ORGANIZER_REJECTED':
+        match = message.match(/^Your organizer application was rejected\. Reason: (.+)$/);
+        if (match) return t('notifications_page.organizer_rejected_message', { reason: match[1] });
+        break;
+      case 'ORGANIZER_REQUEST_DECLINED':
+        match = message.match(/^Your request to upgrade to Group Organizer was declined: (.+)$/);
+        if (match) return t('notifications_page.organizer_upgrade_declined', { reason: match[1] });
+        break;
+      case 'ROTATION_STARTED':
+        match = message.match(/^The spinning wheel for (.+) \(Cycle #(\d+)\) is now OPEN! Spin now to draw your payout order\.$/);
+        if (match) return t('notifications_page.rotation_started_message', { group: match[1], cycle: match[2] });
+        break;
+      case 'DISPUTE':
+        match = message.match(/^Organizer Dispute Escalation: Organizer (.+) escalated a dispute for (.+) \((.+)\)$/);
+        if (match) return t('notifications_page.dispute_escalation_message', { name: match[1], dispute: match[2], disputeType: match[3] });
+        match = message.match(/^New dispute raised in group: (.+) by (.+)$/);
+        if (match) return t('notifications_page.dispute_group_message', { group: match[1], name: match[2] });
+        match = message.match(/^New platform grievance filed: (.+)$/);
+        if (match) return t('notifications_page.dispute_platform_message', { disputeType: match[1] });
+        match = message.match(/^Your dispute has been (resolved|rejected)$/);
+        if (match) return t('notifications_page.dispute_status_message', { status: t(`notifications_page.status_${match[1]}`) });
+        break;
+      case 'EMERGENCY':
+        match = message.match(/^New emergency request from (.+)$/);
+        if (match) return t('notifications_page.emergency_request_message', { name: match[1] });
+        match = message.match(/^Your emergency request has been (resolved|rejected|approved|pending)$/);
+        if (match) return t('notifications_page.emergency_status_message', { status: t(`notifications_page.status_${match[1]}`) });
+        break;
+      default:
+        break;
+    }
+
+    return message;
+  };
+
   const unreadCount = notifications.filter(isUnread).length;
 
   const filteredNotifications = notifications.filter(n => {
@@ -229,7 +372,11 @@ const Notifications = () => {
           <p className="text-muted mb-0">
             {scope === 'ALL_SYSTEM'
               ? t('notifications_page.system_sub', 'Viewing all system-wide notification activities across all users and circles')
-              : `${t('notifications_page.personal_sub', 'Personal notifications for')} ${user?.fullName || 'your account'} (${user?.email || ''})`}
+              : t('notifications_page.personal_sub_with_user', {
+                name: user?.fullName || t('notifications_page.your_account', 'your account'),
+                email: user?.email || '',
+                defaultValue: 'Personal notifications for {{name}} ({{email}})'
+              })}
           </p>
         </div>
 
@@ -239,7 +386,7 @@ const Notifications = () => {
               className="btn btn-outline-warning btn-sm fw-bold d-flex align-items-center gap-1 shadow-sm"
               onClick={handleTriggerReminders}
               disabled={isTriggering}
-              title="Dispatches due payment reminders to members with upcoming cycles"
+              title={t('notifications_page.dispatch_title', 'Dispatches due payment reminders to members with upcoming cycles')}
             >
               <Icon name="payments" size={15} />
               <span>{isTriggering ? t('notifications_page.dispatching', 'Dispatching...') : t('notifications_page.dispatch_btn', 'Dispatch Due Reminders')}</span>
@@ -366,17 +513,17 @@ const Notifications = () => {
                       {scope === 'ALL_SYSTEM' && n.user && (
                         <span className="badge bg-secondary-subtle text-dark border px-2 py-0.5 small d-inline-flex align-items-center">
                           <Icon name="user" size={12} color="#475569" className="me-1" />
-                          <span>{t('notifications_page.sent_to', 'Sent to:')} {n.user.fullName || n.user.email || `User #${n.user.id}`}</span>
+                          <span>{t('notifications_page.sent_to', 'Sent to:')} {n.user.fullName || n.user.email || t('notifications_page.user_id', { userId: n.user.id })}</span>
                         </span>
                       )}
                       <small className="text-muted ms-auto d-inline-flex align-items-center">
                         <Icon name="clock" size={12} color="#94A3B8" className="me-1" />
-                        <span>{n.createdAt ? new Date(n.createdAt).toLocaleString() : 'Just now'}</span>
                       </small>
+                        <span>{n.createdAt ? new Date(n.createdAt).toLocaleString() : t('notifications_page.just_now', 'Just now')}</span>
                     </div>
 
                     <p className="mb-0 text-dark fw-medium mt-2" style={{ lineHeight: 1.5 }}>
-                      {n.message}
+                      {getNotificationMessage(n)}
                     </p>
 
                     {(n.type === 'CYCLE_COMPLETED' || (n.message && (n.message.toLowerCase().includes('payout verification voucher') || n.message.toLowerCase().includes('disbursed to')))) && (
@@ -398,7 +545,7 @@ const Notifications = () => {
                       className="btn btn-sm btn-outline-primary fw-bold ms-3 flex-shrink-0 d-inline-flex align-items-center gap-1"
                       style={{ color: '#0097B2', borderColor: '#0097B2' }}
                       onClick={() => handleMarkAsRead(n.id)}
-                      title="Mark as read"
+                      title={t('notifications_page.mark_read_title', 'Mark as read')}
                     >
                       <Icon name="check" size={13} color="#0097B2" />
                       <span>{t('notifications_page.mark_read', 'Mark Read')}</span>
