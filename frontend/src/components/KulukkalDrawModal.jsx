@@ -97,7 +97,7 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
             chitNumber: 1,
             member: organizerMember,
             isOrganizer: true,
-            roleLabel: 'Circle Organizer (Guaranteed 1st Turn)'
+            roleLabel: 'groups_page.kulukkal.organizer_role'
           });
         } else {
           const subIdx = (i - 2) % subscribersOrdered.length;
@@ -112,7 +112,7 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
             chitNumber: chitNum,
             member: assignedMember,
             isOrganizer: false,
-            roleLabel: `Kulukkal Lot Chit #${chitNum}`
+            roleLabel: 'groups_page.kulukkal.chit_role'
           });
         }
       }
@@ -126,7 +126,7 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
     try {
       const res = await api.post(`/payment-cycles/group/${group.id}/kulukkal-draw`);
       alert(
-        'Kulukkal Draw confirmed! Cycle #1 has been allocated to the Organizer, and subsequent cycle turns have been assigned in drawn lot order.'
+        t('groups_page.kulukkal.apply_success')
       );
       if (onDrawSuccess) {
         onDrawSuccess(res.data?.data || res.data || []);
@@ -134,7 +134,7 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
       onHide();
     } catch (err) {
       console.error('Failed to apply Kulukkal draw to database', err);
-      alert(err.response?.data?.message || 'Failed to apply Kulukkal schedule.');
+      alert(err.response?.data?.message || t('groups_page.kulukkal.apply_error'));
     } finally {
       setSubmitting(false);
     }
@@ -208,11 +208,11 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
           <div className="d-flex align-items-center gap-2">
             <Icon name="refresh" size={20} color="#34D399" />
             <h5 className="modal-title fw-bold mb-0 text-white">
-              Kulukkal Lot Drawing (குலுக்கல் சீட்டு)
+              {t('groups_page.kulukkal.title')}
             </h5>
           </div>
           <small className="text-white-50">
-            Fair Traditional Rotational Lot Selection for {group.name}
+            {t('groups_page.kulukkal.subtitle', { groupName: group.name })}
           </small>
         </div>
         <button type="button" className="btn-close btn-close-white" onClick={onHide}></button>
@@ -224,12 +224,12 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
           <div className="d-flex align-items-start gap-2">
             <Icon name="check-circle" size={18} color="#166534" className="mt-0.5 flex-shrink-0" />
             <div className="small text-dark">
-              <strong>Traditional Seettu Rule (The Cheetus Ordinance No. 61 of 1935):</strong>
+              <strong>{t('groups_page.kulukkal.rule_title')}</strong>
               <div className="mt-1 text-muted">
-                • <strong>Cycle #1</strong> is permanently reserved for the <strong>Circle Organizer ({organizerMember?.fullName || 'Manager'})</strong> as customary management remuneration upon completion of the 1st cycle.
+                • <strong>{t('groups_page.kulukkal.cycle_one')}</strong> {t('groups_page.kulukkal.organizer_rule_prefix')} <strong>{t('groups_page.kulukkal.organizer_label', { organizer: organizerMember?.fullName || t('groups_page.kulukkal.manager') })}</strong> {t('groups_page.kulukkal.organizer_rule_suffix')}
               </div>
               <div className="text-muted">
-                • <strong>Cycles #2 to #{totalCycles}</strong> are drawn using this live <strong>Kulukkal Number Wheel</strong> across all participating subscribers.
+                • <strong>{t('groups_page.kulukkal.cycles_range', { totalCycles })}</strong> {t('groups_page.kulukkal.wheel_rule_prefix')} <strong>{t('groups_page.kulukkal.wheel_label')}</strong> {t('groups_page.kulukkal.wheel_rule_suffix')}
               </div>
             </div>
           </div>
@@ -287,15 +287,15 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
               <div className="mt-3">
                 {isSpinning ? (
                   <div className="badge rounded-pill bg-primary px-3 py-1.5 fs-6 shadow-sm">
-                    Spinning Kulukkal Wheel...
+                    {t('groups_page.kulukkal.spinning_wheel')}
                   </div>
                 ) : winningChit ? (
                   <div className="badge rounded-pill bg-success px-3.5 py-1.5 fs-6 shadow-sm">
-                    Drawn: Chit #{winningChit.number} ({winningChit.member?.fullName})
+                    {t('groups_page.kulukkal.drawn_chit', { number: winningChit.number, member: winningChit.member?.fullName })}
                   </div>
                 ) : (
                   <span className="small text-muted fw-semibold">
-                    {allChitMembers.length} Members on Number Wheel
+                    {t('groups_page.kulukkal.members_on_wheel', { count: allChitMembers.length })}
                   </span>
                 )}
               </div>
@@ -306,7 +306,7 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
               <div className="card border-0 shadow-sm rounded-3 p-3 bg-white">
                 <h6 className="fw-bold text-dark mb-2 d-flex align-items-center gap-1.5">
                   <Icon name="users" size={16} color="#0F2F3D" />
-                  <span>Kulukkal Lot Chits (சீட்டு எண்கள்)</span>
+                  <span>{t('groups_page.kulukkal.lot_chits')}</span>
                 </h6>
                 <div className="d-flex flex-column gap-2 small">
                   {/* Organizer Chit #1 */}
@@ -322,11 +322,11 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
                         Chit #1
                       </span>
                       <span className="fw-bold text-dark">
-                        {organizerMember?.fullName || 'Circle Organizer'}
+                        {organizerMember?.fullName || t('groups_page.kulukkal.circle_organizer')}
                       </span>
                     </div>
                     <span className="badge bg-success-subtle text-success border border-success-subtle">
-                      Cycle 1 (Guaranteed)
+                      {t('groups_page.kulukkal.cycle_one_guaranteed')}
                     </span>
                   </div>
 
@@ -354,9 +354,9 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
                         </div>
                         <span className="text-muted small">
                           {isWinner ? (
-                            <strong className="text-success">Won Cycle #2</strong>
+                            <strong className="text-success">{t('groups_page.kulukkal.won_cycle_two')}</strong>
                           ) : (
-                            'In Wheel Pool'
+                            t('groups_page.kulukkal.in_wheel_pool')
                           )}
                         </span>
                       </div>
@@ -374,10 +374,10 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
                     <Icon name="refresh" size={17} />
                     <span>
                       {isSpinning
-                        ? 'Spinning...'
+                        ? t('groups_page.kulukkal.spinning')
                         : drawnSchedule
-                        ? 'Spin Again (மீண்டும் சுழற்று)'
-                        : 'Spin Kulukkal Wheel (குலுக்கல் சுழற்று)'}
+                        ? t('groups_page.kulukkal.spin_again')
+                        : t('groups_page.kulukkal.spin_wheel')}
                     </span>
                   </button>
                 </div>
@@ -392,7 +392,7 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-1.5">
                 <Icon name="check-circle" size={17} color="#166534" />
-                <span>Kulukkal Draw Results (Rotation Sequence)</span>
+                <span>{t('groups_page.kulukkal.results_title')}</span>
               </h6>
             </div>
 
@@ -400,11 +400,11 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
               <table className="table table-hover align-middle mb-0">
                 <thead className="table-light">
                   <tr>
-                    <th className="py-2.5 px-3">Cycle Turn</th>
-                    <th className="py-2.5 px-3">Lot Chit</th>
-                    <th className="py-2.5 px-3">Subscriber</th>
-                    <th className="py-2.5 px-3">Designation / Lot Method</th>
-                    <th className="py-2.5 px-3 text-end">Pooled Pot</th>
+                    <th className="py-2.5 px-3">{t('groups_page.kulukkal.cycle_turn')}</th>
+                    <th className="py-2.5 px-3">{t('groups_page.kulukkal.lot_chit')}</th>
+                    <th className="py-2.5 px-3">{t('groups_page.kulukkal.subscriber')}</th>
+                    <th className="py-2.5 px-3">{t('groups_page.kulukkal.designation')}</th>
+                    <th className="py-2.5 px-3 text-end">{t('groups_page.kulukkal.pooled_pot')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -413,14 +413,14 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
                       key={item.cycleNumber}
                       className={item.isOrganizer ? 'table-success-subtle' : ''}
                     >
-                      <td className="py-2.5 px-3 fw-bold">Cycle #{item.cycleNumber}</td>
+                      <td className="py-2.5 px-3 fw-bold">{t('groups_page.kulukkal.cycle_number', { number: item.cycleNumber })}</td>
                       <td className="py-2.5 px-3">
                         <span className="badge rounded-pill bg-secondary px-2.5 py-1">
-                          Chit #{item.chitNumber}
+                          {t('groups_page.kulukkal.chit_number', { number: item.chitNumber })}
                         </span>
                       </td>
                       <td className="py-2.5 px-3 fw-semibold text-dark">
-                        {item.member?.fullName || 'Member'}
+                        {item.member?.fullName || t('groups_page.kulukkal.member')}
                       </td>
                       <td className="py-2.5 px-3">
                         <span
@@ -430,7 +430,7 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
                               : 'bg-primary-subtle text-primary border'
                           } px-2 py-1`}
                         >
-                          {item.roleLabel}
+                          {t(item.roleLabel, { chitNum: item.chitNumber })}
                         </span>
                       </td>
                       <td className="py-2.5 px-3 text-end fw-bold text-success">
@@ -443,7 +443,7 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
             </div>
 
             <p className="small text-muted mb-0">
-              Confirming this draw will bind this rotational schedule in the platform ledger and notify all enrolled members.
+              {t('groups_page.kulukkal.confirm_notice')}
             </p>
           </div>
         )}
@@ -456,7 +456,7 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
           onClick={onHide}
           disabled={submitting || isSpinning}
         >
-          Cancel
+          {t('common.cancel')}
         </button>
         {drawnSchedule && (
           <button
@@ -465,7 +465,7 @@ const KulukkalDrawModal = ({ show, onHide, group, onDrawSuccess }) => {
             onClick={handleApplyKulukkal}
             disabled={submitting || isSpinning}
           >
-            {submitting ? 'Applying Schedule...' : 'Confirm & Save Kulukkal Schedule'}
+            {submitting ? t('groups_page.kulukkal.applying') : t('groups_page.kulukkal.confirm_save')}
           </button>
         )}
       </div>

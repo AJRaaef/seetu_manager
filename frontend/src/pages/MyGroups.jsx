@@ -81,28 +81,28 @@ const MyGroups = () => {
     const freq = (frequency || 'MONTHLY').toUpperCase();
     switch (freq) {
       case 'DAILY':
-        return `${formattedAmount} LKR / day`;
+        return t('groups_page.browse_contribution_daily', { amount: formattedAmount });
       case 'WEEKLY':
-        return `${formattedAmount} LKR / week`;
+        return t('groups_page.browse_contribution_weekly', { amount: formattedAmount });
       case 'BI_WEEKLY':
-        return `${formattedAmount} LKR / 2 weeks`;
+        return t('groups_page.browse_contribution_biweekly', { amount: formattedAmount });
       case 'YEARLY':
-        return `${formattedAmount} LKR / year`;
+        return t('groups_page.browse_contribution_yearly', { amount: formattedAmount });
       case 'MONTHLY':
       default:
-        return `${formattedAmount} LKR / month`;
+        return t('groups_page.browse_contribution_monthly', { amount: formattedAmount });
     }
   };
 
   const formatFrequency = (freq) => {
     const f = (freq || 'MONTHLY').toUpperCase();
     switch (f) {
-      case 'DAILY': return 'Daily Cycle';
-      case 'WEEKLY': return 'Weekly Cycle';
-      case 'BI_WEEKLY': return 'Bi-Weekly Cycle';
-      case 'YEARLY': return 'Yearly Cycle';
+      case 'DAILY': return t('groups_page.browse_frequency_daily');
+      case 'WEEKLY': return t('groups_page.browse_frequency_weekly');
+      case 'BI_WEEKLY': return t('groups_page.browse_frequency_biweekly');
+      case 'YEARLY': return t('groups_page.browse_frequency_yearly');
       case 'MONTHLY':
-      default: return 'Monthly Cycle';
+      default: return t('groups_page.browse_frequency_monthly');
     }
   };
 
@@ -170,7 +170,7 @@ const MyGroups = () => {
   // Handle Join Request Submit
   const handleOpenJoinModal = (group) => {
     if (!isUserVerified && user?.role === 'MEMBER') {
-      if (window.confirm('Identity verification is required before joining Seettu circles to protect member funds. Would you like to complete your verification now?')) {
+      if (window.confirm(t('groups_page.browse_verify_before_join_confirm'))) {
         navigate('/verification');
       }
       return;
@@ -187,14 +187,14 @@ const MyGroups = () => {
     setActionError('');
     try {
       await createJoinRequest(joinModalTarget.id, userId);
-      setActionSuccess(`Join request for "${joinModalTarget.name}" submitted successfully! The group organizer will review your request.`);
+      setActionSuccess(t('groups_page.browse_join_request_success', { groupName: joinModalTarget.name }));
       setJoinModalTarget(null);
       setJoinNote('');
       setTimeout(() => setActionSuccess(''), 5000);
       await fetchRequests();
     } catch (err) {
       console.error('Join request error', err);
-      setActionError(err.response?.data?.message || 'Failed to submit join request.');
+      setActionError(err.response?.data?.message || t('groups_page.browse_join_request_error'));
     } finally {
       setSubmittingJoin(false);
     }
@@ -207,12 +207,15 @@ const MyGroups = () => {
     setActionSuccess('');
     try {
       await approveJoinRequest(requestId);
-      setActionSuccess(`${memberName || 'Member'} has been approved and added to "${groupName || 'the group'}"!`);
+      setActionSuccess(t('groups_page.browse_join_approved', {
+        memberName: memberName || t('groups_page.browse_member'),
+        groupName: groupName || t('groups_page.browse_the_group'),
+      }));
       setTimeout(() => setActionSuccess(''), 5000);
       await Promise.all([fetchGroups(), fetchRequests()]);
     } catch (err) {
       console.error('Failed to approve request', err);
-      setActionError(err.response?.data?.message || 'Failed to approve join request.');
+      setActionError(err.response?.data?.message || t('groups_page.browse_approve_error'));
     } finally {
       setActionLoadingId(null);
     }
@@ -220,7 +223,9 @@ const MyGroups = () => {
 
   // Organizer: Reject Join Request
   const handleRejectRequest = async (requestId, memberName) => {
-    if (!window.confirm(`Are you sure you want to decline the join request from ${memberName || 'this member'}?`)) {
+    if (!window.confirm(t('groups_page.browse_decline_confirm', {
+      memberName: memberName || t('groups_page.browse_this_member'),
+    }))) {
       return;
     }
     setActionLoadingId(requestId);
@@ -228,12 +233,14 @@ const MyGroups = () => {
     setActionSuccess('');
     try {
       await rejectJoinRequest(requestId);
-      setActionSuccess(`Declined join request from ${memberName || 'member'}.`);
+      setActionSuccess(t('groups_page.browse_join_declined', {
+        memberName: memberName || t('groups_page.browse_member'),
+      }));
       setTimeout(() => setActionSuccess(''), 4000);
       await fetchRequests();
     } catch (err) {
       console.error('Failed to reject request', err);
-      setActionError(err.response?.data?.message || 'Failed to reject join request.');
+      setActionError(err.response?.data?.message || t('groups_page.browse_decline_error'));
     } finally {
       setActionLoadingId(null);
     }
@@ -241,17 +248,17 @@ const MyGroups = () => {
 
   // Delete Group (Organizer / Admin)
   const handleDeleteGroup = async (groupId, groupName) => {
-    if (!window.confirm(`Are you sure you want to delete the circle "${groupName}"?`)) {
+    if (!window.confirm(t('groups_page.browse_delete_confirm', { groupName }))) {
       return;
     }
     try {
       await deleteGroup(groupId);
-      setActionSuccess(`Circle "${groupName}" deleted successfully.`);
+      setActionSuccess(t('groups_page.browse_delete_success', { groupName }));
       setTimeout(() => setActionSuccess(''), 4000);
       await fetchGroups();
     } catch (err) {
       console.error('Failed to delete group:', err);
-      alert(err.response?.data?.message || 'Failed to delete group from database.');
+      alert(err.response?.data?.message || t('groups_page.browse_delete_error'));
     }
   };
 
@@ -340,10 +347,10 @@ const MyGroups = () => {
         <div>
           <h2 className="fw-bold mb-1 d-flex align-items-center gap-2" style={{ color: '#0F2F3D' }}>
             <Users size={24} style={{ color: '#0F2F3D' }} />
-            <span>{t('my_groups_page.title', 'Seettu Circles & Contribution Pools')}</span>
+            <span>{t('groups_page.browse_title')}</span>
           </h2>
           <p className="text-muted mb-0 small">
-            Browse active rotational credit schemes, check funding targets, and apply to join open circles.
+            {t('groups_page.browse_subtitle')}
           </p>
         </div>
 
@@ -351,7 +358,7 @@ const MyGroups = () => {
           {isAdmin ? (
             <span className="badge bg-light text-secondary border px-3 py-2 small fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm">
               <Icon name="shield" size={15} color="#235665" />
-              <span>Platform Overseer</span>
+              <span>{t('groups_page.browse_platform_overseer')}</span>
             </span>
           ) : isOrganizer ? (
             <Link
@@ -360,7 +367,7 @@ const MyGroups = () => {
               style={{ backgroundColor: '#1c4d4b', borderColor: '#0097B2' }}
             >
               <Icon name="plus" size={16} color="#FFFFFF" />
-              <span>{t('my_groups_page.create_new', 'Create New Circle')}</span>
+              <span>{t('groups_page.browse_create_circle')}</span>
             </Link>
           ) : (
             <div className="d-flex align-items-center gap-2">
@@ -368,15 +375,15 @@ const MyGroups = () => {
                 <Link
                   to="/verification"
                   className="btn btn-sm btn-outline-warning d-inline-flex align-items-center gap-1.5 fw-bold shadow-sm px-3 py-2"
-                  title="Verify your NIC & Grama Niladhari certificate to be authorized to join contribution circles"
+                  title={t('groups_page.browse_verify_id_title')}
                 >
                   <Icon name="shield" size={15} color="#D97706" />
-                  <span>Verify ID to Join Circles</span>
+                  <span>{t('groups_page.browse_verify_id_to_join')}</span>
                 </Link>
               ) : (
                 <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 d-inline-flex align-items-center gap-1.5 fw-semibold">
                   <Icon name="check-circle" size={14} color="#059669" />
-                  <span>Verified Member</span>
+                  <span>{t('groups_page.browse_verified_member')}</span>
                 </span>
               )}
               {user?.requestedRole !== 'ORGANIZER' && (
@@ -387,7 +394,7 @@ const MyGroups = () => {
                   style={{ background: '#0F2F3D', color: '#fff'}}
                 >
                   <Icon name="award" size={15} />
-                  <span>Become Organizer</span>
+                  <span>{t('groups_page.browse_become_organizer')}</span>
                 </button>
               )}
             </div>
@@ -400,7 +407,7 @@ const MyGroups = () => {
         <div className="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4 shadow-sm" role="alert">
           <Icon name="check-circle" size={18} color="#059669" />
           <div className="fw-semibold">{actionSuccess}</div>
-          <button type="button" className="btn-close ms-auto" onClick={() => setActionSuccess('')} aria-label="Close"></button>
+          <button type="button" className="btn-close ms-auto" onClick={() => setActionSuccess('')} aria-label={t('groups_page.browse_close')}></button>
         </div>
       )}
 
@@ -408,7 +415,7 @@ const MyGroups = () => {
         <div className="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4 shadow-sm" role="alert">
           <Icon name="alert-circle" size={18} color="#DC2626" />
           <div>{actionError}</div>
-          <button type="button" className="btn-close ms-auto" onClick={() => setActionError('')} aria-label="Close"></button>
+          <button type="button" className="btn-close ms-auto" onClick={() => setActionError('')} aria-label={t('groups_page.browse_close')}></button>
         </div>
       )}
 
@@ -421,9 +428,9 @@ const MyGroups = () => {
                 <Icon name="shield" size={24} color="#D97706" />
               </div>
               <div>
-                <h6 className="fw-bold text-dark mb-0.5">Identity Verification Required for Pool Participation</h6>
+                <h6 className="fw-bold text-dark mb-0.5">{t('groups_page.browse_verification_required_title')}</h6>
                 <p className="text-dark mb-0 small" style={{ fontSize: '0.85rem' }}>
-                  Under the Sri Lankan Cheetus Ordinance and platform rules, all members must verify their National Identity Card (NIC) & Grama Niladhari Character Certificate before joining Seettu groups.
+                  {t('groups_page.browse_verification_required_description')}
                 </p>
               </div>
             </div>
@@ -432,7 +439,7 @@ const MyGroups = () => {
               className="btn btn-sm btn-dark text-white fw-bold px-3 py-2 flex-shrink-0 text-nowrap shadow-sm"
               style={{ backgroundColor: '#1F2937' }}
             >
-              Complete Verification →
+              {t('groups_page.browse_complete_verification')} →
             </Link>
           </div>
         </div>
@@ -450,7 +457,7 @@ const MyGroups = () => {
               onClick={() => setActiveTab('EXPLORE')}
             >
               <Icon name="globe" size={16} color={activeTab === 'EXPLORE' ? '#FFFFFF' : 'currentColor'} />
-              <span>Explore All Circles</span>
+              <span>{t('groups_page.browse_explore_all')}</span>
               <span className={`badge rounded-pill ${activeTab === 'EXPLORE' ? 'bg-white text-dark' : 'bg-secondary-subtle text-secondary'}`}>
                 {allGroups.length}
               </span>
@@ -466,7 +473,7 @@ const MyGroups = () => {
               onClick={() => setActiveTab('ENROLLED')}
             >
               <Icon name="groups" size={16} color={activeTab === 'ENROLLED' ? '#FFFFFF' : 'currentColor'} />
-              <span>My Enrolled Circles</span>
+              <span>{t('groups_page.browse_my_enrolled')}</span>
               <span className={`badge rounded-pill ${activeTab === 'ENROLLED' ? 'bg-white text-dark' : 'bg-secondary-subtle text-secondary'}`}>
                 {enrolledGroups.length}
               </span>
@@ -483,7 +490,7 @@ const MyGroups = () => {
                 onClick={() => setActiveTab('REQUESTS')}
               >
                 <Icon name="users" size={16} color={activeTab === 'REQUESTS' ? '#FFFFFF' : 'currentColor'} />
-                <span>Member Join Requests</span>
+                <span>{t('groups_page.browse_member_join_requests')}</span>
                 {organizerPendingRequests.length > 0 && (
                   <span className="badge rounded-pill bg-danger text-white">
                     {organizerPendingRequests.length}
@@ -496,7 +503,10 @@ const MyGroups = () => {
 
         {activeTab !== 'REQUESTS' && (
           <div className="small text-muted">
-            Showing <strong>{filteredDisplayGroups.length}</strong> {activeTab === 'ENROLLED' ? 'enrolled' : 'available'} circles
+            {t('groups_page.browse_showing_count', {
+              count: filteredDisplayGroups.length,
+              type: activeTab === 'ENROLLED' ? t('groups_page.browse_enrolled') : t('groups_page.browse_available'),
+            })}
           </div>
         )}
       </div>
@@ -506,9 +516,9 @@ const MyGroups = () => {
         <div>
           <div className="d-flex justify-content-between align-items-center mb-3">
             <div>
-              <h5 className="fw-bold text-dark mb-1">Incoming Member Join Requests</h5>
+              <h5 className="fw-bold text-dark mb-1">{t('groups_page.browse_incoming_requests')}</h5>
               <p className="text-muted small mb-0">
-                Review verified members who have requested to participate in your Seettu circles.
+                {t('groups_page.browse_review_requests_description')}
               </p>
             </div>
             <button
@@ -518,23 +528,23 @@ const MyGroups = () => {
               disabled={loadingRequests}
             >
               <Icon name="rotate" size={13} />
-              <span>Refresh</span>
+              <span>{t('groups_page.browse_refresh')}</span>
             </button>
           </div>
 
           {loadingRequests ? (
             <div className="text-center py-5">
               <div className="spinner-border text-teal mb-2" role="status" style={{ color: '#0097B2' }}></div>
-              <p className="text-muted small">Loading membership applications...</p>
+              <p className="text-muted small">{t('groups_page.browse_loading_applications')}</p>
             </div>
           ) : organizerPendingRequests.length === 0 ? (
             <div className="ui-card p-5 text-center shadow-sm rounded-4">
               <div className="rounded-circle p-3 d-inline-flex align-items-center justify-content-center bg-light text-muted mb-3" style={{ width: '64px', height: '64px' }}>
                 <Icon name="check-circle" size={32} color="#059669" />
               </div>
-              <h5 className="fw-bold text-dark mb-1">No Pending Join Requests</h5>
+              <h5 className="fw-bold text-dark mb-1">{t('groups_page.browse_no_pending_requests')}</h5>
               <p className="text-muted small mb-0" style={{ maxWidth: '420px', margin: '0 auto' }}>
-                All member applications for your contribution circles have been processed. New requests will appear here instantly.
+                {t('groups_page.browse_no_pending_requests_description')}
               </p>
             </div>
           ) : (
@@ -556,12 +566,12 @@ const MyGroups = () => {
                               className="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold"
                               style={{ width: '42px', height: '42px', backgroundColor: '#1A5265', fontSize: '0.9rem' }}
                             >
-                              {getInitials(reqUser.fullName || 'Member')}
+                              {getInitials(reqUser.fullName || t('groups_page.browse_member'))}
                             </div>
                             <div>
-                              <h6 className="fw-bold text-dark mb-0">{reqUser.fullName || 'Member'}</h6>
+                              <h6 className="fw-bold text-dark mb-0">{reqUser.fullName || t('groups_page.browse_member')}</h6>
                               <div className="text-muted small" style={{ fontSize: '0.78rem' }}>
-                                {reqUser.email || 'No email provided'} • {reqUser.phone || 'No phone'}
+                                {reqUser.email || t('groups_page.browse_no_email')} • {reqUser.phone || t('groups_page.browse_no_phone')}
                               </div>
                             </div>
                           </div>
@@ -570,11 +580,11 @@ const MyGroups = () => {
                             {isVerifiedApplicant ? (
                               <span className="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small fw-semibold d-inline-flex align-items-center gap-1">
                                 <Icon name="check-circle" size={12} color="#059669" />
-                                <span>Verified ID (NIC: {reqUser.nicNumber || 'Yes'})</span>
+                                <span>{t('groups_page.browse_verified_id', { nic: reqUser.nicNumber || t('groups_page.browse_yes') })}</span>
                               </span>
                             ) : (
                               <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1 small fw-semibold">
-                                Pending NIC Verification
+                                {t('groups_page.browse_pending_nic')}
                               </span>
                             )}
                           </div>
@@ -582,16 +592,16 @@ const MyGroups = () => {
 
                         {/* Target Circle Details */}
                         <div className="p-2.5 rounded-2 mb-2.5" style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
-                          <div className="small text-muted">Requested Circle:</div>
-                          <div className="fw-bold text-dark">{reqGroup.name || 'Seettu Group'}</div>
+                          <div className="small text-muted">{t('groups_page.browse_requested_circle')}</div>
+                          <div className="fw-bold text-dark">{reqGroup.name || t('groups_page.browse_seettu_group')}</div>
                           <div className="d-flex justify-content-between text-muted small mt-1" style={{ fontSize: '0.78rem' }}>
-                            <span>Contribution: <strong className="text-dark">Rs. {Number(reqGroup.contributionAmount || 0).toLocaleString()} LKR</strong></span>
-                            <span>Target Slots: <strong className="text-dark">{reqGroup.memberCount || 10} members</strong></span>
+                            <span>{t('groups_page.browse_contribution_label')}: <strong className="text-dark">Rs. {Number(reqGroup.contributionAmount || 0).toLocaleString()} LKR</strong></span>
+                            <span>{t('groups_page.browse_target_slots')}: <strong className="text-dark">{t('groups_page.browse_member_count', { count: reqGroup.memberCount || 10 })}</strong></span>
                           </div>
                         </div>
 
                         <div className="small text-muted mb-3" style={{ fontSize: '0.75rem' }}>
-                          Applied on: {req.requestedAt ? new Date(req.requestedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recently'}
+                          {t('groups_page.browse_applied_on')}: {req.requestedAt ? new Date(req.requestedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : t('groups_page.browse_recently')}
                         </div>
                       </div>
 
@@ -609,7 +619,7 @@ const MyGroups = () => {
                           ) : (
                             <>
                               <Icon name="check" size={14} color="#FFFFFF" />
-                              <span>Approve & Add to Group</span>
+                              <span>{t('groups_page.browse_approve_add')}</span>
                             </>
                           )}
                         </button>
@@ -621,7 +631,7 @@ const MyGroups = () => {
                           onClick={() => handleRejectRequest(req.id, reqUser.fullName)}
                         >
                           <Icon name="x" size={13} />
-                          <span>Decline</span>
+                          <span>{t('groups_page.browse_decline')}</span>
                         </button>
                       </div>
                     </div>
@@ -648,7 +658,7 @@ const MyGroups = () => {
                   <input
                     type="text"
                     className="form-control border-start-0"
-                    placeholder="Search by circle name, organizer, shop..."
+                    placeholder={t('groups_page.browse_search_placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -667,9 +677,9 @@ const MyGroups = () => {
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
                 >
-                  <option value="ALL">All Types</option>
-                  <option value="MONETARY">Monetary</option>
-                  <option value="NON_MONETARY">Non-Monetary</option>
+                  <option value="ALL">{t('groups_page.browse_all_types')}</option>
+                  <option value="MONETARY">{t('groups_page.browse_monetary')}</option>
+                  <option value="NON_MONETARY">{t('groups_page.browse_non_monetary')}</option>
                 </select>
               </div>
 
@@ -680,11 +690,11 @@ const MyGroups = () => {
                   value={filterFreq}
                   onChange={(e) => setFilterFreq(e.target.value)}
                 >
-                  <option value="ALL">All Frequencies</option>
-                  <option value="DAILY">Daily</option>
-                  <option value="WEEKLY">Weekly</option>
-                  <option value="MONTHLY">Monthly</option>
-                  <option value="YEARLY">Yearly</option>
+                  <option value="ALL">{t('groups_page.browse_all_frequencies')}</option>
+                  <option value="DAILY">{t('groups_page.browse_daily')}</option>
+                  <option value="WEEKLY">{t('groups_page.browse_weekly')}</option>
+                  <option value="MONTHLY">{t('groups_page.browse_monthly')}</option>
+                  <option value="YEARLY">{t('groups_page.browse_yearly')}</option>
                 </select>
               </div>
 
@@ -695,9 +705,9 @@ const MyGroups = () => {
                   value={filterSpots}
                   onChange={(e) => setFilterSpots(e.target.value)}
                 >
-                  <option value="ALL">All Availabilities</option>
-                  <option value="OPEN">Open Spots</option>
-                  <option value="FULL">Full Circles</option>
+                  <option value="ALL">{t('groups_page.browse_all_availabilities')}</option>
+                  <option value="OPEN">{t('groups_page.browse_open_spots')}</option>
+                  <option value="FULL">{t('groups_page.browse_full_circles')}</option>
                 </select>
               </div>
 
@@ -708,10 +718,10 @@ const MyGroups = () => {
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
                 >
-                  <option value="DEFAULT">Sort: Default</option>
-                  <option value="POOL_HIGH">Highest Pool</option>
-                  <option value="CONTRIB_LOW">Lowest Contribution</option>
-                  <option value="MEMBERS_HIGH">Most Members</option>
+                  <option value="DEFAULT">{t('groups_page.browse_sort_default')}</option>
+                  <option value="POOL_HIGH">{t('groups_page.browse_highest_pool')}</option>
+                  <option value="CONTRIB_LOW">{t('groups_page.browse_lowest_contribution')}</option>
+                  <option value="MEMBERS_HIGH">{t('groups_page.browse_most_members')}</option>
                 </select>
               </div>
             </div>
@@ -721,7 +731,7 @@ const MyGroups = () => {
           {loading ? (
             <div className="text-center py-5">
               <div className="spinner-border text-teal mb-3" role="status" style={{ color: '#0097B2' }}></div>
-              <p className="text-muted fw-semibold">Loading Seettu circles...</p>
+              <p className="text-muted fw-semibold">{t('groups_page.browse_loading_circles')}</p>
             </div>
           ) : filteredDisplayGroups.length === 0 ? (
             <div className="ui-card p-5 text-center shadow-sm rounded-4">
@@ -729,12 +739,12 @@ const MyGroups = () => {
                 <Icon name="groups" size={32} color="#94A3B8" />
               </div>
               <h5 className="fw-bold text-dark mb-1">
-                {activeTab === 'ENROLLED' ? 'No Enrolled Circles Yet' : 'No Seettu Circles Found'}
+                {activeTab === 'ENROLLED' ? t('groups_page.browse_no_enrolled_yet') : t('groups_page.browse_no_circles_found')}
               </h5>
               <p className="text-muted small mb-3" style={{ maxWidth: '420px', margin: '0 auto' }}>
                 {activeTab === 'ENROLLED'
-                  ? 'You are not enrolled in any Seettu circles yet. Explore open circles and send a join request to organizers.'
-                  : 'No circles match your current search and filter criteria. Try resetting filters.'}
+                  ? t('groups_page.browse_no_enrolled_description')
+                  : t('groups_page.browse_no_results_description')}
               </p>
               {activeTab === 'ENROLLED' ? (
                 <button
@@ -743,7 +753,7 @@ const MyGroups = () => {
                   style={{ backgroundColor: '#0097B2' }}
                   onClick={() => setActiveTab('EXPLORE')}
                 >
-                  Explore Available Circles
+                  {t('groups_page.browse_explore_available')}
                 </button>
               ) : (
                 <button
@@ -757,7 +767,7 @@ const MyGroups = () => {
                     setSortBy('DEFAULT');
                   }}
                 >
-                  Clear Filters
+                  {t('groups_page.browse_clear_filters')}
                 </button>
               )}
             </div>
@@ -817,7 +827,7 @@ const MyGroups = () => {
                               letterSpacing: '0.5px'
                             }}
                           >
-                            {isMonetary ? (<span className="d-inline-flex align-items-center gap-1"><Banknote size={13} /> Cash Rotation</span>) : (<span className="d-inline-flex align-items-center gap-1"><Gift size={13} /> Commodity Goods</span>)}
+                            {isMonetary ? (<span className="d-inline-flex align-items-center gap-1"><Banknote size={13} /> {t('groups_page.browse_cash_rotation')}</span>) : (<span className="d-inline-flex align-items-center gap-1"><Gift size={13} /> {t('groups_page.browse_commodity_goods')}</span>)}
                           </span>
 
                           <span
@@ -846,7 +856,7 @@ const MyGroups = () => {
                         {!isMonetary && group.shopName && (
                           <div className="small text-white-50 d-flex align-items-center gap-1 text-truncate" style={{ fontSize: '0.78rem' }}>
                             <Icon name="shop" size={13} color="#FFFFFF" />
-                            <span>Partner Shop: <strong>{group.shopName}</strong></span>
+                            <span>{t('groups_page.browse_partner_shop')}: <strong>{group.shopName}</strong></span>
                           </div>
                         )}
                       </div>
@@ -861,17 +871,17 @@ const MyGroups = () => {
                                 className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
                                 style={{ width: '28px', height: '28px', backgroundColor: '#3E7B8E', fontSize: '0.75rem' }}
                               >
-                                {getInitials(group.createdByName || 'Organizer')}
+                                {getInitials(group.createdByName || t('groups_page.organizer'))}
                               </div>
                               <div className="small text-muted" style={{ fontSize: '0.8rem' }}>
-                                Organized by <strong className="text-dark">{group.createdByName || 'Verified Organizer'}</strong>
+                                {t('groups_page.browse_organized_by')} <strong className="text-dark">{group.createdByName || t('groups_page.browse_verified_organizer')}</strong>
                               </div>
                             </div>
 
                             {/* Spot Availability Tag */}
                             {isFull ? (
                               <span className="badge bg-secondary-subtle text-secondary small px-2 py-0.5" style={{ fontSize: '0.7rem' }}>
-                                Circle Full
+                                {t('groups_page.browse_circle_full')}
                               </span>
                             ) : (
                               <span
@@ -883,7 +893,7 @@ const MyGroups = () => {
                                   fontSize: '0.72rem'
                                 }}
                               >
-                                {spotsRemaining} {spotsRemaining === 1 ? 'Spot Left' : 'Spots Left'}
+                                {t('groups_page.browse_spots_left', { count: spotsRemaining })}
                               </span>
                             )}
                           </div>
@@ -905,10 +915,10 @@ const MyGroups = () => {
                           >
                             <div className="d-flex justify-content-between align-items-center mb-0.5">
                               <span className="text-muted small text-uppercase fw-bold" style={{ fontSize: '0.72rem', letterSpacing: '0.5px' }}>
-                                Total Target Pool
+                                {t('groups_page.browse_total_target_pool')}
                               </span>
                               <span className="badge bg-light text-dark border small" style={{ fontSize: '0.68rem' }}>
-                                {maxMembers} Shares
+                                {t('groups_page.browse_shares', { count: maxMembers })}
                               </span>
                             </div>
                             <div className="fs-4 fw-bold text-dark d-flex align-items-baseline gap-1">
@@ -916,7 +926,7 @@ const MyGroups = () => {
                               <span className="text-muted fw-normal small" style={{ fontSize: '0.8rem' }}>LKR</span>
                             </div>
                             <div className="text-muted small mt-1 d-flex justify-content-between align-items-center pt-1 border-top" style={{ fontSize: '0.78rem' }}>
-                              <span>Per Member Contribution:</span>
+                              <span>{t('groups_page.browse_per_member_contribution')}:</span>
                               <strong className="text-dark">{formatContribution(group.contributionAmount, group.cycleFrequency)}</strong>
                             </div>
                           </div>
@@ -925,10 +935,10 @@ const MyGroups = () => {
                           <div className="mb-3">
                             <div className="d-flex justify-content-between align-items-center small mb-1">
                               <span className="fw-semibold text-dark" style={{ fontSize: '0.8rem' }}>
-                                {membersCount} of {maxMembers} Members Joined
+                                {t('groups_page.browse_members_joined', { count: membersCount, total: maxMembers })}
                               </span>
                               <span className="fw-bold" style={{ color: memberPercent >= 100 ? '#059669' : '#0097B2', fontSize: '0.8rem' }}>
-                                {memberPercent}% Filled
+                                {t('groups_page.browse_percent_filled', { percent: memberPercent })}
                               </span>
                             </div>
                             <div style={{ height: '8px', backgroundColor: '#E2E8F0', borderRadius: '10px', overflow: 'hidden' }}>
@@ -945,8 +955,8 @@ const MyGroups = () => {
                               />
                             </div>
                             <div className="d-flex justify-content-between text-muted mt-1" style={{ fontSize: '0.72rem' }}>
-                              <span>{isFull ? 'All slots filled' : `${spotsRemaining} slots remaining to begin`}</span>
-                              <span>Cycle: {group.completedCycles || 0}/{maxMembers}</span>
+                              <span>{isFull ? t('groups_page.browse_all_slots_filled') : t('groups_page.browse_slots_remaining', { count: spotsRemaining })}</span>
+                              <span>{t('groups_page.browse_cycle_progress', { completed: group.completedCycles || 0, total: maxMembers })}</span>
                             </div>
                           </div>
                         </div>
@@ -961,7 +971,7 @@ const MyGroups = () => {
                                 className="btn btn-outline-success btn-sm w-100 fw-bold py-2 d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm"
                               >
                                 <Icon name="check" size={15} color="#16A34A" />
-                                <span>Enrolled Member • View Circle →</span>
+                                <span>{t('groups_page.browse_enrolled_view_circle')}</span>
                               </button>
                             </div>
                           ) : isRequested ? (
@@ -972,7 +982,7 @@ const MyGroups = () => {
                               disabled
                             >
                               <Icon name="clock" size={15} color="#92400E" />
-                              <span>Join Request Pending Organizer Review</span>
+                              <span>{t('groups_page.browse_request_pending_review')}</span>
                             </button>
                           ) : isCreator ? (
                             <div className="d-flex gap-2 align-items-center">
@@ -981,14 +991,14 @@ const MyGroups = () => {
                                 onClick={() => navigate(`/groups/${group.id}`)}
                                 className="btn btn-outline-primary btn-sm flex-grow-1 fw-bold py-1.5"
                               >
-                                Manage Circle
+                                {t('groups_page.browse_manage_circle')}
                               </button>
                               {groupPendingRequests > 0 && (
                                 <button
                                   type="button"
                                   onClick={() => setActiveTab('REQUESTS')}
                                   className="btn btn-danger btn-sm fw-bold py-1.5 px-2.5 d-inline-flex align-items-center gap-1"
-                                  title={`${groupPendingRequests} join requests waiting`}
+                                  title={t('groups_page.browse_join_requests_waiting', { count: groupPendingRequests })}
                                 >
                                   <Icon name="bell" size={13} color="#FFFFFF" />
                                   <span>{groupPendingRequests}</span>
@@ -998,7 +1008,7 @@ const MyGroups = () => {
                                 type="button"
                                 onClick={() => handleDeleteGroup(group.id, group.name)}
                                 className="btn btn-link text-danger p-1"
-                                title="Delete Circle"
+                                title={t('groups_page.browse_delete_circle')}
                               >
                                 <Icon name="trash" size={15} color="#DC2626" />
                               </button>
@@ -1009,7 +1019,7 @@ const MyGroups = () => {
                               className="btn btn-secondary btn-sm w-100 fw-semibold py-2"
                               disabled
                             >
-                              Circle Full ({membersCount}/{maxMembers})
+                              {t('groups_page.browse_circle_full_count', { current: membersCount, total: maxMembers })}
                             </button>
                           ) : isUserVerified ? (
                             <button
@@ -1019,7 +1029,7 @@ const MyGroups = () => {
                               style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
                             >
                               <Icon name="plus" size={15} color="#FFFFFF" />
-                              <span>Request to Join Circle</span>
+                              <span>{t('groups_page.browse_request_to_join')}</span>
                             </button>
                           ) : (
                             <button
@@ -1028,7 +1038,7 @@ const MyGroups = () => {
                               className="btn btn-outline-warning btn-sm w-100 fw-bold py-2 text-dark d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm"
                             >
                               <Icon name="shield" size={15} color="#D97706" />
-                              <span>Verify ID to Request Join</span>
+                              <span>{t('groups_page.browse_verify_to_request_join')}</span>
                             </button>
                           )}
                         </div>
@@ -1054,9 +1064,9 @@ const MyGroups = () => {
                 }}
               >
                 <div>
-                  <h5 className="modal-title fw-bold mb-1">Request to Join Seettu Circle</h5>
+                  <h5 className="modal-title fw-bold mb-1">{t('groups_page.browse_join_modal_title')}</h5>
                   <p className="text-white-50 mb-0 small">
-                    Your verified profile will be shared with the circle organizer for admission.
+                    {t('groups_page.browse_join_modal_description')}
                   </p>
                 </div>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setJoinModalTarget(null)}></button>
@@ -1066,21 +1076,21 @@ const MyGroups = () => {
                 <div className="modal-body p-4">
                   {/* Summary of Circle */}
                   <div className="p-3 rounded-3 mb-3" style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
-                    <div className="small text-muted">Circle Target:</div>
+                    <div className="small text-muted">{t('groups_page.browse_circle_target')}</div>
                     <div className="fw-bold text-dark fs-5">{joinModalTarget.name}</div>
                     <div className="d-flex justify-content-between text-muted small mt-2 pt-2 border-top">
-                      <span>Contribution:</span>
+                      <span>{t('groups_page.browse_contribution_label')}:</span>
                       <strong className="text-dark">{formatContribution(joinModalTarget.contributionAmount, joinModalTarget.cycleFrequency)}</strong>
                     </div>
                     <div className="d-flex justify-content-between text-muted small mt-1">
-                      <span>Total Pool Goal:</span>
+                      <span>{t('groups_page.browse_total_pool_goal')}:</span>
                       <strong className="text-dark">
                         Rs. {(Number(joinModalTarget.contributionAmount || 0) * (joinModalTarget.memberCount || 10)).toLocaleString()} LKR
                       </strong>
                     </div>
                     <div className="d-flex justify-content-between text-muted small mt-1">
-                      <span>Organizer:</span>
-                      <strong className="text-dark">{joinModalTarget.createdByName || 'Verified Organizer'}</strong>
+                      <span>{t('groups_page.created_by')}:</span>
+                      <strong className="text-dark">{joinModalTarget.createdByName || t('groups_page.browse_verified_organizer')}</strong>
                     </div>
                   </div>
 
@@ -1088,25 +1098,25 @@ const MyGroups = () => {
                   <div className="p-2.5 rounded-2 mb-3 d-flex align-items-center gap-2 bg-success-subtle border border-success-subtle">
                     <Icon name="check-circle" size={18} color="#059669" />
                     <div className="small text-success-emphasis">
-                      Submitting as verified member: <strong>{user?.fullName || 'Member'}</strong>
-                      {user?.nicNumber && <span> (NIC: {user.nicNumber})</span>}
+                      {t('groups_page.browse_submitting_as_verified_member')}: <strong>{user?.fullName || t('groups_page.browse_member')}</strong>
+                      {user?.nicNumber && <span> ({t('groups_page.nic')}: {user.nicNumber})</span>}
                     </div>
                   </div>
 
                   {/* Optional Note */}
                   <div className="mb-2 text-start">
                     <label className="form-label small fw-semibold text-dark mb-1">
-                      Optional Note for Organizer
+                      {t('groups_page.browse_optional_note')}
                     </label>
                     <textarea
                       className="form-control"
                       rows="3"
-                      placeholder="e.g., I am interested in joining this circle for regular monthly savings. My profession is..."
+                      placeholder={t('groups_page.browse_note_placeholder')}
                       value={joinNote}
                       onChange={(e) => setJoinNote(e.target.value)}
                     ></textarea>
                     <div className="text-muted small mt-1" style={{ fontSize: '0.75rem' }}>
-                      The organizer will receive this note along with your verified contact information.
+                      {t('groups_page.browse_note_helper')}
                     </div>
                   </div>
                 </div>
@@ -1118,7 +1128,7 @@ const MyGroups = () => {
                     onClick={() => setJoinModalTarget(null)}
                     disabled={submittingJoin}
                   >
-                    Cancel
+                    {t('groups_page.cancel')}
                   </button>
                   <button
                     type="submit"
@@ -1129,12 +1139,12 @@ const MyGroups = () => {
                     {submittingJoin ? (
                       <>
                         <span className="spinner-border spinner-border-sm" role="status"></span>
-                        <span>Submitting...</span>
+                        <span>{t('groups_page.browse_submitting')}</span>
                       </>
                     ) : (
                       <>
                         <Icon name="check" size={16} color="#FFFFFF" />
-                        <span>Send Join Request</span>
+                        <span>{t('groups_page.browse_send_join_request')}</span>
                       </>
                     )}
                   </button>

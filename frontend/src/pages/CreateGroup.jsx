@@ -9,9 +9,9 @@ import api from '../api/axios';
 import { getErrorMessage } from '../utils/errorHandler';
 
 const CYCLE_FREQUENCIES = [
-  { value: 'DAILY',    label: 'Daily' },
-  { value: 'WEEKLY',   label: 'Weekly' },
-  { value: 'MONTHLY',  label: 'Monthly' },
+  { value: 'DAILY',    label: 'groups_page.create_group.daily' },
+  { value: 'WEEKLY',   label: 'groups_page.create_group.weekly' },
+  { value: 'MONTHLY',  label: 'groups_page.create_group.monthly' },
 ];
 
 const isNonMonetary = (type) => {
@@ -108,32 +108,32 @@ const CreateGroup = () => {
     let valid = true;
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Group name is required.';
+      newErrors.name = t('groups_page.create_group.name_required');
       valid = false;
     } else if (formData.name.trim().length > 100) {
-      newErrors.name = 'Group name must be at most 100 characters.';
+      newErrors.name = t('groups_page.create_group.name_max_length');
       valid = false;
     }
 
     const amount = parseFloat(formData.contributionAmount);
     if (!formData.contributionAmount || isNaN(amount) || amount <= 0) {
-      newErrors.contributionAmount = 'Contribution amount must be greater than 0.';
+      newErrors.contributionAmount = t('groups_page.create_group.amount_required');
       valid = false;
     }
 
     const count = parseInt(formData.memberCount);
     if (!formData.memberCount || isNaN(count) || count < 2) {
-      newErrors.memberCount = 'Number of members must be at least 2.';
+      newErrors.memberCount = t('groups_page.create_group.member_count_minimum');
       valid = false;
     }
 
     if (!formData.cycleFrequency) {
-      newErrors.cycleFrequency = 'Cycle frequency is required.';
+      newErrors.cycleFrequency = t('groups_page.create_group.frequency_required');
       valid = false;
     }
 
     if (!formData.seettuTypeId) {
-      newErrors.seettuTypeId = 'Seettu type is required.';
+      newErrors.seettuTypeId = t('groups_page.create_group.type_required');
       valid = false;
     }
 
@@ -165,7 +165,7 @@ const CreateGroup = () => {
       await createGroup(payload, creatorId);
       navigate('/groups');
     } catch (err) {
-      setSubmitError(getErrorMessage(err, 'Failed to create group. Please check your form inputs.'));
+      setSubmitError(getErrorMessage(err, t('groups_page.create_group.create_error')));
     } finally {
       setLoading(false);
     }
@@ -203,7 +203,7 @@ const CreateGroup = () => {
         setNewShopAddress(''); setNewShopDescription('');
       }
     } catch (err) {
-      setShopError('Failed to register shop. Please try again.');
+      setShopError(t('groups_page.create_group.shop_registration_error'));
     } finally {
       setSavingShop(false);
     }
@@ -216,10 +216,10 @@ const CreateGroup = () => {
           {/* Header */}
           <div className="p-4" style={{ backgroundColor: '#235665', color: '#FFFFFF' }}>
             <h4 className="mb-0 fw-bold text-white" style={{ fontSize: '1.25rem' }}>
-              {t('create_group_page.title', 'Create Group')}
+              {t('groups_page.create_group.title')}
             </h4>
             <p className="mb-0 text-white-50 mt-1" style={{ fontSize: '0.85rem' }}>
-              {t('create_group_page.subtitle', 'Configure contribution terms, member capacity, and Seettu type')}
+              {t('groups_page.create_group.subtitle')}
             </p>
           </div>
 
@@ -235,12 +235,12 @@ const CreateGroup = () => {
               {/* Group Name */}
               <div className="mb-3">
                 <label className="form-label fw-medium text-secondary" style={{ fontSize: '0.875rem' }}>
-                  {t('create_group_page.group_name', 'Group Name')} <span className="text-danger">*</span>
+                  {t('groups_page.create_group.group_name')} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
                   className={`form-control ${errors.name ? 'is-invalid' : ''}`}
-                  placeholder="e.g. Gold Saver Circle Q4"
+                  placeholder={t('groups_page.create_group.group_name_placeholder')}
                   value={formData.name}
                   maxLength={100}
                   onChange={e => handleChange('name', e.target.value)}
@@ -252,12 +252,12 @@ const CreateGroup = () => {
               {/* Description */}
               <div className="mb-3">
                 <label className="form-label fw-medium text-secondary" style={{ fontSize: '0.875rem' }}>
-                  {t('create_group_page.description', 'Description')}
+                  {t('groups_page.create_group.description')}
                 </label>
                 <textarea
                   className="form-control"
                   rows="3"
-                  placeholder="Explain group rules, purpose, or terms…"
+                  placeholder={t('groups_page.create_group.description_placeholder')}
                   value={formData.description}
                   maxLength={500}
                   onChange={e => handleChange('description', e.target.value)}
@@ -269,12 +269,12 @@ const CreateGroup = () => {
               <div className="row mb-3 g-3">
                 <div className="col-md-4">
                   <label className="form-label fw-medium text-secondary" style={{ fontSize: '0.875rem' }}>
-                    {t('create_group_page.contribution_amount', 'Contribution Amount (LKR)')} <span className="text-danger">*</span>
+                    {t('groups_page.create_group.contribution_amount')} <span className="text-danger">*</span>
                   </label>
                   <input
                     type="number"
                     className={`form-control ${errors.contributionAmount ? 'is-invalid' : ''}`}
-                    placeholder="e.g. 10000"
+                    placeholder={t('groups_page.create_group.contribution_placeholder')}
                     value={formData.contributionAmount}
                     min="1"
                     step="any"
@@ -286,12 +286,12 @@ const CreateGroup = () => {
 
                 <div className="col-md-4">
                   <label className="form-label fw-medium text-secondary" style={{ fontSize: '0.875rem' }}>
-                    {t('create_group_page.member_count', 'Number of Members')} <span className="text-danger">*</span>
+                    {t('groups_page.create_group.member_count')} <span className="text-danger">*</span>
                   </label>
                   <input
                     type="number"
                     className={`form-control ${errors.memberCount ? 'is-invalid' : ''}`}
-                    placeholder="e.g. 12"
+                    placeholder={t('groups_page.create_group.member_count_placeholder')}
                     value={formData.memberCount}
                     min="2"
                     onChange={e => handleChange('memberCount', e.target.value)}
@@ -302,7 +302,7 @@ const CreateGroup = () => {
 
                 <div className="col-md-4">
                   <label className="form-label fw-medium text-secondary" style={{ fontSize: '0.875rem' }}>
-                    {t('create_group_page.cycle_frequency', 'Cycle Frequency')} <span className="text-danger">*</span>
+                    {t('groups_page.create_group.cycle_frequency')} <span className="text-danger">*</span>
                   </label>
                   <select
                     className={`form-select ${errors.cycleFrequency ? 'is-invalid' : ''}`}
@@ -311,7 +311,7 @@ const CreateGroup = () => {
                     style={{ borderRadius: '8px' }}
                   >
                     {CYCLE_FREQUENCIES.map(f => (
-                      <option key={f.value} value={f.value}>{f.label}</option>
+                      <option key={f.value} value={f.value}>{t(f.label)}</option>
                     ))}
                   </select>
                   {errors.cycleFrequency && <div className="invalid-feedback">{errors.cycleFrequency}</div>}
@@ -321,7 +321,7 @@ const CreateGroup = () => {
               {/* Seettu Type */}
               <div className="mb-3">
                 <label className="form-label fw-medium text-secondary" style={{ fontSize: '0.875rem' }}>
-                  {t('create_group_page.seettu_type', 'Seettu Type')} <span className="text-danger">*</span>
+                  {t('groups_page.create_group.seettu_type')} <span className="text-danger">*</span>
                 </label>
                 <select
                   className={`form-select ${errors.seettuTypeId ? 'is-invalid' : ''}`}
@@ -329,7 +329,7 @@ const CreateGroup = () => {
                   onChange={e => handleChange('seettuTypeId', e.target.value)}
                   style={{ borderRadius: '8px' }}
                 >
-                  <option value="">-- Select Seettu Type --</option>
+                  <option value="">{t('groups_page.create_group.select_type')}</option>
                   {seettuTypes.map(type => (
                     <option key={type.id} value={type.id}>{type.name}</option>
                   ))}
@@ -345,13 +345,13 @@ const CreateGroup = () => {
               {/* Category (optional) */}
               <div className="mb-3">
                 <label className="form-label fw-medium text-secondary" style={{ fontSize: '0.875rem' }}>
-                  {t('create_group_page.group_category', 'Category')}
-                  <span className="text-muted ms-1" style={{ fontSize: '0.78rem' }}>(Optional)</span>
+                  {t('groups_page.create_group.category')}
+                  <span className="text-muted ms-1" style={{ fontSize: '0.78rem' }}>{t('groups_page.create_group.optional')}</span>
                 </label>
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="e.g. Community, Business, Emergency…"
+                  placeholder={t('groups_page.create_group.category_placeholder')}
                   value={formData.category}
                   onChange={e => handleChange('category', e.target.value)}
                   style={{ borderRadius: '8px' }}
@@ -363,8 +363,8 @@ const CreateGroup = () => {
                 <div className="mb-3">
                   <div className="d-flex justify-content-between align-items-center mb-1">
                     <label className="form-label fw-medium text-secondary mb-0" style={{ fontSize: '0.875rem' }}>
-                      {t('create_group_page.associated_shop', 'Associated Shop')}
-                      <span className="text-muted ms-1" style={{ fontSize: '0.78rem' }}>(Optional)</span>
+                      {t('groups_page.create_group.associated_shop')}
+                      <span className="text-muted ms-1" style={{ fontSize: '0.78rem' }}>{t('groups_page.create_group.optional')}</span>
                     </label>
                     <button
                       type="button"
@@ -372,7 +372,7 @@ const CreateGroup = () => {
                       style={{ fontSize: '0.8rem', color: '#235665' }}
                       onClick={() => setShowAddShopModal(true)}
                     >
-                      + Register Shop
+                      + {t('groups_page.create_group.register_shop')}
                     </button>
                   </div>
                   <select
@@ -381,7 +381,7 @@ const CreateGroup = () => {
                     onChange={e => handleChange('shopId', e.target.value)}
                     style={{ borderRadius: '8px' }}
                   >
-                    <option value="">None / Independent Group</option>
+                    <option value="">{t('groups_page.create_group.no_associated_shop')}</option>
                     {shops.map(shop => (
                       <option key={shop.id} value={shop.id}>
                         {shop.name}{shop.address ? ` (${shop.address})` : ''}
@@ -400,7 +400,7 @@ const CreateGroup = () => {
                   onClick={() => navigate('/groups')}
                   disabled={loading}
                 >
-                  {t('common.cancel', 'Cancel')}
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -411,10 +411,10 @@ const CreateGroup = () => {
                   {loading ? (
                     <>
                       <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
-                      {t('create_group_page.creating', 'Creating…')}
+                      {t('groups_page.create_group.creating')}
                     </>
                   ) : (
-                    t('create_group_page.submit', 'Create Group')
+                    t('groups_page.create_group.submit')
                   )}
                 </button>
               </div>
@@ -430,8 +430,8 @@ const CreateGroup = () => {
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
               <div className="modal-header text-white" style={{ backgroundColor: '#235665' }}>
                 <div>
-                  <h5 className="modal-title fw-bold mb-0">Register Partner Merchant Shop</h5>
-                  <small className="text-white-50">Onboard a verified retail merchant for Non-Monetary Seettu</small>
+                  <h5 className="modal-title fw-bold mb-0">{t('groups_page.create_group.register_shop_title')}</h5>
+                  <small className="text-white-50">{t('groups_page.create_group.register_shop_subtitle')}</small>
                 </div>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowAddShopModal(false)} />
               </div>
@@ -443,12 +443,12 @@ const CreateGroup = () => {
                   <div className="row g-3">
                     <div className="col-md-6">
                       <label className="form-label text-secondary fw-medium small mb-1">
-                        Shop / Merchant Name <span className="text-danger">*</span>
+                        {t('groups_page.create_group.shop_name')} <span className="text-danger">*</span>
                       </label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="e.g. Lalitha Jewellery (Pvt) Ltd"
+                        placeholder={t('groups_page.create_group.shop_name_placeholder')}
                         value={newShopName}
                         onChange={e => setNewShopName(e.target.value)}
                         required
@@ -456,78 +456,78 @@ const CreateGroup = () => {
                       />
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label text-secondary fw-medium small mb-1">Shop Owner Name</label>
+                      <label className="form-label text-secondary fw-medium small mb-1">{t('groups_page.create_group.shop_owner_name')}</label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="e.g. M. K. Perera"
+                        placeholder={t('groups_page.create_group.shop_owner_placeholder')}
                         value={newShopOwnerName}
                         onChange={e => setNewShopOwnerName(e.target.value)}
                       />
                     </div>
                     <div className="col-md-6">
                       <label className="form-label text-secondary fw-medium small mb-1">
-                        Shop Type <span className="text-danger">*</span>
+                        {t('groups_page.create_group.shop_type')} <span className="text-danger">*</span>
                       </label>
                       <select
                         className="form-select"
                         value={newShopType}
                         onChange={e => setNewShopType(e.target.value)}
                       >
-                        <option value="GOLD_JEWELLERY">Gold &amp; Jewellery</option>
-                        <option value="ELECTRONICS">Electronics &amp; Appliances</option>
-                        <option value="VEHICLES_MOTORS">Vehicles &amp; Motorbikes</option>
-                        <option value="GROCERY_PROVISIONS">Grocery &amp; Wholesale Provisions</option>
-                        <option value="HARDWARE_CONSTRUCTION">Hardware &amp; Building Materials</option>
-                        <option value="GENERAL_MERCHANT">General Partner Merchant</option>
+                        <option value="GOLD_JEWELLERY">{t('groups_page.create_group.shop_type_gold')}</option>
+                        <option value="ELECTRONICS">{t('groups_page.create_group.shop_type_electronics')}</option>
+                        <option value="VEHICLES_MOTORS">{t('groups_page.create_group.shop_type_vehicles')}</option>
+                        <option value="GROCERY_PROVISIONS">{t('groups_page.create_group.shop_type_grocery')}</option>
+                        <option value="HARDWARE_CONSTRUCTION">{t('groups_page.create_group.shop_type_hardware')}</option>
+                        <option value="GENERAL_MERCHANT">{t('groups_page.create_group.shop_type_general')}</option>
                       </select>
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label text-secondary fw-medium small mb-1">Business Registration No.</label>
+                      <label className="form-label text-secondary fw-medium small mb-1">{t('groups_page.create_group.business_registration')}</label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="e.g. PV-123456"
+                        placeholder={t('groups_page.create_group.business_registration_placeholder')}
                         value={newShopRegisterNumber}
                         onChange={e => setNewShopRegisterNumber(e.target.value)}
                       />
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label text-secondary fw-medium small mb-1">Contact Phone</label>
+                      <label className="form-label text-secondary fw-medium small mb-1">{t('groups_page.create_group.contact_phone')}</label>
                       <input
                         type="tel"
                         className="form-control"
-                        placeholder="e.g. +94 11 234 5678"
+                        placeholder={t('groups_page.create_group.contact_phone_placeholder')}
                         value={newShopContact}
                         onChange={e => setNewShopContact(e.target.value)}
                       />
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label text-secondary fw-medium small mb-1">Official Email</label>
+                      <label className="form-label text-secondary fw-medium small mb-1">{t('groups_page.create_group.official_email')}</label>
                       <input
                         type="email"
                         className="form-control"
-                        placeholder="e.g. orders@shop.lk"
+                        placeholder={t('groups_page.create_group.official_email_placeholder')}
                         value={newShopEmail}
                         onChange={e => setNewShopEmail(e.target.value)}
                       />
                     </div>
                     <div className="col-12">
-                      <label className="form-label text-secondary fw-medium small mb-1">Store Address</label>
+                      <label className="form-label text-secondary fw-medium small mb-1">{t('groups_page.create_group.store_address')}</label>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="e.g. No. 125, Sea Street, Colombo 11"
+                        placeholder={t('groups_page.create_group.store_address_placeholder')}
                         value={newShopAddress}
                         onChange={e => setNewShopAddress(e.target.value)}
                       />
                     </div>
                     <div className="col-12">
-                      <label className="form-label text-secondary fw-medium small mb-1">Description / Notes</label>
+                      <label className="form-label text-secondary fw-medium small mb-1">{t('groups_page.create_group.shop_description')}</label>
                       <textarea
                         className="form-control"
                         rows="2"
-                        placeholder="e.g. Authorized 22K gold coin dealer."
+                        placeholder={t('groups_page.create_group.shop_description_placeholder')}
                         value={newShopDescription}
                         onChange={e => setNewShopDescription(e.target.value)}
                       />
@@ -536,7 +536,7 @@ const CreateGroup = () => {
                 </div>
                 <div className="modal-footer border-top p-3 bg-light">
                   <button type="button" className="btn btn-secondary px-3" onClick={() => setShowAddShopModal(false)}>
-                    Cancel
+                    {t('common.cancel', 'Cancel')}
                   </button>
                   <button
                     type="submit"
@@ -544,7 +544,7 @@ const CreateGroup = () => {
                     style={{ backgroundColor: '#235665', borderColor: '#235665' }}
                     disabled={savingShop || !newShopName.trim()}
                   >
-                    {savingShop ? 'Registering…' : 'Register Shop'}
+                    {savingShop ? t('groups_page.create_group.registering') : t('groups_page.create_group.register_shop')}
                   </button>
                 </div>
               </form>
