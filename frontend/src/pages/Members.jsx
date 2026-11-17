@@ -9,20 +9,20 @@ import { getPendingKycUsers, verifyMemberKyc } from '../api/userApi';
 
 import { useAuth } from '../hooks/useAuth';
 
-const getScoreMeta = (scoreNum, category) => {
+const getScoreMeta = (scoreNum, category, t) => {
   if (category) {
-    if (category === 'EXCELLENT') return { label: 'Excellent', color: '#188754' };
-    if (category === 'GOOD') return { label: 'Good', color: '#0D6EFD' };
-    if (category === 'FAIR') return { label: 'Fair', color: '#FFB020' };
-    if (category === 'POOR') return { label: 'Poor', color: '#FD7E14' };
-    if (category === 'HIGH_RISK') return { label: 'High Risk', color: '#DC3545' };
+    if (category === 'EXCELLENT') return { label: t('members_page.score_excellent'), color: '#188754' };
+    if (category === 'GOOD') return { label: t('members_page.score_good'), color: '#0D6EFD' };
+    if (category === 'FAIR') return { label: t('members_page.score_fair'), color: '#FFB020' };
+    if (category === 'POOR') return { label: t('members_page.score_poor'), color: '#FD7E14' };
+    if (category === 'HIGH_RISK') return { label: t('members_page.score_high_risk'), color: '#DC3545' };
   }
   const num = Number(scoreNum);
-  if (num >= 90) return { label: 'Excellent', color: '#188754' };
-  if (num >= 75) return { label: 'Good', color: '#0D6EFD' };
-  if (num >= 60) return { label: 'Fair', color: '#FFB020' };
-  if (num >= 40) return { label: 'Poor', color: '#FD7E14' };
-  return { label: 'High Risk', color: '#DC3545' };
+  if (num >= 90) return { label: t('members_page.score_excellent'), color: '#188754' };
+  if (num >= 75) return { label: t('members_page.score_good'), color: '#0D6EFD' };
+  if (num >= 60) return { label: t('members_page.score_fair'), color: '#FFB020' };
+  if (num >= 40) return { label: t('members_page.score_poor'), color: '#FD7E14' };
+  return { label: t('members_page.score_high_risk'), color: '#DC3545' };
 };
 
 const calculateScore = (member) => {
@@ -83,10 +83,10 @@ const Members = () => {
       if (Array.isArray(pList) && pList.length > 0) {
         const formattedPending = pList.map(r => ({
           id: r.id,
-          memberName: r.user?.fullName || r.userName || 'Member',
-          email: r.user?.email || 'N/A',
-          groupName: r.group?.name || 'Seettu Group',
-          date: r.requestedAt ? r.requestedAt.split('T')[0] : 'Today',
+          memberName: r.user?.fullName || r.userName || t('members_page.status_default_member'),
+          email: r.user?.email || t('members_page.not_available'),
+          groupName: r.group?.name || t('members_page.status_general_group'),
+          date: r.requestedAt ? r.requestedAt.split('T')[0] : t('members_page.status_today'),
           status: r.status || 'PENDING'
         }));
         setPendingRequests(formattedPending);
@@ -94,8 +94,8 @@ const Members = () => {
         setPendingRequests([]);
       }
     } catch (err) {
-      console.error('Failed to load members or groups:', err);
-      setErrorMsg(getErrorMessage(err, 'Failed to fetch members from database.'));
+      console.error(t('members_page.loading_error'), err);
+      setErrorMsg(getErrorMessage(err, t('members_page.fetch_members_error')));
     } finally {
       setLoading(false);
     }
@@ -110,10 +110,10 @@ const Members = () => {
       setActionMsg('');
       setErrorMsg('');
       await approveJoinRequest(reqId);
-      setActionMsg(`Member ${memberName} approved and successfully added to group "${groupName}"!`);
+      setActionMsg(t('members_page.approve_request_success', { memberName, groupName }));
       await fetchData();
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Failed to approve join request.'));
+      setErrorMsg(getErrorMessage(err, t('members_page.approve_request_error')));
     }
   };
 
@@ -122,10 +122,10 @@ const Members = () => {
       setActionMsg('');
       setErrorMsg('');
       await rejectJoinRequest(reqId);
-      setActionMsg(`Join request for ${memberName} was rejected.`);
+      setActionMsg(t('members_page.reject_request_success', { memberName }));
       await fetchData();
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Failed to reject join request.'));
+      setErrorMsg(getErrorMessage(err, t('members_page.reject_request_error')));
     }
   };
 
@@ -134,11 +134,11 @@ const Members = () => {
       setActionMsg('');
       setErrorMsg('');
       await verifyMemberKyc(userId, 'VERIFIED', '', role);
-      const roleText = role === 'ORGANIZER' ? ' and promoted to Group Organizer' : '';
-      setActionMsg(`Member ${memberName} identity & Grama Niladhari Certificate successfully verified${roleText}!`);
+      const roleText = role === 'ORGANIZER' ? t('members_page.organizer_promotion') : '';
+      setActionMsg(t('members_page.verify_member_success', { memberName, roleText }));
       await fetchData();
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Failed to verify member identity.'));
+      setErrorMsg(getErrorMessage(err, t('members_page.verify_member_error')));
     }
   };
 
@@ -147,13 +147,13 @@ const Members = () => {
       setActionMsg('');
       setErrorMsg('');
       await verifyMemberKyc(userId, 'REJECTED', reason);
-      setActionMsg(`Member ${memberName} verification was rejected with reason: "${reason}".`);
+      setActionMsg(t('members_page.reject_verification_success', { memberName, reason }));
       setShowRejectKycModal(false);
       setRejectKycTarget(null);
       setRejectReasonInput('');
       await fetchData();
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Failed to reject member verification.'));
+      setErrorMsg(getErrorMessage(err, t('members_page.reject_verification_error')));
     }
   };
 
@@ -162,33 +162,33 @@ const Members = () => {
       setActionMsg('');
       setErrorMsg('');
       await inviteMember(groupId, { fullName, email, phone });
-      setActionMsg(`Member ${fullName} added successfully to group!`);
+      setActionMsg(t('members_page.add_member_success', { memberName: fullName }));
       await fetchData();
     } catch (err) {
-      setErrorMsg(getErrorMessage(err, 'Failed to add member.'));
+      setErrorMsg(getErrorMessage(err, t('members_page.add_member_error')));
       throw err;
     }
   };
 
   const handleDeleteMember = async (member) => {
-    const name = member.name || member.user?.fullName || 'this member';
+    const name = member.name || member.user?.fullName || t('members_page.status_default_member');
     const groupId = member.groupId || member.group?.id;
     const userId = member.userId || member.user?.id;
 
     if (!groupId || !userId) {
-      alert('Cannot delete: Missing group or user ID.');
+      alert(t('members_page.missing_member_ids'));
       return;
     }
 
-    if (window.confirm(`Are you sure you want to remove member ${name} from ${member.groupName || member.group?.name}?`)) {
+    if (window.confirm(t('members_page.confirm_remove_member', { memberName: name, groupName: member.groupName || member.group?.name }))) {
       try {
         setActionMsg('');
         setErrorMsg('');
         await removeMember(groupId, userId);
-        setActionMsg(` Member ${name} removed successfully.`);
+        setActionMsg(t('members_page.remove_member_success', { memberName: name }));
         await fetchData();
       } catch (err) {
-        setErrorMsg(getErrorMessage(err, 'Failed to remove member.'));
+        setErrorMsg(getErrorMessage(err, t('members_page.remove_member_error')));
       }
     }
   };
@@ -211,7 +211,7 @@ const Members = () => {
       }
       return m;
     }));
-    setActionMsg(` Updated member details for ${updated.name}`);
+    setActionMsg(t('members_page.update_member_success', { memberName: updated.name }));
   };
 
   // Normalized display items
@@ -222,21 +222,21 @@ const Members = () => {
     })
     .map((m) => {
       const scoreVal = calculateScore(m);
-      const scoreMeta = getScoreMeta(scoreVal, m.disciplineCategory);
-      const dateStr = m.joinedAt ? m.joinedAt.split('T')[0] : 'N/A';
+      const scoreMeta = getScoreMeta(scoreVal, m.disciplineCategory, t);
+      const dateStr = m.joinedAt ? m.joinedAt.split('T')[0] : t('members_page.not_available');
 
       return {
         id: m.id,
         userId: m.user?.id,
         groupId: m.group?.id,
-        name: m.user?.fullName || 'Unknown Member',
-        email: m.user?.email || 'N/A',
-        phone: m.user?.phone || 'N/A',
+        name: m.user?.fullName || t('members_page.status_unknown'),
+        email: m.user?.email || t('members_page.not_available'),
+        phone: m.user?.phone || t('members_page.not_available'),
         nicNumber: m.user?.nicNumber || '-',
         kycStatus: m.user?.kycStatus || 'UNVERIFIED',
         gnCertificateUrl: m.user?.gnCertificateUrl,
         profilePictureUrl: m.user?.profilePictureUrl,
-        groupName: m.group?.name || 'General Group',
+        groupName: m.group?.name || t('members_page.status_general_group'),
         joinedDate: dateStr,
         score: scoreVal,
         scoreLabel: scoreMeta.label,
@@ -262,13 +262,13 @@ const Members = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('members_page.title', 'Members')}</h2>
-          <p className="text-muted small mb-0">{t('members_page.subtitle', 'Manage member profiles, verify NIC & Grama Niladhari certificates, and monitor discipline scores')}</p>
+          <h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('members_page.title')}</h2>
+          <p className="text-muted small mb-0">{t('members_page.subtitle')}</p>
         </div>
         {isAdmin ? (
           <span className="badge bg-light text-secondary border px-3 py-2 small fw-semibold d-inline-flex align-items-center gap-1.5">
             <Icon name="shield" size={15} />
-            <span>Platform Overseer Mode</span>
+            <span>{t('members_page.platform_overseer')}</span>
           </span>
         ) : isOrganizer ? (
           <button
@@ -276,7 +276,7 @@ const Members = () => {
             className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2"
           >
             <Icon name="user-plus" size={18} />
-            <span>{t('members_page.invite_btn', 'Invite Member')}</span>
+            <span>{t('members_page.invite_btn')}</span>
           </button>
         ) : null}
       </div>
@@ -285,7 +285,7 @@ const Members = () => {
         <div className="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
           <Icon name="check" size={18} />
           <div>{actionMsg}</div>
-          <button type="button" className="btn-close ms-auto" onClick={() => setActionMsg('')} aria-label="Close"></button>
+          <button type="button" className="btn-close ms-auto" onClick={() => setActionMsg('')} aria-label={t('members_page.close')}></button>
         </div>
       )}
 
@@ -293,7 +293,7 @@ const Members = () => {
         <div className="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4" role="alert">
           <Icon name="alert-circle" size={18} />
           <div>{errorMsg}</div>
-          <button type="button" className="btn-close ms-auto" onClick={() => setErrorMsg('')} aria-label="Close"></button>
+          <button type="button" className="btn-close ms-auto" onClick={() => setErrorMsg('')} aria-label={t('members_page.close')}></button>
         </div>
       )}
 
@@ -304,25 +304,25 @@ const Members = () => {
             <div>
               <h5 className="fw-bold mb-0 text-dark d-flex align-items-center gap-2">
                 <Icon name="shield" size={20} color="#1A5265" />
-                <span>Member Identity & Grama Niladhari Verification Queue ({pendingKycList.length})</span>
+                <span>{t('members_page.queue_title', { count: pendingKycList.length })}</span>
               </h5>
               <small className="text-muted">
-                Review applicant Sri Lankan NIC numbers and Grama Niladhari Character Certificates to prevent duplicate members and fraud before group entry.
+                {t('members_page.queue_description')}
               </small>
             </div>
-            <span className="badge rounded-pill bg-warning text-dark px-3 py-1.5 fw-bold">Verification Required</span>
+            <span className="badge rounded-pill bg-warning text-dark px-3 py-1.5 fw-bold">{t('members_page.verification_required')}</span>
           </div>
 
           <div className="table-responsive">
             <table className="table table-sm align-middle mb-0">
               <thead className="table-light">
                 <tr>
-                  <th>Applicant Name</th>
-                  <th>Contact Details</th>
-                  <th>NIC Number</th>
-                  <th>Grama Niladhari Proof</th>
-                  <th>Submission Date</th>
-                  <th className="text-end">Verification Action</th>
+                  <th>{t('members_page.applicant_name')}</th>
+                  <th>{t('members_page.contact_details')}</th>
+                  <th>{t('members_page.nic_number')}</th>
+                  <th>{t('members_page.gn_proof')}</th>
+                  <th>{t('members_page.submission_date')}</th>
+                  <th className="text-end">{t('members_page.verification_action')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -334,7 +334,7 @@ const Members = () => {
                         <div className="mt-1">
                           <span className="badge bg-teal bg-opacity-10 text-dark border border-secondary border-opacity-25 px-2 py-0.5 rounded-pill small fw-semibold d-inline-flex align-items-center gap-1" style={{ fontSize: '0.72rem', backgroundColor: '#E2F0F3', color: '#1A5265' }}>
                             <Icon name="users" size={12} color="#1A5265" />
-                            <span>Applicant: Seettu Organizer</span>
+                            <span>{t('members_page.applicant_organizer')}</span>
                           </span>
                           {usr.district && (
                             <div className="small text-muted mt-1 fw-normal" style={{ fontSize: '0.78rem' }}>
@@ -356,11 +356,11 @@ const Members = () => {
                     </td>
                     <td>
                       <span className="badge bg-light text-dark border font-monospace px-2 py-1">
-                        {usr.nicNumber || (usr.requestedRole === 'ORGANIZER' ? 'Pending GN/NIC' : 'N/A')}
+                        {usr.nicNumber || (usr.requestedRole === 'ORGANIZER' ? t('members_page.pending_gn_nic') : t('members_page.not_available'))}
                       </span>
                       {usr.nicNumber && (
                         <span className="badge bg-success bg-opacity-10 text-success border border-success ms-1 small" style={{ fontSize: '0.72rem' }}>
-                          Unique NIC
+                          {t('members_page.unique_nic')}
                         </span>
                       )}
                     </td>
@@ -374,14 +374,14 @@ const Members = () => {
                           style={{ fontSize: '0.78rem' }}
                         >
                           <Icon name="file-text" size={14} />
-                          <span>View GN Certificate</span>
+                          <span>{t('members_page.view_gn_certificate')}</span>
                         </a>
                       ) : (
-                        <span className="badge bg-light text-muted border small">No Document Uploaded</span>
+                        <span className="badge bg-light text-muted border small">{t('members_page.no_document_uploaded')}</span>
                       )}
                     </td>
                     <td className="text-muted small">
-                      {usr.createdAt ? usr.createdAt.split('T')[0] : 'Recent'}
+                      {usr.createdAt ? usr.createdAt.split('T')[0] : t('members_page.recent')}
                     </td>
                     <td className="text-end">
                       <div className="d-inline-flex gap-2 align-items-center justify-content-end">
@@ -390,20 +390,20 @@ const Members = () => {
                             onClick={() => handleApproveKyc(usr.id, usr.fullName, 'ORGANIZER')}
                             className="btn btn-sm px-3 py-1.5 shadow-sm fw-semibold d-inline-flex align-items-center gap-1.5 text-white"
                             style={{ backgroundColor: '#0097B2', height: '36px', minWidth: '165px', justifyContent: 'center' }}
-                            title="Approve applicant application and promote to Group Organizer"
+                            title={t('members_page.approve_organizer_title')}
                           >
                             <Icon name="user-check" size={15} />
-                            <span>Approve Organizer</span>
+                            <span>{t('members_page.approve_organizer')}</span>
                           </button>
                         ) : (
                           <button
                             onClick={() => handleApproveKyc(usr.id, usr.fullName)}
                             className="btn btn-sm btn-success px-3 py-1.5 shadow-sm fw-semibold d-inline-flex align-items-center gap-1.5"
                             style={{ height: '36px', minWidth: '135px', justifyContent: 'center' }}
-                            title="Verify as Participating Member"
+                            title={t('members_page.verify_member_title')}
                           >
                             <Icon name="check" size={15} />
-                            <span>Verify Member</span>
+                            <span>{t('members_page.verify_member')}</span>
                           </button>
                         )}
                         <button
@@ -415,7 +415,7 @@ const Members = () => {
                           style={{ height: '36px', minWidth: '85px', justifyContent: 'center' }}
                         >
                           <Icon name="x" size={15} />
-                          <span>Reject</span>
+                          <span>{t('members_page.reject')}</span>
                         </button>
                       </div>
                     </td>
@@ -432,19 +432,19 @@ const Members = () => {
         <div className="ui-card p-4 mb-4 shadow-sm border-0 rounded-3">
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h5 className="fw-bold mb-0" style={{ color: '#1A3644' }}>
-              Pending Group Join Requests ({pendingRequests.length})
+              {t('members_page.pending_join_requests', { count: pendingRequests.length })}
             </h5>
-            <span className="badge rounded-pill bg-warning text-dark px-3 py-1">Requires Organizer Approval</span>
+            <span className="badge rounded-pill bg-warning text-dark px-3 py-1">{t('members_page.requires_organizer_approval')}</span>
           </div>
           <div className="table-responsive">
             <table className="table table-sm align-middle mb-0">
               <thead className="table-light">
                 <tr>
-                  <th>Member Name</th>
-                  <th>Email</th>
-                  <th>Requested Seettu Group</th>
-                  <th>Request Date</th>
-                  <th className="text-end">Organizer Action</th>
+                  <th>{t('members_page.table_member_name')}</th>
+                  <th>{t('members_page.table_email')}</th>
+                  <th>{t('members_page.requested_group')}</th>
+                  <th>{t('members_page.request_date')}</th>
+                  <th className="text-end">{t('members_page.organizer_action')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -459,13 +459,13 @@ const Members = () => {
                         onClick={() => handleApproveRequest(req.id, req.memberName, req.groupName)}
                         className="btn btn-sm btn-success px-3 me-2 shadow-sm"
                       >
-                        Approve
+                        {t('members_page.approve')}
                       </button>
                       <button
                         onClick={() => handleRejectRequest(req.id, req.memberName)}
                         className="btn btn-sm btn-outline-danger px-2"
                       >
-                        ✕ Reject
+                        ✕ {t('members_page.reject')}
                       </button>
                     </td>
                   </tr>
@@ -486,7 +486,7 @@ const Members = () => {
             <input
               type="text"
               className="form-control border-0 shadow-none ps-1"
-              placeholder={t('members_page.search_placeholder', 'Search members by name, email, or NIC...')}
+              placeholder={t('members_page.search_placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -499,7 +499,7 @@ const Members = () => {
             value={groupFilter}
             onChange={(e) => setGroupFilter(e.target.value)}
           >
-            <option value="All">{t('members_page.filter_group', 'All Groups')}</option>
+            <option value="All">{t('members_page.filter_group')}</option>
             {groups.map((g) => (
               <option key={g.id} value={g.name}>{g.name}</option>
             ))}
@@ -512,10 +512,10 @@ const Members = () => {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="All">{t('common.all', 'All')}</option>
-            <option value="Active">Active</option>
-            <option value="REMOVED">Removed</option>
-            <option value="Inactive">Inactive</option>
+            <option value="All">{t('members_page.all')}</option>
+            <option value="Active">{t('members_page.status_active')}</option>
+            <option value="REMOVED">{t('members_page.status_removed')}</option>
+            <option value="Inactive">{t('members_page.status_inactive')}</option>
           </select>
         </div>
       </div>
@@ -526,16 +526,16 @@ const Members = () => {
           <table className="table table-hover align-middle mb-0">
             <thead style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E5E7EB' }}>
               <tr>
-                <th className="py-3 px-3 text-muted fw-semibold small">ID</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('members_page.col_name', 'Member Name')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">Email</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('auth.phone_label', 'Phone')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.group', 'Group')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small">{t('common.date', 'Joined Date')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('members_page.col_kyc', 'Identity (NIC & GN)')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('members_page.col_score', 'Discipline Score')}</th>
-                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('common.status', 'Status')}</th>
-                {(isOrganizer || isAdmin) && <th className="py-3 px-3 text-muted fw-semibold small text-end">{t('members_page.col_actions', 'Actions')}</th>}
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('members_page.table_id')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('members_page.col_name')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('members_page.table_email')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('members_page.table_phone')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('members_page.table_group')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small">{t('members_page.table_joined_date')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('members_page.col_kyc')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('members_page.col_score')}</th>
+                <th className="py-3 px-3 text-muted fw-semibold small text-center">{t('members_page.table_status')}</th>
+                {(isOrganizer || isAdmin) && <th className="py-3 px-3 text-muted fw-semibold small text-end">{t('members_page.col_actions')}</th>}
               </tr>
             </thead>
             <tbody>
@@ -543,15 +543,15 @@ const Members = () => {
                 <tr>
                   <td colSpan={(isOrganizer || isAdmin) ? "10" : "9"} className="text-center py-5">
                     <div className="spinner-border text-teal" role="status" style={{ color: '#1A5265' }}></div>
-                    <p className="mt-2 text-muted small">Loading members...</p>
+                    <p className="mt-2 text-muted small">{t('members_page.loading_members')}</p>
                   </td>
                 </tr>
               ) : filteredMembers.length === 0 ? (
                 <tr>
                   <td colSpan={(isOrganizer || isAdmin) ? "10" : "9"} className="text-center py-5">
                     <Icon name="users" size={36} color="#94A3B8" className="mb-2" />
-                    <h6 className="fw-bold text-dark">{t('members_page.no_members', 'No members found')}</h6>
-                    <p className="text-muted small mb-0">{t('members_page.no_members_desc', 'No active members match the current filters or no members are registered yet.')}</p>
+                    <h6 className="fw-bold text-dark">{t('members_page.no_members')}</h6>
+                    <p className="text-muted small mb-0">{t('members_page.no_members_desc')}</p>
                   </td>
                 </tr>
               ) : (
@@ -576,7 +576,7 @@ const Members = () => {
                               onError={(e) => { e.currentTarget.style.display = 'none'; }}
                             />
                           ) : (
-                            member.name ? member.name.charAt(0).toUpperCase() : 'M'
+                            member.name ? member.name.charAt(0).toUpperCase() : t('members_page.status_default_member').charAt(0).toUpperCase()
                           )}
                         </div>
                         <span>{member.name}</span>
@@ -590,7 +590,7 @@ const Members = () => {
                       {member.kycStatus === 'VERIFIED' ? (
                         <div>
                           <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-0.5 rounded-pill small fw-semibold">
-                            <Icon name="check" size={11} className="me-1" />Verified
+                            <Icon name="check" size={11} className="me-1" />{t('members_page.badge_verified')}
                           </span>
                           <div className="font-monospace text-muted mt-0.5" style={{ fontSize: '0.72rem' }}>
                             {member.nicNumber}
@@ -598,15 +598,15 @@ const Members = () => {
                         </div>
                       ) : member.kycStatus === 'PENDING' ? (
                         <span className="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 px-2 py-0.5 rounded-pill small fw-semibold">
-                          <Icon name="clock" size={11} className="me-1" />KYC Pending
+                          <Icon name="clock" size={11} className="me-1" />{t('members_page.badge_kyc_pending')}
                         </span>
                       ) : member.kycStatus === 'REJECTED' ? (
                         <span className="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-0.5 rounded-pill small fw-semibold">
-                          Rejected
+                          {t('members_page.badge_rejected')}
                         </span>
                       ) : (
                         <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-0.5 rounded-pill small">
-                          Unverified
+                          {t('members_page.badge_unverified')}
                         </span>
                       )}
                     </td>
@@ -620,7 +620,7 @@ const Members = () => {
                     </td>
                     <td className="py-3 px-3 text-center">
                       <span className="badge-mint">
-                        {member.status}
+                        {member.status === 'Active' ? t('members_page.status_active_member') : member.status === 'REMOVED' ? t('members_page.status_removed') : member.status === 'Inactive' ? t('members_page.status_inactive') : member.status}
                       </span>
                     </td>
                     {(isOrganizer || isAdmin) && (
@@ -629,7 +629,7 @@ const Members = () => {
                           <button
                             className="btn btn-link p-1 text-decoration-none"
                             style={{ color: '#188754' }}
-                            title="Edit Member"
+                            title={t('members_page.edit_member')}
                             onClick={() => setEditingMember(member)}
                           >
                             <Icon name="pencil" size={16} color="#188754" />
@@ -637,7 +637,7 @@ const Members = () => {
                           <button
                             className="btn btn-link p-1 text-decoration-none"
                             style={{ color: '#DC3545' }}
-                            title="Delete Member"
+                            title={t('members_page.delete_member')}
                             onClick={() => handleDeleteMember(member)}
                           >
                             <Icon name="trash" size={16} color="#DC3545" />
@@ -661,34 +661,34 @@ const Members = () => {
               <div className="modal-header border-bottom">
                 <h5 className="modal-title fw-bold text-danger d-flex align-items-center gap-2">
                   <Icon name="alert-circle" size={18} />
-                  <span>Reject Member Verification</span>
+                  <span>{t('members_page.reject_verification_title')}</span>
                 </h5>
-                <button type="button" className="btn-close" onClick={() => setShowRejectKycModal(false)}></button>
+                <button type="button" className="btn-close" onClick={() => setShowRejectKycModal(false)} aria-label={t('members_page.close')}></button>
               </div>
               <div className="modal-body">
                 <p className="text-dark small mb-3">
-                  Rejecting verification for <strong>{rejectKycTarget?.fullName}</strong> (NIC: {rejectKycTarget?.nicNumber}).
-                  Please provide a reason so the applicant can submit valid Grama Niladhari documentation.
+                  {t('members_page.rejecting_verification_for')} <strong>{rejectKycTarget?.fullName}</strong> ({t('members_page.nic_label')} {rejectKycTarget?.nicNumber}).
+                  {' '}{t('members_page.rejection_instructions')}
                 </p>
                 <div className="mb-3">
-                  <label className="form-label small fw-semibold text-muted">Rejection Reason</label>
+                  <label className="form-label small fw-semibold text-muted">{t('members_page.rejection_reason')}</label>
                   <textarea
                     className="form-control"
                     rows="3"
-                    placeholder="e.g. Grama Niladhari seal is unclear, or NIC number mismatch."
+                    placeholder={t('members_page.rejection_reason_placeholder')}
                     value={rejectReasonInput}
                     onChange={(e) => setRejectReasonInput(e.target.value)}
                   />
                 </div>
               </div>
               <div className="modal-footer border-top">
-                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowRejectKycModal(false)}>Cancel</button>
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShowRejectKycModal(false)}>{t('members_page.cancel')}</button>
                 <button
                   type="button"
                   className="btn btn-danger btn-sm px-3 fw-bold"
                   onClick={() => handleRejectKyc(rejectKycTarget?.id, rejectKycTarget?.fullName, rejectReasonInput)}
                 >
-                  Confirm Rejection
+                  {t('members_page.confirm_rejection')}
                 </button>
               </div>
             </div>

@@ -31,7 +31,7 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
             setGroupId(list[0].id);
           }
         })
-        .catch((err) => console.error('Failed to load groups for InviteMemberModal', err))
+        .catch((err) => console.error(t('members_page.invite_modal.load_groups_error'), err))
         .finally(() => setLoadingGroups(false));
     }
   }, [show, groups]);
@@ -39,7 +39,7 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!groupId) {
-      alert(t('modals.invite_member.select_group', 'Please select a group.'));
+      alert(t('members_page.invite_modal.select_group_error'));
       return;
     }
     setLoading(true);
@@ -59,11 +59,17 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
   };
 
   const selectedGroup = activeGroups.find(g => String(g.id) === String(groupId));
+  const frequencyLabels = {
+    DAILY: t('members_page.invite_modal.daily'),
+    WEEKLY: t('members_page.invite_modal.weekly'),
+    BI_WEEKLY: t('members_page.invite_modal.biweekly'),
+    MONTHLY: t('members_page.invite_modal.monthly')
+  };
 
   return (
     <Modal show={show} onHide={onHide} centered contentClassName="custom-modal-content">
       <div className="custom-modal-header">
-        <h5 className="fw-bold mb-0 text-dark">{t('modals.invite_member.title', 'Invite New Member')}</h5>
+        <h5 className="fw-bold mb-0 text-dark">{t('members_page.invite_modal.title')}</h5>
         <button className="btn btn-link text-muted p-0 border-0" onClick={onHide}>
           <Icon name="x" size={20} />
         </button>
@@ -73,7 +79,7 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
         <div className="custom-modal-body">
           <div className="mb-3">
             <label className="form-label text-dark fw-semibold small">
-              {t('modals.invite_member.select_group', 'Select Seettu Group')} <span className="text-danger">*</span>
+              {t('members_page.invite_modal.select_group')} <span className="text-danger">*</span>
             </label>
             <select
               className="form-select"
@@ -83,15 +89,15 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
               disabled={loadingGroups}
             >
               {loadingGroups ? (
-                <option value="">{t('modals.invite_member.loading_groups', 'Loading Seettu groups...')}</option>
+                <option value="">{t('members_page.invite_modal.loading_groups')}</option>
               ) : activeGroups.length === 0 ? (
-                <option value="">{t('modals.invite_member.no_groups', 'No Seettu groups available')}</option>
+                <option value="">{t('members_page.invite_modal.no_groups')}</option>
               ) : (
                 <>
-                  <option value="">{t('modals.invite_member.choose_group', '-- Choose Seettu Group --')}</option>
+                  <option value="">{t('members_page.invite_modal.choose_group')}</option>
                   {activeGroups.map((g) => (
                     <option key={g.id} value={g.id}>
-                      {g.name} (LKR {Number(g.contributionAmount || 0).toLocaleString()} • {g.cycleFrequency || 'Monthly'})
+                      {g.name} (LKR {Number(g.contributionAmount || 0).toLocaleString()} • {frequencyLabels[String(g.cycleFrequency || 'MONTHLY').toUpperCase()] || g.cycleFrequency})
                     </option>
                   ))}
                 </>
@@ -99,17 +105,17 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
             </select>
             {selectedGroup && (
               <small className="text-muted d-block mt-1">
-                {t('modals.invite_member.selected_group', 'Selected Group')}: <strong>{selectedGroup.name}</strong> • {t('modals.invite_member.contribution', 'Contribution')}: LKR {Number(selectedGroup.contributionAmount || 0).toLocaleString()}
+                {t('members_page.invite_modal.selected_group')}: <strong>{selectedGroup.name}</strong> • {t('members_page.invite_modal.contribution')}: LKR {Number(selectedGroup.contributionAmount || 0).toLocaleString()}
               </small>
             )}
           </div>
 
           <div className="mb-3">
-            <label className="form-label text-dark fw-semibold small">{t('modals.invite_member.full_name', 'Full Name')}</label>
+            <label className="form-label text-dark fw-semibold small">{t('members_page.invite_modal.full_name')}</label>
             <input
               type="text"
               className="form-control"
-              placeholder="e.g. Sunil Shantha"
+              placeholder={t('members_page.invite_modal.full_name_placeholder')}
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
@@ -117,11 +123,11 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
           </div>
 
           <div className="mb-3">
-            <label className="form-label text-dark fw-semibold small">{t('modals.invite_member.email', 'Email Address')}</label>
+            <label className="form-label text-dark fw-semibold small">{t('members_page.invite_modal.email')}</label>
             <input
               type="email"
               className="form-control"
-              placeholder="e.g. sunil@gmail.com"
+              placeholder={t('members_page.invite_modal.email_placeholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -129,11 +135,11 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
           </div>
 
           <div className="mb-2">
-            <label className="form-label text-dark fw-semibold small">{t('modals.invite_member.phone', 'Phone Number')}</label>
+            <label className="form-label text-dark fw-semibold small">{t('members_page.invite_modal.phone')}</label>
             <input
               type="tel"
               className="form-control"
-              placeholder="e.g. 0771234567"
+              placeholder={t('members_page.invite_modal.phone_placeholder')}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
@@ -143,10 +149,10 @@ const InviteMemberModal = ({ show, onHide, onAddMember, groups = [] }) => {
 
         <div className="custom-modal-footer">
           <button type="button" className="btn btn-link text-muted text-decoration-none px-4" onClick={onHide} disabled={loading}>
-            {t('modals.invite_member.cancel', 'Cancel')}
+            {t('members_page.cancel')}
           </button>
           <button type="submit" className="btn btn-teal px-4" disabled={loading}>
-            {loading ? t('modals.invite_member.adding', 'Adding...') : t('modals.invite_member.add_member', 'Add Member')}
+            {loading ? t('members_page.invite_modal.adding') : t('members_page.invite_modal.add_member')}
           </button>
         </div>
       </form>
