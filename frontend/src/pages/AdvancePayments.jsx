@@ -115,8 +115,8 @@ const AdvancePayments = () => {
       
       if (isBankTransfer) {
         const details = [];
-        if (formData.bankName) details.push(`Bank: ${formData.bankName}`);
-        if (formData.referenceNumber) details.push(`Ref: ${formData.referenceNumber}`);
+        if (formData.bankName) details.push(`${t('advance_page.bank_label')}: ${formData.bankName}`);
+        if (formData.referenceNumber) details.push(`${t('advance_page.reference_label')}: ${formData.referenceNumber}`);
         if (finalNotes) details.push(finalNotes);
         finalNotes = `[Bank Transfer] ${details.join(' | ')}`;
       }
@@ -130,7 +130,7 @@ const AdvancePayments = () => {
       if (formData.groupId) params.append('groupId', formData.groupId);
 
       await api.post(`/advance-payments?${params.toString()}`);
-      alert(isAdminOrOrg ? 'Advance payment recorded successfully!' : 'Advance payment submitted via Bank Transfer successfully!');
+      alert(isAdminOrOrg ? t('advance_page.record_success') : t('advance_page.submit_success'));
       setShowModal(false);
       setFormData({ 
         groupId: '', 
@@ -143,7 +143,7 @@ const AdvancePayments = () => {
       });
       fetchData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to submit advance payment.');
+      alert(err.response?.data?.message || t('advance_page.submit_failed'));
     }
   };
 
@@ -164,24 +164,24 @@ const AdvancePayments = () => {
         notes: editFormData.notes || ''
       });
       await api.put(`/advance-payments/${editRecord.id}?${params.toString()}`);
-      alert('Advance payment updated successfully!');
+      alert(t('advance_page.update_success'));
       setEditRecord(null);
       fetchData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update advance payment.');
+      alert(err.response?.data?.message || t('advance_page.update_failed'));
     }
   };
 
   const handleDeleteAdvance = async (id) => {
-    if (!window.confirm(`Are you sure you want to delete advance payment record #ADV-${id}?`)) {
+    if (!window.confirm(t('advance_page.delete_confirm', { id }))) {
       return;
     }
     try {
       await api.delete(`/advance-payments/${id}`);
-      alert(`Advance payment #ADV-${id} deleted successfully!`);
+      alert(t('advance_page.delete_success', { id }));
       fetchData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete advance payment.');
+      alert(err.response?.data?.message || t('advance_page.delete_failed'));
     }
   };
 
@@ -204,7 +204,7 @@ const AdvancePayments = () => {
         {isAdmin ? (
           <span className="badge bg-light text-secondary border px-3 py-2 small fw-semibold d-inline-flex align-items-center gap-1.5">
             <Icon name="shield" size={15} />
-            <span>Platform Oversight Mode</span>
+            <span>{t('advance_page.platform_oversight')}</span>
           </span>
         ) : isOrganizer ? (
           <button 
@@ -220,7 +220,7 @@ const AdvancePayments = () => {
             onClick={handleOpenModal}
           >
             <Icon name="plus" size={16} />
-            <span>Submit Advance (Bank Transfer)</span>
+            <span>{t('advance_page.member_submit_btn')}</span>
           </button>
         )}
       </div>
@@ -248,15 +248,15 @@ const AdvancePayments = () => {
       {loading ? (
         <div className="text-center py-5">
           <div className="spinner-border" style={{ color: '#235665' }} role="status"></div>
-          <p className="mt-2 text-muted">Loading advance payment records...</p>
+          <p className="mt-2 text-muted">{t('advance_page.loading')}</p>
         </div>
       ) : advancePayments.length === 0 ? (
         <div className="ui-card text-center p-5 shadow-sm border-0">
           <div className="d-inline-flex p-3 rounded-circle mb-3" style={{ backgroundColor: '#E8F0F3' }}>
             <Icon name="advance" size={36} color="#235665" />
           </div>
-          <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>No Advance Payments Recorded</h5>
-          <p className="text-muted small mb-0">You have no recorded advance payment contributions for your groups.</p>
+          <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>{t('advance_page.no_records_title')}</h5>
+          <p className="text-muted small mb-0">{t('advance_page.no_records_text')}</p>
         </div>
       ) : (
         <div className="ui-card shadow-sm border-0 overflow-hidden">
@@ -267,10 +267,10 @@ const AdvancePayments = () => {
             <table className="table table-hover align-middle mb-0">
               <thead style={{ backgroundColor: '#DCE7EB' }}>
                 <tr>
-                  <th>ID</th>
+                  <th>{t('advance_page.col_id')}</th>
                   <th>{t('common.member', 'Member')}</th>
                   <th>{t('advance_page.col_amount', 'Amount')}</th>
-                  <th>Method</th>
+                  <th>{t('advance_page.col_method')}</th>
                   <th>{t('common.notes', 'Notes & Reference')}</th>
                   <th>{t('common.date', 'Date')}</th>
                   {isAdminOrOrg && <th className="text-end pe-3">{t('common.actions', 'Actions')}</th>}
@@ -282,18 +282,18 @@ const AdvancePayments = () => {
                   return (
                   <tr key={adv.id}>
                     <td className="fw-bold">#ADV-{adv.id}</td>
-                    <td>{adv.member?.fullName || adv.member?.email || 'Member'}</td>
+                    <td>{adv.member?.fullName || adv.member?.email || t('advance_page.member')}</td>
                     <td><strong className="text-success fs-6">LKR {(Number(adv.amount) || 0).toLocaleString()}</strong></td>
                     <td>
                       {isBank ? (
                         <span className="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 small fw-semibold d-inline-flex align-items-center gap-1">
                           <Icon name="bank" size={12} />
-                          <span>Bank Transfer</span>
+                          <span>{t('advance_page.bank_transfer')}</span>
                         </span>
                       ) : (
                         <span className="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2.5 py-1 small fw-semibold d-inline-flex align-items-center gap-1">
                           <Icon name="wallet" size={12} />
-                          <span>Cash</span>
+                          <span>{t('advance_page.cash')}</span>
                         </span>
                       )}
                     </td>
@@ -308,7 +308,7 @@ const AdvancePayments = () => {
                             <button
                               className="btn btn-link p-1 text-decoration-none"
                               style={{ color: '#188754' }}
-                              title="Edit Advance Payment"
+                              title={t('advance_page.edit_title')}
                               onClick={() => handleOpenEdit(adv)}
                             >
                               <Icon name="pencil" size={16} color="#188754" />
@@ -317,7 +317,7 @@ const AdvancePayments = () => {
                           <button
                             className="btn btn-link p-1 text-decoration-none"
                             style={{ color: '#DC3545' }}
-                            title="Delete Advance Payment"
+                            title={t('advance_page.delete_title')}
                             onClick={() => handleDeleteAdvance(adv.id)}
                           >
                             <Icon name="trash" size={16} color="#DC3545" />
@@ -341,7 +341,7 @@ const AdvancePayments = () => {
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
               <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#134A5A' }}>
                 <h5 className="modal-title fw-bold">
-                  {isAdminOrOrg ? 'Record Advance Contribution' : 'Submit Advance Contribution (Bank Transfer)'}
+                  {isAdminOrOrg ? t('advance_page.modal_record_title') : t('advance_page.modal_submit_title')}
                 </h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
@@ -353,14 +353,14 @@ const AdvancePayments = () => {
                     <div className="alert alert-info py-2.5 px-3 small d-flex align-items-start gap-2 mb-3" style={{ borderRadius: '8px' }}>
                       <Icon name="bank" size={18} color="#0C5460" className="mt-0.5 flex-shrink-0" />
                       <div>
-                        <strong>Bank Transfer Only:</strong> Offline cash advances must be handed directly to your Seettu Organizer. Use this portal exclusively to submit advance contributions via <strong>Bank Transfer / Online Banking</strong>.
+                        <strong>{t('advance_page.bank_transfer_only')}</strong> {t('advance_page.bank_transfer_notice')}
                       </div>
                     </div>
                   )}
 
                   {/* Group Selection */}
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Select Group</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('advance_page.select_group')}</label>
                     <select
                       className="form-select"
                       value={formData.groupId}
@@ -368,7 +368,7 @@ const AdvancePayments = () => {
                       style={{ borderRadius: '8px' }}
                       required
                     >
-                      <option value="">-- Select Group --</option>
+                      <option value="">{t('advance_page.select_group_placeholder')}</option>
                       {groups.map((g) => (
                         <option key={g.id} value={g.id}>{g.name}</option>
                       ))}
@@ -378,7 +378,7 @@ const AdvancePayments = () => {
                   {/* Member Selection (Organizer only) vs Member Identity Notice */}
                   {isOrganizer ? (
                     <div className="mb-3">
-                      <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Select Member</label>
+                      <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('advance_page.select_member')}</label>
                       <select
                         className="form-select"
                         value={formData.memberId}
@@ -386,21 +386,21 @@ const AdvancePayments = () => {
                         style={{ borderRadius: '8px' }}
                         required
                       >
-                        <option value="">-- Select Member --</option>
+                        <option value="">{t('advance_page.select_member_placeholder')}</option>
                         {user && (
                           <option value={String(user?.userId || user?.id)}>
-                            {user.fullName || user.email || 'Organizer'} (Organizer / Me)
+                            {user.fullName || user.email || t('advance_page.organizer')} {t('advance_page.organizer_me')}
                           </option>
                         )}
                         {members
                           .filter(m => String(m.user?.id || m.userId || m.id) !== String(user?.userId || user?.id))
                           .map((m) => {
                             const mId = m.user?.id || m.userId || m.id;
-                            const mName = m.user?.fullName || m.fullName || m.name || `Member #${mId}`;
+                            const mName = m.user?.fullName || m.fullName || m.name || t('advance_page.member_number', { id: mId });
                             const mNic = m.user?.nicNumber ? ` (${m.user.nicNumber})` : '';
                             return (
                               <option key={mId} value={String(mId)}>
-                                {mName}{mNic} - Member #{mId}
+                                {mName}{mNic} - {t('advance_page.member_number', { id: mId })}
                               </option>
                             );
                           })}
@@ -408,13 +408,13 @@ const AdvancePayments = () => {
                     </div>
                   ) : (
                     <div className="mb-3 p-2.5 bg-light rounded border text-muted small">
-                      Contributing Member: <strong className="text-dark">{user?.fullName || 'Member'}</strong> {user?.nicNumber && `(${user.nicNumber})`}
+                      {t('advance_page.contributing_member')} <strong className="text-dark">{user?.fullName || t('advance_page.member')}</strong> {user?.nicNumber && `(${user.nicNumber})`}
                     </div>
                   )}
 
                   {/* Payment Method */}
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Payment Method</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('advance_page.payment_method')}</label>
                     {!isAdminOrOrg ? (
                       <div className="input-group">
                         <span className="input-group-text bg-light text-muted border-end-0">
@@ -423,7 +423,7 @@ const AdvancePayments = () => {
                         <input 
                           type="text" 
                           className="form-control bg-light border-start-0 fw-semibold text-teal" 
-                          value="Bank Transfer (Online / CDM Deposit)" 
+                          value={t('advance_page.bank_transfer_field')}
                           disabled 
                           style={{ borderRadius: '0 8px 8px 0' }}
                         />
@@ -435,8 +435,8 @@ const AdvancePayments = () => {
                         onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
                         style={{ borderRadius: '8px' }}
                       >
-                        <option value="Bank Transfer">Bank Transfer (Online / CDM)</option>
-                        <option value="Cash">Cash (Physical Handover)</option>
+                        <option value="Bank Transfer">{t('advance_page.bank_transfer_option')}</option>
+                        <option value="Cash">{t('advance_page.cash_option')}</option>
                       </select>
                     )}
                   </div>
@@ -445,7 +445,7 @@ const AdvancePayments = () => {
                   {(formData.paymentMethod === 'Bank Transfer' || !isAdminOrOrg) && (
                     <div className="row g-2 mb-3">
                       <div className="col-12 col-md-6">
-                        <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Bank Name</label>
+                        <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('advance_page.bank_name')}</label>
                         <select
                           className="form-select"
                           value={formData.bankName}
@@ -453,7 +453,7 @@ const AdvancePayments = () => {
                           style={{ borderRadius: '8px' }}
                           required={!isAdminOrOrg}
                         >
-                          <option value="">-- Select Bank --</option>
+                          <option value=""> {t('advance_page.select_bank_placeholder')} </option>
                           <option value="Bank of Ceylon (BOC)">Bank of Ceylon (BOC)</option>
                           <option value="Commercial Bank">Commercial Bank</option>
                           <option value="People's Bank">People's Bank</option>
@@ -463,15 +463,15 @@ const AdvancePayments = () => {
                           <option value="Nations Trust Bank (NTB)">Nations Trust Bank (NTB)</option>
                           <option value="DFCC Bank">DFCC Bank</option>
                           <option value="National Savings Bank (NSB)">National Savings Bank (NSB)</option>
-                          <option value="Other Bank / Online App">Other Bank / Online App</option>
+                          <option value="Other Bank / Online App">{t('advance_page.other_bank')}</option>
                         </select>
                       </div>
                       <div className="col-12 col-md-6">
-                        <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Transaction / Slip Ref</label>
+                        <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('advance_page.transaction_ref')}</label>
                         <input
                           type="text"
                           className="form-control"
-                          placeholder="e.g. TXN-893041"
+                          placeholder={t('advance_page.transaction_placeholder')}
                           value={formData.referenceNumber}
                           onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
                           style={{ borderRadius: '8px' }}
@@ -483,11 +483,11 @@ const AdvancePayments = () => {
 
                   {/* Amount */}
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Advance Amount (LKR)</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('advance_page.modal_amount_label')}</label>
                     <input
                       type="number"
                       className="form-control"
-                      placeholder="e.g. 5000"
+                      placeholder={t('advance_page.amount_placeholder')}
                       min="100"
                       value={formData.amount}
                       onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
@@ -498,11 +498,11 @@ const AdvancePayments = () => {
 
                   {/* Notes */}
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Additional Notes (Optional)</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('advance_page.additional_notes')}</label>
                     <textarea
                       className="form-control"
                       rows="2"
-                      placeholder="e.g. Deposited for next cycles"
+                      placeholder={t('advance_page.notes_placeholder')}
                       value={formData.notes}
                       onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                       style={{ borderRadius: '8px' }}
@@ -510,9 +510,9 @@ const AdvancePayments = () => {
                   </div>
                 </div>
                 <div className="modal-footer py-3 px-4 bg-light">
-                  <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setShowModal(false)}>{t('advance_page.cancel')}</button>
                   <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>
-                    {isAdminOrOrg ? 'Save Advance Payment' : 'Submit Bank Transfer Advance'}
+                    {isAdminOrOrg ? t('advance_page.save_payment') : t('advance_page.submit_bank_transfer')}
                   </button>
                 </div>
               </form>
@@ -527,23 +527,23 @@ const AdvancePayments = () => {
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
               <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#134A5A' }}>
-                <h5 className="modal-title fw-bold">Edit Advance Contribution #ADV-{editRecord.id}</h5>
+                <h5 className="modal-title fw-bold">{t('advance_page.edit_modal_title', { id: editRecord.id })}</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setEditRecord(null)}></button>
               </div>
               <form onSubmit={handleSaveEdit}>
                 <div className="modal-body p-4">
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Member</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('advance_page.member')}</label>
                     <input
                       type="text"
                       className="form-control bg-light"
-                      value={editRecord.member?.fullName || editRecord.member?.email || `Member #${editRecord.member?.id || ''}`}
+                      value={editRecord.member?.fullName || editRecord.member?.email || t('advance_page.member_number', { id: editRecord.member?.id || '' })}
                       disabled
                       style={{ borderRadius: '8px' }}
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Advance Amount (LKR)</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('advance_page.modal_amount_label')}</label>
                     <input
                       type="number"
                       className="form-control"
@@ -554,7 +554,7 @@ const AdvancePayments = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Notes / Reference</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('advance_page.notes_reference')}</label>
                     <textarea
                       className="form-control"
                       rows="3"
@@ -565,8 +565,8 @@ const AdvancePayments = () => {
                   </div>
                 </div>
                 <div className="modal-footer py-3 px-4 bg-light">
-                  <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setEditRecord(null)}>Cancel</button>
-                  <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>Update Payment</button>
+                  <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setEditRecord(null)}>{t('advance_page.cancel')}</button>
+                  <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>{t('advance_page.update_payment')}</button>
                 </div>
               </form>
             </div>

@@ -47,7 +47,7 @@ const EmergencyRequests = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     if (isAdmin) {
-      alert('System Admins cannot submit emergency payout requests.');
+      alert(t('emergency_page.admin_submit_error'));
       return;
     }
     try {
@@ -62,7 +62,7 @@ const EmergencyRequests = () => {
       setFormData({ groupId: '', reason: '', requestedAmount: '' });
       fetchData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to submit emergency request.');
+      alert(err.response?.data?.message || t('emergency_page.submit_failed'));
     }
   };
 
@@ -72,7 +72,7 @@ const EmergencyRequests = () => {
       await api.put(`/emergency/${id}/status?status=${status}&resolvedById=${uid}`);
       fetchData();
     } catch (err) {
-      alert(err.response?.data?.message || `Failed to ${status.toLowerCase()} request.`);
+      alert(err.response?.data?.message || t('emergency_page.status_update_failed'));
     }
   };
 
@@ -86,8 +86,8 @@ const EmergencyRequests = () => {
           </div>
           <p className="text-muted mb-0">
             {isAdmin 
-              ? 'Review and oversee emergency payout applications across group cycles' 
-              : 'Apply for prioritized early payout in case of financial or medical emergencies'}
+              ? t('emergency_page.admin_subtitle')
+              : t('emergency_page.member_subtitle')}
           </p>
         </div>
 
@@ -97,7 +97,7 @@ const EmergencyRequests = () => {
         <div className="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3 mb-4" style={{ backgroundColor: '#E0F2FE', color: '#0369A1' }}>
           <Icon name="shield" size={24} />
           <div>
-            <strong>System Admin Notice:</strong> System Admins act as platform supervisors to oversee emergency payout applications across group circles. Circle Organizers review, approve, or reject member applications directly.
+            <strong>{t('emergency_page.admin_notice_title')}</strong> {t('emergency_page.admin_notice_text')}
           </div>
         </div>
       )}
@@ -105,23 +105,23 @@ const EmergencyRequests = () => {
       {loading ? (
         <div className="text-center py-5">
           <div className="spinner-border" style={{ color: '#235665' }} role="status"></div>
-          <p className="mt-2 text-muted">Loading emergency requests...</p>
+          <p className="mt-2 text-muted">{t('emergency_page.loading')}</p>
         </div>
       ) : requests.length === 0 ? (
         <div className="ui-card text-center p-5 shadow-sm border-0">
           <div className="d-inline-flex p-3 rounded-circle mb-3" style={{ backgroundColor: '#FEE2E2' }}>
             <Icon name="emergency" size={36} color="#DC3545" />
           </div>
-          <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>No Emergency Requests</h5>
+          <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>{t('emergency_page.no_requests_title')}</h5>
           <p className="text-muted small mb-4">
             {isAdmin 
-              ? 'There are no active emergency payout applications to display.' 
-              : 'You have no active or previous emergency payout requests.'}
+              ? t('emergency_page.admin_no_req')
+              : t('emergency_page.member_no_req')}
           </p>
           {!isAdmin && (
             <div>
               <button className="btn btn-teal px-4 py-2" onClick={() => setShowModal(true)}>
-                {t('Emergency Request')}
+                {t('emergency_page.submit_btn')}
               </button>
             </div>
           )}
@@ -129,20 +129,20 @@ const EmergencyRequests = () => {
       ) : (
         <div className="ui-card shadow-sm border-0 overflow-hidden">
           <div className="card-header bg-white border-bottom fw-bold text-dark py-3">
-            Submitted Emergency Payout Applications ({requests.length})
+            {t('emergency_page.table_title', { count: requests.length })}
           </div>
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
               <thead style={{ backgroundColor: '#DCE7EB' }}>
                 <tr>
-                  <th>Request ID</th>
-                  {(isAdmin || isOrganizer) && <th>Raised By</th>}
-                  <th>Group</th>
-                  <th>Requested Amount</th>
-                  <th>Reason</th>
-                  <th>Status</th>
-                  <th>Submitted On</th>
-                  {(isAdmin || isOrganizer) && <th className="text-end">Actions</th>}
+                  <th>{t('emergency_page.col_id')}</th>
+                  {(isAdmin || isOrganizer) && <th>{t('emergency_page.col_raised_by')}</th>}
+                  <th>{t('emergency_page.col_group')}</th>
+                  <th>{t('emergency_page.col_amount')}</th>
+                  <th>{t('emergency_page.col_reason')}</th>
+                  <th>{t('emergency_page.col_status')}</th>
+                  <th>{t('emergency_page.col_date')}</th>
+                  {(isAdmin || isOrganizer) && <th className="text-end">{t('emergency_page.col_actions')}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -151,18 +151,18 @@ const EmergencyRequests = () => {
                     <td className="fw-bold">#{r.id}</td>
                     {(isAdmin || isOrganizer) && (
                       <td>
-                        <span className="fw-semibold text-dark">{r.raisedBy?.fullName || r.raisedBy?.email || 'Member'}</span>
+                        <span className="fw-semibold text-dark">{r.raisedBy?.fullName || r.raisedBy?.email || t('emergency_page.member')}</span>
                       </td>
                     )}
-                    <td>{r.group?.name || `Group #${r.groupId || r.seettuGroup?.id || 'N/A'}`}</td>
+                    <td>{r.group?.name || t('emergency_page.group_number', { number: r.groupId || r.seettuGroup?.id || t('emergency_page.not_available') })}</td>
                     <td><strong className="text-danger fs-6">LKR {(r.requestedAmount || 0).toLocaleString()}</strong></td>
                     <td className="text-dark">{r.reason}</td>
                     <td>
                       <span className={`badge ${r.status === 'APPROVED' ? 'bg-success' : r.status === 'REJECTED' ? 'bg-danger' : 'bg-warning text-dark'}`}>
-                        {r.status === 'PENDING' ? 'Awaiting Organizer Approval' : (r.status || 'PENDING')}
+                        {r.status === 'PENDING' ? t('emergency_page.awaiting_organizer_approval') : t(`emergency_page.status_${(r.status || 'PENDING').toLowerCase()}`)}
                       </span>
                     </td>
-                    <td className="text-muted">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : 'N/A'}</td>
+                    <td className="text-muted">{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : t('emergency_page.not_available')}</td>
                     {(isAdmin || isOrganizer) && (
                       <td className="text-end">
                         {r.status === 'PENDING' ? (
@@ -172,22 +172,22 @@ const EmergencyRequests = () => {
                                 className="btn btn-sm btn-success px-2 py-1 fs-7"
                                 onClick={() => handleStatusUpdate(r.id, 'APPROVED')}
                               >
-                                Approve
+                                {t('emergency_page.approve')}
                               </button>
                               <button
                                 className="btn btn-sm btn-outline-danger px-2 py-1 fs-7"
                                 onClick={() => handleStatusUpdate(r.id, 'REJECTED')}
                               >
-                                Reject
+                                {t('emergency_page.reject')}
                               </button>
                             </div>
                           ) : (
                             <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-2 py-1">
-                              Supervisory Oversight Only
+                              {t('emergency_page.supervisory_oversight')}
                             </span>
                           )
                         ) : (
-                          <span className="text-muted small">{r.status === 'APPROVED' ? 'Approved' : 'Rejected'}</span>
+                          <span className="text-muted small">{r.status === 'APPROVED' ? t('emergency_page.approved') : t('emergency_page.rejected')}</span>
                         )}
                       </td>
                     )}
@@ -205,13 +205,13 @@ const EmergencyRequests = () => {
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
               <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#134A5A' }}>
-                <h5 className="modal-title fw-bold">Request Emergency Early Payout</h5>
+                <h5 className="modal-title fw-bold">{t('emergency_page.modal_title')}</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleCreate}>
                 <div className="modal-body p-4">
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Select Group</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('emergency_page.select_group')}</label>
                     <select
                       className="form-select"
                       value={formData.groupId}
@@ -219,18 +219,18 @@ const EmergencyRequests = () => {
                       style={{ borderRadius: '8px' }}
                       required
                     >
-                      <option value="">-- Select Group --</option>
+                      <option value="">{t('emergency_page.select_group_placeholder')}</option>
                       {groups.map((g) => (
                         <option key={g.id} value={g.id}>{g.name}</option>
                       ))}
                     </select>
                   </div>
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Requested Amount (LKR)</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('emergency_page.modal_amount_label')}</label>
                     <input
                       type="number"
                       className="form-control"
-                      placeholder="e.g. 50000"
+                      placeholder={t('emergency_page.amount_placeholder')}
                       value={formData.requestedAmount}
                       onChange={(e) => setFormData({ ...formData, requestedAmount: e.target.value })}
                       style={{ borderRadius: '8px' }}
@@ -238,21 +238,21 @@ const EmergencyRequests = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Emergency Reason</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('emergency_page.modal_reason_label')}</label>
                     <textarea
                       className="form-control"
                       rows="3"
                       value={formData.reason}
                       onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                      placeholder="Describe the medical or financial emergency..."
+                      placeholder={t('emergency_page.reason_placeholder')}
                       style={{ borderRadius: '8px' }}
                       required
                     ></textarea>
                   </div>
                 </div>
                 <div className="modal-footer py-3 px-4 bg-light">
-                  <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setShowModal(false)}>Cancel</button>
-                  <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>Submit Request</button>
+                  <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setShowModal(false)}>{t('emergency_page.cancel')}</button>
+                  <button type="submit" className="btn btn-teal px-4" style={{ borderRadius: '8px' }}>{t('emergency_page.modal_submit')}</button>
                 </div>
               </form>
             </div>
