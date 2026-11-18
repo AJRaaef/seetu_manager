@@ -17,7 +17,7 @@ const DeletePaymentModal = ({ show, onHide, payment, onDelete }) => {
           >
             <Icon name="trash" size={16} color="#EF4444" />
           </div>
-          <h5 className="fw-bold mb-0 text-dark">{t('modals.delete_payment.title', 'Delete Payment Record')}</h5>
+          <h5 className="fw-bold mb-0 text-dark">{t('payments_page.delete_payment_title')}</h5>
         </div>
         <button className="btn btn-link text-muted p-0 border-0" onClick={onHide}>
           <Icon name="x" size={20} />
@@ -26,24 +26,24 @@ const DeletePaymentModal = ({ show, onHide, payment, onDelete }) => {
 
       <div className="custom-modal-body">
         <p className="text-muted mb-3" style={{ fontSize: '0.9rem' }}>
-          {t('modals.delete_payment.confirm_desc', 'Are you sure you want to delete this payment record? This action cannot be undone.')}
+          {t('payments_page.delete_payment_confirmation')}
         </p>
 
         <div className="bg-light p-3 rounded-3 border mb-1">
           <div className="d-flex justify-content-between py-1 small">
-            <span className="text-muted">{t('modals.delete_payment.member', 'Member:')}</span>
-            <span className="fw-semibold text-dark">{payment.member || payment.memberName || 'Member'}</span>
+            <span className="text-muted">{t('payments_page.member')}:</span>
+            <span className="fw-semibold text-dark">{payment.member || payment.memberName || t('payments_page.member')}</span>
           </div>
           <div className="d-flex justify-content-between py-1 small">
-            <span className="text-muted">{t('modals.delete_payment.group', 'Group:')}</span>
+            <span className="text-muted">{t('payments_page.group')}:</span>
             <span className="fw-semibold text-dark">{payment.group || '—'}</span>
           </div>
           <div className="d-flex justify-content-between py-1 small">
-            <span className="text-muted">{t('modals.delete_payment.amount', 'Amount:')}</span>
-            <span className="fw-semibold text-dark">{payment.amount ? `${Number(payment.amount).toLocaleString()} LKR` : '—'}</span>
+            <span className="text-muted">{t('payments_page.amount')}:</span>
+            <span className="fw-semibold text-dark">{payment.amount ? `${Number(payment.amount).toLocaleString()} ${t('payments_page.currency')}` : '—'}</span>
           </div>
           <div className="d-flex justify-content-between py-1 small">
-            <span className="text-muted">{t('modals.delete_payment.date', 'Date:')}</span>
+            <span className="text-muted">{t('payments_page.date')}:</span>
             <span className="fw-semibold text-dark">{payment.date || '—'}</span>
           </div>
         </div>
@@ -51,7 +51,7 @@ const DeletePaymentModal = ({ show, onHide, payment, onDelete }) => {
 
       <div className="custom-modal-footer">
         <button type="button" className="btn btn-light px-4 border" onClick={onHide}>
-          {t('modals.delete_payment.cancel', 'Cancel')}
+          {t('payments_page.cancel')}
         </button>
         <button
           type="button"
@@ -61,7 +61,7 @@ const DeletePaymentModal = ({ show, onHide, payment, onDelete }) => {
             onHide();
           }}
         >
-          {t('modals.delete_payment.delete_btn', 'Delete Record')}
+          {t('payments_page.delete_record')}
         </button>
       </div>
     </Modal>

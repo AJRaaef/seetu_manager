@@ -11,6 +11,13 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
   const [submitting, setSubmitting] = useState(false);
   const [showRejectInput, setShowRejectInput] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
+  const getPaymentMethodLabel = (method) => (
+    method === 'Cash (Offline)'
+      ? t('payments_page.cash_offline')
+      : method === 'Bank Deposit / Transfer'
+        ? t('payments_page.bank_deposit_transfer')
+        : method || t('payments_page.bank_deposit_transfer')
+  );
 
   const getFileUrl = (path) => {
     if (!path) return '';
@@ -71,7 +78,7 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
 
   const handleConfirmReject = async () => {
     if (!rejectReason.trim()) {
-      alert('Please enter a reason for rejecting this payment submission.');
+      alert(t('payments_page.reject_reason_required'));
       return;
     }
     setSubmitting(true);
@@ -100,10 +107,10 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
           </div>
           <div>
             <h5 className="fw-bold mb-0 text-dark" style={{ fontSize: '1.05rem' }}>
-              Review & Approve Member Payment
+              {t('payments_page.review_approve_member_payment')}
             </h5>
             <span className="text-muted small">
-              Record ID: #PAY-{payment.id} • Awaiting Organizer Verification
+              {t('payments_page.record_id')} #PAY-{payment.id} • {t('payments_page.awaiting_organizer_verification')}
             </span>
           </div>
         </div>
@@ -120,15 +127,15 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
         >
           <div>
             <div className="text-uppercase small fw-bold text-muted" style={{ fontSize: '0.72rem', letterSpacing: '0.5px' }}>
-              SUBMITTED PAYMENT AMOUNT
+              {t('payments_page.submitted_payment_amount')}
             </div>
             <div className="fs-3 fw-bold text-dark mt-1">
-              {Number(payment.amount || 0).toLocaleString()} LKR
+              {Number(payment.amount || 0).toLocaleString()} {t('payments_page.currency')}
             </div>
           </div>
           <div>
             <span className="badge bg-warning-subtle text-warning border border-warning px-2.5 py-1.5 rounded-2 fw-semibold" style={{ fontSize: '0.8rem' }}>
-              Awaiting Approval
+              {t('payments_page.awaiting_approval')}
             </span>
           </div>
         </div>
@@ -138,19 +145,19 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
           <div className="row g-3">
             <div className="col-6">
               <span className="text-uppercase text-muted fw-semibold" style={{ fontSize: '0.72rem' }}>
-                MEMBER
+                {t('payments_page.member')}
               </span>
-              <div className="fw-bold text-dark">{payment.member || 'Member'}</div>
+              <div className="fw-bold text-dark">{payment.member || t('payments_page.member')}</div>
               {payment.memberPhone && (
                 <div className="small text-muted">{payment.memberPhone}</div>
               )}
             </div>
             <div className="col-6">
               <span className="text-uppercase text-muted fw-semibold" style={{ fontSize: '0.72rem' }}>
-                GROUP & CYCLE
+                {t('payments_page.group_cycle')}
               </span>
               <div className="fw-bold text-dark">{payment.group}</div>
-              <div className="small text-muted">{payment.cycle}</div>
+              <div className="small text-muted">{payment.cycleNumber != null ? t('payments_page.cycle_value', { number: payment.cycleNumber }) : payment.cycle || t('payments_page.not_available')}</div>
             </div>
           </div>
         </div>
@@ -160,7 +167,7 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
           <div className="col-6">
             <div className="p-2.5 bg-light rounded-2 border">
               <span className="text-uppercase text-muted fw-semibold" style={{ fontSize: '0.7rem' }}>
-                PAYMENT DATE
+                {t('payments_page.payment_date')}
               </span>
               <div className="fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
                 {payment.date || '—'}
@@ -170,10 +177,10 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
           <div className="col-6">
             <div className="p-2.5 bg-light rounded-2 border">
               <span className="text-uppercase text-muted fw-semibold" style={{ fontSize: '0.7rem' }}>
-                PAYMENT METHOD
+                {t('payments_page.payment_method')}
               </span>
               <div className="fw-bold text-dark" style={{ fontSize: '0.9rem' }}>
-                {payment.method || payment.paymentMethod || 'Bank Deposit / Transfer'}
+                {getPaymentMethodLabel(payment.method || payment.paymentMethod)}
               </div>
             </div>
           </div>
@@ -183,7 +190,7 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
         {payment.notes && (
           <div className="p-2.5 bg-light rounded-2 border mb-3">
             <span className="text-uppercase text-muted fw-semibold" style={{ fontSize: '0.7rem' }}>
-              MEMBER NOTES / REFERENCE
+              {t('payments_page.member_notes_reference')}
             </span>
             <div className="small text-dark mt-0.5">{payment.notes}</div>
           </div>
@@ -193,10 +200,10 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
         <div className="mb-3 p-3 bg-white rounded-3 border">
           <div className="d-flex justify-content-between align-items-center mb-2">
             <span className="text-uppercase text-muted small fw-bold" style={{ fontSize: '0.72rem' }}>
-              ATTACHED PAYMENT EVIDENCE / BANK SLIP
+              {t('payments_page.attached_payment_evidence')}
             </span>
             <span className={`badge ${existingEvidences.length > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-light text-muted border'} px-2 py-0.5 rounded-pill`} style={{ fontSize: '0.7rem' }}>
-              {existingEvidences.length > 0 ? `${existingEvidences.length} Slip Attached` : 'No Slip Attached'}
+              {existingEvidences.length > 0 ? t('payments_page.slip_attached_count', { count: existingEvidences.length }) : t('payments_page.no_slip_attached')}
             </span>
           </div>
 
@@ -205,7 +212,7 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
               {existingEvidences.map((fn, idx) => {
                 const fileUrl = getFileUrl(fn);
                 const isImg = isImageFile(fn);
-                const fileName = typeof fn === 'string' ? fn.split('/').pop() : 'Deposit Slip';
+                const fileName = typeof fn === 'string' ? fn.split('/').pop() : t('payments_page.deposit_slip');
                 return (
                   <div key={idx} className="bg-light p-2.5 rounded-2 border">
                     <div className="d-flex align-items-center justify-content-between mb-2">
@@ -223,7 +230,7 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
                           className="btn btn-xs btn-outline-primary py-0.5 px-2 small text-decoration-none"
                           style={{ fontSize: '0.75rem' }}
                         >
-                          Open Full Slip ↗
+                          {t('payments_page.open_full_slip')} ↗
                         </a>
                       )}
                     </div>
@@ -232,7 +239,7 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
                         <a href={fileUrl} target="_blank" rel="noopener noreferrer">
                           <img
                             src={fileUrl}
-                            alt="Payment Slip Preview"
+                            alt={t('payments_page.payment_slip_preview')}
                             className="img-fluid rounded"
                             style={{ maxHeight: '200px', objectFit: 'contain' }}
                             onError={(e) => {
@@ -249,8 +256,8 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
           ) : (
             <div className="text-muted small py-2 px-3 bg-light rounded-2 border fst-italic">
               {(payment.method || '').toLowerCase().includes('cash')
-                ? 'Offline cash payment reported by member. Official electronic receipt will be generated upon approval.'
-                : 'No digital bank deposit slip was attached with this submission.'}
+                ? t('payments_page.cash_receipt_after_approval')
+                : t('payments_page.no_digital_slip_submitted')}
             </div>
           )}
         </div>
@@ -259,12 +266,12 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
         {!showRejectInput ? (
           <div className="mb-2">
             <label className="form-label text-dark fw-semibold small mb-1">
-              Organizer Verification Note (Optional)
+              {t('payments_page.organizer_verification_note')}
             </label>
             <input
               type="text"
               className="form-control form-control-sm"
-              placeholder="e.g. Verified with bank statement #REF-1234"
+              placeholder={t('payments_page.verification_note_example')}
               value={approvalNotes}
               onChange={(e) => setApprovalNotes(e.target.value)}
             />
@@ -272,12 +279,12 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
         ) : (
           <div className="mb-2 p-3 bg-danger-subtle rounded-2 border border-danger-subtle">
             <label className="form-label text-danger fw-bold small mb-1">
-              Reason for Rejecting Payment <span className="text-danger">*</span>
+              {t('payments_page.reason_rejecting_payment')} <span className="text-danger">*</span>
             </label>
             <textarea
               className="form-control form-control-sm"
               rows="2"
-              placeholder="e.g. Deposit slip unreadable or transaction reference does not match bank statement."
+              placeholder={t('payments_page.rejection_reason_example')}
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               autoFocus
@@ -295,7 +302,7 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
               onClick={() => setShowRejectInput(true)}
               disabled={submitting}
             >
-              Reject Submission
+              {t('payments_page.reject_submission')}
             </button>
           ) : (
             <button
@@ -304,14 +311,14 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
               onClick={() => setShowRejectInput(false)}
               disabled={submitting}
             >
-              Back to Approval
+              {t('payments_page.back_to_approval')}
             </button>
           )}
         </div>
 
         <div className="d-flex align-items-center gap-2">
           <button type="button" className="btn btn-outline-secondary px-3" onClick={onHide} disabled={submitting}>
-            Cancel
+            {t('payments_page.cancel')}
           </button>
 
           {!showRejectInput ? (
@@ -324,12 +331,12 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
               {submitting ? (
                 <>
                   <span className="spinner-border spinner-border-sm" role="status"></span>
-                  <span>Approving...</span>
+                  <span>{t('payments_page.approving')}</span>
                 </>
               ) : (
                 <>
                   <Icon name="check" size={16} />
-                  <span>Approve Payment</span>
+                  <span>{t('payments_page.approve_payment')}</span>
                 </>
               )}
             </button>
@@ -343,10 +350,10 @@ const ApprovePaymentModal = ({ show, onHide, payment, onApprove, onReject }) => 
               {submitting ? (
                 <>
                   <span className="spinner-border spinner-border-sm" role="status"></span>
-                  <span>Rejecting...</span>
+                  <span>{t('payments_page.rejecting')}</span>
                 </>
               ) : (
-                <span>Confirm Rejection</span>
+                <span>{t('payments_page.confirm_rejection')}</span>
               )}
             </button>
           )}

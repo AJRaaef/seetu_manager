@@ -20,6 +20,13 @@ const isNonMonetary = (type) => {
   return name.includes('non') || name.includes('item');
 };
 
+const getSeettuTypeTranslationKey = (name) => {
+  const normalizedName = name?.trim().toLowerCase();
+  if (normalizedName === 'monetary') return 'monetary';
+  if (normalizedName === 'non-monetary') return 'non_monetary';
+  return null;
+};
+
 const INITIAL_FORM = {
   name: '',
   description: '',
@@ -66,6 +73,7 @@ const CreateGroup = () => {
 
   // Derived: selected type object
   const selectedType = seettuTypes.find(t => String(t.id) === String(formData.seettuTypeId));
+  const selectedTypeTranslationKey = getSeettuTypeTranslationKey(selectedType?.name);
   const showShop = isNonMonetary(selectedType);
 
   // Fetch seettu types and shops on mount
@@ -330,14 +338,21 @@ const CreateGroup = () => {
                   style={{ borderRadius: '8px' }}
                 >
                   <option value="">{t('groups_page.create_group.select_type')}</option>
-                  {seettuTypes.map(type => (
-                    <option key={type.id} value={type.id}>{type.name}</option>
-                  ))}
+                  {seettuTypes.map(type => {
+                    const translationKey = getSeettuTypeTranslationKey(type.name);
+                    return (
+                      <option key={type.id} value={type.id}>
+                        {translationKey ? t(`groups_page.create_group.type_${translationKey}`) : type.name}
+                      </option>
+                    );
+                  })}
                 </select>
                 {errors.seettuTypeId && <div className="invalid-feedback">{errors.seettuTypeId}</div>}
                 {selectedType?.description && (
                   <div className="form-text text-muted mt-1" style={{ fontSize: '0.8rem' }}>
-                    {selectedType.description}
+                    {selectedTypeTranslationKey
+                      ? t(`groups_page.create_group.type_${selectedTypeTranslationKey}_description`)
+                      : selectedType.description}
                   </div>
                 )}
               </div>

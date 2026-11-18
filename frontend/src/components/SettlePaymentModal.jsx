@@ -78,7 +78,7 @@ const SettlePaymentModal = ({ show, onHide, payment, onSettle }) => {
 
     const hasSlip = existingEvidences.length > 0 || Boolean(evidenceFile);
     if (method !== 'Cash (Offline)' && !hasSlip) {
-      alert('Bank deposit slip / payment proof is mandatory for Bank Deposit / Transfer. Please attach the slip.');
+      alert(t('payments_page.bank_slip_required'));
       return;
     }
 

@@ -79,7 +79,7 @@ const PaymentAuditTrail = () => {
   // Export CSV function
   const handleExportCSV = () => {
     if (filteredLogs.length === 0) {
-      alert('No audit logs available to export.');
+      alert(t('payments_page.audit_export_empty'));
       return;
     }
 

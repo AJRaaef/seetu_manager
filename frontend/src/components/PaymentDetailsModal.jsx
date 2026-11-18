@@ -17,6 +17,14 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
     return `http://localhost:8081${cleanPath}`;
   };
 
+  const getPaymentMethodLabel = (method) => (
+    method === 'Cash (Offline)'
+      ? t('payments_page.cash_offline')
+      : method === 'Bank Deposit / Transfer'
+        ? t('payments_page.bank_deposit_transfer')
+        : method || t('payments_page.cash_offline')
+  );
+
   const isImageFile = (path) => {
     if (!path) return false;
     const clean = path.split('?')[0].toLowerCase();
@@ -66,10 +74,10 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
       } else {
         setAttachedFiles((prev) => [...prev, file.name]);
       }
-      alert(`Digital payment evidence "${file.name}" attached successfully!`);
+      alert(t('payments_page.evidence_attached_success', { name: file.name }));
     } catch (err) {
       console.error('Evidence upload failed', err);
-      alert(`Failed to attach slip: ${err?.response?.data?.message || err?.message || 'Error uploading file'}`);
+      alert(t('payments_page.evidence_attach_failed', { message: err?.response?.data?.message || err?.message || t('payments_page.error_uploading_file') }));
     } finally {
       setUploading(false);
     }
@@ -78,35 +86,36 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
   const getStatusBadge = (status) => {
     switch (status?.toUpperCase()) {
       case 'PAID':
-        return <span className="badge-paid">{t('status.PAID', 'Paid')}</span>;
+        return <span className="badge-paid">{t('payments_page.paid')}</span>;
       case 'LATE':
-        return <span className="badge bg-warning text-dark px-2 py-1 rounded-2 fw-semibold" style={{ fontSize: '0.75rem' }}>{t('status.LATE', 'Paid (Late)')}</span>;
+        return <span className="badge bg-warning text-dark px-2 py-1 rounded-2 fw-semibold" style={{ fontSize: '0.75rem' }}>{t('payments_page.paid_late')}</span>;
       case 'PENDING':
-        return <span className="badge-pending">{t('status.PENDING', 'Pending')}</span>;
+        return <span className="badge-pending">{t('payments_page.pending')}</span>;
       case 'OVERDUE':
-        return <span className="badge-overdue">{t('status.OVERDUE', 'Overdue')}</span>;
+        return <span className="badge-overdue">{t('payments_page.overdue')}</span>;
       case 'PARTIAL':
-        return <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 rounded-2" style={{ fontSize: '0.75rem' }}>{t('status.PARTIAL', 'Partial')}</span>;
+        return <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 rounded-2" style={{ fontSize: '0.75rem' }}>{t('payments_page.partial')}</span>;
       default:
-        return <span className="badge-paid">{t(`status.${status}`, status || 'Paid')}</span>;
+        return <span className="badge-paid">{t(`payments_page.status_${status?.toLowerCase()}`, t('payments_page.status_unknown'))}</span>;
     }
   };
 
   const isPaid = payment.status?.toUpperCase() === 'PAID' || payment.status?.toUpperCase() === 'LATE';
   const cycleNumber =
-    payment.cycleNumber ?? payment.cycle?.match(/^Cycle\s+#?(\d+)$/i)?.[1];
+    payment.cycleNumber
+    ?? (typeof payment.cycle === 'number' ? payment.cycle : payment.cycle?.match(/^Cycle\s+#?(\d+)$/i)?.[1]);
   const cycleLabel =
     cycleNumber != null
-      ? t('modals.payment_details.cycle_value', { number: cycleNumber })
-      : payment.cycle || t('modals.payment_details.not_available');
+      ? t('payments_page.cycle_value', { number: cycleNumber })
+      : payment.cycle || t('payments_page.not_available');
   const notesText =
     payment.notes === 'Recorded via Payment Management portal'
-      ? t('modals.payment_details.recorded_via_portal')
+      ? t('payments_page.recorded_via_portal')
       : payment.notes ===
           'Submitted by member with payment slip (Awaiting Approval)'
-        ? t('modals.payment_details.submitted_by_member_pending')
+        ? t('payments_page.submitted_by_member_pending')
         : payment.notes ||
-          t('modals.payment_details.no_notes', 'No extra notes recorded for this transaction.');
+          t('payments_page.no_transaction_notes');
 
   const handleDownloadReceipt = () => {
     try {
@@ -115,7 +124,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
       const margin = 20;
       const contentWidth = pageWidth - margin * 2;
       const receiptNumber = payment.id ? `PAY-${payment.id}` : 'PAY-101';
-      const safeText = (value, fallback = 'N/A') => String(value || fallback);
+      const safeText = (value, fallback = t('payments_page.not_available')) => String(value || fallback);
       const addField = (label, value, x, y, width) => {
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(8);
@@ -129,7 +138,10 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
         return y + 6 + lines.length * 5;
       };
 
-      pdf.setProperties({ title: `Payment Receipt ${receiptNumber}`, subject: 'SeettuManager payment receipt' });
+      pdf.setProperties({
+        title: t('payments_page.receipt_title', { number: receiptNumber }),
+        subject: t('payments_page.receipt_subject')
+      });
       pdf.setFillColor(19, 74, 90);
       pdf.rect(0, 0, pageWidth, 42, 'F');
       pdf.setTextColor(255, 255, 255);
@@ -138,10 +150,10 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
       pdf.text('SeettuManager', margin, 18);
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(10);
-      pdf.text('Official Contribution Payment Receipt', margin, 26);
+      pdf.text(t('payments_page.official_contribution_receipt'), margin, 26);
       pdf.setFontSize(9);
-      pdf.text(`Receipt Ref: #${receiptNumber}`, margin, 34);
-      pdf.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth - margin, 34, { align: 'right' });
+      pdf.text(`${t('payments_page.receipt_ref')}: #${receiptNumber}`, margin, 34);
+      pdf.text(`${t('payments_page.generated')}: ${new Date().toLocaleDateString()}`, pageWidth - margin, 34, { align: 'right' });
 
       pdf.setFillColor(240, 253, 244);
       pdf.setDrawColor(187, 222, 197);
@@ -149,20 +161,20 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
       pdf.setTextColor(100, 116, 139);
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(8);
-      pdf.text('AMOUNT', margin + 7, 63);
+      pdf.text(t('payments_page.amount').toUpperCase(), margin + 7, 63);
       pdf.setTextColor(31, 41, 55);
       pdf.setFontSize(20);
-      pdf.text(`${Number(payment.amount || 0).toLocaleString()} LKR`, margin + 7, 75);
+      pdf.text(`${Number(payment.amount || 0).toLocaleString()} ${t('payments_page.currency')}`, margin + 7, 75);
       pdf.setFillColor(isPaid ? 22 : 245, isPaid ? 163 : 158, isPaid ? 74 : 11);
       pdf.roundedRect(pageWidth - margin - 31, 63, 24, 9, 4, 4, 'F');
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(8);
-      pdf.text(safeText(payment.status, 'PAID').toUpperCase(), pageWidth - margin - 19, 69, { align: 'center' });
+      pdf.text(t(`payments_page.status_${payment.status?.toLowerCase()}`, t('payments_page.status_unknown')).toUpperCase(), pageWidth - margin - 19, 69, { align: 'center' });
 
       pdf.setTextColor(19, 74, 90);
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(11);
-      pdf.text('Payment Details', margin, 99);
+      pdf.text(t('payments_page.payment_details'), margin, 99);
       pdf.setDrawColor(226, 232, 240);
       pdf.line(margin, 103, pageWidth - margin, 103);
 
@@ -170,13 +182,13 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
       const columnWidth = (contentWidth - columnGap) / 2;
       let y = 113;
       const fields = [
-        ['Member', payment.member || payment.memberName || 'N/A', 'Group', payment.group || payment.groupName || 'N/A'],
-        ['Cycle', cycleLabel, 'Date', payment.date || 'N/A'],
-        ['Recorded By', payment.recordedBy || (isPaid ? 'Organizer' : 'N/A'), 'Payment Method', payment.method || 'Cash (Offline)']
+        [t('payments_page.member'), payment.member || payment.memberName || t('payments_page.not_available'), t('payments_page.group'), payment.group || payment.groupName || t('payments_page.not_available')],
+        [t('payments_page.cycle'), cycleLabel, t('payments_page.date'), payment.date || t('payments_page.not_available')],
+        [t('payments_page.recorded_by'), payment.recordedBy === 'Organizer' ? t('payments_page.organizer') : payment.recordedBy || (isPaid ? t('payments_page.organizer') : t('payments_page.not_available')), t('payments_page.payment_method'), getPaymentMethodLabel(payment.method)]
       ];
       if (payment.status?.toUpperCase() === 'PARTIAL') {
         const balDue = (payment.expectedAmount || 0) > payment.amount ? (payment.expectedAmount - payment.amount) : 0;
-        fields.push(['Full Required Installment', `${Number(payment.expectedAmount || 0).toLocaleString()} LKR`, 'Outstanding Balance Due', `${Number(balDue).toLocaleString()} LKR`]);
+        fields.push([t('payments_page.full_required_installment'), `${Number(payment.expectedAmount || 0).toLocaleString()} ${t('payments_page.currency')}`, t('payments_page.outstanding_balance_due'), `${Number(balDue).toLocaleString()} ${t('payments_page.currency')}`]);
       }
 
       fields.forEach(([leftLabel, leftValue, rightLabel, rightValue]) => {
@@ -189,7 +201,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
       pdf.setDrawColor(226, 232, 240);
       const notes = safeText(
         notesText,
-        t('modals.payment_details.no_notes', 'No extra notes recorded for this transaction.'),
+        t('payments_page.no_transaction_notes'),
       );
       const noteLines = pdf.splitTextToSize(notes, contentWidth - 14);
       const notesHeight = Math.max(25, 18 + noteLines.length * 5);
@@ -197,7 +209,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(8);
       pdf.setTextColor(100, 116, 139);
-      pdf.text('NOTES / REMARKS', margin + 7, y + 8);
+      pdf.text(t('payments_page.notes_remarks').toUpperCase(), margin + 7, y + 8);
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(9);
       pdf.setTextColor(71, 85, 105);
@@ -208,14 +220,14 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
       pdf.line(margin, footerY - 8, pageWidth - margin, footerY - 8);
       pdf.setFontSize(8);
       pdf.setTextColor(100, 116, 139);
-      pdf.text('Generated electronically via SeettuManager Digital Discipline System', pageWidth / 2, footerY, { align: 'center' });
-      pdf.text('Verified by Group Organizer - Thank you for your contribution!', pageWidth / 2, footerY + 5, { align: 'center' });
+      pdf.text(t('payments_page.digital_receipt_footer'), pageWidth / 2, footerY, { align: 'center' });
+      pdf.text(t('payments_page.verified_receipt_footer'), pageWidth / 2, footerY + 5, { align: 'center' });
 
       const fileName = `Payment_Receipt_${receiptNumber}.pdf`;
       pdf.save(fileName);
     } catch (error) {
       console.error('Failed to download payment receipt PDF', error);
-      alert('Unable to download the payment receipt. Please try again.');
+      alert(t('payments_page.download_receipt_failed'));
     }
   };
 
@@ -233,15 +245,15 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           <span style={{ color: '#033B4A' }}>Seettu</span>
           <span style={{ color: '#008CA7' }}>Manager</span>
         </div>
-        <div className="small fw-semibold text-secondary">Official Contribution Payment Receipt</div>
+        <div className="small fw-semibold text-secondary">{t('payments_page.official_contribution_receipt')}</div>
         <div className="small text-muted mt-1">
-          Receipt Ref: {payment.id ? `#PAY-${payment.id}` : '#PAY-101'} • Generated: {new Date().toLocaleDateString()}
+          {t('payments_page.receipt_ref')}: {payment.id ? `#PAY-${payment.id}` : '#PAY-101'} • {t('payments_page.generated')}: {new Date().toLocaleDateString()}
         </div>
       </div>
 
       <div className="custom-modal-header no-print">
         <div className="d-flex align-items-center gap-2">
-          <h5 className="fw-bold mb-0 text-dark">{t('modals.payment_details.title', 'Payment Details')}</h5>
+          <h5 className="fw-bold mb-0 text-dark">{t('payments_page.payment_details')}</h5>
           <span className="badge bg-light text-muted border small">
             {payment.id ? `#PAY-${payment.id}` : '#PAY-101'}
           </span>
@@ -257,38 +269,38 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           <div className="p-3 rounded-3 mb-3 border shadow-xs" style={{ backgroundColor: '#FFFBEB', borderColor: '#FDE68A' }}>
             <div className="d-flex justify-content-between align-items-center mb-2.5">
               <span className="fw-bold text-warning-emphasis small text-uppercase letter-spacing-1">
-                Partial Payment Receipt Breakdown
+                {t('payments_page.partial_receipt_breakdown')}
               </span>
               {getStatusBadge(payment.status)}
             </div>
             <div className="row g-2 text-center mb-2">
               <div className="col-4">
                 <div className="p-2 bg-white rounded border">
-                  <div className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.68rem' }}>Full Required</div>
+                  <div className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.68rem' }}>{t('payments_page.full_required')}</div>
                   <div className="fw-bold text-dark fs-6 mt-1">
-                    {Number(payment.expectedAmount || 0).toLocaleString()} LKR
+                    {Number(payment.expectedAmount || 0).toLocaleString()} {t('payments_page.currency')}
                   </div>
                 </div>
               </div>
               <div className="col-4">
                 <div className="p-2 bg-white rounded border border-success border-opacity-25">
-                  <div className="text-success text-uppercase fw-semibold" style={{ fontSize: '0.68rem' }}>Amount Paid</div>
+                  <div className="text-success text-uppercase fw-semibold" style={{ fontSize: '0.68rem' }}>{t('payments_page.amount_paid')}</div>
                   <div className="fw-bold text-success fs-6 mt-1">
-                    {Number(payment.amount || 0).toLocaleString()} LKR
+                    {Number(payment.amount || 0).toLocaleString()} {t('payments_page.currency')}
                   </div>
                 </div>
               </div>
               <div className="col-4">
                 <div className="p-2 bg-white rounded border border-danger border-opacity-50">
-                  <div className="text-danger text-uppercase fw-semibold" style={{ fontSize: '0.68rem' }}>Balance Remaining</div>
+                  <div className="text-danger text-uppercase fw-semibold" style={{ fontSize: '0.68rem' }}>{t('payments_page.balance_remaining')}</div>
                   <div className="fw-bold text-danger fs-6 mt-1">
-                    {Number((payment.expectedAmount || 0) > payment.amount ? (payment.expectedAmount - payment.amount) : 0).toLocaleString()} LKR
+                    {Number((payment.expectedAmount || 0) > payment.amount ? (payment.expectedAmount - payment.amount) : 0).toLocaleString()} {t('payments_page.currency')}
                   </div>
                 </div>
               </div>
             </div>
             <div className="small text-muted fst-italic p-2 bg-white bg-opacity-60 rounded border border-warning border-opacity-25" style={{ fontSize: '0.74rem' }}>
-              ℹ️ Member has paid <strong>{Number(payment.amount || 0).toLocaleString()} LKR</strong> out of the required <strong>{Number(payment.expectedAmount || 0).toLocaleString()} LKR</strong> contribution. Outstanding balance of <strong>{Number((payment.expectedAmount || 0) > payment.amount ? (payment.expectedAmount - payment.amount) : 0).toLocaleString()} LKR</strong> must be settled.
+              ℹ️ {t('payments_page.partial_payment_explanation', { amount: Number(payment.amount || 0).toLocaleString(), expected: Number(payment.expectedAmount || 0).toLocaleString(), balance: Number((payment.expectedAmount || 0) > payment.amount ? (payment.expectedAmount - payment.amount) : 0).toLocaleString(), currency: t('payments_page.currency') })}
             </div>
           </div>
         ) : (
@@ -298,10 +310,10 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           >
             <div>
               <div className="text-uppercase small fw-bold text-muted" style={{ fontSize: '0.725rem', letterSpacing: '0.5px' }}>
-                {t('modals.payment_details.amount', 'AMOUNT')}
+                {t('payments_page.amount').toUpperCase()}
               </div>
               <div className="fs-3 fw-bold text-dark mt-1">
-                {payment.amount ? `${Number(payment.amount).toLocaleString()} LKR` : '1,000 LKR'}
+                {payment.amount ? `${Number(payment.amount).toLocaleString()} ${t('payments_page.currency')}` : t('payments_page.default_amount', { currency: t('payments_page.currency') })}
               </div>
             </div>
             <div>
@@ -313,35 +325,35 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
         {/* 2-Column Info Grid */}
         <div className="row g-3 mb-3">
           <div className="col-6">
-            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.member', 'MEMBER')}</div>
-            <div className="fw-bold text-dark">{payment.member || payment.memberName || 'Kamala'}</div>
+            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('payments_page.member').toUpperCase()}</div>
+            <div className="fw-bold text-dark">{payment.member || payment.memberName || t('payments_page.member')}</div>
           </div>
           <div className="col-6">
-            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.group', 'GROUP')}</div>
+            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('payments_page.group').toUpperCase()}</div>
             <div className="fw-bold text-dark">{payment.group || payment.groupName || '—'}</div>
           </div>
           <div className="col-6">
-            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.cycle', 'CYCLE')}</div>
+            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('payments_page.cycle').toUpperCase()}</div>
             <div className="fw-semibold text-dark">{cycleLabel}</div>
           </div>
           <div className="col-6">
-            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.date', 'DATE')}</div>
-            <div className="fw-semibold text-dark">{payment.date || '2026-03-15'}</div>
+            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('payments_page.date').toUpperCase()}</div>
+            <div className="fw-semibold text-dark">{payment.date || t('payments_page.not_available')}</div>
           </div>
           <div className="col-6">
-            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.recorded_by', 'RECORDED BY')}</div>
-            <div className="fw-semibold text-dark">{payment.recordedBy || (isPaid ? 'Organizer' : '—')}</div>
+            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('payments_page.recorded_by').toUpperCase()}</div>
+            <div className="fw-semibold text-dark">{payment.recordedBy === 'Organizer' ? t('payments_page.organizer') : payment.recordedBy || (isPaid ? t('payments_page.organizer') : '—')}</div>
           </div>
           <div className="col-6">
-            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('modals.payment_details.payment_method', 'PAYMENT METHOD')}</div>
-            <div className="fw-semibold text-dark">{payment.method || 'Cash (Offline)'}</div>
+            <div className="text-uppercase text-muted small fw-semibold" style={{ fontSize: '0.725rem' }}>{t('payments_page.payment_method').toUpperCase()}</div>
+            <div className="fw-semibold text-dark">{getPaymentMethodLabel(payment.method)}</div>
           </div>
         </div>
 
         {/* Notes / Remarks Box */}
         <div className="bg-light p-3 rounded-3 border mb-3">
           <div className="text-uppercase text-muted small fw-bold mb-1" style={{ fontSize: '0.725rem' }}>
-            {t('modals.payment_details.notes', 'NOTES / REMARKS')}
+            {t('payments_page.notes_remarks').toUpperCase()}
           </div>
           <div className="small text-muted">
             {notesText}
@@ -352,10 +364,10 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
         <div className="bg-white p-3 rounded-3 border mb-3">
           <div className="d-flex justify-content-between align-items-center mb-2">
             <span className="text-uppercase text-muted small fw-bold" style={{ fontSize: '0.725rem' }}>
-              {t('modals.payment_details.evidence', 'PAYMENT EVIDENCE / BANK SLIP')}
+              {t('payments_page.payment_evidence_bank_slip').toUpperCase()}
             </span>
             <span className={`badge ${attachedFiles.length > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-light text-muted border'} px-2 py-0.5 rounded-pill`} style={{ fontSize: '0.7rem' }}>
-              {attachedFiles.length > 0 ? t('modals.payment_details.slips_attached', { count: attachedFiles.length, defaultValue: `${attachedFiles.length} Slip(s) Attached` }) : t('modals.payment_details.no_slip_attached', 'No Slip Attached')}
+              {attachedFiles.length > 0 ? t('payments_page.slip_attached_count', { count: attachedFiles.length }) : t('payments_page.no_slip_attached')}
             </span>
           </div>
 
@@ -364,7 +376,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
               {attachedFiles.map((fn, idx) => {
                 const fileUrl = getFileUrl(fn);
                 const isImg = isImageFile(fn);
-                const fileName = typeof fn === 'string' ? fn.split('/').pop() : 'Evidence Slip';
+                const fileName = typeof fn === 'string' ? fn.split('/').pop() : t('payments_page.evidence_slip');
                 return (
                   <div key={idx} className="bg-light p-2.5 rounded-3 border">
                     <div className="d-flex align-items-center justify-content-between mb-2">
@@ -375,7 +387,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
                         </span>
                       </div>
                       <div className="d-flex align-items-center gap-2">
-                        <span className="badge bg-success-subtle text-success small">{t('modals.payment_details.verified', 'Attached Slip')}</span>
+                        <span className="badge bg-success-subtle text-success small">{t('payments_page.attached_slip')}</span>
                         {fileUrl && (
                           <a
                             href={fileUrl}
@@ -384,7 +396,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
                             className="btn btn-xs btn-outline-primary py-0.5 px-2 small text-decoration-none"
                             style={{ fontSize: '0.75rem' }}
                           >
-                            Open Full Slip ↗
+                            {t('payments_page.open_full_slip')} ↗
                           </a>
                         )}
                       </div>
@@ -394,7 +406,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
                         <a href={fileUrl} target="_blank" rel="noopener noreferrer">
                           <img
                             src={fileUrl}
-                            alt="Payment Slip"
+                            alt={t('payments_page.payment_slip')}
                             className="img-fluid rounded"
                             style={{ maxHeight: '220px', objectFit: 'contain' }}
                             onError={(e) => {
@@ -411,8 +423,8 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           ) : (
             <div className="text-muted small py-2 px-3 bg-light rounded-2 border fst-italic">
               {(payment.method || '').toLowerCase().includes('cash') && isPaid
-                ? t('modals.payment_details.cash_note', 'Handled via offline cash payment. Official electronic receipt is issued through the system (available for PDF download and printing below).')
-                : t('modals.payment_details.no_slip_yet', 'No digital payment slip attached yet.')}
+                ? t('payments_page.cash_payment_note')
+                : t('payments_page.no_slip_yet')}
             </div>
           )}
 
@@ -420,7 +432,7 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
             <div className="mt-2 text-end">
               <label className="btn btn-sm btn-outline-primary py-1 px-3 no-print cursor-pointer mb-0">
                 <Icon name="paperclip" size={14} className="me-1" />
-                <span>{uploading ? t('modals.payment_details.uploading', 'Uploading...') : t('modals.payment_details.attach_slip', 'Attach Payment Slip')}</span>
+                <span>{uploading ? t('payments_page.uploading') : t('payments_page.attach_payment_slip')}</span>
                 <input 
                   type="file" 
                   accept="image/*,.pdf" 
@@ -439,25 +451,25 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           style={{ backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' }}
         >
           <div className="fw-bold small text-primary mb-1">
-            {t('modals.payment_details.discipline_impact', 'Financial Discipline Impact')}
+            {t('payments_page.financial_discipline_impact')}
           </div>
           <div className="small text-primary" style={{ fontSize: '0.8rem' }}>
             {isPaid
-              ? t('modals.payment_details.on_time_impact', 'On-time payment recorded. Maintains member discipline score in EXCELLENT tier.')
-              : t('modals.payment_details.pending_impact', 'Pending / Overdue contribution. Reminders can be issued by group organizer.')}
+              ? t('payments_page.on_time_impact')
+              : t('payments_page.pending_impact')}
           </div>
         </div>
 
         {/* Official Print-Only Receipt Footer */}
         <div className="print-only text-center mt-4 pt-3 border-top text-muted small" style={{ fontSize: '0.75rem' }}>
-          <div>Generated electronically via SeettuManager Digital Discipline System</div>
-          <div>Verified by Group Organizer • Thank you for your contribution!</div>
+          <div>{t('payments_page.digital_receipt_footer')}</div>
+          <div>{t('payments_page.verified_receipt_footer')}</div>
         </div>
       </div>
 
       <div className="custom-modal-footer no-print">
         <button type="button" className="btn btn-light px-4 border" onClick={onHide}>
-          {t('modals.payment_details.close', 'Close')}
+          {t('payments_page.close')}
         </button>
         <button
           type="button"
@@ -465,14 +477,14 @@ const PaymentDetailsModal = ({ show, onHide, payment }) => {
           onClick={handleDownloadReceipt}
         >
           <Icon name="download" size={16} />
-          {t('modals.payment_details.download_receipt', 'Download Receipt')}
+          {t('payments_page.download_receipt')}
         </button>
         <button
           type="button"
           className="btn btn-teal px-4"
           onClick={() => window.print()}
         >
-          {t('modals.payment_details.print_receipt', 'Print Receipt')}
+          {t('payments_page.print_receipt')}
         </button>
       </div>
     </Modal>

@@ -124,9 +124,9 @@ res = await getPaymentsByMember(userId);
       const formatted = list.map((p, idx) => ({
         id: p.id || `pay-${idx}`,
         date: p.paymentDate || p.createdAt?.split('T')[0] || '-',
-        group: p.groupName || 'General Group',
-        member: p.memberName || 'Member',
-        cycle: p.cycleNumber ? `Cycle ${p.cycleNumber}` : 'Cycle 1',
+        group: p.groupName || t('payments_page.general_group'),
+        member: p.memberName || t('payments_page.member'),
+        cycle: p.cycleNumber ? t('payments_page.cycle_label', { number: p.cycleNumber }) : t('payments_page.cycle_label', { number: 1 }),
         cycleId: p.cycleId,
         memberId: p.memberId,
         cycleStartDate: p.cycleStartDate || p.cycle?.startDate,
@@ -293,7 +293,7 @@ const targetMemberId = selectedMemberId || userId;
 
 if (!selectedGroupId || !targetMemberId || !selectedCycleId || !amountInput) {
 
-alert('Please select group, cycle, and enter contribution amount.');
+alert(t('payments_page.select_payment_required'));
 
 return;
 
@@ -301,7 +301,7 @@ return;
 
 if (paymentMethodInput !== 'Cash (Offline)' && !evidenceFile) {
 
-alert('Bank deposit slip / payment proof is mandatory for Bank Deposit / Transfer. Please upload the deposit slip.');
+alert(t('payments_page.bank_slip_required'));
 
 return;
 
@@ -359,13 +359,13 @@ console.error('Failed to attach digital slip', fileErr);
 
 if (isMemberUser) {
 
-alert('Contribution slip submitted successfully! Your payment is now PENDING organizer verification and approval.');
+alert(t('payments_page.contribution_slip_submitted'));
 
 setLedgerTab('pending');
 
 } else {
 
-alert(paymentMethodInput === 'Cash (Offline)' ? 'Offline cash payment recorded successfully! Official electronic receipt is generated and available in payment details.' : `Bank payment recorded successfully with attached deposit slip!`);
+alert(paymentMethodInput === 'Cash (Offline)' ? t('payments_page.cash_payment_recorded') : t('payments_page.bank_payment_recorded'));
 
 if (statusInput === 'OVERDUE') {
 
@@ -392,9 +392,11 @@ fetchPayments();
 
 console.error('Error recording payment to database', err);
 
-const msg = err.response?.data?.message || 'Failed to record payment in database. Please check cycle and member.';
+const msg = err.response?.data?.message || t('payments_page.record_payment_error_default');
 
-alert(` ${msg}`);
+alert(msg.startsWith('Circle Forming:')
+  ? t('payments_page.circle_forming_alert')
+  : t('payments_page.record_payment_error', { message: msg }));
 
 } finally {
 
@@ -420,7 +422,7 @@ notes: 'Marked as Paid by Organizer'
 
 });
 
-alert(`Payment for ${payment.member} marked as Paid in database!`);
+alert(t('payments_page.quick_payment_marked_paid', { member: payment.member }));
 
 await fetchPayments();
 
@@ -428,7 +430,7 @@ await fetchPayments();
 
 console.error('Error updating payment status', err);
 
-alert('Updated payment status.');
+alert(t('payments_page.payment_status_updated'));
 
 fetchPayments();
 
@@ -476,7 +478,7 @@ const handleDeleteRecord = async (target) => {
 
 if (!isAdmin) {
 
-alert('Security Protection: Only system administrators are authorized to permanently delete payment records.');
+alert(t('payments_page.admin_delete_only'));
 
 return;
 
@@ -494,7 +496,7 @@ fetchPayments();
 
 console.error('Failed to delete payment from database', err);
 
-alert('Failed to delete payment: ' + (err?.response?.data?.message || err?.message || 'Unknown error'));
+alert(t('payments_page.delete_payment_error', { message: err?.response?.data?.message || err?.message || t('payments_page.unknown_error') }));
 
 fetchPayments();
 
@@ -506,7 +508,7 @@ fetchPayments();
 
 const handleApprovePayment = async (payment, approvalNotes) => {
     if (isAdmin) {
-      alert('Access Restricted: Routine bank slip verification is reserved for the Group Organizer who receives member funds in their bank account. Platform Admins retain ledger oversight with Edit and Delete capabilities.');
+      alert(t('payments_page.admin_approval_restricted'));
       return;
     }
 
@@ -526,7 +528,7 @@ notes: finalNotes
 
 }, userId);
 
-alert(`Payment of ${Number(payment.amount).toLocaleString()} LKR for ${payment.member} approved successfully! The record is now marked as PAID and moved to the Recorded Payments Ledger.`);
+alert(t('payments_page.payment_approved', { amount: Number(payment.amount).toLocaleString(), currency: t('payments_page.currency'), member: payment.member }));
 
 setLedgerTab('recorded');
 
@@ -536,9 +538,9 @@ await fetchPayments();
 
 console.error('Failed to approve payment', err);
 
-const msg = err.response?.data?.message || err.message || 'Error approving payment.';
+const msg = err.response?.data?.message || err.message || t('payments_page.approval_error_default');
 
-alert(`Error approving payment: ${msg}`);
+alert(t('payments_page.approval_error', { message: msg }));
 
 fetchPayments();
 
@@ -560,7 +562,7 @@ notes: `Rejected by Organizer on ${new Date().toLocaleDateString()}: ${rejection
 
 }, userId);
 
-alert(`Payment submission for ${payment.member} has been rejected.`);
+alert(t('payments_page.payment_rejected', { member: payment.member }));
 
 await fetchPayments();
 
@@ -568,9 +570,9 @@ await fetchPayments();
 
 console.error('Failed to reject payment', err);
 
-const msg = err.response?.data?.message || err.message || 'Error rejecting payment.';
+const msg = err.response?.data?.message || err.message || t('payments_page.rejection_error_default');
 
-alert(`Error rejecting payment: ${msg}`);
+alert(t('payments_page.rejection_error', { message: msg }));
 
 fetchPayments();
 
@@ -616,7 +618,10 @@ console.error('Failed to attach digital slip', fileErr);
 
 }
 
-alert(`Payment for ${updated.member} settled successfully as ${updated.status === 'LATE' ? 'Paid (Late)' : updated.status} and moved to Recorded Payments Ledger!`);
+alert(t('payments_page.payment_settled', {
+  member: updated.member,
+  status: updated.status === 'LATE' ? t('payments_page.paid_late') : t(`payments_page.status_${updated.status?.toLowerCase()}`, t('payments_page.status_unknown'))
+}));
 
 if (updated.status === 'PAID' || updated.status === 'LATE') {
 
@@ -630,9 +635,9 @@ await fetchPayments();
 
 console.error('Failed to settle payment in database', err);
 
-const msg = err.response?.data?.message || err.message || 'Error settling payment. Please try again.';
+const msg = err.response?.data?.message || err.message || t('payments_page.settlement_error_default');
 
-alert(`Error settling payment: ${msg}`);
+alert(t('payments_page.settlement_error', { message: msg }));
 
 fetchPayments();
 
@@ -643,7 +648,7 @@ fetchPayments();
 const getStatusBadge = (payment) => {
 
 const { status, daysEarly = 0, daysLate = 0, daysOverdue = 0, cycleStartDate, dueDate, date } = payment;
-const pluralizeDays = (days) => `${days} day${days === 1 ? '' : 's'}`;
+const pluralizeDays = (days) => t('payments_page.day_count', { count: days });
 const toUtcDay = (value) => {
   if (!value) return null;
   const [year, month, day] = String(value).slice(0, 10).split('-').map(Number);
@@ -666,35 +671,35 @@ switch (status) {
 
 case 'PAID':
 return <span className="badge-paid text-nowrap" style={{ cursor: 'pointer' }}>
-  {paidEarlyDays > 0 ? `Paid (${pluralizeDays(paidEarlyDays)} early)` : (dueDate && date === dueDate ? 'Paid (on due date)' : 'Paid (on time)')}
+  {paidEarlyDays > 0 ? t('payments_page.paid_days_early', { days: paidEarlyDays }) : (dueDate && date === dueDate ? t('payments_page.paid_on_due_date') : t('payments_page.paid_on_time'))}
 </span>;
 
 case 'LATE':
 
 return <span className="badge bg-warning text-dark px-2 py-1 rounded-2 fw-semibold text-nowrap" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>
-  {paidLateDays > 0 ? `Paid (${pluralizeDays(paidLateDays)} late)` : 'Paid (Late)'}
+  {paidLateDays > 0 ? t('payments_page.paid_days_late', { days: paidLateDays }) : t('payments_page.paid_late')}
 </span>;
 
 case 'PENDING':
 
-return <span className="badge-pending text-nowrap" style={{ cursor: 'pointer' }}>Pending</span>;
+return <span className="badge-pending text-nowrap" style={{ cursor: 'pointer' }}>{t('payments_page.pending')}</span>;
 
 case 'OVERDUE':
 case 'MISSED':
 
 return <span className="badge-overdue text-nowrap" style={{ cursor: 'pointer' }}>
-  {overdueDays > 0 ? `Overdue (${pluralizeDays(overdueDays)})` : 'Overdue'}
+  {overdueDays > 0 ? t('payments_page.overdue_days', { days: overdueDays }) : t('payments_page.overdue')}
 </span>;
 
 case 'PARTIAL':
 
 return <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 rounded-2 text-nowrap" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>
-  {overdueDays > 0 ? `Partial (${pluralizeDays(overdueDays)} overdue)` : 'Partial'}
+  {overdueDays > 0 ? t('payments_page.partial_days_overdue', { days: overdueDays }) : t('payments_page.partial')}
 </span>;
 
 default:
 
-return <span className="badge bg-secondary-subtle text-secondary border px-2 py-1 rounded-2 text-nowrap" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>{status}</span>;
+return <span className="badge bg-secondary-subtle text-secondary border px-2 py-1 rounded-2 text-nowrap" style={{ cursor: 'pointer', fontSize: '0.75rem' }}>{t(`payments_page.status_${status?.toLowerCase()}`, t('payments_page.status_unknown'))}</span>;
 
 }
 
@@ -836,7 +841,7 @@ return (
 
 <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
 
-<h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('payments_page.title', 'Payment Tracking')}</h2>
+<h2 className="fw-bold mb-0" style={{ color: '#1A3644' }}>{t('payments_page.title')}</h2>
 
 <div className="d-flex align-items-center gap-2">
 
@@ -856,15 +861,15 @@ return (
 
 <div>
 
-<div className="text-muted small" style={{ fontSize: '0.8rem' }}>{t('payments_page.total_collected', 'Total Collected')}</div>
+<div className="text-muted small" style={{ fontSize: '0.8rem' }}>{t('payments_page.total_collected')}</div>
 
-<div className="fw-bold fs-4 text-dark mt-1">{Number(totalCollected || 0).toLocaleString()} LKR</div>
+<div className="fw-bold fs-4 text-dark mt-1">{Number(totalCollected || 0).toLocaleString()} {t('payments_page.currency')}</div>
 
 </div>
 
 <div className="text-muted small mt-2" style={{ fontSize: '0.75rem' }}>
 
-{metricsSource.filter((p) => p.status === 'PAID' || p.status === 'LATE' || p.status === 'PARTIAL').length} Paid Payments
+{t('payments_page.paid_payments_count', { count: metricsSource.filter((p) => p.status === 'PAID' || p.status === 'LATE' || p.status === 'PARTIAL').length })}
 
 </div>
 
@@ -880,15 +885,15 @@ return (
 
 <div>
 
-<div className="text-muted small" style={{ fontSize: '0.8rem' }}>Pending Payments</div>
+<div className="text-muted small" style={{ fontSize: '0.8rem' }}>{t('payments_page.pending_payments')}</div>
 
-<div className="fw-bold fs-4 text-dark mt-1">{Number(totalPending || 0).toLocaleString()} LKR</div>
+<div className="fw-bold fs-4 text-dark mt-1">{Number(totalPending || 0).toLocaleString()} {t('payments_page.currency')}</div>
 
 </div>
 
 <div className="text-muted small mt-2" style={{ fontSize: '0.75rem' }}>
 
-{metricsSource.filter((p) => p.status === 'PENDING').length} Pending
+{t('payments_page.pending_count', { count: metricsSource.filter((p) => p.status === 'PENDING').length })}
 
 </div>
 
@@ -904,15 +909,15 @@ return (
 
 <div>
 
-<div className="text-muted small" style={{ fontSize: '0.8rem' }}>Overdue Payments</div>
+<div className="text-muted small" style={{ fontSize: '0.8rem' }}>{t('payments_page.overdue_payments')}</div>
 
-<div className="fw-bold fs-4 text-dark mt-1">{Number(totalOverdue || 0).toLocaleString()} LKR</div>
+<div className="fw-bold fs-4 text-dark mt-1">{Number(totalOverdue || 0).toLocaleString()} {t('payments_page.currency')}</div>
 
 </div>
 
 <div className="text-muted small mt-2" style={{ fontSize: '0.75rem' }}>
 
-{overdueMembersCount} {overdueMembersCount === 1 ? 'Member' : 'Members'}
+{t('payments_page.member_count', { count: overdueMembersCount })}
 
 </div>
 
@@ -928,7 +933,7 @@ return (
 
 <div>
 
-<div className="text-muted small" style={{ fontSize: '0.8rem' }}>On-time Rate</div>
+<div className="text-muted small" style={{ fontSize: '0.8rem' }}>{t('payments_page.on_time_rate')}</div>
 
 <div className="fw-bold fs-4 text-dark mt-1">{onTimeRate}%</div>
 
@@ -942,7 +947,7 @@ return (
 
 <div className="text-muted small mt-2" style={{ fontSize: '0.75rem' }}>
 
-{onTimePaymentsCount} of {totalPaymentsCount} on time
+{t('payments_page.on_time_summary', { paid: onTimePaymentsCount, total: totalPaymentsCount })}
 
 </div>
 
@@ -964,13 +969,13 @@ return (
 
 <Icon name="shield" size={13} color="#FFFFFF" />
 
-<span>Platform Oversight Mode</span>
+<span>{t('payments_page.platform_oversight')}</span>
 
 </span>
 
 <span className="text-muted small">
 
-You are reviewing verified transactions, receipts, and automated delinquency recovery desks across all circles.
+{t('payments_page.platform_oversight_description')}
 
 </span>
 
@@ -1006,11 +1011,11 @@ style={{ backgroundColor: '#134A5A', width: '42px', height: '42px', minWidth: '4
 
 <div>
 
-<h5 className="fw-bold mb-1" style={{ color: '#1A3644', fontSize: '1.1rem' }}>Record Member Payment</h5>
+<h5 className="fw-bold mb-1" style={{ color: '#1A3644', fontSize: '1.1rem' }}>{t('payments_page.record_member_payment')}</h5>
 
 <p className="text-muted small mb-0" style={{ fontSize: '0.82rem' }}>
 
-Log verified monthly contributions or offline deposits directly into the system
+{t('payments_page.record_payment_description')}
 
 </p>
 
@@ -1027,7 +1032,7 @@ Log verified monthly contributions or offline deposits directly into the system
       <div className="alert alert-warning border-0 shadow-xs rounded-3 mb-3 d-flex align-items-center gap-2 py-2.5 px-3">
         <Icon name="clock" size={18} color="#D97706" />
         <div className="small">
-          <strong>Circle Forming ({groupMembers.length}/{selectedGrp.memberCount || 15} members joined):</strong> Rotational cycles and contributions will automatically activate once all {selectedGrp.memberCount || 15} members join.
+          <strong>{t('payments_page.circle_forming', { joined: groupMembers.length, total: selectedGrp.memberCount || 15 })}</strong> {t('payments_page.circle_activation', { total: selectedGrp.memberCount || 15 })}
         </div>
       </div>
     );
@@ -1047,7 +1052,7 @@ Log verified monthly contributions or offline deposits directly into the system
 
 <label className="form-label small fw-semibold text-dark mb-1">
 
-Seettu Group <span className="text-danger">*</span>
+{t('payments_page.seettu_group')} <span className="text-danger">*</span>
 
 </label>
 
@@ -1077,13 +1082,13 @@ required
 
 >
 
-<option value="">-- Select Seettu Group --</option>
+<option value="">{t('payments_page.select_seettu_group')}</option>
 
 {availableGroups.map((g) => (
 
 <option key={g.id} value={g.id}>
 
-{g.name} (LKR {Number(g.contributionAmount || 0).toLocaleString()})
+{g.name} ({t('payments_page.currency')} {Number(g.contributionAmount || 0).toLocaleString()})
 
 </option>
 
@@ -1091,7 +1096,7 @@ required
 
 {availableGroups.length === 0 && (
 
-<option value="" disabled>No active groups found</option>
+<option value="" disabled>{t('payments_page.no_active_groups')}</option>
 
 )}
 
@@ -1105,7 +1110,7 @@ required
 
 <label className="form-label small fw-semibold text-dark mb-1">
 
-Paying Member <span className="text-danger">*</span>
+{t('payments_page.paying_member')} <span className="text-danger">*</span>
 
 </label>
 
@@ -1113,9 +1118,9 @@ Paying Member <span className="text-danger">*</span>
 
 <div className="form-control bg-light text-dark fw-semibold d-flex align-items-center justify-content-between" style={{ minHeight: '38px' }}>
 
-<span>{user?.fullName || user?.email || 'Me'}</span>
+<span>{user?.fullName || user?.email || t('payments_page.me')}</span>
 
-<span className="badge bg-primary-subtle text-primary border border-primary-subtle small">Member (You)</span>
+<span className="badge bg-primary-subtle text-primary border border-primary-subtle small">{t('payments_page.member_you')}</span>
 
 </div>
 
@@ -1133,13 +1138,13 @@ required
 
 >
 
-<option value="">{selectedGroupId ? '-- Select Member --' : '-- Select Group First --'}</option>
+<option value="">{selectedGroupId ? t('payments_page.select_member') : t('payments_page.select_group_first')}</option>
 
 {(isAdmin || isOrganizer) && user && (
 
 <option value={userId}>
 
-{user.fullName || user.email || 'Organizer'} (Organizer / Me)
+{user.fullName || user.email || t('payments_page.organizer')} ({t('payments_page.organizer_me')})
 
 </option>
 
@@ -1159,13 +1164,13 @@ return String(mUserId) !== String(userId);
 
 const mUserId = m.user?.id || m.userId || m.id;
 
-const mName = m.user?.fullName || m.fullName || m.name || `Member #${mUserId}`;
+const mName = m.user?.fullName || m.fullName || m.name || t('payments_page.member_number', { id: mUserId });
 
 return (
 
 <option key={m.id || mUserId} value={mUserId}>
 
-{mName} (Member #{mUserId})
+{mName} ({t('payments_page.member_number', { id: mUserId })})
 
 </option>
 
@@ -1185,7 +1190,7 @@ return (
 
 <label className="form-label small fw-semibold text-dark mb-1">
 
-Rotation Cycle <span className="text-danger">*</span>
+{t('payments_page.rotation_cycle')} <span className="text-danger">*</span>
 
 </label>
 
@@ -1201,13 +1206,13 @@ required
 
 >
 
-<option value="">{selectedGroupId ? (groupCycles.some(c => c.status === 'ACTIVE') ? '-- Select Rotation Cycle --' : 'No active cycle currently open') : '-- Select Group First --'}</option>
+<option value="">{selectedGroupId ? (groupCycles.some(c => c.status === 'ACTIVE') ? t('payments_page.select_rotation_cycle') : t('payments_page.no_active_cycle')) : t('payments_page.select_group_first')}</option>
 
 {groupCycles.map((c) => {
   const isActive = c.status === 'ACTIVE';
   const isCompleted = c.status === 'COMPLETED';
   const isPending = c.status === 'PENDING';
-  const dueInfo = c.endDate ? ` • Due: ${c.endDate}` : '';
+  const dueInfo = c.endDate ? ` • ${t('payments_page.due_date', { date: c.endDate })}` : '';
   return (
     <option
       key={c.id}
@@ -1215,7 +1220,7 @@ required
       disabled={isPending || isCompleted}
       style={isActive ? { fontWeight: 'bold', color: '#198754' } : { color: '#6C757D' }}
     >
-      Cycle #{c.cycleNumber} {isActive ? `— Active (Current Collecting${dueInfo})` : (isCompleted ? '— Completed (Disbursed)' : '— Upcoming (Locked)')}
+      {t('payments_page.cycle_number', { number: c.cycleNumber })} {isActive ? `— ${t('payments_page.active_collecting')}${dueInfo}` : (isCompleted ? `— ${t('payments_page.completed_disbursed')}` : `— ${t('payments_page.upcoming_locked')}`)}
     </option>
   );
 })}
@@ -1236,13 +1241,13 @@ required
 
 <label className="form-label small fw-semibold text-dark mb-1">
 
-Amount <span className="text-danger">*</span>
+{t('payments_page.amount')} <span className="text-danger">*</span>
 
 </label>
 
 <div className="input-group">
 
-<span className="input-group-text bg-light font-monospace small fw-semibold text-muted">LKR</span>
+<span className="input-group-text bg-light font-monospace small fw-semibold text-muted">{t('payments_page.currency')}</span>
 
 <input
 
@@ -1250,7 +1255,7 @@ type="number"
 
 className="form-control font-monospace"
 
-placeholder="e.g. 5000"
+placeholder={t('payments_page.amount_example')}
 
 value={amountInput}
 
@@ -1272,7 +1277,7 @@ min="1"
 
 <label className="form-label small fw-semibold text-dark mb-1">
 
-Status <span className="text-danger">*</span>
+{t('payments_page.status')} <span className="text-danger">*</span>
 
 </label>
 
@@ -1284,17 +1289,17 @@ value={statusInput}
 
 onChange={(e) => setStatusInput(e.target.value)}
 
-title="Payment Status"
+title={t('payments_page.payment_status')}
 
 >
 
-<option value="PAID">Paid (Full)</option>
+<option value="PAID">{t('payments_page.paid_full')}</option>
 
-<option value="PARTIAL">Partial Payment</option>
+<option value="PARTIAL">{t('payments_page.partial_payment')}</option>
 
-<option value="LATE">Paid (Late)</option>
+<option value="LATE">{t('payments_page.paid_late')}</option>
 
-<option value="OVERDUE">Overdue Payment</option>
+<option value="OVERDUE">{t('payments_page.overdue_payment')}</option>
 
 </select>
 
@@ -1306,7 +1311,7 @@ title="Payment Status"
 
 <label className="form-label small fw-semibold text-dark mb-1">
 
-Payment Date <span className="text-danger">*</span>
+{t('payments_page.payment_date')} <span className="text-danger">*</span>
 
 </label>
 
@@ -1332,7 +1337,7 @@ required
 
 <label className="form-label small fw-semibold text-dark mb-1">
 
-Payment Method <span className="text-danger">*</span>
+{t('payments_page.payment_method')} <span className="text-danger">*</span>
 
 </label>
 
@@ -1344,13 +1349,13 @@ value={paymentMethodInput}
 
 onChange={(e) => setPaymentMethodInput(e.target.value)}
 
-title="Payment Settlement Method"
+title={t('payments_page.payment_settlement_method')}
 
 >
 
-<option value="Cash (Offline)">Cash (Offline)</option>
+<option value="Cash (Offline)">{t('payments_page.cash_offline')}</option>
 
-<option value="Bank Deposit / Transfer">Bank Deposit / Transfer</option>
+<option value="Bank Deposit / Transfer">{t('payments_page.bank_deposit_transfer')}</option>
 
 </select>
 
@@ -1364,13 +1369,13 @@ title="Payment Settlement Method"
 
 {paymentMethodInput === 'Cash (Offline)' ? (
 
-<span>System Receipt (Offline Cash)</span>
+<span>{t('payments_page.system_receipt_offline_cash')}</span>
 
 ) : (
 
 <span>
 
-Deposit Slip / Proof <span className="text-danger">*</span>
+{t('payments_page.deposit_slip_proof')} <span className="text-danger">*</span>
 
 </span>
 
@@ -1382,7 +1387,7 @@ Deposit Slip / Proof <span className="text-danger">*</span>
 
 <div className="text-muted small py-1.5 px-2 bg-light rounded border text-truncate" style={{ fontSize: '0.78rem' }}>
 
-Official electronic receipt generated by system
+{t('payments_page.electronic_receipt_generated')}
 
 </div>
 
@@ -1396,7 +1401,7 @@ accept="image/*,.pdf"
 
 className="form-control bg-white"
 
-title="Attach Bank Deposit Slip / Transfer Evidence (Mandatory)"
+title={t('payments_page.attach_bank_slip_mandatory')}
 
 required
 
@@ -1418,13 +1423,13 @@ onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)}
 
 <span>
 
-Recording: <strong className="text-dark">LKR {Number(amountInput || 0).toLocaleString()}</strong> as <span className="badge bg-success-subtle text-success border">{statusInput}</span> via <span className="badge bg-light text-dark border">{paymentMethodInput}</span>
+{t('payments_page.recording_summary')} <strong className="text-dark">{t('payments_page.currency')} {Number(amountInput || 0).toLocaleString()}</strong> {t('payments_page.as_status_via')} <span className="badge bg-success-subtle text-success border">{t(`payments_page.status_${statusInput.toLowerCase()}`, statusInput)}</span> {t('payments_page.via_method')} <span className="badge bg-light text-dark border">{paymentMethodInput === 'Cash (Offline)' ? t('payments_page.cash_offline') : t('payments_page.bank_deposit_transfer')}</span>
 
 </span>
 
 ) : (
 
-<span>Select group, member, and rotation cycle to record payment.</span>
+<span>{t('payments_page.select_group_member_cycle')}</span>
 
 )}
 
@@ -1446,7 +1451,7 @@ disabled={submitting}
 
 <span className="spinner-border spinner-border-sm" role="status"></span>
 
-<span>Recording Payment...</span>
+<span>{t('payments_page.recording_payment')}</span>
 
 </>
 
@@ -1456,7 +1461,7 @@ disabled={submitting}
 
 <Icon name="check" size={16} />
 
-<span>Record Payment</span>
+<span>{t('payments_page.record_payment')}</span>
 
 </>
 
@@ -1484,21 +1489,21 @@ disabled={submitting}
                 <Icon name="upload" size={20} color="#FFFFFF" />
               </div>
               <div>
-                <h5 className="fw-bold mb-1" style={{ color: '#1A3644', fontSize: '1.1rem' }}>Submit Bank Transfer Slip</h5>
+                <h5 className="fw-bold mb-1" style={{ color: '#1A3644', fontSize: '1.1rem' }}>{t('payments_page.submit_bank_slip')}</h5>
                 <p className="text-muted small mb-0" style={{ fontSize: '0.82rem' }}>
-                  Paid via online bank transfer or CDM deposit? Submit your receipt or transaction screenshot for organizer verification.
+                  {t('payments_page.bank_slip_description')}
                 </p>
               </div>
             </div>
             <span className="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle small px-3 py-1.5">
-              Verification Flow: PENDING Approval
+              {t('payments_page.pending_verification_flow')}
             </span>
           </div>
 
           <div className="alert alert-info py-2 px-3 mb-3 small d-flex align-items-center gap-2 rounded-3 border-0 bg-info-subtle text-info-emphasis">
             <Icon name="info" size={16} />
             <span>
-              <strong>Notice:</strong> Offline cash contributions must be paid directly to your Seettu Organizer to receive an instant physical receipt. Use this portal exclusively to submit <strong>Bank Transfer / CDM Deposit Slips</strong>.
+              <strong>{t('payments_page.notice')}</strong> {t('payments_page.offline_cash_notice')} <strong>{t('payments_page.bank_cdm_slips')}</strong>.
             </span>
           </div>
 
@@ -1508,7 +1513,7 @@ disabled={submitting}
               {/* Group Select */}
               <div className="col-12 col-md-4">
                 <label className="form-label small fw-semibold text-dark mb-1">
-                  Seettu Group <span className="text-danger">*</span>
+                  {t('payments_page.seettu_group')} <span className="text-danger">*</span>
                 </label>
                 <select
                   className="form-select bg-white"
@@ -1523,14 +1528,14 @@ disabled={submitting}
                   }}
                   required
                 >
-                  <option value="">-- Select Seettu Group --</option>
+                  <option value="">{t('payments_page.select_seettu_group')}</option>
                   {availableGroups.map((g) => (
                     <option key={g.id} value={g.id}>
-                      {g.name} (LKR {Number(g.contributionAmount || 0).toLocaleString()})
+                      {g.name} ({t('payments_page.currency')} {Number(g.contributionAmount || 0).toLocaleString()})
                     </option>
                   ))}
                   {availableGroups.length === 0 && (
-                    <option value="" disabled>No joined groups found</option>
+                    <option value="" disabled>{t('payments_page.no_joined_groups')}</option>
                   )}
                 </select>
               </div>
@@ -1538,18 +1543,18 @@ disabled={submitting}
               {/* Member Display (Read-Only) */}
               <div className="col-12 col-md-4">
                 <label className="form-label small fw-semibold text-dark mb-1">
-                  Paying Member
+                  {t('payments_page.paying_member')}
                 </label>
                 <div className="form-control bg-light text-dark fw-semibold d-flex align-items-center justify-content-between" style={{ minHeight: '38px' }}>
-                  <span>{user?.fullName || user?.email || 'Me'}</span>
-                  <span className="badge bg-primary-subtle text-primary border border-primary-subtle small">Member (You)</span>
+                  <span>{user?.fullName || user?.email || t('payments_page.me')}</span>
+                  <span className="badge bg-primary-subtle text-primary border border-primary-subtle small">{t('payments_page.member_you')}</span>
                 </div>
               </div>
 
               {/* Rotation Cycle Select */}
               <div className="col-12 col-md-4">
                 <label className="form-label small fw-semibold text-dark mb-1">
-                  Rotation Cycle <span className="text-danger">*</span>
+                  {t('payments_page.rotation_cycle')} <span className="text-danger">*</span>
                 </label>
                 <select
                   className="form-select bg-white"
@@ -1557,12 +1562,12 @@ disabled={submitting}
                   onChange={(e) => setSelectedCycleId(e.target.value)}
                   required
                 >
-                  <option value="">{selectedGroupId ? (groupCycles.some(c => c.status === 'ACTIVE') ? '-- Select Active Cycle --' : 'No active cycle currently open') : '-- Select Group First --'}</option>
+                  <option value="">{selectedGroupId ? (groupCycles.some(c => c.status === 'ACTIVE') ? t('payments_page.select_active_cycle') : t('payments_page.no_active_cycle')) : t('payments_page.select_group_first')}</option>
                   {groupCycles.map((c) => {
                     const isActive = c.status === 'ACTIVE';
                     const isCompleted = c.status === 'COMPLETED';
                     const isPending = c.status === 'PENDING';
-                    const dueInfo = c.endDate ? ` • Due: ${c.endDate}` : '';
+                    const dueInfo = c.endDate ? ` • ${t('payments_page.due_date', { date: c.endDate })}` : '';
                     return (
                       <option
                         key={c.id}
@@ -1570,7 +1575,7 @@ disabled={submitting}
                         disabled={isPending || isCompleted}
                         style={isActive ? { fontWeight: 'bold', color: '#198754' } : { color: '#6C757D' }}
                       >
-                        Cycle #{c.cycleNumber} {isActive ? `— Active (Current Collecting${dueInfo})` : (isCompleted ? '— Completed (Disbursed)' : '— Upcoming (Locked)')}
+                        {t('payments_page.cycle_number', { number: c.cycleNumber })} {isActive ? `— ${t('payments_page.active_collecting')}${dueInfo}` : (isCompleted ? `— ${t('payments_page.completed_disbursed')}` : `— ${t('payments_page.upcoming_locked')}`)}
                       </option>
                     );
                   })}
@@ -1583,14 +1588,14 @@ disabled={submitting}
               {/* Amount Input */}
               <div className="col-12 col-sm-6 col-md-3">
                 <label className="form-label small fw-semibold text-dark mb-1">
-                  Transfer Amount (LKR) <span className="text-danger">*</span>
+                  {t('payments_page.transfer_amount', { currency: t('payments_page.currency') })} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="number"
                   step="0.01"
                   min="1"
                   className="form-control fw-semibold"
-                  placeholder="e.g. 5000"
+                  placeholder={t('payments_page.amount_example')}
                   value={amountInput}
                   onChange={(e) => setAmountInput(e.target.value)}
                   required
@@ -1600,7 +1605,7 @@ disabled={submitting}
               {/* Payment Date */}
               <div className="col-12 col-sm-6 col-md-3">
                 <label className="form-label small fw-semibold text-dark mb-1">
-                  Transfer Date <span className="text-danger">*</span>
+                  {t('payments_page.transfer_date')} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="date"
@@ -1614,12 +1619,12 @@ disabled={submitting}
               {/* Payment Method (Locked) */}
               <div className="col-12 col-sm-6 col-md-3">
                 <label className="form-label small fw-semibold text-dark mb-1">
-                  Payment Method
+                  {t('payments_page.payment_method')}
                 </label>
                 <input
                   type="text"
                   className="form-control bg-light text-muted fw-semibold"
-                  value="Bank Deposit / Transfer"
+                  value={t('payments_page.bank_deposit_transfer')}
                   readOnly
                 />
               </div>
@@ -1627,7 +1632,7 @@ disabled={submitting}
               {/* Upload Deposit Slip / Evidence (Mandatory) */}
               <div className="col-12 col-sm-6 col-md-3">
                 <label className="form-label small fw-semibold text-dark mb-1">
-                  Deposit Slip / Receipt Screenshot <span className="text-danger">*</span>
+                  {t('payments_page.deposit_slip_screenshot')} <span className="text-danger">*</span>
                 </label>
                 <input
                   type="file"
@@ -1643,12 +1648,12 @@ disabled={submitting}
             <div className="row g-3 mb-3">
               <div className="col-12">
                 <label className="form-label small fw-semibold text-dark mb-1">
-                  Bank Reference / Transaction ID / Notes (Optional)
+                  {t('payments_page.bank_reference_notes')}
                 </label>
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="e.g. Commercial Bank Ref #TXN98124 or CDM Colombo 03"
+                  placeholder={t('payments_page.bank_reference_example')}
                   value={notesInput}
                   onChange={(e) => setNotesInput(e.target.value)}
                 />
@@ -1660,10 +1665,10 @@ disabled={submitting}
               <div className="small text-muted">
                 {selectedGroupId && amountInput ? (
                   <span>
-                    Submitting: <strong className="text-dark">LKR {Number(amountInput || 0).toLocaleString()}</strong> with bank receipt for organizer verification.
+                    {t('payments_page.submitting_summary')} <strong className="text-dark">{t('payments_page.currency')} {Number(amountInput || 0).toLocaleString()}</strong> {t('payments_page.bank_receipt_verification')}
                   </span>
                 ) : (
-                  <span>Select group, cycle, and upload bank transfer slip to submit for approval.</span>
+                  <span>{t('payments_page.select_group_cycle_upload')}</span>
                 )}
               </div>
 
@@ -1675,12 +1680,12 @@ disabled={submitting}
                 {submitting ? (
                   <>
                     <span className="spinner-border spinner-border-sm" role="status"></span>
-                    <span>Submitting Slip...</span>
+                    <span>{t('payments_page.submitting_slip')}</span>
                   </>
                 ) : (
                   <>
                     <Icon name="upload" size={16} />
-                    <span>Submit Bank Slip for Approval</span>
+                    <span>{t('payments_page.submit_bank_slip_approval')}</span>
                   </>
                 )}
               </button>
@@ -1696,13 +1701,13 @@ disabled={submitting}
             <Icon name="check-circle" size={18} color="#0097B2" />
           </div>
           <div>
-            <h5 className="fw-bold mb-0 text-dark" style={{ fontSize: '1.1rem' }}>Official Payment Ledger</h5>
-            <small className="text-muted">Verified member contributions and timestamped receipts recorded directly by circle organizers</small>
+            <h5 className="fw-bold mb-0 text-dark" style={{ fontSize: '1.1rem' }}>{t('payments_page.official_ledger')}</h5>
+            <small className="text-muted">{t('payments_page.ledger_description')}</small>
           </div>
         </div>
         <div className="d-flex align-items-center gap-2">
           <span className="badge rounded-pill bg-light text-dark border px-3 py-1.5 fw-semibold">
-            {filteredPayments.length} {filteredPayments.length === 1 ? 'Record' : 'Records'}
+            {t('payments_page.record_count', { count: filteredPayments.length })}
           </span>
         </div>
       </div>
@@ -1717,7 +1722,7 @@ disabled={submitting}
           onClick={() => setLedgerTab('recorded')}
         >
           <Icon name="check-circle" size={15} color={ledgerTab === 'recorded' ? '#FFFFFF' : '#188754'} />
-          <span>Confirmed Ledger</span>
+          <span>{t('payments_page.confirmed_ledger')}</span>
           <span 
             className={`badge rounded-pill fw-bold ${ledgerTab === 'recorded' ? 'bg-white text-teal' : 'bg-secondary-subtle text-secondary'}`}
             style={ledgerTab === 'recorded' ? { color: '#1A5265' } : undefined}
@@ -1734,7 +1739,7 @@ disabled={submitting}
           onClick={() => setLedgerTab('pending')}
         >
           <Icon name="clock" size={15} color={ledgerTab === 'pending' ? '#212529' : '#E67E22'} />
-          <span>Pending Bank Slips</span>
+          <span>{t('payments_page.pending_bank_slips')}</span>
           <span className={`badge rounded-pill ${ledgerTab === 'pending' ? 'bg-dark text-white' : pendingCount > 0 ? 'bg-warning text-dark' : 'bg-secondary-subtle text-secondary'}`}>
             {pendingCount}
           </span>
@@ -1748,7 +1753,7 @@ disabled={submitting}
           onClick={() => setLedgerTab('overdue')}
         >
           <Icon name="warning" size={15} color={ledgerTab === 'overdue' ? '#FFFFFF' : '#DC3545'} />
-          <span>Overdue Action Desk</span>
+          <span>{t('payments_page.overdue_action_desk')}</span>
           <span className={`badge rounded-pill ${ledgerTab === 'overdue' ? 'bg-white text-danger' : overdueCount > 0 ? 'bg-danger text-white' : 'bg-secondary-subtle text-secondary'}`}>
             {overdueCount}
           </span>
@@ -1762,7 +1767,7 @@ disabled={submitting}
           onClick={() => setLedgerTab('all')}
         >
           <Icon name="list" size={15} color={ledgerTab === 'all' ? '#FFFFFF' : '#6C757D'} />
-          <span>All Records</span>
+          <span>{t('payments_page.all_records')}</span>
           <span className={`badge rounded-pill ${ledgerTab === 'all' ? 'bg-white text-dark' : 'bg-secondary-subtle text-secondary'}`}>
             {allCount}
           </span>
@@ -1791,7 +1796,7 @@ type="text"
 
 className="form-control border-0 shadow-none ps-1"
 
-placeholder="Search member, group, cycle..."
+placeholder={t('payments_page.search_placeholder')}
 
 value={searchQuery}
 
@@ -1809,7 +1814,7 @@ className="btn btn-link text-muted border-0 pe-3 text-decoration-none"
 
 onClick={() => setSearchQuery('')}
 
-title="Clear search"
+title={t('payments_page.clear_search')}
 
 >
 
@@ -1845,7 +1850,7 @@ onChange={(e) => setFilterGroup(e.target.value)}
 
 >
 
-<option value="All">All Groups</option>
+<option value="All">{t('payments_page.all_groups')}</option>
 
 {groupOptions.map((grp) => (
 
@@ -1877,7 +1882,7 @@ onChange={(e) => setFilterMember(e.target.value)}
 
 >
 
-<option value="All">All Members</option>
+<option value="All">{t('payments_page.all_members')}</option>
 
 {memberOptions.map((mem) => (
 
@@ -1907,17 +1912,17 @@ onChange={(e) => setFilterStatus(e.target.value)}
 
 >
 
-<option value="All">All Status</option>
+<option value="All">{t('payments_page.all_status')}</option>
 
-{ledgerTab !== 'overdue' && <option value="PAID">Paid</option>}
+{ledgerTab !== 'overdue' && <option value="PAID">{t('payments_page.paid')}</option>}
 
-{ledgerTab !== 'overdue' && <option value="LATE">Paid (Late)</option>}
+{ledgerTab !== 'overdue' && <option value="LATE">{t('payments_page.paid_late')}</option>}
 
-{ledgerTab !== 'overdue' && <option value="PARTIAL">Partial</option>}
+{ledgerTab !== 'overdue' && <option value="PARTIAL">{t('payments_page.partial')}</option>}
 
-{ledgerTab !== 'recorded' && <option value="OVERDUE">Overdue</option>}
+{ledgerTab !== 'recorded' && <option value="OVERDUE">{t('payments_page.overdue')}</option>}
 
-{ledgerTab !== 'recorded' && <option value="PENDING">Pending</option>}
+{ledgerTab !== 'recorded' && <option value="PENDING">{t('payments_page.pending')}</option>}
 
 </select>
 
@@ -1935,13 +1940,13 @@ onChange={(e) => setFilterStatus(e.target.value)}
 
 <div className="text-muted small">
 
-Showing <strong className="text-dark">{filteredPayments.length}</strong> of <strong className="text-dark">{payments.length}</strong> payments
+{t('payments_page.showing')} <strong className="text-dark">{filteredPayments.length}</strong> {t('payments_page.of')} <strong className="text-dark">{payments.length}</strong> {t('payments_page.payments')}
 
-{filterGroup !== 'All' && <span> • Group: <strong className="text-dark">{filterGroup}</strong></span>}
+{filterGroup !== 'All' && <span> • {t('payments_page.group')}: <strong className="text-dark">{filterGroup}</strong></span>}
 
-{filterMember !== 'All' && <span> • Member: <strong className="text-dark">{filterMember}</strong></span>}
+{filterMember !== 'All' && <span> • {t('payments_page.member')}: <strong className="text-dark">{filterMember}</strong></span>}
 
-{filterStatus !== 'All' && <span> • Status: <strong className="text-dark">{filterStatus}</strong></span>}
+{filterStatus !== 'All' && <span> • {t('payments_page.status')}: <strong className="text-dark">{t(`payments_page.status_${filterStatus.toLowerCase()}`, filterStatus)}</strong></span>}
 
 </div>
 
@@ -1957,7 +1962,7 @@ onClick={handleClearFilters}
 
 >
 
-Clear Filters
+{t('payments_page.clear_filters')}
 
 </button>
 
@@ -1985,13 +1990,13 @@ color={ledgerTab === 'overdue' ? '#DC3545' : '#188754'}
 
 <h6 className="fw-bold mb-0 text-dark">
 
-{ledgerTab === 'recorded' && 'Recorded Payments History'}
+{ledgerTab === 'recorded' && t('payments_page.recorded_payments_history')}
 
-{ledgerTab === 'pending' && 'Pending Member Submissions & Verification Queue'}
+{ledgerTab === 'pending' && t('payments_page.pending_submissions_queue')}
 
-{ledgerTab === 'overdue' && 'Overdue Contributions & Default Action Desk'}
+{ledgerTab === 'overdue' && t('payments_page.overdue_action_desk_title')}
 
-{ledgerTab === 'all' && 'All Payment Records'}
+{ledgerTab === 'all' && t('payments_page.all_payment_records')}
 
 </h6>
 
@@ -1999,7 +2004,7 @@ color={ledgerTab === 'overdue' ? '#DC3545' : '#188754'}
 
 <span className="badge bg-light text-muted border small">
 
-{filteredPayments.length} {filteredPayments.length === 1 ? 'record' : 'records'}
+{t('payments_page.record_count', { count: filteredPayments.length })}
 
 </span>
 
@@ -2013,21 +2018,21 @@ color={ledgerTab === 'overdue' ? '#DC3545' : '#188754'}
 
 <tr>
 
-<th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{ledgerTab === 'overdue' ? 'Due Date' : 'Date'}</th>
+<th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{ledgerTab === 'overdue' ? t('payments_page.due_date_label') : t('payments_page.date')}</th>
 
-<th className="py-3 px-3 text-muted fw-semibold small text-nowrap">Group</th>
+<th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{t('payments_page.group')}</th>
 
-<th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{ledgerTab === 'overdue' ? 'Delinquent Member' : 'Member'}</th>
+<th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{ledgerTab === 'overdue' ? t('payments_page.delinquent_member') : t('payments_page.member')}</th>
 
-<th className="py-3 px-3 text-muted fw-semibold small text-nowrap">Cycle</th>
+<th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{t('payments_page.cycle')}</th>
 
-<th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{ledgerTab === 'overdue' ? 'Due Amount' : 'Amount'}</th>
+<th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{ledgerTab === 'overdue' ? t('payments_page.due_amount') : t('payments_page.amount')}</th>
 
-<th className="py-3 px-3 text-muted fw-semibold small text-center text-nowrap">Status</th>
+<th className="py-3 px-3 text-muted fw-semibold small text-center text-nowrap">{t('payments_page.status')}</th>
 
-<th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{ledgerTab === 'pending' ? 'Verification' : ledgerTab === 'overdue' ? 'Detected By' : 'Recorded By'}</th>
+<th className="py-3 px-3 text-muted fw-semibold small text-nowrap">{ledgerTab === 'pending' ? t('payments_page.verification') : ledgerTab === 'overdue' ? t('payments_page.detected_by') : t('payments_page.recorded_by')}</th>
 
-<th className="py-3 px-3 text-muted fw-semibold small text-end text-nowrap" style={{ minWidth: '240px' }}>{ledgerTab === 'overdue' ? 'Recovery Actions' : 'Actions'}</th>
+<th className="py-3 px-3 text-muted fw-semibold small text-end text-nowrap" style={{ minWidth: '240px' }}>{ledgerTab === 'overdue' ? t('payments_page.recovery_actions') : t('payments_page.actions')}</th>
 
 </tr>
 
@@ -2043,7 +2048,7 @@ color={ledgerTab === 'overdue' ? '#DC3545' : '#188754'}
 
 <div className="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
 
-<span className="text-muted small">Loading payment records...</span>
+<span className="text-muted small">{t('payments_page.loading_payment_records')}</span>
 
 </td>
 
@@ -2061,7 +2066,7 @@ color={ledgerTab === 'overdue' ? '#DC3545' : '#188754'}
 
 <h6 className="fw-bold mt-3 mb-1 text-dark">
 
-{ledgerTab === 'overdue' ? 'No overdue payments or default notices' : 'No payments found'}
+{ledgerTab === 'overdue' ? t('payments_page.no_overdue_payments') : t('payments_page.no_payments_found')}
 
 </h6>
 
@@ -2069,13 +2074,13 @@ color={ledgerTab === 'overdue' ? '#DC3545' : '#188754'}
 
 {ledgerTab === 'overdue'
 
-? 'All group contributions are up to date! There are no delinquent payments or pending notices.'
+? t('payments_page.all_contributions_current')
 
 : isFiltered
 
-? 'No payment records match your search or filter criteria.'
+? t('payments_page.no_matching_payments')
 
-: 'There are no recorded payments registered yet.'}
+: t('payments_page.no_recorded_payments')}
 
 </p>
 
@@ -2089,7 +2094,7 @@ onClick={handleClearFilters}
 
 >
 
-Reset All Filters
+{t('payments_page.reset_all_filters')}
 
 </button>
 
@@ -2128,7 +2133,7 @@ style={{ cursor: 'pointer' }}
 <td className="py-3 px-3 text-muted small text-nowrap">{p.cycle}</td>
 
 <td className="py-3 px-3 fw-semibold text-dark small text-nowrap">
-  <div>{Number(p.amount || 0).toLocaleString()} LKR</div>
+  <div>{Number(p.amount || 0).toLocaleString()} {t('payments_page.currency')}</div>
   {p.status === 'PARTIAL' && (
     <div className="text-danger fw-normal mt-0.5" style={{ fontSize: '0.75rem' }}>
       {(() => {
@@ -2138,9 +2143,9 @@ style={{ cursor: 'pointer' }}
           || 0;
         const balanceDue = fullExpected > p.amount ? fullExpected - p.amount : 0;
         return balanceDue > 0 ? (
-          <span>Remaining: <strong className="text-danger">{Number(balanceDue).toLocaleString()} LKR</strong></span>
+          <span>{t('payments_page.remaining')}: <strong className="text-danger">{Number(balanceDue).toLocaleString()} {t('payments_page.currency')}</strong></span>
         ) : (
-          <span className="text-warning-emphasis">Partial Payment</span>
+          <span className="text-warning-emphasis">{t('payments_page.partial_payment')}</span>
         );
       })()}
     </div>
@@ -2153,7 +2158,7 @@ className="py-3 px-3 text-center text-nowrap"
 
 onClick={() => setViewPayment(p)}
 
-title="Click to view payment details"
+title={t('payments_page.click_view_payment_details')}
 
 >
 
@@ -2169,7 +2174,7 @@ title="Click to view payment details"
 
 <span className="badge bg-warning-subtle text-warning border border-warning px-2 py-1 text-nowrap">
 
-Awaiting Organizer Approval
+{t('payments_page.awaiting_organizer_approval')}
 
 </span>
 
@@ -2189,11 +2194,11 @@ setViewPayment(p);
 
 }}
 
-title="Click to view bank deposit slip"
+title={t('payments_page.click_view_bank_slip')}
 
 >
 
-<Icon name="paperclip" size={11} /> {p.evidenceUrls.length} Slip Attached
+<Icon name="paperclip" size={11} /> {t('payments_page.slip_attached_count', { count: p.evidenceUrls.length })}
 
 </span>
 
@@ -2201,7 +2206,7 @@ title="Click to view bank deposit slip"
 
 <span className="text-muted" style={{ fontSize: '0.72rem' }}>
 
-{p.method}
+{p.method === 'Cash (Offline)' ? t('payments_page.cash_offline') : p.method === 'Bank Deposit / Transfer' ? t('payments_page.bank_deposit_transfer') : p.method}
 
 </span>
 
@@ -2213,7 +2218,7 @@ title="Click to view bank deposit slip"
 
 <span className="badge bg-light text-secondary border px-2 py-1 text-nowrap">
 
-{p.recordedBy && p.recordedBy !== '—' && p.recordedBy !== 'Organizer' ? p.recordedBy : 'System Auto-Detected'}
+{p.recordedBy && p.recordedBy !== '—' && p.recordedBy !== 'Organizer' ? p.recordedBy : t('payments_page.system_auto_detected')}
 
 </span>
 
@@ -2221,7 +2226,7 @@ title="Click to view bank deposit slip"
 
 <div className="d-flex flex-column align-items-start">
 
-<span className="badge bg-light text-secondary border px-2 py-1 text-nowrap">{p.recordedBy || '—'}</span>
+<span className="badge bg-light text-secondary border px-2 py-1 text-nowrap">{p.recordedBy === 'Organizer' ? t('payments_page.organizer') : p.recordedBy || '—'}</span>
 
 {p.evidenceUrls && p.evidenceUrls.length > 0 && (
 
@@ -2233,7 +2238,7 @@ style={{ fontSize: '0.7rem' }}
 
 >
 
-<Icon name="paperclip" size={10} /> Slip on file
+<Icon name="paperclip" size={10} /> {t('payments_page.slip_on_file')}
 
 </span>
 
@@ -2258,14 +2263,14 @@ onClick={(e) => e.stopPropagation()}
 {p.status === 'PENDING' && isOrganizer && (
                         <button
                           className="btn btn-sm btn-success px-3 py-1 small fw-semibold text-nowrap d-inline-flex align-items-center gap-1 shadow-xs"
-                          title="Verify Deposit Slip & Approve Payment"
+                          title={t('payments_page.verify_approve_title')}
                           onClick={(e) => {
                             e.stopPropagation();
                             setApproveTargetPayment(p);
                           }}
                         >
                           <Icon name="check" size={13} color="#FFFFFF" />
-                          <span>Verify & Approve</span>
+                          <span>{t('payments_page.verify_approve')}</span>
                         </button>
                       )}
                       <button
@@ -2282,7 +2287,7 @@ setViewPayment(p);
 
 >
 
-View Receipt
+{t('payments_page.view_receipt')}
 
 </button>
 
@@ -2292,7 +2297,7 @@ View Receipt
 
 className="btn btn-light btn-sm text-secondary border px-2 py-1 shadow-xs"
 
-title="Edit Payment Record"
+title={t('payments_page.edit_payment_record')}
 
 onClick={(e) => {
 
@@ -2316,7 +2321,7 @@ setEditPayment(p);
 
 className="btn btn-light btn-sm text-danger border px-2 py-1 shadow-xs"
 
-title="Delete Payment (Admin Only)"
+title={t('payments_page.delete_payment_admin_only')}
 
 onClick={(e) => {
 

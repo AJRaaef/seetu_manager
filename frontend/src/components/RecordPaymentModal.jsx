@@ -24,7 +24,7 @@ const RecordPaymentModal = ({ show, onHide, paymentInfo, onSuccess }) => {
       onSuccess();
       onHide();
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to record payment');
+      alert(error.response?.data?.message || t('payments_page.record_payment_error_default'));
     } finally {
       setLoading(false);
     }
