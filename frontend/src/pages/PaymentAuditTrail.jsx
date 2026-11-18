@@ -58,20 +58,20 @@ const PaymentAuditTrail = () => {
   const totalLogs = auditLogs.length;
   const isPaymentsScope = logScope === 'PAYMENTS';
 
-  const card1Title = isPaymentsScope ? 'Total Payment Audits' : 'Total System Logs';
+  const card1Title = isPaymentsScope ? t('audit_trail_page.stats.total_payment_audits') : t('audit_trail_page.stats.total_system_logs');
   const card1Value = totalLogs;
 
-  const card2Title = isPaymentsScope ? 'Payments Recorded' : 'Payment Ledger Audits';
+  const card2Title = isPaymentsScope ? t('audit_trail_page.stats.payments_recorded') : t('audit_trail_page.stats.payment_ledger_audits');
   const card2Value = isPaymentsScope
     ? auditLogs.filter(l => l.action === 'PAYMENT_RECORDED' || l.action === 'ADVANCE_PAYMENT_RECORDED').length
     : auditLogs.filter(l => l.targetTable === 'payments' || l.targetTable === 'advance_payments').length;
 
-  const card3Title = isPaymentsScope ? 'Payment Updates' : 'Auth & Account Events';
+  const card3Title = isPaymentsScope ? t('audit_trail_page.stats.payment_updates') : t('audit_trail_page.stats.auth_account_events');
   const card3Value = isPaymentsScope
     ? auditLogs.filter(l => l.action === 'PAYMENT_UPDATED').length
     : auditLogs.filter(l => l.targetTable === 'users' || (l.action && l.action.startsWith('USER_'))).length;
 
-  const card4Title = isPaymentsScope ? 'Deletions & Overdues' : 'Disputes & Emergencies';
+  const card4Title = isPaymentsScope ? t('audit_trail_page.stats.deletions_overdues') : t('audit_trail_page.stats.disputes_emergencies');
   const card4Value = isPaymentsScope
     ? auditLogs.filter(l => l.action === 'PAYMENT_DELETED' || (l.details && l.details.includes('OVERDUE'))).length
     : auditLogs.filter(l => l.targetTable === 'disputes' || l.targetTable === 'emergency_requests').length;
@@ -83,7 +83,16 @@ const PaymentAuditTrail = () => {
       return;
     }
 
-    const headers = ['Log ID', 'Timestamp', 'Performed By', 'Role', 'Action', 'Target Table', 'Target ID', 'Details'];
+    const headers = [
+      t('audit_trail_page.columns.id'),
+      t('audit_trail_page.columns.timestamp'),
+      t('audit_trail_page.columns.user'),
+      t('audit_trail_page.columns.role'),
+      t('audit_trail_page.columns.action'),
+      t('audit_trail_page.columns.target_table'),
+      t('audit_trail_page.columns.target_id'),
+      t('audit_trail_page.columns.csv_details')
+    ];
     const rows = filteredLogs.map(l => [
       l.id,
       `"${l.timestamp ? new Date(l.timestamp).toLocaleString() : '-'}"`,
@@ -95,16 +104,16 @@ const PaymentAuditTrail = () => {
       `"${(l.details || '').replace(/"/g, '""')}"`
     ]);
 
-    const csvContent = 'data:text/csv;charset=utf-8,' 
-      + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-
-    const encodedUri = encodeURI(csvContent);
+    const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const csvBlob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const encodedUri = URL.createObjectURL(csvBlob);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
     link.setAttribute('download', `Audit_Trail_${logScope}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(encodedUri);
   };
 
   const getActionBadge = (action) => {
@@ -179,14 +188,14 @@ const PaymentAuditTrail = () => {
         <div>
           <div className="d-flex align-items-center gap-2 mb-1">
             <span className="badge bg-danger px-3 py-1.5 rounded-pill fw-bold text-uppercase" style={{ fontSize: '0.75rem' }}>
-              <Icon name="shield" size={14} className="me-1" /> Admin Security Portal
+              <Icon name="shield" size={14} className="me-1" /> {t('audit_trail_page.admin_portal')}
             </span>
           </div>
           <h2 className="fw-extrabold text-dark mb-0" style={{ color: '#0F2F3D' }}>
-            Payment Audit Trail & System Logs
+            {t('audit_trail_page.title')}
           </h2>
           <p className="text-muted small mb-0">
-            Real-time immutable audit trail recording every payment entry, status change, and administrative edit.
+            {t('audit_trail_page.subtitle')}
           </p>
         </div>
 
@@ -197,7 +206,7 @@ const PaymentAuditTrail = () => {
             style={{ backgroundColor: '#0097B2', borderColor: '#0097B2' }}
           >
             <Icon name="download" size={16} />
-            <span>Export CSV</span>
+            <span>{t('audit_trail_page.export_csv')}</span>
           </button>
         </div>
       </div>
@@ -274,7 +283,7 @@ const PaymentAuditTrail = () => {
                 <input 
                   type="text"
                   className="form-control border-start-0 ps-0 shadow-none"
-                  placeholder="Search by user, action, table, or log details..."
+                  placeholder={t('audit_trail_page.search_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -292,7 +301,7 @@ const PaymentAuditTrail = () => {
                   className={`btn btn-sm flex-fill fw-bold rounded-2 ${logScope === 'ALL' ? 'bg-white shadow-sm text-dark' : 'text-muted'}`}
                   style={logScope === 'ALL' ? { color: '#0F2F3D' } : {}}
                 >
-                  All System Logs
+                  {t('audit_trail_page.all_system_logs')}
                 </button>
                 <button
                   onClick={() => {
@@ -302,7 +311,7 @@ const PaymentAuditTrail = () => {
                   className={`btn btn-sm flex-fill fw-bold rounded-2 ${logScope === 'PAYMENTS' ? 'bg-white shadow-sm text-dark' : 'text-muted'}`}
                   style={logScope === 'PAYMENTS' ? { color: '#0F2F3D' } : {}}
                 >
-                  Payment Audits
+                  {t('audit_trail_page.payment_audits')}
                 </button>
               </div>
             </div>
@@ -316,7 +325,7 @@ const PaymentAuditTrail = () => {
               >
                 {uniqueActions.map(act => (
                   <option key={act} value={act}>
-                    {act === 'ALL' ? 'All Actions' : act}
+                    {act === 'ALL' ? t('audit_trail_page.all_actions') : act}
                   </option>
                 ))}
               </select>
@@ -330,8 +339,8 @@ const PaymentAuditTrail = () => {
         <div className="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
           <div className="d-flex align-items-center gap-2">
             <Icon name="shield" size={18} className="text-info" style={{ color: '#0097B2' }} />
-            <h5 className="fw-bold mb-0 text-dark" style={{ color: '#0F2F3D' }}>Audit Log Records</h5>
-            <span className="badge bg-secondary bg-opacity-10 text-secondary ms-2">{filteredLogs.length} Entries</span>
+            <h5 className="fw-bold mb-0 text-dark" style={{ color: '#0F2F3D' }}>{t('audit_trail_page.records_title')}</h5>
+            <span className="badge bg-secondary bg-opacity-10 text-secondary ms-2">{filteredLogs.length} {t('audit_trail_page.entries')}</span>
           </div>
         </div>
 
@@ -339,12 +348,12 @@ const PaymentAuditTrail = () => {
           <table className="table table-hover align-middle mb-0">
             <thead className="table-light text-secondary small text-uppercase fw-semibold" style={{ backgroundColor: '#F8FAFC' }}>
               <tr>
-                <th style={{ width: '80px' }}>Log ID</th>
-                <th style={{ width: '180px' }}>Timestamp</th>
-                <th style={{ width: '150px' }}>Action</th>
-                <th style={{ width: '220px' }}>Performed By</th>
-                <th style={{ width: '120px' }}>Target Entity</th>
-                <th>Audit Details & Log Message</th>
+                <th style={{ width: '80px' }}>{t('audit_trail_page.columns.id')}</th>
+                <th style={{ width: '180px' }}>{t('audit_trail_page.columns.timestamp')}</th>
+                <th style={{ width: '150px' }}>{t('audit_trail_page.columns.action')}</th>
+                <th style={{ width: '220px' }}>{t('audit_trail_page.columns.user')}</th>
+                <th style={{ width: '120px' }}>{t('audit_trail_page.columns.target_entity')}</th>
+                <th>{t('audit_trail_page.columns.details')}</th>
               </tr>
             </thead>
             <tbody>
