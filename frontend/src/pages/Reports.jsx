@@ -33,6 +33,11 @@ const deduplicatePayments = (payments) => {
 const Reports = () => {
   const { t } = useTranslation();
   const { user, isOrganizer, isAdmin } = useAuth();
+  const getReportTypeLabel = (type) => {
+    if (!type) return '';
+    const normalizedType = String(type).toUpperCase();
+    return t(`reports_page.types.${normalizedType}`, { defaultValue: type });
+  };
   const [reports, setReports] = useState([]);
   const [reportGroups, setReportGroups] = useState([]);
   const [reportPayments, setReportPayments] = useState([]);
@@ -148,7 +153,7 @@ const Reports = () => {
       });
       fetchReports();
     } catch (err) {
-      alert(err.response?.data?.message || err.message || 'Failed to generate report.');
+      alert(err.response?.data?.message || err.message || t('reports_page.failed_generate'));
     } finally {
       setCreatingReport(false);
     }
@@ -169,50 +174,50 @@ const Reports = () => {
           return `"${safeText.replace(/"/g, '""')}"`;
         };
         const fallbackRows = [
-          ['SEETTU MANAGER AUDIT SYSTEM'],
-          ['Official Financial Reconciliation & Audit Statement'],
-          ['Report Title', selectedReport.title],
-          ['TYPE', selectedReport.type],
-          ['Generated', selectedReport.createdAt ? new Date(selectedReport.createdAt).toLocaleString() : new Date().toLocaleString()],
-          ['Auditor', selectedReport.generatedBy?.fullName || user?.fullName || 'Administrator'],
+          [t('reports_page.audit_system')],
+          [t('reports_page.official_statement')],
+          [t('reports_page.report_title'), selectedReport.title],
+          [t('reports_page.type'), selectedReport.type],
+          [t('reports_page.generated'), selectedReport.createdAt ? new Date(selectedReport.createdAt).toLocaleString() : new Date().toLocaleString()],
+          [t('reports_page.auditor'), selectedReport.generatedBy?.fullName || user?.fullName || t('reports_page.administrator')],
           [],
-          ['Executive Summary'],
-          ['ACTIVE GROUPS', visibleReportGroups.length],
-          ['ENROLLED MEMBERS', isPersonalReport ? (reportOwnerId == null ? 0 : 1) : visibleReportGroups.reduce((sum, group) => sum + Number(group.memberCount || 0), 0)],
-          ['COLLECTED FUNDS', `LKR ${totalCollections}`],
-          ['COMPLIANCE RATING', '100% VERIFIED'],
+          [t('reports_page.executive_summary')],
+          [t('reports_page.active_groups'), visibleReportGroups.length],
+          [t('reports_page.enrolled_members'), isPersonalReport ? (reportOwnerId == null ? 0 : 1) : visibleReportGroups.reduce((sum, group) => sum + Number(group.memberCount || 0), 0)],
+          [t('reports_page.collected_funds'), `LKR ${totalCollections}`],
+          [t('reports_page.compliance_rating'), t('reports_page.verified')],
           [],
-          ['Audit Findings & Operational Notes'],
-          [selectedReport.content || 'Comprehensive audit report covering registered groups, active members, contribution ledgers, and rotation schedules.'],
+          [t('reports_page.audit_findings_notes')],
+          [selectedReport.content || t('reports_page.default_audit_content')],
           [],
-          ['Tracked Seettu Groups Ledger', visibleReportGroups.length],
-          ['ID', 'Group Name', 'Category', 'Target Members', 'Contribution', 'Status'],
+          [t('reports_page.tracked_groups_ledger'), visibleReportGroups.length],
+          ['ID', t('reports_page.group_name'), t('reports_page.category'), t('reports_page.target_members'), t('reports_page.contribution'), t('reports_page.status')],
           ...(visibleReportGroups.length
             ? visibleReportGroups.map((group) => [
                 `#${group.id}`,
-                group.name || 'Unnamed',
-                group.category || 'GENERAL',
+                group.name || t('reports_page.unnamed'),
+                group.category || t('reports_page.general'),
                 group.memberCount || 0,
                 `LKR ${Number(group.contributionAmount || 0)}`,
-                group.status || 'ACTIVE'
+                group.status || t('reports_page.active')
               ])
-            : [['No active groups found in database.']]),
+            : [[t('reports_page.no_active_groups')]]),
           [],
-          ['Payment Contributions & Settlement Trail (Recent Records)'],
-          ['TX #', 'Group', 'Member', 'Amount (LKR)', 'Method', 'Status'],
+          [t('reports_page.payment_ledger_csv')],
+          ['TX #', t('reports_page.group'), t('reports_page.member'), t('reports_page.amount_lkr'), t('reports_page.method'), t('reports_page.status')],
           ...(visibleReportPayments.length
             ? visibleReportPayments.slice(0, 20).map((payment) => [
                 `#${payment.id}`,
-                payment.groupName || payment.cycle?.group?.name || 'Seettu Group',
-                payment.memberName || payment.member?.fullName || `Member #${payment.memberId ?? payment.member?.id ?? '-'}`,
+                payment.groupName || payment.cycle?.group?.name || t('reports_page.seettu_group'),
+                payment.memberName || payment.member?.fullName || t('reports_page.member_number', { number: payment.memberId ?? payment.member?.id ?? '-' }),
                 Number(payment.amount || 0),
-                payment.paymentMethod || 'OFFLINE',
-                payment.status || 'PAID'
+                payment.paymentMethod || t('reports_page.offline'),
+                payment.status || t('reports_page.paid')
               ])
-            : [['No payment transactions recorded yet.']]),
+            : [[t('reports_page.no_transactions')]]),
           [],
-          ['This is an official computer-generated audit statement from SeettuManager System. All records are cryptographically verified against the persistent transaction ledger.'],
-          ['Certified System Audit', 'SeettuManager Core Engine']
+          [t('reports_page.csv_disclaimer')],
+          [t('reports_page.certified_system_audit'), t('reports_page.core_engine')]
         ];
         csvBlob = new Blob(
           [`\uFEFF${fallbackRows.map((row) => row.map(safeCell).join(',')).join('\r\n')}`],
@@ -231,8 +236,8 @@ const Reports = () => {
     } catch (err) {
       console.error('Failed to download report CSV', err);
       const message = err.response?.status === 404
-        ? 'CSV export is unavailable. Please ensure the backend is up to date and try again.'
-        : 'Failed to download the report CSV.';
+        ? t('reports_page.csv_unavailable')
+        : t('reports_page.failed_download_csv');
       alert(message);
     } finally {
       setDownloadingCsv(false);
@@ -255,9 +260,9 @@ const Reports = () => {
           className="btn btn-teal px-3 py-2 d-flex align-items-center gap-2 shadow-sm"
           onClick={() => {
             setFormData({
-              title: (isAdmin || isOrganizer) ? 'Monthly Group Summary Audit' : `Personal Payment History & Receipts - ${user?.fullName || 'Member'}`,
+              title: (isAdmin || isOrganizer) ? t('reports_page.monthly_summary_title') : t('reports_page.personal_history_title', { name: user?.fullName || t('reports_page.member') }),
               type: (isAdmin || isOrganizer) ? 'GROUP_SUMMARY' : 'PERSONAL_PAYMENT_HISTORY',
-              content: (isAdmin || isOrganizer) ? 'Comprehensive group summary and cycle audit.' : `Contribution audit and ledger statement for ${user?.fullName || 'Member'}.`
+              content: (isAdmin || isOrganizer) ? t('reports_page.group_summary_content') : t('reports_page.personal_history_content', { name: user?.fullName || t('reports_page.member') })
             });
             setShowModal(true);
           }}
@@ -271,32 +276,32 @@ const Reports = () => {
       {loading ? (
         <div className="text-center py-5">
           <div className="spinner-border" style={{ color: '#235665' }} role="status"></div>
-          <p className="mt-2 text-muted">Loading audit reports...</p>
+          <p className="mt-2 text-muted">{t('reports_page.loading')}</p>
         </div>
       ) : reports.length === 0 ? (
         <div className="ui-card text-center p-5 shadow-sm border-0 mb-4">
             <div className="d-inline-flex p-3 rounded-circle mb-3" style={{ backgroundColor: '#E8F0F3' }}>
               <Icon name="reports" size={36} color="#235665" />
             </div>
-            <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>No Reports Generated Yet</h5>
+            <h5 className="fw-bold mt-2" style={{ color: '#1A3644' }}>{t('reports_page.no_reports')}</h5>
             <p className="text-muted small mb-4">
               {isAdmin || isOrganizer
-                ? 'Generate comprehensive group financial audits, payment trails, and member discipline score evaluations.'
-                : 'Generate your personal payment ledger, receipt history, and discipline score evaluations.'}
+                ? t('reports_page.empty_admin')
+                : t('reports_page.empty_member')}
             </p>
             <div>
               <button
                 className="btn btn-teal px-4 py-2"
                 onClick={() => {
                   setFormData({
-                    title: (isAdmin || isOrganizer) ? 'Monthly Group Summary Audit' : `Personal Payment History & Receipts - ${user?.fullName || 'Member'}`,
+                    title: (isAdmin || isOrganizer) ? t('reports_page.monthly_summary_title') : t('reports_page.personal_history_title', { name: user?.fullName || t('reports_page.member') }),
                     type: (isAdmin || isOrganizer) ? 'GROUP_SUMMARY' : 'PERSONAL_PAYMENT_HISTORY',
-                    content: (isAdmin || isOrganizer) ? 'Comprehensive group summary and cycle audit.' : `Contribution audit and ledger statement for ${user?.fullName || 'Member'}.`
+                    content: (isAdmin || isOrganizer) ? t('reports_page.group_summary_content') : t('reports_page.personal_history_content', { name: user?.fullName || t('reports_page.member') })
                   });
                   setShowModal(true);
                 }}
               >
-                <span>+</span> Generate First Report
+                <span>+</span> {t('reports_page.generate_first')}
               </button>
             </div>
           </div>
@@ -308,16 +313,16 @@ const Reports = () => {
               <div className="ui-card shadow-sm h-100 border-0 p-3">
                 <div className="d-flex justify-content-between align-items-start mb-2">
                   <span className="badge rounded-pill" style={{ backgroundColor: '#E8F0F3', color: '#235665', border: '1px solid #DCE7EB' }}>
-                    {r.type}
+                    {getReportTypeLabel(r.type)}
                   </span>
                   <span className="small text-muted">#{r.id}</span>
                 </div>
                 <div>
                   <h5 className="fw-bold text-dark mb-2">{r.title}</h5>
-                  <p className="text-muted small mb-3">{r.content || 'System generated summary audit report.'}</p>
+                  <p className="text-muted small mb-3">{r.content || t('reports_page.system_summary')}</p>
                   <div className="p-2 bg-light rounded-3 mb-3">
                     <small className="text-muted d-block">
-                      <strong>Generated On:</strong> {r.createdAt ? new Date(r.createdAt).toLocaleString() : 'N/A'}
+                      <strong>{t('reports_page.generated_on')}</strong> {r.createdAt ? new Date(r.createdAt).toLocaleString() : t('reports_page.na')}
                     </small>
                   </div>
                   <button 
@@ -345,11 +350,11 @@ const Reports = () => {
               <form onSubmit={handleCreate}>
                 <div className="modal-body p-4">
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Report Title</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('reports_page.report_title')}</label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder={isAdmin || isOrganizer ? "e.g. Monthly Seettu Group Audit Q3" : "e.g. Personal Seettu Payment Summary"}
+                      placeholder={isAdmin || isOrganizer ? t('reports_page.admin_title_placeholder') : t('reports_page.member_title_placeholder')}
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       style={{ borderRadius: '8px' }}
@@ -357,7 +362,7 @@ const Reports = () => {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Report Type</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('reports_page.report_type')}</label>
                     <select
                       className="form-select"
                       value={formData.type}
@@ -366,25 +371,25 @@ const Reports = () => {
                     >
                       {isAdmin || isOrganizer ? (
                         <>
-                          <option value="GROUP_SUMMARY">Group Summary Audit</option>
-                          <option value="PAYMENT_AUDIT">Payment Audit Trail</option>
-                          <option value="DISCIPLINE_SCORE_SUMMARY">Discipline Score Summary</option>
+                          <option value="GROUP_SUMMARY">{t('reports_page.type_group_summary')}</option>
+                          <option value="PAYMENT_AUDIT">{t('reports_page.type_payment_audit')}</option>
+                          <option value="DISCIPLINE_SCORE_SUMMARY">{t('reports_page.type_discipline_summary')}</option>
                         </>
                       ) : (
                         <>
-                          <option value="PERSONAL_PAYMENT_HISTORY">Personal Payment History & Receipts</option>
-                          <option value="DISCIPLINE_SCORE_SUMMARY">Personal Discipline Score Summary</option>
-                          <option value="GROUP_SUMMARY">Member Group Activity Summary</option>
+                          <option value="PERSONAL_PAYMENT_HISTORY">{t('reports_page.type_personal_history')}</option>
+                          <option value="DISCIPLINE_SCORE_SUMMARY">{t('reports_page.type_personal_discipline')}</option>
+                          <option value="GROUP_SUMMARY">{t('reports_page.type_member_activity')}</option>
                         </>
                       )}
                     </select>
                   </div>
                   <div className="mb-3">
-                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>Notes / Content</label>
+                    <label className="form-label text-secondary fw-medium" style={{ fontSize: '0.875rem' }}>{t('reports_page.notes_content')}</label>
                     <textarea
                       className="form-control"
                       rows="3"
-                      placeholder="Audit notes or observations..."
+                      placeholder={t('reports_page.notes_placeholder')}
                       value={formData.content}
                       onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                       style={{ borderRadius: '8px' }}
@@ -392,9 +397,9 @@ const Reports = () => {
                   </div>
                 </div>
                 <div className="modal-footer py-3 px-4 bg-light">
-                  <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setShowModal(false)}>{t('reports_page.cancel')}</button>
                   <button type="submit" className="btn btn-teal px-4 fw-semibold" style={{ borderRadius: '8px' }} disabled={creatingReport}>
-                    {creatingReport ? 'Generating...' : t('reports_page.generate_btn', 'Generate Report')}
+                    {creatingReport ? t('reports_page.generating') : t('reports_page.generate_btn', 'Generate Report')}
                   </button>
                 </div>
               </form>
@@ -422,24 +427,24 @@ const Reports = () => {
                     <div className="d-flex flex-wrap justify-content-between align-items-start border-bottom pb-3 mb-4 gap-2">
                       <div>
                         <div className="d-flex align-items-center gap-2">
-                          <img src="/logo.png" alt="Logo" style={{ width: '38px', height: '38px', borderRadius: '50%' }} />
+                          <img src="/logo.png" alt={t('reports_page.logo')} style={{ width: '38px', height: '38px', borderRadius: '50%' }} />
                           <h4 className="fw-bold mb-0" style={{ color: '#0F2F3D', letterSpacing: '-0.5px' }}>
-                            SeettuManager Audit System
+                            {t('reports_page.audit_brand')}
                           </h4>
                         </div>
                         <div className="text-muted small mt-1">
-                          Report Reference: <span className="font-monospace fw-bold text-dark">#{selectedReport.id}</span> • Official Financial Audit Ledger
+                          {t('reports_page.report_reference')} <span className="font-monospace fw-bold text-dark">#{selectedReport.id}</span> • {t('reports_page.official_ledger')}
                         </div>
                       </div>
                       <div className="text-end">
                         <span className="badge rounded-pill px-3 py-1.5 fw-bold" style={{ backgroundColor: '#E0F2FE', color: '#0284C7', border: '1px solid #BAE6FD' }}>
-                          {selectedReport.type}
+                          {getReportTypeLabel(selectedReport.type)}
                         </span>
                         <div className="text-muted small mt-1">
-                          Generated: {selectedReport.createdAt ? new Date(selectedReport.createdAt).toLocaleString() : new Date().toLocaleString()}
+                          {t('reports_page.generated')}: {selectedReport.createdAt ? new Date(selectedReport.createdAt).toLocaleString() : new Date().toLocaleString()}
                         </div>
                         <div className="text-muted small">
-                          Auditor: <strong>{selectedReport.generatedBy?.fullName || user?.fullName || 'Administrator'}</strong>
+                          {t('reports_page.auditor')}: <strong>{selectedReport.generatedBy?.fullName || user?.fullName || t('reports_page.administrator')}</strong>
                         </div>
                       </div>
                     </div>
@@ -448,39 +453,39 @@ const Reports = () => {
                     <div className="row g-3 mb-4">
                       <div className="col-6 col-md-3">
                         <div className="p-3 rounded-3 border bg-light text-center">
-                          <small className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.72rem' }}>Tracked Groups</small>
+                          <small className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.72rem' }}>{t('reports_page.tracked_groups')}</small>
                           <h4 className="fw-bold text-dark mb-0 mt-1">{visibleReportGroups.length || 0}</h4>
-                          <span className="small text-success">Active Circles</span>
+                          <span className="small text-success">{t('reports_page.active_circles')}</span>
                         </div>
                       </div>
                       <div className="col-6 col-md-3">
                         <div className="p-3 rounded-3 border bg-light text-center">
-                          <small className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.72rem' }}>Total Collections</small>
+                          <small className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.72rem' }}>{t('reports_page.total_collections')}</small>
                           <h4 className="fw-bold text-dark mb-0 mt-1">LKR {totalCollections.toLocaleString()}</h4>
-                          <span className="small text-primary">Verified Paid</span>
+                          <span className="small text-primary">{t('reports_page.verified_paid')}</span>
                         </div>
                       </div>
                       <div className="col-6 col-md-3">
                         <div className="p-3 rounded-3 border bg-light text-center">
-                          <small className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.72rem' }}>Transactions Logged</small>
+                          <small className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.72rem' }}>{t('reports_page.transactions_logged')}</small>
                           <h4 className="fw-bold text-dark mb-0 mt-1">{visibleReportPayments.length || 0}</h4>
-                          <span className="small text-muted">Ledger Records</span>
+                          <span className="small text-muted">{t('reports_page.ledger_records')}</span>
                         </div>
                       </div>
                       <div className="col-6 col-md-3">
                         <div className="p-3 rounded-3 border bg-light text-center">
-                          <small className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.72rem' }}>Compliance Rating</small>
+                          <small className="text-muted text-uppercase fw-semibold" style={{ fontSize: '0.72rem' }}>{t('reports_page.compliance_rating')}</small>
                           <h4 className="fw-bold text-success mb-0 mt-1">100%</h4>
-                          <span className="small text-success">Discipline Standing</span>
+                          <span className="small text-success">{t('reports_page.discipline_standing')}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Audit Findings & Notes */}
                     <div className="p-3 rounded-3 border mb-4" style={{ backgroundColor: '#F8FAFC', borderLeft: '4px solid #1A5265' }}>
-                      <h6 className="fw-bold mb-1" style={{ color: '#1A3644' }}>Audit Findings & Scope Statement:</h6>
+                      <h6 className="fw-bold mb-1" style={{ color: '#1A3644' }}>{t('reports_page.audit_findings_scope')}</h6>
                       <p className="mb-0 text-secondary small" style={{ whiteSpace: 'pre-wrap' }}>
-                        {selectedReport.content || 'Comprehensive audit report covering registered groups, active members, contribution ledgers, and rotation schedules.'}
+                        {selectedReport.content || t('reports_page.default_audit_content')}
                       </p>
                     </div>
 
@@ -488,34 +493,34 @@ const Reports = () => {
                     {!isPersonalReport && <div className="mb-4">
                       <h6 className="fw-bold text-dark mb-2 d-flex align-items-center gap-1.5">
                         <Icon name="users" size={16} color="#1A5265" />
-                        <span>Active Seettu Groups Ledger ({reportGroups.length})</span>
+                        <span>{t('reports_page.active_groups_ledger', { count: reportGroups.length })}</span>
                       </h6>
                       <div className="table-responsive">
                         <table className="table table-sm table-bordered align-middle mb-0 small">
                           <thead className="table-light">
                             <tr>
-                              <th>Group ID</th>
-                              <th>Group Name</th>
-                              <th>Category</th>
-                              <th>Target Members</th>
-                              <th>Contribution (LKR)</th>
-                              <th>Cycle Frequency</th>
-                              <th>Status</th>
+                              <th>{t('reports_page.group_id')}</th>
+                              <th>{t('reports_page.group_name')}</th>
+                              <th>{t('reports_page.category')}</th>
+                              <th>{t('reports_page.target_members')}</th>
+                              <th>{t('reports_page.contribution_lkr')}</th>
+                              <th>{t('reports_page.cycle_frequency')}</th>
+                              <th>{t('reports_page.status')}</th>
                             </tr>
                           </thead>
                           <tbody>
                             {visibleReportGroups.length === 0 ? (
-                              <tr><td colSpan="7" className="text-center py-3 text-muted">No group records available.</td></tr>
+                              <tr><td colSpan="7" className="text-center py-3 text-muted">{t('reports_page.no_group_records')}</td></tr>
                             ) : (
                               visibleReportGroups.map(g => (
                                 <tr key={g.id}>
                                   <td className="font-monospace">#{g.id}</td>
                                   <td className="fw-semibold text-dark">{g.name}</td>
-                                  <td>{g.category || 'GENERAL'}</td>
-                                  <td>{g.memberCount || 0} Members</td>
+                                  <td>{g.category || t('reports_page.general')}</td>
+                                  <td>{g.memberCount || 0} {t('reports_page.members')}</td>
                                   <td className="fw-bold text-dark">LKR {Number(g.contributionAmount || 0).toLocaleString()}</td>
-                                  <td>{g.cycleFrequency || 'MONTHLY'}</td>
-                                  <td><span className="badge bg-success-subtle text-success border">{g.status || 'ACTIVE'}</span></td>
+                                  <td>{g.cycleFrequency || t('reports_page.monthly')}</td>
+                                  <td><span className="badge bg-success-subtle text-success border">{g.status || t('reports_page.active')}</span></td>
                                 </tr>
                               ))
                             )}
@@ -528,34 +533,34 @@ const Reports = () => {
                     <div className="mb-4">
                       <h6 className="fw-bold text-dark mb-2 d-flex align-items-center gap-1.5">
                         <Icon name="credit-card" size={16} color="#1A5265" />
-                        <span>Financial Contribution Ledger (Latest Transactions)</span>
+                        <span>{t('reports_page.financial_ledger')}</span>
                       </h6>
                       <div className="table-responsive">
                         <table className="table table-sm table-bordered align-middle mb-0 small">
                           <thead className="table-light">
                             <tr>
-                              <th>TX #</th>
-                              <th>Seettu Group</th>
-                              <th>Paying Member</th>
-                              <th>Amount (LKR)</th>
-                              <th>Settlement Method</th>
-                              <th>Date</th>
-                              <th>Status</th>
+                              <th>{t('reports_page.tx_number')}</th>
+                              <th>{t('reports_page.seettu_group')}</th>
+                              <th>{t('reports_page.paying_member')}</th>
+                              <th>{t('reports_page.amount_lkr')}</th>
+                              <th>{t('reports_page.settlement_method')}</th>
+                              <th>{t('common.date', 'Date')}</th>
+                              <th>{t('reports_page.status')}</th>
                             </tr>
                           </thead>
                           <tbody>
                             {visibleReportPayments.length === 0 ? (
-                              <tr><td colSpan="7" className="text-center py-3 text-muted">No transaction records found.</td></tr>
+                              <tr><td colSpan="7" className="text-center py-3 text-muted">{t('reports_page.no_transactions_found')}</td></tr>
                             ) : (
                               visibleReportPayments.slice(0, 15).map(p => (
                                 <tr key={p.id}>
                                   <td className="font-monospace">#{p.id}</td>
-                                  <td>{p.groupName || p.cycle?.group?.name || 'Seettu Group'}</td>
-                                  <td className="fw-semibold">{p.memberName || p.member?.fullName || `Member #${p.memberId ?? p.member?.id ?? '-'}`}</td>
+                                  <td>{p.groupName || p.cycle?.group?.name || t('reports_page.seettu_group')}</td>
+                                  <td className="fw-semibold">{p.memberName || p.member?.fullName || t('reports_page.member_number', { number: p.memberId ?? p.member?.id ?? '-' })}</td>
                                   <td className="fw-bold text-dark">LKR {Number(p.amount || 0).toLocaleString()}</td>
-                                  <td><span className="badge bg-light text-dark border">{p.paymentMethod || 'Cash'}</span></td>
-                                  <td className="text-muted">{p.paymentDate ? String(p.paymentDate).split('T')[0] : 'N/A'}</td>
-                                  <td><span className={`badge ${p.status === 'PAID' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-dark'} border`}>{p.status || 'PAID'}</span></td>
+                                  <td><span className="badge bg-light text-dark border">{p.paymentMethod || t('reports_page.cash')}</span></td>
+                                  <td className="text-muted">{p.paymentDate ? String(p.paymentDate).split('T')[0] : t('reports_page.na')}</td>
+                                  <td><span className={`badge ${p.status === 'PAID' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-dark'} border`}>{p.status || t('reports_page.paid')}</span></td>
                                 </tr>
                               ))
                             )}
@@ -569,13 +574,13 @@ const Reports = () => {
                       <div>
                         <div className="d-flex align-items-center gap-1.5">
                           <Icon name="check" size={13} color="#10B981" />
-                          <span>Official automated financial statement generated from verified ledger.</span>
+                          <span>{t('reports_page.official_automated_statement')}</span>
                         </div>
-                        <small style={{ fontSize: '0.72rem' }}>SeettuManager • Sri Lankan Community Finance Platform</small>
+                        <small style={{ fontSize: '0.72rem' }}>{t('reports_page.platform_footer')}</small>
                       </div>
                       <div className="text-end">
-                        <div className="fw-bold text-dark">Certified Audit Engine</div>
-                        <small style={{ fontSize: '0.72rem' }}>Status: Balanced & Reconciled</small>
+                        <div className="fw-bold text-dark">{t('reports_page.certified_audit_engine')}</div>
+                        <small style={{ fontSize: '0.72rem' }}>{t('reports_page.balanced_status')}</small>
                       </div>
                     </div>
                   </div>
@@ -583,7 +588,7 @@ const Reports = () => {
 
                 <div className="modal-footer py-3 px-4 bg-light no-print d-flex justify-content-between align-items-center">
                   <button type="button" className="btn btn-outline-secondary" style={{ borderRadius: '8px' }} onClick={() => setSelectedReport(null)}>
-                    Close
+                    {t('reports_page.cancel')}
                   </button>
                   <div className="d-flex gap-2">
                     <button
@@ -592,10 +597,10 @@ const Reports = () => {
                       style={{ borderRadius: '8px' }}
                       onClick={handleOpenInExcel}
                       disabled={downloadingCsv}
-                      title="Downloads an Excel-compatible CSV file"
+                      title={t('reports_page.excel_download_title')}
                     >
                       <Icon name="download" size={16} />
-                      <span>{downloadingCsv ? 'Preparing CSV...' : 'Download Excel Sheet'}</span>
+                      <span>{downloadingCsv ? t('reports_page.preparing_csv') : t('reports_page.download_excel')}</span>
                     </button>
                     {isPersonalReport ? (
                       <button
@@ -605,7 +610,7 @@ const Reports = () => {
                         onClick={() => window.print()}
                       >
                         <Icon name="download" size={16} />
-                        <span>Print / Save Personal Report as PDF</span>
+                        <span>{t('reports_page.print_personal_pdf')}</span>
                       </button>
                     ) : (
                       <a
@@ -616,12 +621,12 @@ const Reports = () => {
                         style={{ borderRadius: '8px' }}
                       >
                         <Icon name="download" size={16} />
-                        <span>Download PDF Report</span>
+                        <span>{t('reports_page.download_pdf')}</span>
                       </a>
                     )}
                   </div>
                   <small className="w-100 text-end text-muted">
-                    CSV downloads to your device; open the downloaded file with Excel.
+                    {t('reports_page.csv_footer')}
                   </small>
                 </div>
               </div>
