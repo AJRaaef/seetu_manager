@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FileText, Image as ImageIcon, X, UploadCloud, Paperclip, AlertCircle } from 'lucide-react';
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
@@ -15,6 +16,7 @@ const DocumentUpload = ({
   error,
   disabled = false,
 }) => {
+  const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const [localPreview, setLocalPreview] = useState(null);
   const [isPdf, setIsPdf] = useState(false);
@@ -200,10 +202,10 @@ const DocumentUpload = ({
             {dragActive ? <UploadCloud size={28} style={{ color: '#235665' }} /> : <Paperclip size={26} className="text-muted" />}
           </div>
           <div className="fw-semibold text-dark" style={{ fontSize: '0.85rem' }}>
-            Click to upload or drag & drop
+            {t('verification_page.member.upload_prompt', 'Click to upload or drag & drop')}
           </div>
           <div className="text-muted small" style={{ fontSize: '0.74rem' }}>
-            JPEG, PNG or PDF (Max 5MB)
+            {t('verification_page.member.upload_formats', 'JPEG, PNG or PDF (Max 5MB)')}
           </div>
         </div>
       )}

@@ -133,10 +133,10 @@ const VerificationManagement = () => {
         <div>
           <h3 className="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
             <Shield size={24} style={{ color: '#235665' }} />
-            <span>Member Verification Management</span>
+            <span>{t('verification_page.management.title', 'Member Verification Management')}</span>
           </h3>
           <p className="text-muted mb-0 small">
-            Review applicant Sri Lankan NICs and Grama Niladhari Character Certificates for Anti-Fraud Compliance
+            {t('verification_page.management.subtitle', 'Review applicant Sri Lankan NICs and Grama Niladhari Character Certificates for Anti-Fraud Compliance')}
           </p>
         </div>
       </div>
@@ -151,7 +151,7 @@ const VerificationManagement = () => {
           >
             <div className="d-flex align-items-center justify-content-between">
               <div>
-                <div className="text-warning-emphasis fw-bold small text-uppercase">Pending Review</div>
+                <div className="text-warning-emphasis fw-bold small text-uppercase">{t('verification_page.management.pending_review', 'Pending Review')}</div>
                 <h3 className="fw-bold text-dark mb-0">{pendingCount}</h3>
               </div>
               <Clock size={28} className="text-warning" />
@@ -167,7 +167,7 @@ const VerificationManagement = () => {
           >
             <div className="d-flex align-items-center justify-content-between">
               <div>
-                <div className="text-success fw-bold small text-uppercase">Verified Members</div>
+                <div className="text-success fw-bold small text-uppercase">{t('verification_page.management.verified_members', 'Verified Members')}</div>
                 <h3 className="fw-bold text-dark mb-0">{verifiedCount}</h3>
               </div>
               <CheckCircle2 size={28} className="text-success" />
@@ -183,7 +183,7 @@ const VerificationManagement = () => {
           >
             <div className="d-flex align-items-center justify-content-between">
               <div>
-                <div className="text-danger fw-bold small text-uppercase">Rejected</div>
+                <div className="text-danger fw-bold small text-uppercase">{t('verification_page.management.rejected', 'Rejected')}</div>
                 <h3 className="fw-bold text-dark mb-0">{rejectedCount}</h3>
               </div>
               <XCircle size={28} className="text-danger" />
@@ -199,7 +199,7 @@ const VerificationManagement = () => {
           >
             <div className="d-flex align-items-center justify-content-between">
               <div>
-                <div className="text-muted fw-bold small text-uppercase">All Records</div>
+                <div className="text-muted fw-bold small text-uppercase">{t('verification_page.management.all_records', 'All Records')}</div>
                 <h3 className="fw-bold text-dark mb-0">{verifications.length}</h3>
               </div>
               <Folder size={28} style={{ color: '#235665' }} />
@@ -239,10 +239,10 @@ const VerificationManagement = () => {
               onChange={(e) => setFilterStatus(e.target.value)}
               style={{ borderRadius: '8px' }}
             >
-              <option value="ALL">All Statuses</option>
-              <option value="PENDING">Pending Review Only</option>
-              <option value="VERIFIED">Verified Only</option>
-              <option value="REJECTED">Rejected Only</option>
+              <option value="ALL">{t('verification_page.management.all_statuses', 'All Statuses')}</option>
+              <option value="PENDING">{t('verification_page.management.pending_only', 'Pending Review Only')}</option>
+              <option value="VERIFIED">{t('verification_page.management.verified_only', 'Verified Only')}</option>
+              <option value="REJECTED">{t('verification_page.management.rejected_only', 'Rejected Only')}</option>
             </select>
           </div>
           <div className="col-md-7">
@@ -251,7 +251,7 @@ const VerificationManagement = () => {
               <input
                 type="text"
                 className="form-control form-control-sm border-start-0"
-                placeholder="Search member by full name, email, phone, or NIC number…"
+                placeholder={t('verification_page.management.search_placeholder', 'Search member by full name, email, phone, or NIC number…')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{ borderRadius: '0 8px 8px 0' }}
@@ -264,7 +264,7 @@ const VerificationManagement = () => {
               className="btn btn-sm text-white w-100 fw-bold"
               style={{ backgroundColor: '#235665', borderRadius: '8px' }}
             >
-              Filter / Search
+              {t('verification_page.management.filter_search', 'Filter / Search')}
             </button>
           </div>
         </form>
@@ -276,13 +276,13 @@ const VerificationManagement = () => {
           <table className="table table-hover align-middle mb-0">
             <thead className="table-light" style={{ fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               <tr>
-                <th className="ps-4">Applicant Member</th>
-                <th>NIC Number</th>
-                <th>Contact Details</th>
-                <th>GN Division</th>
-                <th>Submitted On</th>
-                <th>Status</th>
-                <th className="text-end pe-4">Actions</th>
+                <th className="ps-4">{t('verification_page.management.applicant_member', 'Applicant Member')}</th>
+                <th>{t('verification_page.management.nic_number', 'NIC Number')}</th>
+                <th>{t('verification_page.management.contact_details', 'Contact Details')}</th>
+                <th>{t('verification_page.management.gn_division', 'GN Division')}</th>
+                <th>{t('verification_page.management.submitted_on', 'Submitted On')}</th>
+                <th>{t('verification_page.management.status', 'Status')}</th>
+                <th className="text-end pe-4">{t('verification_page.management.actions', 'Actions')}</th>
               </tr>
             </thead>
             <tbody style={{ fontSize: '0.875rem' }}>
@@ -290,18 +290,18 @@ const VerificationManagement = () => {
                 <tr>
                   <td colSpan="7" className="text-center py-5">
                     <div className="spinner-border spinner-border-sm text-teal mb-2" style={{ color: '#235665' }} />
-                    <div className="text-muted small">Loading verifications…</div>
+                    <div className="text-muted small">{t('verification_page.management.loading', 'Loading verifications…')}</div>
                   </td>
                 </tr>
               ) : verifications.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center py-5">
                     <div className="mb-2 d-flex justify-content-center"><ClipboardList size={38} className="text-muted" /></div>
-                    <h6 className="fw-bold text-dark mb-1">No Verification Records Found</h6>
+                    <h6 className="fw-bold text-dark mb-1">{t('verification_page.management.no_records', 'No Verification Records Found')}</h6>
                     <p className="text-muted small mb-0">
                       {filterStatus === 'PENDING'
-                        ? 'There are currently no member verifications awaiting approval.'
-                        : 'No records matching the selected status or search filter.'}
+                        ? t('verification_page.management.no_pending', 'There are currently no member verifications awaiting approval.')
+                        : t('verification_page.management.no_matching_records', 'No records matching the selected status or search filter.')}
                     </p>
                   </td>
                 </tr>
@@ -322,8 +322,8 @@ const VerificationManagement = () => {
                           {(v.userName || 'M').substring(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <div className="fw-bold text-dark">{v.userName || 'Unknown Member'}</div>
-                          <div className="text-muted small" style={{ fontSize: '0.74rem' }}>User #{v.userId}</div>
+                          <div className="fw-bold text-dark">{v.userName || t('verification_page.management.unknown_member', 'Unknown Member')}</div>
+                          <div className="text-muted small" style={{ fontSize: '0.74rem' }}>{t('verification_page.management.user_id', 'User')} #{v.userId}</div>
                         </div>
                       </div>
                     </td>
@@ -337,10 +337,10 @@ const VerificationManagement = () => {
                       <div className="text-muted small" style={{ fontSize: '0.75rem' }}>{v.userPhone || '—'}</div>
                     </td>
                     <td>
-                      <div>{v.gnDivision || <span className="text-muted fst-italic">Not specified</span>}</div>
+                      <div>{v.gnDivision || <span className="text-muted fst-italic">{t('verification_page.management.not_specified', 'Not specified')}</span>}</div>
                       {v.gnIssueDate && (
                         <div className="text-muted small" style={{ fontSize: '0.72rem' }}>
-                          Issued: {new Date(v.gnIssueDate).toLocaleDateString()}
+                          {t('verification_page.management.issued', 'Issued')}: {new Date(v.gnIssueDate).toLocaleDateString()}
                         </div>
                       )}
                     </td>
@@ -361,7 +361,7 @@ const VerificationManagement = () => {
                           className="btn btn-sm btn-outline-teal fw-semibold"
                           style={{ color: '#235665', borderColor: '#235665', fontSize: '0.78rem' }}
                         >
-                          <Eye size={13} className="me-1" /> Review
+                          <Eye size={13} className="me-1" /> {t('verification_page.management.review', 'Review')}
                         </button>
                         {v.verificationStatus === 'PENDING' && (
                           <>
@@ -371,9 +371,9 @@ const VerificationManagement = () => {
                               className="btn btn-sm btn-success fw-bold"
                               style={{ fontSize: '0.78rem' }}
                               disabled={actionLoading}
-                              title="Approve verification"
+                              title={t('verification_page.management.approve_title', 'Approve verification')}
                             >
-                              <Check size={13} className="me-1" /> Approve
+                              <Check size={13} className="me-1" /> {t('verification_page.management.approve', 'Approve')}
                             </button>
                             <button
                               type="button"
@@ -381,9 +381,9 @@ const VerificationManagement = () => {
                               className="btn btn-sm btn-danger fw-bold"
                               style={{ fontSize: '0.78rem' }}
                               disabled={actionLoading}
-                              title="Reject verification"
+                              title={t('verification_page.management.reject_title', 'Reject verification')}
                             >
-                              <X size={13} className="me-1" /> Reject
+                              <X size={13} className="me-1" /> {t('verification_page.management.reject', 'Reject')}
                             </button>
                           </>
                         )}
@@ -407,10 +407,10 @@ const VerificationManagement = () => {
                   <Shield size={20} className="text-white" />
                   <div>
                     <h5 className="modal-title fw-bold mb-0 text-white">
-                      Verification Dossier: {selectedVerification.userName}
+                      {t('verification_page.management.dossier', 'Verification Dossier')}: {selectedVerification.userName}
                     </h5>
                     <small className="text-white-50">
-                      NIC: {selectedVerification.nicNumber} • User ID #{selectedVerification.userId}
+                      {t('verification_page.management.nic_number', 'NIC')}: {selectedVerification.nicNumber} • {t('verification_page.management.user_id', 'User ID')} #{selectedVerification.userId}
                     </small>
                   </div>
                 </div>
@@ -429,23 +429,23 @@ const VerificationManagement = () => {
                 <div className="p-3 bg-light rounded-3 mb-4 border">
                   <div className="row g-3">
                     <div className="col-md-3">
-                      <div className="text-muted small">Full Legal Name</div>
+                      <div className="text-muted small">{t('verification_page.management.full_legal_name', 'Full Legal Name')}</div>
                       <div className="fw-bold text-dark">{selectedVerification.userName}</div>
                     </div>
                     <div className="col-md-3">
-                      <div className="text-muted small">NIC Number</div>
+                      <div className="text-muted small">{t('verification_page.management.nic_number', 'NIC Number')}</div>
                       <div className="font-monospace fw-bold text-dark">{selectedVerification.nicNumber}</div>
                     </div>
                     <div className="col-md-3">
-                      <div className="text-muted small">Email & Phone</div>
+                      <div className="text-muted small">{t('verification_page.management.email_phone', 'Email & Phone')}</div>
                       <div className="text-dark small">{selectedVerification.userEmail}</div>
                       <div className="text-dark small">{selectedVerification.userPhone}</div>
                     </div>
                     <div className="col-md-3">
-                      <div className="text-muted small">GN Division / Issue Date</div>
-                      <div className="text-dark small">{selectedVerification.gnDivision || 'Not specified'}</div>
+                      <div className="text-muted small">{t('verification_page.management.gn_division_issue_date', 'GN Division / Issue Date')}</div>
+                      <div className="text-dark small">{selectedVerification.gnDivision || t('verification_page.management.not_specified', 'Not specified')}</div>
                       <div className="text-muted small">
-                        {selectedVerification.gnIssueDate ? `Issued: ${selectedVerification.gnIssueDate}` : ''}
+                        {selectedVerification.gnIssueDate ? `${t('verification_page.management.issued', 'Issued')}: ${selectedVerification.gnIssueDate}` : ''}
                       </div>
                     </div>
                   </div>
@@ -454,35 +454,35 @@ const VerificationManagement = () => {
                 {/* If rejected, show rejection reason */}
                 {selectedVerification.rejectionReason && (
                   <div className="alert alert-danger mb-4 p-3 rounded-3 small">
-                    <strong>Rejection Reason:</strong> {selectedVerification.rejectionReason}
+                    <strong>{t('verification_page.management.rejection_reason', 'Rejection Reason')}:</strong> {selectedVerification.rejectionReason}
                   </div>
                 )}
 
                 {/* Primary Documents Grid */}
-                <h6 className="fw-bold text-dark mb-3">Primary Verification Documents</h6>
+                <h6 className="fw-bold text-dark mb-3">{t('verification_page.management.primary_documents', 'Primary Verification Documents')}</h6>
                 <div className="row g-3 mb-4">
                   {/* NIC Front */}
                   <div className="col-md-4">
                     <div className="card h-100 border rounded-3 p-3 text-center shadow-sm">
-                      <div className="fw-bold text-dark small mb-2">1. NIC Front Page</div>
+                      <div className="fw-bold text-dark small mb-2">1. {t('verification_page.management.nic_front', 'NIC Front Page')}</div>
                       <div
-                        onClick={() => openPreview('NIC Front Page', selectedVerification.nicFrontImagePath)}
+                        onClick={() => openPreview(t('verification_page.management.nic_front', 'NIC Front Page'), selectedVerification.nicFrontImagePath)}
                         style={{ height: '170px', backgroundColor: '#F8FAFC', cursor: 'pointer' }}
                         className="rounded border d-flex align-items-center justify-content-center overflow-hidden mb-2"
                       >
                         <img
                           src={`http://localhost:8081${selectedVerification.nicFrontImagePath}`}
-                          alt="NIC Front"
+                          alt={t('verification_page.management.nic_front', 'NIC Front Page')}
                           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                         />
                       </div>
                       <button
                         type="button"
-                        onClick={() => openPreview('NIC Front Page', selectedVerification.nicFrontImagePath)}
+                        onClick={() => openPreview(t('verification_page.management.nic_front', 'NIC Front Page'), selectedVerification.nicFrontImagePath)}
                         className="btn btn-sm btn-outline-secondary w-100 py-1"
                         style={{ fontSize: '0.78rem' }}
                       >
-                        <Eye size={13} className="me-1" /> Enlarge NIC Front
+                        <Eye size={13} className="me-1" /> {t('verification_page.management.enlarge_nic_front', 'Enlarge NIC Front')}
                       </button>
                     </div>
                   </div>
@@ -490,25 +490,25 @@ const VerificationManagement = () => {
                   {/* NIC Back */}
                   <div className="col-md-4">
                     <div className="card h-100 border rounded-3 p-3 text-center shadow-sm">
-                      <div className="fw-bold text-dark small mb-2">2. NIC Back Page</div>
+                      <div className="fw-bold text-dark small mb-2">2. {t('verification_page.management.nic_back', 'NIC Back Page')}</div>
                       <div
-                        onClick={() => openPreview('NIC Back Page', selectedVerification.nicBackImagePath)}
+                        onClick={() => openPreview(t('verification_page.management.nic_back', 'NIC Back Page'), selectedVerification.nicBackImagePath)}
                         style={{ height: '170px', backgroundColor: '#F8FAFC', cursor: 'pointer' }}
                         className="rounded border d-flex align-items-center justify-content-center overflow-hidden mb-2"
                       >
                         <img
                           src={`http://localhost:8081${selectedVerification.nicBackImagePath}`}
-                          alt="NIC Back"
+                          alt={t('verification_page.management.nic_back', 'NIC Back Page')}
                           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                         />
                       </div>
                       <button
                         type="button"
-                        onClick={() => openPreview('NIC Back Page', selectedVerification.nicBackImagePath)}
+                        onClick={() => openPreview(t('verification_page.management.nic_back', 'NIC Back Page'), selectedVerification.nicBackImagePath)}
                         className="btn btn-sm btn-outline-secondary w-100 py-1"
                         style={{ fontSize: '0.78rem' }}
                       >
-                        <Eye size={13} className="me-1" /> Enlarge NIC Back
+                        <Eye size={13} className="me-1" /> {t('verification_page.management.enlarge_nic_back', 'Enlarge NIC Back')}
                       </button>
                     </div>
                   </div>
@@ -516,32 +516,32 @@ const VerificationManagement = () => {
                   {/* Grama Niladhari Certificate */}
                   <div className="col-md-4">
                     <div className="card h-100 border rounded-3 p-3 text-center shadow-sm">
-                      <div className="fw-bold text-dark small mb-2">3. Grama Niladhari Certificate</div>
+                      <div className="fw-bold text-dark small mb-2">3. {t('verification_page.management.gn_certificate', 'Grama Niladhari Certificate')}</div>
                       <div
-                        onClick={() => openPreview('Grama Niladhari Certificate', selectedVerification.gnCertificateImagePath)}
+                        onClick={() => openPreview(t('verification_page.management.gn_certificate', 'Grama Niladhari Certificate'), selectedVerification.gnCertificateImagePath)}
                         style={{ height: '170px', backgroundColor: '#F8FAFC', cursor: 'pointer' }}
                         className="rounded border d-flex align-items-center justify-content-center overflow-hidden mb-2"
                       >
                         {selectedVerification.gnCertificateImagePath.toLowerCase().endsWith('.pdf') ? (
                           <div className="text-center p-3">
                             <FileText size={42} className="text-danger" />
-                            <div className="text-danger fw-bold small">Official PDF Document</div>
+                            <div className="text-danger fw-bold small">{t('verification_page.management.official_pdf', 'Official PDF Document')}</div>
                           </div>
                         ) : (
                           <img
                             src={`http://localhost:8081${selectedVerification.gnCertificateImagePath}`}
-                            alt="GN Certificate"
+                            alt={t('verification_page.management.gn_certificate', 'Grama Niladhari Certificate')}
                             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                           />
                         )}
                       </div>
                       <button
                         type="button"
-                        onClick={() => openPreview('Grama Niladhari Certificate', selectedVerification.gnCertificateImagePath)}
+                        onClick={() => openPreview(t('verification_page.management.gn_certificate', 'Grama Niladhari Certificate'), selectedVerification.gnCertificateImagePath)}
                         className="btn btn-sm btn-outline-secondary w-100 py-1"
                         style={{ fontSize: '0.78rem' }}
                       >
-                        <Eye size={13} className="me-1" /> Enlarge GN Certificate
+                        <Eye size={13} className="me-1" /> {t('verification_page.management.enlarge_gn_certificate', 'Enlarge GN Certificate')}
                       </button>
                     </div>
                   </div>
@@ -550,7 +550,7 @@ const VerificationManagement = () => {
                 {/* Additional Supporting Documents */}
                 {selectedVerification.additionalDocuments && selectedVerification.additionalDocuments.length > 0 && (
                   <>
-                    <h6 className="fw-bold text-dark mb-3">Additional Supporting Documents</h6>
+                    <h6 className="fw-bold text-dark mb-3">{t('verification_page.management.additional_documents', 'Additional Supporting Documents')}</h6>
                     <div className="row g-3 mb-3">
                       {selectedVerification.additionalDocuments.map((doc) => (
                         <div key={doc.id} className="col-md-4">
@@ -567,7 +567,7 @@ const VerificationManagement = () => {
                               {doc.documentImagePath.toLowerCase().endsWith('.pdf') ? (
                                 <div className="text-center">
                                   <FileText size={36} className="text-danger" />
-                                  <div className="text-danger fw-bold small">PDF File</div>
+                                  <div className="text-danger fw-bold small">{t('verification_page.management.pdf_file', 'PDF File')}</div>
                                 </div>
                               ) : (
                                 <img
@@ -588,7 +588,7 @@ const VerificationManagement = () => {
                               className="btn btn-sm btn-outline-secondary w-100 py-1"
                               style={{ fontSize: '0.78rem' }}
                             >
-                              <Eye size={13} className="me-1" /> View Document
+                              <Eye size={13} className="me-1" /> {t('verification_page.management.view_document', 'View Document')}
                             </button>
                           </div>
                         </div>
@@ -605,7 +605,7 @@ const VerificationManagement = () => {
                   className="btn btn-outline-secondary px-3"
                   onClick={() => setSelectedVerification(null)}
                 >
-                  Close
+                  {t('verification_page.management.close', 'Close')}
                 </button>
 
                 <div className="d-flex align-items-center gap-2">
@@ -615,7 +615,7 @@ const VerificationManagement = () => {
                     className="btn btn-danger fw-bold px-3 shadow-sm"
                     disabled={actionLoading}
                   >
-                    <X size={13} className="me-1" /> Reject Verification
+                    <X size={13} className="me-1" /> {t('verification_page.management.reject_verification', 'Reject Verification')}
                   </button>
                   <button
                     type="button"
@@ -625,11 +625,11 @@ const VerificationManagement = () => {
                   >
                     {selectedVerification.verificationStatus === 'VERIFIED' ? (
                       <span className="d-inline-flex align-items-center gap-1">
-                        <Check size={14} /> Verified
+                        <Check size={14} /> {t('verification_page.management.verified', 'Verified')}
                       </span>
                     ) : (
                       <span className="d-inline-flex align-items-center gap-1">
-                        <Check size={14} /> Approve Verification
+                        <Check size={14} /> {t('verification_page.management.approve_verification', 'Approve Verification')}
                       </span>
                     )}
                   </button>
@@ -646,7 +646,7 @@ const VerificationManagement = () => {
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
               <div className="modal-header bg-danger text-white px-4 py-3">
-                <h6 className="modal-title fw-bold mb-0">Specify Rejection Reason</h6>
+                <h6 className="modal-title fw-bold mb-0">{t('verification_page.management.specify_rejection_reason', 'Specify Rejection Reason')}</h6>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowRejectModal(false)} />
               </div>
               <form onSubmit={handleConfirmReject}>
@@ -657,16 +657,16 @@ const VerificationManagement = () => {
                     </div>
                   )}
                   <p className="text-muted small mb-3">
-                    Please provide clear guidance to the member explaining why their verification was rejected, so they can re-upload proper documents.
+                    {t('verification_page.management.rejection_instructions', 'Please provide clear guidance to the member explaining why their verification was rejected, so they can re-upload proper documents.')}
                   </p>
                   <div className="mb-3">
                     <label className="form-label small fw-semibold text-secondary">
-                      Rejection Reason <span className="text-danger">*</span>
+                      {t('verification_page.management.rejection_reason', 'Rejection Reason')} <span className="text-danger">*</span>
                     </label>
                     <textarea
                       className="form-control"
                       rows="4"
-                      placeholder="e.g. NIC front image is blurry and illegible. Grama Niladhari certificate date is older than 6 months. Please re-upload clear photos."
+                      placeholder={t('verification_page.management.rejection_placeholder', 'e.g. NIC front image is blurry and illegible. Grama Niladhari certificate date is older than 6 months. Please re-upload clear photos.')}
                       value={rejectionReason}
                       onChange={(e) => setRejectionReason(e.target.value)}
                       required
@@ -675,14 +675,16 @@ const VerificationManagement = () => {
                 </div>
                 <div className="modal-footer bg-light p-3">
                   <button type="button" className="btn btn-sm btn-secondary" onClick={() => setShowRejectModal(false)}>
-                    Cancel
+                    {t('verification_page.management.cancel', 'Cancel')}
                   </button>
                   <button
                     type="submit"
                     className="btn btn-sm btn-danger fw-bold px-3 shadow-sm"
                     disabled={actionLoading || !rejectionReason.trim()}
                   >
-                    {actionLoading ? 'Rejecting…' : 'Confirm Rejection'}
+                    {actionLoading
+                      ? t('verification_page.management.rejecting', 'Rejecting…')
+                      : t('verification_page.management.confirm_rejection', 'Confirm Rejection')}
                   </button>
                 </div>
               </form>

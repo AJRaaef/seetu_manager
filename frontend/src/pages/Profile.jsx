@@ -119,12 +119,18 @@ const Profile = () => {
   };
 
   const formatJoinDate = (dateStr) => {
-    if (!dateStr) return 'Member since 2024';
+    if (!dateStr) return t('profile_page.member_since', { date: 2024, defaultValue: 'Member since {{date}}' });
     try {
       const d = new Date(dateStr);
-      return `Member since ${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+      return t('profile_page.member_since', {
+        date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        defaultValue: 'Member since {{date}}',
+      });
     } catch {
-      return `Member since ${dateStr.split('T')[0]}`;
+      return t('profile_page.member_since', {
+        date: dateStr.split('T')[0],
+        defaultValue: 'Member since {{date}}',
+      });
     }
   };
 
@@ -249,7 +255,7 @@ const Profile = () => {
             style={{ backgroundColor: '#EFF6FF', color: '#1E40AF', border: '1px solid #BFDBFE', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.4px' }}
           >
             <Icon name="shield" size={13} color="#1E40AF" />
-            <span>PLATFORM ADMINISTRATOR</span>
+            <span>{t('profile_page.role_admin', 'PLATFORM ADMINISTRATOR')}</span>
           </span>
         );
       case 'ORGANIZER':
@@ -259,7 +265,7 @@ const Profile = () => {
             style={{ backgroundColor: '#ECFDF5', color: '#065F46', border: '1px solid #A7F3D0', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.4px' }}
           >
             <Icon name="award" size={13} color="#065F46" />
-            <span>SEETTU ORGANIZER</span>
+            <span>{t('profile_page.role_organizer', 'SEETTU ORGANIZER')}</span>
           </span>
         );
       default:
@@ -269,7 +275,7 @@ const Profile = () => {
             style={{ backgroundColor: '#F8FAFC', color: '#334155', border: '1px solid #E2E8F0', fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.4px' }}
           >
             <Icon name="user" size={13} color="#334155" />
-            <span>COMMUNITY MEMBER</span>
+            <span>{t('profile_page.role_member', 'COMMUNITY MEMBER')}</span>
           </span>
         );
     }
@@ -285,10 +291,10 @@ const Profile = () => {
           </h2>
           <p className="profile-page-subtitle mb-0">
             {isAdmin
-              ? 'Manage system administrator credentials, security access, and platform oversight.'
+              ? t('profile_page.admin_subtitle', 'Manage system administrator credentials, security access, and platform oversight.')
               : isOrganizer
-              ? 'Manage your organizer profile, circle settings, and security credentials.'
-              : 'Manage your personal profile details, enrolled circles, and security settings.'}
+              ? t('profile_page.organizer_subtitle', 'Manage your organizer profile, circle settings, and security credentials.')
+              : t('profile_page.member_subtitle', 'Manage your personal profile details, enrolled circles, and security settings.')}
           </p>
         </div>
 
@@ -300,7 +306,7 @@ const Profile = () => {
               style={{ backgroundColor: '#DCFCE7', color: '#15803D', border: '1px solid #BBF7D0', fontSize: '0.78rem', fontWeight: 600 }}
             >
               <Icon name="check-circle" size={13} color="#15803D" />
-              <span>KYC Verified</span>
+              <span>{t('profile_page.kyc_verified', 'KYC Verified')}</span>
             </span>
           ) : userInfo?.kycStatus === 'IN_REVIEW' ? (
             <span
@@ -308,7 +314,7 @@ const Profile = () => {
               style={{ backgroundColor: '#FEF3C7', color: '#B45309', border: '1px solid #FDE68A', fontSize: '0.78rem', fontWeight: 600 }}
             >
               <Icon name="clock" size={13} color="#B45309" />
-              <span>KYC Under Review</span>
+              <span>{t('profile_page.kyc_under_review', 'KYC Under Review')}</span>
             </span>
           ) : null}
         </div>
@@ -368,7 +374,7 @@ const Profile = () => {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingPic}
                 className="profile-camera-btn"
-                title="Change Profile Picture"
+                title={t('profile_page.change_picture', 'Change Profile Picture')}
               >
                 <Icon name="camera" size={16} color="#ffffff" />
               </button>
@@ -409,7 +415,7 @@ const Profile = () => {
                     style={{ background: '#FFFBEB', border: '1px solid #FDE68A', color: '#92400E', fontSize: '0.82rem' }}
                   >
                     <Icon name="clock" size={15} color="#92400E" />
-                    <span className="fw-semibold">Organizer Application Under Review</span>
+                    <span className="fw-semibold">{t('profile_page.organizer_application_review', 'Organizer Application Under Review')}</span>
                   </div>
                 ) : (
                   <button
@@ -419,7 +425,7 @@ const Profile = () => {
                     onClick={() => setShowOrgModal(true)}
                   >
                     <Icon name="award" size={16} color="#fff" />
-                    Become an Organizer
+                    {t('profile_page.become_organizer', 'Become an Organizer')}
                   </button>
                 )}
               </div>
@@ -431,7 +437,7 @@ const Profile = () => {
               className="btn btn-teal w-100 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-2 mb-3"
             >
               <Icon name={isEditing ? 'x' : 'edit'} size={15} />
-              <span>{isEditing ? t('common.cancel', 'Cancel Edit') : t('common.edit', 'Edit Profile')}</span>
+              <span>{isEditing ? t('profile_page.cancel_edit', 'Cancel Edit') : t('profile_page.edit_profile', 'Edit Profile')}</span>
             </button>
 
             {/* Viewing vs Editing States */}
@@ -446,7 +452,7 @@ const Profile = () => {
                     className="form-control"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Enter your full name"
+                    placeholder={t('profile_page.name_placeholder', 'Enter your full name')}
                     required
                   />
                 </div>
@@ -460,7 +466,7 @@ const Profile = () => {
                     className="form-control"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="e.g. 0771234567"
+                    placeholder={t('profile_page.phone_placeholder', 'e.g. 0771234567')}
                     required
                   />
                 </div>
@@ -468,10 +474,10 @@ const Profile = () => {
                 <div className="mb-3 p-2.5 rounded-3 bg-light border text-start">
                   <div className="small fw-semibold text-dark mb-1 d-flex align-items-center gap-1.5">
                     <Icon name="upload" size={14} color="#0097B2" />
-                    <span>Upload New Photo</span>
+                    <span>{t('profile_page.upload_new_photo', 'Upload New Photo')}</span>
                   </div>
                   <p className="text-muted mb-2" style={{ fontSize: '0.75rem' }}>
-                    JPG, PNG, or WEBP up to 5MB supported.
+                    {t('profile_page.photo_requirements', 'JPG, PNG, or WEBP up to 5MB supported.')}
                   </p>
                   <button
                     type="button"
@@ -480,7 +486,7 @@ const Profile = () => {
                     className="btn btn-sm btn-outline-secondary w-100 d-inline-flex align-items-center justify-content-center gap-1.5"
                   >
                     <Icon name="camera" size={14} />
-                    <span>Select Photo from Device</span>
+                    <span>{t('profile_page.select_photo', 'Select Photo from Device')}</span>
                   </button>
                 </div>
 
@@ -508,7 +514,7 @@ const Profile = () => {
                 <div className="profile-info-tile">
                   <div className="profile-info-tile-label">
                     <Icon name="mail" size={15} color="#0097B2" />
-                    <span>Email</span>
+                    <span>{t('profile_page.email', 'Email')}</span>
                   </div>
                   <div className="profile-info-tile-val" title={userInfo?.email || '-'}>
                     {userInfo?.email || '-'}
@@ -519,10 +525,10 @@ const Profile = () => {
                 <div className="profile-info-tile">
                   <div className="profile-info-tile-label">
                     <Icon name="phone" size={15} color="#0097B2" />
-                    <span>Phone</span>
+                    <span>{t('profile_page.phone_label', 'Phone')}</span>
                   </div>
                   <div className="profile-info-tile-val">
-                    {phone || userInfo?.phone || 'Not provided'}
+                    {phone || userInfo?.phone || t('profile_page.not_provided', 'Not provided')}
                   </div>
                 </div>
 
@@ -530,7 +536,7 @@ const Profile = () => {
                 <div className="profile-info-tile">
                   <div className="profile-info-tile-label">
                     <Icon name="calendar" size={15} color="#0097B2" />
-                    <span>Joined</span>
+                    <span>{t('profile_page.joined', 'Joined')}</span>
                   </div>
                   <div className="profile-info-tile-val">
                     {formatJoinDate(userInfo?.createdAt)}
@@ -541,10 +547,14 @@ const Profile = () => {
                 <div className="profile-info-tile">
                   <div className="profile-info-tile-label">
                     <Icon name="globe" size={15} color="#0097B2" />
-                    <span>Language</span>
+                    <span>{t('profile_page.language', 'Language')}</span>
                   </div>
                   <div className="profile-info-tile-val">
-                    {userInfo?.preferredLanguage === 'SI' ? 'Sinhala' : userInfo?.preferredLanguage === 'TA' ? 'Tamil' : 'English'}
+                    {userInfo?.preferredLanguage === 'SI'
+                      ? t('profile_page.sinhala', 'Sinhala')
+                      : userInfo?.preferredLanguage === 'TA'
+                      ? t('profile_page.tamil', 'Tamil')
+                      : t('profile_page.english', 'English')}
                   </div>
                 </div>
 
@@ -552,10 +562,10 @@ const Profile = () => {
                 <div className="profile-info-tile mb-0">
                   <div className="profile-info-tile-label">
                     <Icon name="shield" size={15} color="#15803D" />
-                    <span>Account Standing</span>
+                    <span>{t('profile_page.account_standing', 'Account Standing')}</span>
                   </div>
                   <div className="profile-info-tile-val text-success">
-                    Active & Compliant
+                    {t('profile_page.active_compliant', 'Active & Compliant')}
                   </div>
                 </div>
               </div>
@@ -571,27 +581,27 @@ const Profile = () => {
                     <Icon name="shield" size={18} color="#0097B2" />
                   </div>
                   <div>
-                    <h6 className="fw-bold text-dark mb-0">Platform Administration</h6>
-                    <small className="text-muted">System Governance Scope</small>
+                    <h6 className="fw-bold text-dark mb-0">{t('profile_page.platform_administration', 'Platform Administration')}</h6>
+                    <small className="text-muted">{t('profile_page.system_governance_scope', 'System Governance Scope')}</small>
                   </div>
                 </div>
 
                 <p className="small text-muted mb-3 leading-relaxed">
-                  You possess full supervisory authority over Seettu transaction flows, dispute mediation, and member compliance across Sri Lanka.
+                  {t('profile_page.admin_authority_description', 'You possess full supervisory authority over Seettu transaction flows, dispute mediation, and member compliance across Sri Lanka.')}
                 </p>
 
                 <div className="d-flex flex-column gap-2 mb-3">
                   <div className="d-flex align-items-center gap-2 small text-dark">
                     <Icon name="check" size={14} color="#15803D" />
-                    <span>Financial audit reconciliation ledger</span>
+                    <span>{t('profile_page.audit_reconciliation', 'Financial audit reconciliation ledger')}</span>
                   </div>
                   <div className="d-flex align-items-center gap-2 small text-dark">
                     <Icon name="check" size={14} color="#15803D" />
-                    <span>Chief arbitrator for member disputes</span>
+                    <span>{t('profile_page.chief_arbitrator_disputes', 'Chief arbitrator for member disputes')}</span>
                   </div>
                   <div className="d-flex align-items-center gap-2 small text-dark">
                     <Icon name="check" size={14} color="#15803D" />
-                    <span>NIC & Grama Niladhari KYC verification</span>
+                    <span>{t('profile_page.nic_kyc_verification', 'NIC & Grama Niladhari KYC verification')}</span>
                   </div>
                 </div>
 
@@ -601,14 +611,14 @@ const Profile = () => {
                     className="btn btn-sm btn-outline-teal w-100 d-inline-flex align-items-center justify-content-center gap-2"
                   >
                     <Icon name="file-text" size={14} />
-                    <span>Audit Reports Ledger</span>
+                    <span>{t('profile_page.audit_reports_ledger', 'Audit Reports Ledger')}</span>
                   </button>
                   <button
                     onClick={() => navigate('/disputes')}
                     className="btn btn-sm btn-outline-secondary w-100 d-inline-flex align-items-center justify-content-center gap-2"
                   >
                     <Icon name="scale" size={14} />
-                    <span>Dispute Settlement Desk</span>
+                    <span>{t('profile_page.dispute_settlement_desk', 'Dispute Settlement Desk')}</span>
                   </button>
                 </div>
               </div>
@@ -619,27 +629,27 @@ const Profile = () => {
                     <Icon name="award" size={18} color="#0097B2" />
                   </div>
                   <div>
-                    <h6 className="fw-bold text-dark mb-0">Organizer Workspace</h6>
-                    <small className="text-muted">Circle Coordinator Privileges</small>
+                    <h6 className="fw-bold text-dark mb-0">{t('profile_page.organizer_workspace', 'Organizer Workspace')}</h6>
+                    <small className="text-muted">{t('profile_page.circle_coordinator_privileges', 'Circle Coordinator Privileges')}</small>
                   </div>
                 </div>
 
                 <p className="small text-muted mb-3 leading-relaxed">
-                  You are licensed to organize rotating Seettu circles, oversee monthly collection cycles, and disburse rotation vouchers.
+                  {t('profile_page.organizer_description', 'You are licensed to organize rotating Seettu circles, oversee monthly collection cycles, and disburse rotation vouchers.')}
                 </p>
 
                 <div className="d-flex flex-column gap-2 mb-3">
                   <div className="d-flex align-items-center gap-2 small text-dark">
                     <Icon name="check" size={14} color="#15803D" />
-                    <span>Collect & track monthly member pot fees</span>
+                    <span>{t('profile_page.track_monthly_fees', 'Collect & track monthly member pot fees')}</span>
                   </div>
                   <div className="d-flex align-items-center gap-2 small text-dark">
                     <Icon name="check" size={14} color="#15803D" />
-                    <span>Approve disbursement vouchers</span>
+                    <span>{t('profile_page.approve_vouchers', 'Approve disbursement vouchers')}</span>
                   </div>
                   <div className="d-flex align-items-center gap-2 small text-dark">
                     <Icon name="check" size={14} color="#15803D" />
-                    <span>Evaluate member emergency draw requests</span>
+                    <span>{t('profile_page.evaluate_emergency_requests', 'Evaluate member emergency draw requests')}</span>
                   </div>
                 </div>
 
@@ -649,14 +659,14 @@ const Profile = () => {
                     className="btn btn-sm btn-teal w-100 d-inline-flex align-items-center justify-content-center gap-2"
                   >
                     <Icon name="plus" size={14} />
-                    <span>Manage / Create Circles</span>
+                    <span>{t('profile_page.manage_circles', 'Manage / Create Circles')}</span>
                   </button>
                   <button
                     onClick={() => navigate('/payments')}
                     className="btn btn-sm btn-outline-secondary w-100 d-inline-flex align-items-center justify-content-center gap-2"
                   >
                     <Icon name="credit-card" size={14} />
-                    <span>Payment Tracking Desk</span>
+                    <span>{t('profile_page.payment_tracking_desk', 'Payment Tracking Desk')}</span>
                   </button>
                 </div>
               </div>
@@ -667,27 +677,27 @@ const Profile = () => {
                     <Icon name="handshake" size={18} color="#0097B2" />
                   </div>
                   <div>
-                    <h6 className="fw-bold text-dark mb-0">Member Participation Desk</h6>
-                    <small className="text-muted">Community Savings Standing</small>
+                    <h6 className="fw-bold text-dark mb-0">{t('profile_page.member_participation_desk', 'Member Participation Desk')}</h6>
+                    <small className="text-muted">{t('profile_page.community_savings_standing', 'Community Savings Standing')}</small>
                   </div>
                 </div>
 
                 <p className="small text-muted mb-3 leading-relaxed">
-                  Maintain an on-time contribution streak to safeguard your 90+ discipline rating and qualify for emergency relief loans.
+                  {t('profile_page.member_description', 'Maintain an on-time contribution streak to safeguard your 90+ discipline rating and qualify for emergency relief loans.')}
                 </p>
 
                 <div className="d-flex flex-column gap-2 mb-3">
                   <div className="d-flex align-items-center gap-2 small text-dark">
                     <Icon name="check" size={14} color="#15803D" />
-                    <span>Zero-interest rotating community pot</span>
+                    <span>{t('profile_page.zero_interest_pot', 'Zero-interest rotating community pot')}</span>
                   </div>
                   <div className="d-flex align-items-center gap-2 small text-dark">
                     <Icon name="check" size={14} color="#15803D" />
-                    <span>Eligible for advance emergency payouts</span>
+                    <span>{t('profile_page.advance_emergency_payouts', 'Eligible for advance emergency payouts')}</span>
                   </div>
                   <div className="d-flex align-items-center gap-2 small text-dark">
                     <Icon name="check" size={14} color="#15803D" />
-                    <span>Official completion certificates on payout</span>
+                    <span>{t('profile_page.official_certificates', 'Official completion certificates on payout')}</span>
                   </div>
                 </div>
 
@@ -697,14 +707,14 @@ const Profile = () => {
                     className="btn btn-sm btn-teal w-100 d-inline-flex align-items-center justify-content-center gap-2"
                   >
                     <Icon name="users" size={14} />
-                    <span>Explore Seettu Circles</span>
+                    <span>{t('profile_page.explore_circles', 'Explore Seettu Circles')}</span>
                   </button>
                   <button
                     onClick={() => navigate('/emergency')}
                     className="btn btn-sm btn-outline-secondary w-100 d-inline-flex align-items-center justify-content-center gap-2"
                   >
                     <Icon name="emergency" size={14} />
-                    <span>Emergency Aid Desk</span>
+                    <span>{t('profile_page.emergency_aid_desk', 'Emergency Aid Desk')}</span>
                   </button>
                 </div>
               </div>
@@ -719,22 +729,26 @@ const Profile = () => {
             <div className="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
               <div>
                 <h5 className="fw-bold text-dark mb-0">
-                  {isAdmin ? 'System Group Oversight' : 'My Seettu Circles'}
+                  {isAdmin
+                    ? t('profile_page.system_group_oversight', 'System Group Oversight')
+                    : t('profile_page.my_circles', 'My Seettu Circles')}
                 </h5>
                 <small className="text-muted">
                   {isAdmin
-                    ? 'Platform-wide group governance and monitoring'
-                    : 'Active participation and circle memberships'}
+                    ? t('profile_page.platform_group_subtitle', 'Platform-wide group governance and monitoring')
+                    : t('profile_page.member_group_subtitle', 'Active participation and circle memberships')}
                 </small>
               </div>
 
               {isAdmin ? (
                 <span className="badge bg-info-subtle text-info border px-2.5 py-1 fw-bold">
-                  Platform Oversight
+                  {t('profile_page.platform_oversight', 'Platform Oversight')}
                 </span>
               ) : (
                 <span className="badge bg-teal-subtle text-teal px-2.5 py-1 fw-bold">
-                  {groups.length} {groups.length === 1 ? 'Circle' : 'Circles'}
+                  {groups.length} {groups.length === 1
+                    ? t('profile_page.circle', 'Circle')
+                    : t('profile_page.circles', 'Circles')}
                 </span>
               )}
             </div>
@@ -747,34 +761,34 @@ const Profile = () => {
                 >
                   <Icon name="shield" size={28} color="#1E40AF" />
                 </div>
-                <h6 className="fw-bold text-dark mb-1">Administrative Governance Scope</h6>
+                <h6 className="fw-bold text-dark mb-1">{t('profile_page.admin_governance_scope', 'Administrative Governance Scope')}</h6>
                 <p className="text-muted small mx-auto mb-3" style={{ maxWidth: '500px' }}>
-                  As a System Administrator, you supervise all registered Seettu circles, verify organizer credentials, and audit financial flows instead of contributing personal pot shares.
+                  {t('profile_page.admin_group_description', 'As a System Administrator, you supervise all registered Seettu circles, verify organizer credentials, and audit financial flows instead of contributing personal pot shares.')}
                 </p>
                 <div className="d-flex justify-content-center gap-2">
                   <button onClick={() => navigate('/groups')} className="btn btn-sm btn-teal d-inline-flex align-items-center gap-1.5">
                     <Icon name="users" size={14} />
-                    <span>Inspect Platform Circles</span>
+                    <span>{t('profile_page.inspect_circles', 'Inspect Platform Circles')}</span>
                   </button>
                   <button onClick={() => navigate('/verification')} className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1.5">
                     <Icon name="check-circle" size={14} />
-                    <span>KYC Approvals</span>
+                    <span>{t('profile_page.kyc_approvals', 'KYC Approvals')}</span>
                   </button>
                 </div>
               </div>
             ) : loading ? (
               <div className="text-center py-4">
                 <div className="spinner-border spinner-border-sm text-teal" role="status" style={{ color: '#0097B2' }}></div>
-                <span className="ms-2 text-muted small">Loading circle memberships...</span>
+                <span className="ms-2 text-muted small">{t('profile_page.loading_memberships', 'Loading circle memberships...')}</span>
               </div>
             ) : groups.length === 0 ? (
               <div className="text-center py-4 text-muted">
                 <Icon name="users" size={32} color="#94A3B8" className="mb-2 d-block mx-auto" />
-                <div className="fw-semibold text-dark mb-1">No Active Seettu Groups</div>
-                <div className="small mb-3">You are not currently enrolled in any community circles.</div>
+                <div className="fw-semibold text-dark mb-1">{t('profile_page.no_active_groups', 'No Active Seettu Groups')}</div>
+                <div className="small mb-3">{t('profile_page.no_groups_description', 'You are not currently enrolled in any community circles.')}</div>
                 <button onClick={() => navigate('/groups')} className="btn btn-sm btn-teal d-inline-flex align-items-center gap-1.5">
                   <Icon name="plus" size={14} />
-                  <span>Browse & Join Circles</span>
+                  <span>{t('profile_page.browse_circles', 'Browse & Join Circles')}</span>
                 </button>
               </div>
             ) : (
@@ -804,11 +818,15 @@ const Profile = () => {
                               }
                               style={{ fontSize: '0.7rem' }}
                             >
-                              {isActive ? 'Active Circle' : isPending ? 'Pending Cycle' : g.status}
+                              {isActive
+                                ? t('profile_page.active_circle', 'Active Circle')
+                                : isPending
+                                ? t('profile_page.pending_cycle', 'Pending Cycle')
+                                : g.status}
                             </span>
                             {g.contributionAmount && (
                               <span className="text-muted small" style={{ fontSize: '0.72rem' }}>
-                                • LKR {Number(g.contributionAmount).toLocaleString()} / pot
+                                • LKR {Number(g.contributionAmount).toLocaleString()} / {t('profile_page.pot', 'pot')}
                               </span>
                             )}
                           </div>
@@ -819,7 +837,7 @@ const Profile = () => {
                         onClick={() => navigate(`/groups/${g.id}`)}
                         className="btn btn-sm btn-outline-teal d-inline-flex align-items-center gap-1 flex-shrink-0"
                       >
-                        <span>View</span>
+                        <span>{t('profile_page.view', 'View')}</span>
                         <Icon name="chevron-right" size={13} />
                       </button>
                     </div>
@@ -834,12 +852,14 @@ const Profile = () => {
             <div className="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
               <div>
                 <h5 className="fw-bold text-dark mb-0">
-                  {isAdmin ? 'Administrative Governance Overview' : 'Savings & Performance Statistics'}
+                  {isAdmin
+                    ? t('profile_page.admin_overview', 'Administrative Governance Overview')
+                    : t('profile_page.performance_statistics', 'Savings & Performance Statistics')}
                 </h5>
                 <small className="text-muted">
                   {isAdmin
-                    ? 'Supervisory authority and compliance metrics'
-                    : 'Your contributions, trust score, and circle achievements'}
+                    ? t('profile_page.admin_metrics', 'Supervisory authority and compliance metrics')
+                    : t('profile_page.member_metrics', 'Your contributions, trust score, and circle achievements')}
                 </small>
               </div>
             </div>
@@ -851,15 +871,15 @@ const Profile = () => {
                     <div className="profile-stat-tile" style={{ backgroundColor: '#EFF6FF', borderColor: '#DBEAFE' }}>
                       <div className="d-flex align-items-center justify-content-between mb-2">
                         <span className="small fw-semibold" style={{ color: '#1E40AF', fontSize: '0.8rem' }}>
-                          System Role
+                          {t('profile_page.system_role', 'System Role')}
                         </span>
                         <Icon name="shield" size={18} color="#2563EB" />
                       </div>
                       <div className="fs-6 fw-bold text-truncate" style={{ color: '#1E40AF' }}>
-                        Platform Administrator
+                        {t('profile_page.platform_administrator', 'Platform Administrator')}
                       </div>
                       <small className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>
-                        Supervisory governance authority
+                        {t('profile_page.supervisory_authority', 'Supervisory governance authority')}
                       </small>
                     </div>
                   </div>
@@ -868,15 +888,15 @@ const Profile = () => {
                     <div className="profile-stat-tile" style={{ backgroundColor: '#ECFDF5', borderColor: '#D1FAE5' }}>
                       <div className="d-flex align-items-center justify-content-between mb-2">
                         <span className="small fw-semibold" style={{ color: '#065F46', fontSize: '0.8rem' }}>
-                          Arbitration Standing
+                          {t('profile_page.arbitration_standing', 'Arbitration Standing')}
                         </span>
                         <Icon name="scale" size={18} color="#059669" />
                       </div>
                       <div className="fs-6 fw-bold" style={{ color: '#065F46' }}>
-                        Chief Arbitrator
+                        {t('profile_page.chief_arbitrator', 'Chief Arbitrator')}
                       </div>
                       <small className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>
-                        Final dispute appeals authority
+                        {t('profile_page.dispute_appeals_authority', 'Final dispute appeals authority')}
                       </small>
                     </div>
                   </div>
@@ -885,15 +905,15 @@ const Profile = () => {
                     <div className="profile-stat-tile" style={{ backgroundColor: '#F8FAFC', borderColor: '#E2E8F0' }}>
                       <div className="d-flex align-items-center justify-content-between mb-2">
                         <span className="small fw-semibold" style={{ color: '#475569', fontSize: '0.8rem' }}>
-                          Discipline Rating
+                          {t('profile_page.discipline_rating', 'Discipline Rating')}
                         </span>
                         <Icon name="check-circle" size={18} color="#64748B" />
                       </div>
                       <div className="fs-6 fw-bold" style={{ color: '#475569' }}>
-                        Exempt (Platform Oversight)
+                        {t('profile_page.exempt_oversight', 'Exempt (Platform Oversight)')}
                       </div>
                       <small className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>
-                        Non-participating supervisory account
+                        {t('profile_page.supervisory_account', 'Non-participating supervisory account')}
                       </small>
                     </div>
                   </div>
@@ -902,15 +922,15 @@ const Profile = () => {
                     <div className="profile-stat-tile" style={{ backgroundColor: '#FFFBEB', borderColor: '#FEF3C7' }}>
                       <div className="d-flex align-items-center justify-content-between mb-2">
                         <span className="small fw-semibold" style={{ color: '#92400E', fontSize: '0.8rem' }}>
-                          Privilege Scope
+                          {t('profile_page.privilege_scope', 'Privilege Scope')}
                         </span>
                         <Icon name="lock" size={18} color="#D97706" />
                       </div>
                       <div className="fs-6 fw-bold" style={{ color: '#92400E' }}>
-                        Full System Governance
+                        {t('profile_page.full_governance', 'Full System Governance')}
                       </div>
                       <small className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>
-                        Full ledger, dispute & user access
+                        {t('profile_page.full_access', 'Full ledger, dispute & user access')}
                       </small>
                     </div>
                   </div>
@@ -919,7 +939,7 @@ const Profile = () => {
                 <div className="mt-3 p-3 bg-light rounded-3 border d-flex align-items-center gap-2.5">
                   <Icon name="info" size={18} color="#0097B2" className="flex-shrink-0" />
                   <div className="small text-muted" style={{ fontSize: '0.8rem' }}>
-                    As Platform Administrator, you govern dispute settlements, monitor financial audits, and enforce platform regulations. You do not participate in contribution draws or hold personal discipline ratings.
+                    {t('profile_page.admin_oversight_notice', 'As Platform Administrator, you govern dispute settlements, monitor financial audits, and enforce platform regulations. You do not participate in contribution draws or hold personal discipline ratings.')}
                   </div>
                 </div>
               </div>
@@ -930,7 +950,7 @@ const Profile = () => {
                   <div className="profile-stat-tile" style={{ backgroundColor: '#FEF2F2', borderColor: '#FEE2E2' }}>
                     <div className="d-flex align-items-center justify-content-between mb-2">
                       <span className="small fw-semibold" style={{ color: '#991B1B', fontSize: '0.8rem' }}>
-                        Total Contributed
+                        {t('profile_page.total_contributed', 'Total Contributed')}
                       </span>
                       <Icon name="credit-card" size={18} color="#DC2626" />
                     </div>
@@ -938,7 +958,7 @@ const Profile = () => {
                       {totalContributed.toLocaleString()} LKR
                     </div>
                     <small className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>
-                      Verified circle payments deposited
+                      {t('profile_page.verified_payments', 'Verified circle payments deposited')}
                     </small>
                   </div>
                 </div>
@@ -948,15 +968,17 @@ const Profile = () => {
                   <div className="profile-stat-tile" style={{ backgroundColor: '#EFF6FF', borderColor: '#DBEAFE' }}>
                     <div className="d-flex align-items-center justify-content-between mb-2">
                       <span className="small fw-semibold" style={{ color: '#1E40AF', fontSize: '0.8rem' }}>
-                        Groups Participated
+                        {t('profile_page.groups_participated', 'Groups Participated')}
                       </span>
                       <Icon name="users" size={18} color="#2563EB" />
                     </div>
                     <div className="fs-5 fw-bold" style={{ color: '#1E40AF' }}>
-                      {groupsParticipated} {groupsParticipated === 1 ? 'Circle' : 'Circles'}
+                      {groupsParticipated} {groupsParticipated === 1
+                        ? t('profile_page.circle', 'Circle')
+                        : t('profile_page.circles', 'Circles')}
                     </div>
                     <small className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>
-                      Enrolled and completed circles
+                      {t('profile_page.completed_circles', 'Enrolled and completed circles')}
                     </small>
                   </div>
                 </div>
@@ -966,7 +988,7 @@ const Profile = () => {
                   <div className="profile-stat-tile" style={{ backgroundColor: '#ECFDF5', borderColor: '#D1FAE5' }}>
                     <div className="d-flex align-items-center justify-content-between mb-2">
                       <span className="small fw-semibold" style={{ color: '#065F46', fontSize: '0.8rem' }}>
-                        Discipline Score
+                        {t('profile_page.discipline_score', 'Discipline Score')}
                       </span>
                       <Icon name="award" size={18} color="#059669" />
                     </div>
@@ -976,11 +998,15 @@ const Profile = () => {
                         className="badge rounded-pill bg-success-subtle text-success border border-success-subtle"
                         style={{ fontSize: '0.68rem', fontWeight: 600 }}
                       >
-                        {averageDisciplineScore >= 90 ? 'Excellent' : averageDisciplineScore >= 75 ? 'Good' : 'Fair'}
+                        {averageDisciplineScore >= 90
+                          ? t('profile_page.excellent', 'Excellent')
+                          : averageDisciplineScore >= 75
+                          ? t('profile_page.good', 'Good')
+                          : t('profile_page.fair', 'Fair')}
                       </span>
                     </div>
                     <small className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>
-                      Platform reliability & trust rating
+                      {t('profile_page.reliability_rating', 'Platform reliability & trust rating')}
                     </small>
                   </div>
                 </div>
@@ -990,15 +1016,17 @@ const Profile = () => {
                   <div className="profile-stat-tile" style={{ backgroundColor: '#FFFBEB', borderColor: '#FEF3C7' }}>
                     <div className="d-flex align-items-center justify-content-between mb-2">
                       <span className="small fw-semibold" style={{ color: '#92400E', fontSize: '0.8rem' }}>
-                        Certificates Earned
+                        {t('profile_page.certificates_earned', 'Certificates Earned')}
                       </span>
                       <Icon name="graduation-cap" size={18} color="#D97706" />
                     </div>
                     <div className="fs-5 fw-bold" style={{ color: '#92400E' }}>
-                      {certificatesEarned} {certificatesEarned === 1 ? 'Award' : 'Awards'}
+                      {certificatesEarned} {certificatesEarned === 1
+                        ? t('profile_page.award', 'Award')
+                        : t('profile_page.awards', 'Awards')}
                     </div>
                     <small className="text-muted mt-1" style={{ fontSize: '0.72rem' }}>
-                      Verified cycle payout completions
+                      {t('profile_page.payout_completions', 'Verified cycle payout completions')}
                     </small>
                   </div>
                 </div>
@@ -1015,16 +1043,16 @@ const Profile = () => {
                 </div>
                 <div>
                   <h5 className="fw-bold mb-0 text-dark" style={{ fontSize: '1.05rem' }}>
-                    Security & Change Password
+                    {t('profile_page.security_password', 'Security & Change Password')}
                   </h5>
                   <small className="text-muted">
-                    Update your account credentials to safeguard access and circle funds
+                    {t('profile_page.password_help', 'Update your account credentials to safeguard access and circle funds')}
                   </small>
                 </div>
               </div>
 
               <span className="badge bg-light text-secondary border px-2.5 py-1 small fw-semibold">
-                All Roles Protected
+                {t('profile_page.all_roles_protected', 'All Roles Protected')}
               </span>
             </div>
 
@@ -1047,13 +1075,13 @@ const Profile = () => {
                 {/* Current Password */}
                 <div className="col-12 col-md-4">
                   <label className="form-label text-secondary fw-semibold small mb-1">
-                    Current Password <span className="text-danger">*</span>
+                    {t('profile_page.current_password', 'Current Password')} <span className="text-danger">*</span>
                   </label>
                   <div className="input-group">
                     <input
                       type={showCurrentPass ? 'text' : 'password'}
                       className="form-control"
-                      placeholder="Enter current password"
+                      placeholder={t('profile_page.current_password_placeholder', 'Enter current password')}
                       value={passwordForm.currentPassword}
                       onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
                       required
@@ -1062,7 +1090,7 @@ const Profile = () => {
                       type="button"
                       className="btn btn-outline-secondary"
                       onClick={() => setShowCurrentPass(!showCurrentPass)}
-                      title={showCurrentPass ? 'Hide password' : 'Show password'}
+                      title={showCurrentPass ? t('profile_page.hide_password', 'Hide password') : t('profile_page.show_password', 'Show password')}
                     >
                       <Icon name={showCurrentPass ? 'eye-off' : 'eye'} size={15} />
                     </button>
@@ -1072,13 +1100,13 @@ const Profile = () => {
                 {/* New Password */}
                 <div className="col-12 col-md-4">
                   <label className="form-label text-secondary fw-semibold small mb-1">
-                    New Password <span className="text-danger">*</span>
+                    {t('profile_page.new_password', 'New Password')} <span className="text-danger">*</span>
                   </label>
                   <div className="input-group">
                     <input
                       type={showNewPass ? 'text' : 'password'}
                       className="form-control"
-                      placeholder="Min. 6 characters"
+                      placeholder={t('profile_page.password_minimum', 'Min. 6 characters')}
                       value={passwordForm.newPassword}
                       onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
                       required
@@ -1087,7 +1115,7 @@ const Profile = () => {
                       type="button"
                       className="btn btn-outline-secondary"
                       onClick={() => setShowNewPass(!showNewPass)}
-                      title={showNewPass ? 'Hide password' : 'Show password'}
+                      title={showNewPass ? t('profile_page.hide_password', 'Hide password') : t('profile_page.show_password', 'Show password')}
                     >
                       <Icon name={showNewPass ? 'eye-off' : 'eye'} size={15} />
                     </button>
@@ -1097,13 +1125,13 @@ const Profile = () => {
                 {/* Confirm Password */}
                 <div className="col-12 col-md-4">
                   <label className="form-label text-secondary fw-semibold small mb-1">
-                    Confirm Password <span className="text-danger">*</span>
+                    {t('profile_page.confirm_password', 'Confirm Password')} <span className="text-danger">*</span>
                   </label>
                   <div className="input-group">
                     <input
                       type={showConfirmPass ? 'text' : 'password'}
                       className="form-control"
-                      placeholder="Re-type new password"
+                      placeholder={t('profile_page.confirm_password_placeholder', 'Re-type new password')}
                       value={passwordForm.confirmPassword}
                       onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
                       required
@@ -1112,7 +1140,7 @@ const Profile = () => {
                       type="button"
                       className="btn btn-outline-secondary"
                       onClick={() => setShowConfirmPass(!showConfirmPass)}
-                      title={showConfirmPass ? 'Hide password' : 'Show password'}
+                      title={showConfirmPass ? t('profile_page.hide_password', 'Hide password') : t('profile_page.show_password', 'Show password')}
                     >
                       <Icon name={showConfirmPass ? 'eye-off' : 'eye'} size={15} />
                     </button>
@@ -1122,7 +1150,7 @@ const Profile = () => {
 
               <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-3 pt-2">
                 <small className="text-muted" style={{ fontSize: '0.78rem' }}>
-                  Must be at least 6 characters and different from your current password.
+                  {t('profile_page.password_requirements', 'Must be at least 6 characters and different from your current password.')}
                 </small>
 
                 <button
@@ -1133,12 +1161,12 @@ const Profile = () => {
                   {passLoading ? (
                     <>
                       <span className="spinner-border spinner-border-sm" role="status"></span>
-                      <span>Updating Password...</span>
+                      <span>{t('profile_page.updating_password', 'Updating Password...')}</span>
                     </>
                   ) : (
                     <>
                       <Icon name="check" size={16} />
-                      <span>Update Password</span>
+                      <span>{t('profile_page.update_password', 'Update Password')}</span>
                     </>
                   )}
                 </button>

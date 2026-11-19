@@ -254,19 +254,19 @@ const Certificates = () => {
             </h2>
             {isAdmin ? (
               <span className="badge bg-light text-secondary border px-2.5 py-1 small fw-bold">
-                PLATFORM OVERSIGHT
+                {t('certificates_page.platform_oversight', 'PLATFORM OVERSIGHT')}
               </span>
             ) : isOrganizer ? (
               <span className="badge bg-teal-subtle text-teal border border-teal-subtle px-2.5 py-1 small fw-bold">
-                ORGANIZER DESK
+                {t('certificates_page.organizer_desk', 'ORGANIZER DESK')}
               </span>
             ) : null}
           </div>
           <p className="text-muted mb-0">
             {isAdmin
-              ? 'Oversee all statutory completion certificates across circles, verify credentials, and audit compliance.'
+              ? t('certificates_page.admin_subtitle', 'Oversee all statutory completion certificates across circles, verify credentials, and audit compliance.')
               : isOrganizer
-              ? 'Issue and manage verified completion certificates for members who completed all cycle contributions in your circles.'
+              ? t('certificates_page.organizer_subtitle', 'Issue and manage verified completion certificates for members who completed all cycle contributions in your circles.')
               : t('certificates_page.subtitle', 'Official recognized certificates verifying your successful contributions.')}
           </p>
         </div>
@@ -274,7 +274,7 @@ const Certificates = () => {
         {isAdmin ? (
           <span className="badge bg-light text-secondary border px-3 py-2 small fw-semibold d-inline-flex align-items-center gap-1.5">
             <Icon name="shield" size={15} />
-            <span>Platform Oversight Mode</span>
+            <span>{t('certificates_page.platform_oversight_mode', 'Platform Oversight Mode')}</span>
           </span>
         ) : isOrganizer ? (
           <button 
@@ -307,7 +307,7 @@ const Certificates = () => {
                 <input
                   type="text"
                   className="form-control border-start-0"
-                  placeholder="Search by member name, group, or certificate code..."
+                  placeholder={t('certificates_page.search_placeholder', 'Search by member name, group, or certificate code...')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -320,7 +320,7 @@ const Certificates = () => {
                 value={selectedGroupFilter}
                 onChange={(e) => setSelectedGroupFilter(e.target.value)}
               >
-                <option value="ALL">All Seettu Circles ({certificates.length})</option>
+                <option value="ALL">{t('certificates_page.all_circles', 'All Seettu Circles')} ({certificates.length})</option>
                 {allGroups.map((g) => (
                   <option key={g.id} value={g.id}>
                     {g.name}
@@ -330,7 +330,7 @@ const Certificates = () => {
             </div>
 
             <div className="col-12 col-md-2 text-md-end text-muted small">
-              <strong>{filteredCertificates.length}</strong> certificates found
+              <strong>{filteredCertificates.length}</strong> {t('certificates_page.certificates_found', 'certificates found')}
             </div>
           </div>
         </div>
@@ -340,7 +340,7 @@ const Certificates = () => {
       {loading ? (
         <div className="text-center py-5">
           <div className="spinner-border" style={{ color: '#0097B2' }} role="status"></div>
-          <p className="mt-2 text-muted">Loading certificates ledger...</p>
+          <p className="mt-2 text-muted">{t('certificates_page.loading', 'Loading certificates ledger...')}</p>
         </div>
       ) : filteredCertificates.length === 0 ? (
         <div className="card text-center p-5 shadow-sm border-0 rounded-4 bg-white">
@@ -348,12 +348,14 @@ const Certificates = () => {
             <Icon name="certificates" size={40} color="#0097B2" />
           </div>
           <h5 className="fw-bold mt-2" style={{ color: '#0F2F3D' }}>
-            {isAdmin || isOrganizer ? 'No Certificates Found' : 'No Certificates Earned Yet'}
+            {isAdmin || isOrganizer
+              ? t('certificates_page.no_certificates_found', 'No Certificates Found')
+              : t('certificates_page.no_certificates_earned', 'No Certificates Earned Yet')}
           </h5>
           <p className="text-muted small max-w-md mx-auto mb-3">
             {isAdmin || isOrganizer 
-              ? 'No member certificates match your search criteria. Click "+ Issue Certificate" above to generate one.'
-              : 'Completion certificates are awarded when you fulfill all monthly contribution cycles in an active Seettu group.'}
+              ? t('certificates_page.no_match_description', 'No member certificates match your search criteria. Click "+ Issue Certificate" above to generate one.')
+              : t('certificates_page.no_earned_description', 'Completion certificates are awarded when you fulfill all monthly contribution cycles in an active Seettu group.')}
           </p>
           {(isAdmin || isOrganizer) && (
             <div>
@@ -361,7 +363,7 @@ const Certificates = () => {
                 className="btn btn-teal btn-sm fw-bold px-3 py-1.5 text-white"
                 onClick={() => setShowIssueModal(true)}
               >
-                + Issue Certificate Now
+                {t('certificates_page.issue_now', '+ Issue Certificate Now')}
               </button>
             </div>
           )}
@@ -377,7 +379,7 @@ const Certificates = () => {
                     {c.certificateUuid ? `CERT-${c.certificateUuid.substring(0, 8).toUpperCase()}` : `CERT-${c.id}`}
                   </span>
                   <span className="badge bg-success-subtle text-success small px-2 py-0.5">
-                    ● Verified Active
+                    {t('certificates_page.verified_active', '● Verified Active')}
                   </span>
                 </div>
 
@@ -388,26 +390,26 @@ const Certificates = () => {
 
                 {/* Recipient Details */}
                 <h5 className="fw-bold text-dark mb-1 text-truncate" title={c.user?.fullName || c.user?.email}>
-                  {c.user?.fullName || c.user?.email || 'Member Certificate'}
+                  {c.user?.fullName || c.user?.email || t('certificates_page.member_certificate', 'Member Certificate')}
                 </h5>
                 <p className="text-muted small mb-2 text-truncate">{c.user?.email || ''}</p>
 
                 {/* Group Box */}
                 <div className="p-2.5 rounded-3 mb-3 text-start" style={{ backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
                   <div className="d-flex justify-content-between align-items-center mb-1">
-                    <span className="small text-muted">Circle:</span>
+                    <span className="small text-muted">{t('certificates_page.circle_label', 'Circle:')}</span>
                     <strong className="small text-dark text-truncate" style={{ maxWidth: '170px' }}>
                       {c.group?.name || 'Seettu Circle'}
                     </strong>
                   </div>
                   <div className="d-flex justify-content-between align-items-center">
-                    <span className="small text-muted">Contribution:</span>
+                    <span className="small text-muted">{t('certificates_page.contribution_label', 'Contribution:')}</span>
                     <span className="small fw-semibold text-dark">
                       LKR {(c.group?.contributionAmount || 5000).toLocaleString()}
                     </span>
                   </div>
                   <div className="d-flex justify-content-between align-items-center mt-1 pt-1 border-top border-light-subtle">
-                    <span className="text-muted" style={{ fontSize: '11px' }}>Issued:</span>
+                    <span className="text-muted" style={{ fontSize: '11px' }}>{t('certificates_page.issued_label', 'Issued:')}</span>
                     <span className="text-muted" style={{ fontSize: '11px' }}>
                       {c.issuedAt ? new Date(c.issuedAt).toLocaleDateString() : new Date().toLocaleDateString()}
                     </span>
@@ -421,28 +423,28 @@ const Certificates = () => {
                     onClick={() => setPreviewCert(c)}
                   >
                     <Icon name="eye" size={15} />
-                    <span>View Certificate</span>
+                    <span>{t('certificates_page.view_certificate', 'View Certificate')}</span>
                   </button>
 
                   {(isAdmin || isOrganizer) && (
-                    <div className="d-flex gap-2 w-100" role="group" aria-label="Certificate actions">
+                    <div className="d-flex gap-2 w-100" role="group" aria-label={t('certificates_page.actions', 'Certificate actions')}>
                       <button 
                         type="button"
                         className="btn btn-light border btn-sm fw-semibold d-inline-flex align-items-center justify-content-center gap-2 py-2 flex-fill"
                         onClick={() => handleOpenEdit(c)}
-                        title="Modify / Edit Certificate Details"
+                        title={t('certificates_page.modify_title', 'Modify / Edit Certificate Details')}
                       >
                         <Icon name="pencil" size={14} color="#235665" />
-                        <span>Modify</span>
+                        <span>{t('certificates_page.modify', 'Modify')}</span>
                       </button>
                       <button 
                         type="button"
                         className="btn btn-outline-danger btn-sm fw-semibold d-inline-flex align-items-center justify-content-center gap-2 py-2 flex-fill"
                         onClick={() => setDeleteCert(c)}
-                        title="Delete Certificate Record"
+                        title={t('certificates_page.delete_title', 'Delete Certificate Record')}
                       >
                         <Icon name="trash" size={14} />
-                        <span>Delete</span>
+                        <span>{t('certificates_page.delete', 'Delete')}</span>
                       </button>
                     </div>
                   )}
@@ -461,7 +463,7 @@ const Certificates = () => {
               <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#0F2F3D' }}>
                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
                   <Icon name="certificates" size={20} color="#00E5FF" />
-                  <span>Certificate Preview & Print</span>
+                  <span>{t('certificates_page.preview_title', 'Certificate Preview & Print')}</span>
                 </h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setPreviewCert(null)}></button>
               </div>
@@ -513,7 +515,7 @@ const Certificates = () => {
                       >
                         <img
                           src="/logo.png"
-                          alt="SeettuManager Logo"
+                          alt={t('certificates_page.logo_alt', 'SeettuManager Logo')}
                           style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'contain' }}
                         />
                       </div>
@@ -521,23 +523,23 @@ const Certificates = () => {
                         <h2 className="fw-bold m-0" style={{ color: '#0F2F3D', fontSize: '1.95rem', letterSpacing: '-0.5px', fontFamily: "'Arial', sans-serif" }}>
                           Seettu<span style={{ color: '#0097B2' }}>Manager</span>
                         </h2>
-                        <span className="text-muted small fw-medium" style={{ fontFamily: "'Arial', sans-serif", fontSize: '0.85rem' }}>Save Together. Manage Smarter. • Sri Lanka</span>
+                        <span className="text-muted small fw-medium" style={{ fontFamily: "'Arial', sans-serif", fontSize: '0.85rem' }}>{t('certificates_page.tagline', 'Save Together. Manage Smarter. • Sri Lanka')}</span>
                       </div>
                     </div>
 
                     <div className="text-end d-flex align-items-start gap-4">
                       <div className="pt-2">
                         <small className="text-muted fw-bold d-block" style={{ fontFamily: "'Arial', sans-serif", fontSize: '0.75rem' }}>
-                          Certificate ID: <span style={{ color: '#0F2F3D' }}>{previewCert.certificateUuid ? `SM-2026-${previewCert.certificateUuid.substring(0, 8).toUpperCase()}` : `SM-2026-000${previewCert.id}`}</span>
+                          {t('certificates_page.certificate_id', 'Certificate ID')}: <span style={{ color: '#0F2F3D' }}>{previewCert.certificateUuid ? `SM-2026-${previewCert.certificateUuid.substring(0, 8).toUpperCase()}` : `SM-2026-000${previewCert.id}`}</span>
                         </small>
-                        <small className="text-muted" style={{ fontSize: '0.7rem' }}>The Cheetus Ordinance No. 61 of 1935</small>
+                        <small className="text-muted" style={{ fontSize: '0.7rem' }}>{t('certificates_page.ordinance', 'The Cheetus Ordinance No. 61 of 1935')}</small>
                       </div>
 
                       <div className="position-relative text-center text-white" style={{ width: '85px', marginTop: '-24px', marginRight: '10px' }}>
                         <div className="p-3 pt-4 shadow-sm" style={{ background: '#0F2F3D', border: '2px solid #C5A059', borderRadius: '0 0 12px 12px' }}>
                           <Icon name="award" size={26} color="#C5A059" className="mb-1" />
                           <small className="d-block fw-bold text-uppercase" style={{ fontSize: '0.55rem', letterSpacing: '0.5px', color: '#D1D5DB' }}>
-                            OFFICIAL AUDIT
+                            {t('certificates_page.official_audit', 'OFFICIAL AUDIT')}
                           </small>
                         </div>
                       </div>
@@ -547,12 +549,12 @@ const Certificates = () => {
                   {/* Main Title Section */}
                   <div className="text-center my-4 position-relative z-1">
                     <h1 className="fw-bold tracking-widest text-uppercase m-0" style={{ color: '#0F2F3D', fontSize: '2.8rem', letterSpacing: '4px' }}>
-                      CERTIFICATE
+                      {t('certificates_page.certificate', 'CERTIFICATE')}
                     </h1>
                     <div className="d-flex align-items-center justify-content-center gap-3 mt-1">
                       <div style={{ height: '1.5px', width: '90px', background: '#C5A059' }}></div>
                       <span className="fw-bold text-uppercase tracking-wider" style={{ color: '#0F2F3D', fontSize: '1.1rem', letterSpacing: '3px' }}>
-                        OF COMPLETION
+                        {t('certificates_page.of_completion', 'OF COMPLETION')}
                       </span>
                       <div style={{ height: '1.5px', width: '90px', background: '#C5A059' }}></div>
                     </div>
@@ -560,17 +562,17 @@ const Certificates = () => {
 
                   {/* Recipient Name */}
                   <div className="text-center position-relative z-1 my-4 px-4">
-                    <p className="fst-italic text-secondary m-0" style={{ fontSize: '1.15rem' }}>This is to certify that</p>
+                    <p className="fst-italic text-secondary m-0" style={{ fontSize: '1.15rem' }}>{t('certificates_page.certify_that', 'This is to certify that')}</p>
                     
                     <div className="my-2 d-inline-block position-relative px-4">
                       <h2 className="fw-bold m-0" style={{ color: '#0F2F3D', fontSize: '2.5rem', fontFamily: "'Georgia', cursive, serif" }}>
-                        {previewCert.user?.fullName || previewCert.user?.email || 'Valued Member'}
+                        {previewCert.user?.fullName || previewCert.user?.email || t('certificates_page.valued_member', 'Valued Member')}
                       </h2>
                       <div className="w-100 mt-1" style={{ height: '2px', background: '#C5A059' }}></div>
                     </div>
 
                     <p className="text-secondary mx-auto mt-3 mb-4" style={{ maxWidth: '720px', fontSize: '1.05rem', lineHeight: '1.6' }}>
-                      has successfully satisfied all statutory monthly contributions to the Seettu group <strong style={{ color: '#0F2F3D' }}>{previewCert.group?.name || 'SeettuManager Circle'}</strong> and demonstrated verified financial integrity through timely rotational cycle payments.
+                      {t('certificates_page.completion_statement', 'has successfully satisfied all statutory monthly contributions to the Seettu group')} <strong style={{ color: '#0F2F3D' }}>{previewCert.group?.name || t('certificates_page.default_circle', 'SeettuManager Circle')}</strong> {t('certificates_page.integrity_statement', 'and demonstrated verified financial integrity through timely rotational cycle payments.')}
                     </p>
                   </div>
 
@@ -578,24 +580,24 @@ const Certificates = () => {
                   <div className="mx-auto position-relative z-1 mb-4 p-3 px-4 shadow-sm" style={{ maxWidth: '820px', background: '#F0F6FC', border: '1px solid #D0E2F7', borderRadius: '14px' }}>
                     <div className="row text-center align-items-center">
                       <div className="col-3 border-end border-secondary-subtle">
-                        <small className="text-muted d-block fw-medium" style={{ fontSize: '0.78rem', fontFamily: "'Arial', sans-serif" }}>Group Name</small>
-                        <strong className="text-dark d-block text-truncate" style={{ fontSize: '0.95rem' }}>{previewCert.group?.name || 'Seettu Circle'}</strong>
+                        <small className="text-muted d-block fw-medium" style={{ fontSize: '0.78rem', fontFamily: "'Arial', sans-serif" }}>{t('certificates_page.group_name', 'Group Name')}</small>
+                        <strong className="text-dark d-block text-truncate" style={{ fontSize: '0.95rem' }}>{previewCert.group?.name || t('certificates_page.seettu_circle', 'Seettu Circle')}</strong>
                       </div>
                       <div className="col-3 border-end border-secondary-subtle">
-                        <small className="text-muted d-block fw-medium" style={{ fontSize: '0.78rem', fontFamily: "'Arial', sans-serif" }}>Contribution Amount</small>
+                        <small className="text-muted d-block fw-medium" style={{ fontSize: '0.78rem', fontFamily: "'Arial', sans-serif" }}>{t('certificates_page.contribution_amount', 'Contribution Amount')}</small>
                         <strong className="text-dark d-block" style={{ fontSize: '0.95rem' }}>LKR {(previewCert.group?.contributionAmount || 5000).toLocaleString()}</strong>
                       </div>
                       <div className="col-3 border-end border-secondary-subtle">
-                        <small className="text-muted d-block fw-medium" style={{ fontSize: '0.78rem', fontFamily: "'Arial', sans-serif" }}>Financial Discipline</small>
+                        <small className="text-muted d-block fw-medium" style={{ fontSize: '0.78rem', fontFamily: "'Arial', sans-serif" }}>{t('certificates_page.financial_discipline', 'Financial Discipline')}</small>
                         <strong className="text-success d-block" style={{ fontSize: '0.95rem' }}>
                           {previewCert.disciplineScore != null
-                            ? `${Number(previewCert.disciplineScore).toFixed(1)} / 100 Rating`
-                            : 'Score not recorded'}
+                            ? `${Number(previewCert.disciplineScore).toFixed(1)} / 100 ${t('certificates_page.rating', 'Rating')}`
+                            : t('certificates_page.score_not_recorded', 'Score not recorded')}
                         </strong>
                       </div>
                       <div className="col-3">
-                        <small className="text-muted d-block fw-medium" style={{ fontSize: '0.78rem', fontFamily: "'Arial', sans-serif" }}>Legal Status</small>
-                        <strong className="text-dark d-block" style={{ fontSize: '0.95rem' }}>Satisfied & Settled</strong>
+                        <small className="text-muted d-block fw-medium" style={{ fontSize: '0.78rem', fontFamily: "'Arial', sans-serif" }}>{t('certificates_page.legal_status', 'Legal Status')}</small>
+                        <strong className="text-dark d-block" style={{ fontSize: '0.95rem' }}>{t('certificates_page.satisfied_settled', 'Satisfied & Settled')}</strong>
                       </div>
                     </div>
                   </div>
@@ -607,8 +609,8 @@ const Certificates = () => {
                         SeettuManager Core
                       </div>
                       <div style={{ height: '1px', background: '#0F2F3D', width: '100%' }}></div>
-                      <strong className="d-block text-dark small mt-1" style={{ fontFamily: "'Arial', sans-serif" }}>Chief Administrator</strong>
-                      <small className="text-muted d-block" style={{ fontSize: '0.75rem', fontFamily: "'Arial', sans-serif" }}>Audit Verification Engine</small>
+                      <strong className="d-block text-dark small mt-1" style={{ fontFamily: "'Arial', sans-serif" }}>{t('certificates_page.chief_administrator', 'Chief Administrator')}</strong>
+                      <small className="text-muted d-block" style={{ fontSize: '0.75rem', fontFamily: "'Arial', sans-serif" }}>{t('certificates_page.audit_engine', 'Audit Verification Engine')}</small>
                     </div>
 
                     <div className="text-center position-relative" style={{ marginBottom: '-10px' }}>
@@ -622,7 +624,7 @@ const Certificates = () => {
                         {previewCert.issuedAt ? new Date(previewCert.issuedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                       </strong>
                       <div style={{ height: '1px', background: '#0F2F3D', width: '100%' }}></div>
-                      <small className="text-muted d-block mt-1" style={{ fontSize: '0.78rem', fontFamily: "'Arial', sans-serif" }}>Date of Issuance</small>
+                      <small className="text-muted d-block mt-1" style={{ fontSize: '0.78rem', fontFamily: "'Arial', sans-serif" }}>{t('certificates_page.date_of_issuance', 'Date of Issuance')}</small>
                     </div>
                   </div>
                 </div>
@@ -645,12 +647,12 @@ const Certificates = () => {
                     {downloadingCertificate ? (
                       <>
                         <span className="spinner-border spinner-border-sm" role="status" />
-                        <span>Downloading...</span>
+                        <span>{t('certificates_page.downloading', 'Downloading...')}</span>
                       </>
                     ) : (
                       <>
                         <Icon name="download" size={14} />
-                        <span>Download Certificate</span>
+                        <span>{t('certificates_page.download_certificate', 'Download Certificate')}</span>
                       </>
                     )}
                   </button>
@@ -669,19 +671,19 @@ const Certificates = () => {
               <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#0F2F3D' }}>
                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
                   <Icon name="certificates" size={18} color="#00E5FF" />
-                  <span>Issue Completion Certificate</span>
+                  <span>{t('certificates_page.issue_completion_title', 'Issue Completion Certificate')}</span>
                 </h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowIssueModal(false)}></button>
               </div>
               <form onSubmit={handleIssueCertificate}>
                 <div className="modal-body p-4 bg-light-subtle">
                   <p className="text-muted small mb-3">
-                    Certificates are available only after the Seettu group and all its cycles are complete, and the selected member has paid every cycle.
+                    {t('certificates_page.issue_requirement', 'Certificates are available only after the Seettu group and all its cycles are complete, and the selected member has paid every cycle.')}
                   </p>
 
                   <div className="mb-3">
                     <label className="form-label text-dark fw-bold small">
-                      Select Member / Subscriber *
+                      {t('certificates_page.select_member', 'Select Member / Subscriber')} *
                     </label>
                     <select
                       className="form-select"
@@ -689,7 +691,7 @@ const Certificates = () => {
                       onChange={(e) => setIssueUserId(e.target.value)}
                       required
                     >
-                      <option value="">-- Choose Member --</option>
+                      <option value="">{t('certificates_page.choose_member', '-- Choose Member --')}</option>
                       {allUsers.map((u) => (
                         <option key={u.id} value={u.id}>
                           {u.fullName || u.email} (ID #{u.id})
@@ -697,13 +699,13 @@ const Certificates = () => {
                       ))}
                     </select>
                     <div className="form-text text-muted small" style={{ fontSize: '11px' }}>
-                      (System administrators are excluded from certificate eligibility)
+                      {t('certificates_page.admin_exclusion', '(System administrators are excluded from certificate eligibility)')}
                     </div>
                   </div>
 
                   <div className="mb-3">
                     <label className="form-label text-dark fw-bold small">
-                      Select Seettu Group *
+                      {t('certificates_page.select_group', 'Select Seettu Group')} *
                     </label>
                     <select
                       className="form-select"
@@ -711,7 +713,7 @@ const Certificates = () => {
                       onChange={(e) => setIssueGroupId(e.target.value)}
                       required
                     >
-                      <option value="">-- Choose Seettu Group --</option>
+                      <option value="">{t('certificates_page.choose_group', '-- Choose Seettu Group --')}</option>
                       {allGroups.map((g) => (
                         <option key={g.id} value={g.id}>
                           {g.name} (LKR {(g.contributionAmount || 0).toLocaleString()} • ID #{g.id})
@@ -723,7 +725,7 @@ const Certificates = () => {
 
                 <div className="modal-footer py-3 px-4 bg-light">
                   <button type="button" className="btn btn-outline-secondary btn-sm px-3" onClick={() => setShowIssueModal(false)}>
-                    Cancel
+                    {t('certificates_page.cancel', 'Cancel')}
                   </button>
                   <button 
                     type="submit" 
@@ -733,12 +735,12 @@ const Certificates = () => {
                     {issuing ? (
                       <>
                         <span className="spinner-border spinner-border-sm" role="status" />
-                        <span>Generating PDF...</span>
+                        <span>{t('certificates_page.generating_pdf', 'Generating PDF...')}</span>
                       </>
                     ) : (
                       <>
                         <Icon name="check" size={14} />
-                        <span>Issue Certificate</span>
+                        <span>{t('certificates_page.issue_btn', 'Issue Certificate')}</span>
                       </>
                     )}
                   </button>
@@ -757,7 +759,7 @@ const Certificates = () => {
               <div className="modal-header py-3 px-4 text-white" style={{ backgroundColor: '#0F2F3D' }}>
                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
                   <Icon name="pencil" size={18} color="#00E5FF" />
-                  <span>Modify Certificate #{editCert.id}</span>
+                  <span>{t('certificates_page.modify_certificate', 'Modify Certificate')} #{editCert.id}</span>
                 </h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setEditCert(null)}></button>
               </div>
@@ -766,12 +768,12 @@ const Certificates = () => {
                   <div className="alert alert-info py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
                     <Icon name="info" size={16} />
                     <span>
-                      Modifying this record will automatically regenerate the PDF certificate and update all verification logs.
+                      {t('certificates_page.modify_notice', 'Modifying this record will automatically regenerate the PDF certificate and update all verification logs.')}
                     </span>
                   </div>
 
                   <div className="mb-3">
-                    <label className="form-label text-dark fw-bold small">Certificate Code</label>
+                    <label className="form-label text-dark fw-bold small">{t('certificates_page.certificate_code', 'Certificate Code')}</label>
                     <input 
                       type="text" 
                       className="form-control form-control-sm bg-light" 
@@ -782,7 +784,7 @@ const Certificates = () => {
 
                   <div className="mb-3">
                     <label className="form-label text-dark fw-bold small">
-                      Select Member / Subscriber *
+                      {t('certificates_page.select_member', 'Select Member / Subscriber')} *
                     </label>
                     <select
                       className="form-select"
@@ -790,7 +792,7 @@ const Certificates = () => {
                       onChange={(e) => setEditUserId(e.target.value)}
                       required
                     >
-                      <option value="">-- Choose Member --</option>
+                      <option value="">{t('certificates_page.choose_member', '-- Choose Member --')}</option>
                       {allUsers.map((u) => (
                         <option key={u.id} value={u.id}>
                           {u.fullName || u.email} (ID #{u.id})
@@ -801,7 +803,7 @@ const Certificates = () => {
 
                   <div className="mb-3">
                     <label className="form-label text-dark fw-bold small">
-                      Select Seettu Group *
+                      {t('certificates_page.select_group', 'Select Seettu Group')} *
                     </label>
                     <select
                       className="form-select"
@@ -809,7 +811,7 @@ const Certificates = () => {
                       onChange={(e) => setEditGroupId(e.target.value)}
                       required
                     >
-                      <option value="">-- Choose Seettu Group --</option>
+                      <option value="">{t('certificates_page.choose_group', '-- Choose Seettu Group --')}</option>
                       {allGroups.map((g) => (
                         <option key={g.id} value={g.id}>
                           {g.name} (LKR {(g.contributionAmount || 0).toLocaleString()} • ID #{g.id})
@@ -821,7 +823,7 @@ const Certificates = () => {
 
                 <div className="modal-footer py-3 px-4 bg-light">
                   <button type="button" className="btn btn-outline-secondary btn-sm px-3" onClick={() => setEditCert(null)}>
-                    Cancel
+                    {t('certificates_page.cancel', 'Cancel')}
                   </button>
                   <button 
                     type="submit" 
@@ -831,12 +833,12 @@ const Certificates = () => {
                     {updating ? (
                       <>
                         <span className="spinner-border spinner-border-sm" role="status" />
-                        <span>Updating...</span>
+                        <span>{t('certificates_page.updating', 'Updating...')}</span>
                       </>
                     ) : (
                       <>
                         <Icon name="check" size={14} />
-                        <span>Save Changes</span>
+                        <span>{t('certificates_page.save_changes', 'Save Changes')}</span>
                       </>
                     )}
                   </button>
@@ -855,7 +857,7 @@ const Certificates = () => {
               <div className="modal-header py-3 px-4 text-white bg-danger">
                 <h5 className="modal-title fw-bold d-flex align-items-center gap-2">
                   <Icon name="trash" size={18} color="#FFFFFF" />
-                  <span>Delete Certificate Confirmation</span>
+                  <span>{t('certificates_page.delete_confirmation_title', 'Delete Certificate Confirmation')}</span>
                 </h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setDeleteCert(null)}></button>
               </div>
@@ -864,28 +866,28 @@ const Certificates = () => {
                 <div className="d-inline-flex p-3 rounded-circle mb-3 bg-danger-subtle text-danger">
                   <Icon name="trash" size={36} color="#DC2626" />
                 </div>
-                <h5 className="fw-bold text-dark mb-2">Permanently Delete Certificate?</h5>
+                <h5 className="fw-bold text-dark mb-2">{t('certificates_page.delete_question', 'Permanently Delete Certificate?')}</h5>
                 <p className="text-muted small mb-3">
-                  Are you sure you want to permanently delete this completion certificate? This action will remove the record from the database and delete the generated PDF file.
+                  {t('certificates_page.delete_warning', 'Are you sure you want to permanently delete this completion certificate? This action will remove the record from the database and delete the generated PDF file.')}
                 </p>
 
                 <div className="card bg-light border p-3 rounded-3 text-start small mb-3">
                   <div className="mb-1">
-                    <strong>Recipient:</strong> {deleteCert.user?.fullName || deleteCert.user?.email || 'Member'}
+                    <strong>{t('certificates_page.recipient', 'Recipient')}:</strong> {deleteCert.user?.fullName || deleteCert.user?.email || t('certificates_page.member', 'Member')}
                   </div>
                   <div className="mb-1">
-                    <strong>Group:</strong> {deleteCert.group?.name || 'Seettu Group'}
+                    <strong>{t('certificates_page.group', 'Group')}:</strong> {deleteCert.group?.name || t('certificates_page.seettu_group', 'Seettu Group')}
                   </div>
                   <div className="mb-1">
-                    <strong>Certificate Code:</strong> <span className="font-monospace">{deleteCert.certificateUuid}</span>
+                    <strong>{t('certificates_page.certificate_code', 'Certificate Code')}:</strong> <span className="font-monospace">{deleteCert.certificateUuid}</span>
                   </div>
                   <div>
-                    <strong>Issued Date:</strong> {deleteCert.issuedAt ? new Date(deleteCert.issuedAt).toLocaleDateString() : 'N/A'}
+                    <strong>{t('certificates_page.issued_date', 'Issued Date')}:</strong> {deleteCert.issuedAt ? new Date(deleteCert.issuedAt).toLocaleDateString() : t('certificates_page.not_available', 'N/A')}
                   </div>
                 </div>
 
                 <div className="text-danger small fw-semibold">
-                  ⚠️ This action is irreversible.
+                  {t('certificates_page.irreversible', '⚠️ This action is irreversible.')}
                 </div>
               </div>
 
@@ -896,7 +898,7 @@ const Certificates = () => {
                   onClick={() => setDeleteCert(null)}
                   disabled={deleting}
                 >
-                  Cancel
+                  {t('certificates_page.cancel', 'Cancel')}
                 </button>
                 <button 
                   type="button" 
@@ -907,12 +909,12 @@ const Certificates = () => {
                   {deleting ? (
                     <>
                       <span className="spinner-border spinner-border-sm" role="status" />
-                      <span>Deleting...</span>
+                      <span>{t('certificates_page.deleting', 'Deleting...')}</span>
                     </>
                   ) : (
                     <>
                       <Icon name="trash" size={14} />
-                      <span>Yes, Delete Certificate</span>
+                      <span>{t('certificates_page.confirm_delete', 'Yes, Delete Certificate')}</span>
                     </>
                   )}
                 </button>

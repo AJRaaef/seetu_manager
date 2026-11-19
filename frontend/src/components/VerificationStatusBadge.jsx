@@ -1,7 +1,9 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Clock, XCircle, AlertCircle } from 'lucide-react';
 
 const VerificationStatusBadge = ({ status, className = '' }) => {
+  const { t } = useTranslation();
   const normStatus = (status || 'INCOMPLETE').toUpperCase();
 
   let badgeStyle = {
@@ -16,7 +18,7 @@ const VerificationStatusBadge = ({ status, className = '' }) => {
       badgeStyle = {
         backgroundColor: '#198754',
         color: '#FFFFFF',
-        text: 'VERIFIED',
+        text: t('verification_page.verified_badge', 'VERIFIED'),
         Icon: CheckCircle2
       };
       break;

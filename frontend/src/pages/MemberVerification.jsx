@@ -219,7 +219,7 @@ const MemberVerification = () => {
     return (
       <div className="d-flex flex-column align-items-center justify-content-center py-5">
         <div className="spinner-border text-teal mb-3" style={{ color: '#235665' }} role="status"></div>
-        <div className="text-muted fw-semibold">Loading identity verification records…</div>
+        <div className="text-muted fw-semibold">{t('verification_page.member.loading', 'Loading identity verification records…')}</div>
       </div>
     );
   }
@@ -231,10 +231,10 @@ const MemberVerification = () => {
         <div>
           <h3 className="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
             <Shield size={24} style={{ color: '#235665' }} />
-            <span>Member Identity Verification</span>
+            <span>{t('verification_page.member.title', 'Member Identity Verification')}</span>
           </h3>
           <p className="text-muted mb-0 small">
-            Sri Lankan National Identity Card (NIC) & Grama Niladhari Anti-Fraud Proof
+            {t('verification_page.member.subtitle', 'Sri Lankan National Identity Card (NIC) & Grama Niladhari Anti-Fraud Proof')}
           </p>
         </div>
         <div className="d-flex align-items-center gap-2">
@@ -245,7 +245,7 @@ const MemberVerification = () => {
               className="btn btn-sm btn-primary fw-bold"
               style={{ backgroundColor: '#235665', borderColor: '#235665' }}
             >
-              <RefreshCw size={13} className="me-1.5" /> Re-Submit Verification
+              <RefreshCw size={13} className="me-1.5" /> {t('verification_page.member.resubmit', 'Re-Submit Verification')}
             </button>
           )}
         </div>
@@ -279,19 +279,19 @@ const MemberVerification = () => {
             <div className="d-flex align-items-start gap-3">
               <XCircle size={32} className="text-danger flex-shrink-0" />
               <div className="flex-grow-1">
-                <h5 className="fw-bold text-danger mb-1">Verification Rejected by Organizer / Admin</h5>
+                <h5 className="fw-bold text-danger mb-1">{t('verification_page.member.rejected_title', 'Verification Rejected by Organizer / Admin')}</h5>
                 <p className="text-dark mb-2" style={{ fontSize: '0.9rem' }}>
-                  <strong>Reason:</strong> {verification.rejectionReason || 'Uploaded documents did not meet verification criteria. Please upload clear, unaltered copies.'}
+                  <strong>{t('verification_page.member.reason', 'Reason')}:</strong> {verification.rejectionReason || t('verification_page.member.rejection_default', 'Uploaded documents did not meet verification criteria. Please upload clear, unaltered copies.')}
                 </p>
                 <div className="text-muted small mb-3">
-                  You can re-upload your NIC images and official Grama Niladhari Certificate to request a new review.
+                  {t('verification_page.member.reupload_help', 'You can re-upload your NIC images and official Grama Niladhari Certificate to request a new review.')}
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsResubmitting(true)}
                   className="btn btn-sm btn-danger fw-bold px-3 py-1.5 shadow-sm"
                 >
-                  Click Here to Re-Submit Verification
+                  {t('verification_page.member.resubmit_link', 'Click Here to Re-Submit Verification')}
                 </button>
               </div>
             </div>
@@ -306,22 +306,22 @@ const MemberVerification = () => {
             <div className="d-flex align-items-start gap-3">
               <CheckCircle2 size={32} className="text-success flex-shrink-0" />
               <div>
-                <h5 className="fw-bold text-success mb-1">Identity Officially Verified</h5>
+                <h5 className="fw-bold text-success mb-1">{t('verification_page.member.verified_title', 'Identity Officially Verified')}</h5>
                 <p className="text-dark mb-2" style={{ fontSize: '0.9rem' }}>
-                  Your identity has been fully cleared with verified Sri Lankan NIC and official Grama Niladhari Character Certificate. You have full access to participate in and join Seettu contribution groups.
+                  {t('verification_page.member.verified_description', 'Your identity has been fully cleared with verified Sri Lankan NIC and official Grama Niladhari Character Certificate. You have full access to participate in and join Seettu contribution groups.')}
                 </p>
                 <div className="d-flex flex-wrap gap-3 text-muted small">
                   <div>
-                    <strong>Verified NIC:</strong> <span className="font-monospace text-dark fw-bold">{verification.nicNumber}</span>
+                    <strong>{t('verification_page.member.verified_nic', 'Verified NIC')}:</strong> <span className="font-monospace text-dark fw-bold">{verification.nicNumber}</span>
                   </div>
                   {verification.gnDivision && (
                     <div>
-                      <strong>GN Division:</strong> <span className="text-dark">{verification.gnDivision}</span>
+                      <strong>{t('verification_page.member.gn_division', 'GN Division')}:</strong> <span className="text-dark">{verification.gnDivision}</span>
                     </div>
                   )}
                   {verification.verifiedAt && (
                     <div>
-                      <strong>Verified At:</strong> <span className="text-dark">{new Date(verification.verifiedAt).toLocaleDateString()}</span>
+                      <strong>{t('verification_page.member.verified_at', 'Verified At')}:</strong> <span className="text-dark">{new Date(verification.verifiedAt).toLocaleDateString()}</span>
                     </div>
                   )}
                 </div>
@@ -338,16 +338,16 @@ const MemberVerification = () => {
             <div className="d-flex align-items-start gap-3">
               <Clock size={32} className="text-warning flex-shrink-0" />
               <div>
-                <h5 className="fw-bold text-dark mb-1">Verification Review in Progress</h5>
+                <h5 className="fw-bold text-dark mb-1">{t('verification_page.member.pending_title', 'Verification Review in Progress')}</h5>
                 <p className="text-dark mb-2" style={{ fontSize: '0.9rem' }}>
-                  Your documents are currently undergoing anti-fraud inspection by group organizers. Once verified, you will receive an instant notification and can immediately join Seettu circles.
+                  {t('verification_page.member.pending_description', 'Your documents are currently undergoing anti-fraud inspection by group organizers. Once verified, you will receive an instant notification and can immediately join Seettu circles.')}
                 </p>
                 <div className="d-flex flex-wrap gap-3 text-muted small">
                   <div>
-                    <strong>Submitted NIC:</strong> <span className="font-monospace text-dark fw-bold">{verification.nicNumber}</span>
+                    <strong>{t('verification_page.member.submitted_nic', 'Submitted NIC')}:</strong> <span className="font-monospace text-dark fw-bold">{verification.nicNumber}</span>
                   </div>
                   <div>
-                    <strong>Submitted Date:</strong> <span className="text-dark">{new Date(verification.createdAt).toLocaleDateString()}</span>
+                    <strong>{t('verification_page.member.submitted_date', 'Submitted Date')}:</strong> <span className="text-dark">{new Date(verification.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -361,10 +361,12 @@ const MemberVerification = () => {
         <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
           <div className="p-4 text-white" style={{ backgroundColor: '#235665' }}>
             <h5 className="fw-bold mb-1 text-white">
-              {isResubmitting ? 'Re-Submit Identity Verification' : 'Identity Verification Submission'}
+              {isResubmitting
+                ? t('verification_page.member.resubmit_title', 'Re-Submit Identity Verification')
+                : t('verification_page.member.submission_title', 'Identity Verification Submission')}
             </h5>
             <small className="text-white-50">
-              Please provide clear, legible copies of your identification documents. Accepted formats: JPG, PNG, PDF (Max 5MB each).
+              {t('verification_page.member.upload_instructions', 'Please provide clear, legible copies of your identification documents. Accepted formats: JPG, PNG, PDF (Max 5MB each).')}
             </small>
           </div>
 
@@ -374,18 +376,18 @@ const MemberVerification = () => {
               <div className="mb-4 pb-3 border-bottom">
                 <h6 className="fw-bold text-dark d-flex align-items-center gap-2 mb-3">
                   <span className="badge bg-light text-dark border">1</span>
-                  <span>National Identity Card (NIC) Verification</span>
+                  <span>{t('verification_page.member.nic_section', 'National Identity Card (NIC) Verification')}</span>
                 </h6>
 
                 <div className="row g-3 mb-3">
                   <div className="col-md-6">
                     <label className="form-label fw-semibold text-secondary" style={{ fontSize: '0.85rem' }}>
-                      Sri Lankan NIC Number <span className="text-danger">*</span>
+                      {t('verification_page.member.nic_number', 'Sri Lankan NIC Number')} <span className="text-danger">*</span>
                     </label>
                     <input
                       type="text"
                       className={`form-control font-monospace text-uppercase ${fieldErrors.nicNumber ? 'is-invalid' : ''}`}
-                      placeholder="e.g. 951234567V or 199512345678"
+                      placeholder={t('verification_page.member.nic_placeholder', 'e.g. 951234567V or 199512345678')}
                       value={nicNumber}
                       maxLength={15}
                       onChange={(e) => {
@@ -396,7 +398,7 @@ const MemberVerification = () => {
                     />
                     {fieldErrors.nicNumber && <div className="invalid-feedback">{fieldErrors.nicNumber}</div>}
                     <div className="form-text text-muted small" style={{ fontSize: '0.74rem' }}>
-                      Format: 9 digits ending with V/X, or 12 modern digits.
+                      {t('verification_page.member.nic_format', 'Format: 9 digits ending with V/X, or 12 modern digits.')}
                     </div>
                   </div>
                 </div>
@@ -405,9 +407,9 @@ const MemberVerification = () => {
                   <div className="col-md-6">
                     <DocumentUpload
                       id="nicFront"
-                      label="NIC Front Page Image"
+                      label={t('verification_page.member.nic_front_label', 'NIC Front Page Image')}
                       required
-                      helperText="Clear photo or scan of the front face of your NIC."
+                      helperText={t('verification_page.member.nic_front_help', 'Clear photo or scan of the front face of your NIC.')}
                       file={nicFrontFile}
                       existingUrl={verification?.nicFrontImagePath}
                       onChange={(file) => {
@@ -421,9 +423,9 @@ const MemberVerification = () => {
                   <div className="col-md-6">
                     <DocumentUpload
                       id="nicBack"
-                      label="NIC Back Page Image"
+                      label={t('verification_page.member.nic_back_label', 'NIC Back Page Image')}
                       required
-                      helperText="Clear photo or scan of the reverse side of your NIC."
+                      helperText={t('verification_page.member.nic_back_help', 'Clear photo or scan of the reverse side of your NIC.')}
                       file={nicBackFile}
                       existingUrl={verification?.nicBackImagePath}
                       onChange={(file) => {
@@ -441,18 +443,18 @@ const MemberVerification = () => {
               <div className="mb-4 pb-3 border-bottom">
                 <h6 className="fw-bold text-dark d-flex align-items-center gap-2 mb-3">
                   <span className="badge bg-light text-dark border">2</span>
-                  <span>Grama Niladhari Character Certificate (Original)</span>
+                  <span>{t('verification_page.member.gn_section', 'Grama Niladhari Character Certificate (Original)')}</span>
                 </h6>
 
                 <div className="row g-3 mb-3">
                   <div className="col-md-6">
                     <label className="form-label fw-semibold text-secondary" style={{ fontSize: '0.85rem' }}>
-                      GN Division Name <span className="text-muted small">(Optional)</span>
+                      {t('verification_page.member.gn_division_name', 'GN Division Name')} <span className="text-muted small">({t('verification_page.member.optional', 'Optional')})</span>
                     </label>
                     <input
                       type="text"
                       className="form-control"
-                      placeholder="e.g. Dematagoda GN Division / 512"
+                      placeholder={t('verification_page.member.gn_division_placeholder', 'e.g. Dematagoda GN Division / 512')}
                       value={gnDivision}
                       onChange={(e) => setGnDivision(e.target.value)}
                       style={{ borderRadius: '8px' }}
@@ -460,7 +462,7 @@ const MemberVerification = () => {
                   </div>
                   <div className="col-md-6">
                     <label className="form-label fw-semibold text-secondary" style={{ fontSize: '0.85rem' }}>
-                      Certificate Issue Date <span className="text-muted small">(Optional)</span>
+                      {t('verification_page.member.certificate_issue_date', 'Certificate Issue Date')} <span className="text-muted small">({t('verification_page.member.optional', 'Optional')})</span>
                     </label>
                     <input
                       type="date"
@@ -476,9 +478,9 @@ const MemberVerification = () => {
                   <div className="col-12">
                     <DocumentUpload
                       id="gnCert"
-                      label="Grama Niladhari Certificate Original Image / PDF"
+                      label={t('verification_page.member.gn_certificate_label', 'Grama Niladhari Certificate Original Image / PDF')}
                       required
-                      helperText="Official certificate verifying character and permanent residency within Sri Lanka."
+                      helperText={t('verification_page.member.gn_certificate_help', 'Official certificate verifying character and permanent residency within Sri Lanka.')}
                       file={gnCertFile}
                       existingUrl={verification?.gnCertificateImagePath}
                       onChange={(file) => {
@@ -497,8 +499,8 @@ const MemberVerification = () => {
                 <div className="d-flex align-items-center justify-content-between mb-2">
                   <h6 className="fw-bold text-dark d-flex align-items-center gap-2 mb-0">
                     <span className="badge bg-light text-dark border">3</span>
-                    <span>Additional Supporting Documents</span>
-                    <span className="badge bg-secondary bg-opacity-10 text-secondary border small">Optional</span>
+                    <span>{t('verification_page.member.additional_documents', 'Additional Supporting Documents')}</span>
+                    <span className="badge bg-secondary bg-opacity-10 text-secondary border small">{t('verification_page.member.optional', 'Optional')}</span>
                   </h6>
                   <button
                     type="button"
@@ -506,48 +508,52 @@ const MemberVerification = () => {
                     className="btn btn-sm btn-link text-decoration-none fw-semibold"
                     style={{ color: '#235665' }}
                   >
-                    {includeAdditional ? '− Remove Additional Document' : '+ Add Supporting Document'}
+                    {includeAdditional
+                      ? t('verification_page.member.remove_additional', '− Remove Additional Document')
+                      : t('verification_page.member.add_supporting', '+ Add Supporting Document')}
                   </button>
                 </div>
                 <p className="text-muted small mb-3">
-                  Upload club membership proof, employment confirmation letter, utility bill, or other references to enhance your trust score.
+                  {t('verification_page.member.additional_help', 'Upload club membership proof, employment confirmation letter, utility bill, or other references to enhance your trust score.')}
                 </p>
 
                 {includeAdditional && (
                   <div className="p-3 bg-light rounded-3 border">
                     <div className="row g-3 mb-3">
                       <div className="col-md-6">
-                        <label className="form-label fw-semibold text-secondary small">Document Type</label>
+                        <label className="form-label fw-semibold text-secondary small">{t('verification_page.member.document_type', 'Document Type')}</label>
                         <select
                           className="form-select form-select-sm"
                           value={additionalDocType}
                           onChange={(e) => setAdditionalDocType(e.target.value)}
                         >
-                          {ADDITIONAL_DOC_TYPES.map((t) => (
-                            <option key={t.value} value={t.value}>{t.label}</option>
+                          {ADDITIONAL_DOC_TYPES.map((docType) => (
+                            <option key={docType.value} value={docType.value}>
+                              {t(`verification_page.member.document_type_${docType.value}`, docType.label)}
+                            </option>
                           ))}
                         </select>
                       </div>
                       <div className="col-md-6">
                         <label className="form-label fw-semibold text-secondary small">
-                          Document Title / Identifier
+                          {t('verification_page.member.document_title', 'Document Title / Identifier')}
                         </label>
                         <input
                           type="text"
                           className="form-control form-control-sm"
-                          placeholder="e.g. Rotary Club ID, Dialog Axiata Salary Letter"
+                          placeholder={t('verification_page.member.document_title_placeholder', 'e.g. Rotary Club ID, Dialog Axiata Salary Letter')}
                           value={additionalDocName}
                           onChange={(e) => setAdditionalDocName(e.target.value)}
                         />
                       </div>
                       <div className="col-12">
                         <label className="form-label fw-semibold text-secondary small">
-                          Description / Reference Details
+                          {t('verification_page.member.description_reference', 'Description / Reference Details')}
                         </label>
                         <input
                           type="text"
                           className="form-control form-control-sm"
-                          placeholder="e.g. Club Member #9928 or Employee ID #10492"
+                          placeholder={t('verification_page.member.description_placeholder', 'e.g. Club Member #9928 or Employee ID #10492')}
                           value={additionalDocDesc}
                           onChange={(e) => setAdditionalDocDesc(e.target.value)}
                         />
@@ -555,7 +561,7 @@ const MemberVerification = () => {
                     </div>
                     <DocumentUpload
                       id="additionalDoc"
-                      label="Supporting Document File (JPG, PNG, PDF)"
+                      label={t('verification_page.member.supporting_file_label', 'Supporting Document File (JPG, PNG, PDF)')}
                       file={additionalDocFile}
                       onChange={(file) => setAdditionalDocFile(file)}
                       onRemove={() => setAdditionalDocFile(null)}
@@ -574,7 +580,7 @@ const MemberVerification = () => {
                     style={{ borderRadius: '8px' }}
                     disabled={submitting}
                   >
-                    Cancel
+                    {t('verification_page.member.cancel', 'Cancel')}
                   </button>
                 )}
                 <button
@@ -586,10 +592,10 @@ const MemberVerification = () => {
                   {submitting ? (
                     <>
                       <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" />
-                      Uploading & Submitting…
+                      {t('verification_page.member.uploading_submitting', 'Uploading & Submitting…')}
                     </>
                   ) : (
-                    'Submit Verification for Approval'
+                    t('verification_page.member.submit_for_approval', 'Submit Verification for Approval')
                   )}
                 </button>
               </div>
@@ -601,8 +607,8 @@ const MemberVerification = () => {
         <div className="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
           <div className="p-3 px-4 bg-light border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div>
-              <h5 className="fw-bold mb-0 text-dark">Verified Evidence & Uploaded Documents</h5>
-              <small className="text-muted">Click any document to inspect full resolution or download</small>
+              <h5 className="fw-bold mb-0 text-dark">{t('verification_page.member.evidence_title', 'Verified Evidence & Uploaded Documents')}</h5>
+              <small className="text-muted">{t('verification_page.member.evidence_help', 'Click any document to inspect full resolution or download')}</small>
             </div>
             <button
               type="button"
@@ -610,7 +616,7 @@ const MemberVerification = () => {
               className="btn btn-sm btn-outline-teal fw-semibold d-inline-flex align-items-center gap-1.5"
               style={{ color: '#235665', borderColor: '#235665' }}
             >
-              <span>+ Add Supporting Document</span>
+              <span>{t('verification_page.member.add_supporting', '+ Add Supporting Document')}</span>
             </button>
           </div>
 
@@ -620,25 +626,25 @@ const MemberVerification = () => {
               {verification.nicFrontImagePath && (
                 <div className="col-md-4 col-sm-6">
                   <div className="card h-100 border rounded-3 p-3 text-center shadow-sm hover-shadow">
-                    <div className="fw-semibold text-dark small mb-2">NIC Front Page</div>
+                    <div className="fw-semibold text-dark small mb-2">{t('verification_page.member.nic_front', 'NIC Front Page')}</div>
                     <div
-                      onClick={() => openPreview('NIC Front Page', verification.nicFrontImagePath)}
+                      onClick={() => openPreview(t('verification_page.member.nic_front', 'NIC Front Page'), verification.nicFrontImagePath)}
                       style={{ cursor: 'pointer', height: '140px', backgroundColor: '#F8FAFC' }}
                       className="rounded border d-flex align-items-center justify-content-center overflow-hidden mb-2"
                     >
                       <img
                         src={`http://localhost:8081${verification.nicFrontImagePath}`}
-                        alt="NIC Front"
+                        alt={t('verification_page.member.nic_front', 'NIC Front')}
                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                       />
                     </div>
                     <button
                       type="button"
-                      onClick={() => openPreview('NIC Front Page', verification.nicFrontImagePath)}
+                      onClick={() => openPreview(t('verification_page.member.nic_front', 'NIC Front Page'), verification.nicFrontImagePath)}
                       className="btn btn-sm btn-outline-secondary w-100 py-1"
                       style={{ fontSize: '0.78rem' }}
                     >
-                      <Eye size={13} className="me-1" /> View Document
+                      <Eye size={13} className="me-1" /> {t('verification_page.member.view_document', 'View Document')}
                     </button>
                   </div>
                 </div>
@@ -648,25 +654,25 @@ const MemberVerification = () => {
               {verification.nicBackImagePath && (
                 <div className="col-md-4 col-sm-6">
                   <div className="card h-100 border rounded-3 p-3 text-center shadow-sm">
-                    <div className="fw-semibold text-dark small mb-2">NIC Back Page</div>
+                    <div className="fw-semibold text-dark small mb-2">{t('verification_page.member.nic_back', 'NIC Back Page')}</div>
                     <div
-                      onClick={() => openPreview('NIC Back Page', verification.nicBackImagePath)}
+                      onClick={() => openPreview(t('verification_page.member.nic_back', 'NIC Back Page'), verification.nicBackImagePath)}
                       style={{ cursor: 'pointer', height: '140px', backgroundColor: '#F8FAFC' }}
                       className="rounded border d-flex align-items-center justify-content-center overflow-hidden mb-2"
                     >
                       <img
                         src={`http://localhost:8081${verification.nicBackImagePath}`}
-                        alt="NIC Back"
+                        alt={t('verification_page.member.nic_back', 'NIC Back')}
                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                       />
                     </div>
                     <button
                       type="button"
-                      onClick={() => openPreview('NIC Back Page', verification.nicBackImagePath)}
+                      onClick={() => openPreview(t('verification_page.member.nic_back', 'NIC Back Page'), verification.nicBackImagePath)}
                       className="btn btn-sm btn-outline-secondary w-100 py-1"
                       style={{ fontSize: '0.78rem' }}
                     >
-                      <Eye size={13} className="me-1" /> View Document
+                      <Eye size={13} className="me-1" /> {t('verification_page.member.view_document', 'View Document')}
                     </button>
                   </div>
                 </div>
@@ -676,32 +682,32 @@ const MemberVerification = () => {
               {verification.gnCertificateImagePath && (
                 <div className="col-md-4 col-sm-6">
                   <div className="card h-100 border rounded-3 p-3 text-center shadow-sm">
-                    <div className="fw-semibold text-dark small mb-2">Grama Niladhari Certificate</div>
+                    <div className="fw-semibold text-dark small mb-2">{t('verification_page.member.gn_certificate', 'Grama Niladhari Certificate')}</div>
                     <div
-                      onClick={() => openPreview('Grama Niladhari Certificate', verification.gnCertificateImagePath)}
+                      onClick={() => openPreview(t('verification_page.member.gn_certificate', 'Grama Niladhari Certificate'), verification.gnCertificateImagePath)}
                       style={{ cursor: 'pointer', height: '140px', backgroundColor: '#F8FAFC' }}
                       className="rounded border d-flex align-items-center justify-content-center overflow-hidden mb-2"
                     >
                       {verification.gnCertificateImagePath.toLowerCase().endsWith('.pdf') ? (
                         <div className="text-center p-3">
                           <FileText size={36} className="text-danger" />
-                          <div className="text-danger fw-bold small">Official GN PDF</div>
+                          <div className="text-danger fw-bold small">{t('verification_page.member.official_gn_pdf', 'Official GN PDF')}</div>
                         </div>
                       ) : (
                         <img
                           src={`http://localhost:8081${verification.gnCertificateImagePath}`}
-                          alt="GN Certificate"
+                          alt={t('verification_page.member.gn_certificate', 'Grama Niladhari Certificate')}
                           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                         />
                       )}
                     </div>
                     <button
                       type="button"
-                      onClick={() => openPreview('Grama Niladhari Certificate', verification.gnCertificateImagePath)}
+                      onClick={() => openPreview(t('verification_page.member.gn_certificate', 'Grama Niladhari Certificate'), verification.gnCertificateImagePath)}
                       className="btn btn-sm btn-outline-secondary w-100 py-1"
                       style={{ fontSize: '0.78rem' }}
                     >
-                      <Eye size={13} className="me-1" /> View Document
+                      <Eye size={13} className="me-1" /> {t('verification_page.member.view_document', 'View Document')}
                     </button>
                   </div>
                 </div>
@@ -716,7 +722,7 @@ const MemberVerification = () => {
                       onClick={() => handleDeleteAdditionalDoc(doc.id)}
                       className="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle p-0 d-flex align-items-center justify-content-center"
                       style={{ width: '24px', height: '24px', fontSize: '11px' }}
-                      title="Delete document"
+                      title={t('verification_page.member.delete_document', 'Delete document')}
                     >
                       <X size={12} />
                     </button>
@@ -734,7 +740,7 @@ const MemberVerification = () => {
                       {doc.documentImagePath.toLowerCase().endsWith('.pdf') ? (
                         <div className="text-center">
                           <FileText size={32} className="text-danger" />
-                          <div className="text-danger fw-bold small">PDF File</div>
+                          <div className="text-danger fw-bold small">{t('verification_page.member.pdf_file', 'PDF File')}</div>
                         </div>
                       ) : (
                         <img
@@ -755,7 +761,7 @@ const MemberVerification = () => {
                       className="btn btn-sm btn-outline-secondary w-100 py-1"
                       style={{ fontSize: '0.78rem' }}
                     >
-                      <Eye size={13} className="me-1" /> View Document
+                      <Eye size={13} className="me-1" /> {t('verification_page.member.view_document', 'View Document')}
                     </button>
                   </div>
                 </div>
@@ -771,7 +777,7 @@ const MemberVerification = () => {
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '12px', overflow: 'hidden' }}>
               <div className="modal-header text-white" style={{ backgroundColor: '#235665' }}>
-                <h6 className="modal-title fw-bold mb-0">Upload Additional Supporting Document</h6>
+                <h6 className="modal-title fw-bold mb-0">{t('verification_page.member.upload_additional_title', 'Upload Additional Supporting Document')}</h6>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setShowAddDocModal(false)} />
               </div>
               <form onSubmit={handleUploadSingleAdditionalDoc}>
@@ -782,40 +788,42 @@ const MemberVerification = () => {
                     </div>
                   )}
                   <div className="mb-3">
-                    <label className="form-label small fw-semibold text-secondary">Document Type</label>
+                    <label className="form-label small fw-semibold text-secondary">{t('verification_page.member.document_type', 'Document Type')}</label>
                     <select
                       className="form-select form-select-sm"
                       value={newDocType}
                       onChange={(e) => setNewDocType(e.target.value)}
                     >
-                      {ADDITIONAL_DOC_TYPES.map((t) => (
-                        <option key={t.value} value={t.value}>{t.label}</option>
+                      {ADDITIONAL_DOC_TYPES.map((docType) => (
+                        <option key={docType.value} value={docType.value}>
+                          {t(`verification_page.member.document_type_${docType.value}`, docType.label)}
+                        </option>
                       ))}
                     </select>
                   </div>
                   <div className="mb-3">
-                    <label className="form-label small fw-semibold text-secondary">Document Name / Title</label>
+                    <label className="form-label small fw-semibold text-secondary">{t('verification_page.member.document_name', 'Document Name / Title')}</label>
                     <input
                       type="text"
                       className="form-control form-control-sm"
-                      placeholder="e.g. Colombo Club Membership Card"
+                      placeholder={t('verification_page.member.document_name_placeholder', 'e.g. Colombo Club Membership Card')}
                       value={newDocName}
                       onChange={(e) => setNewDocName(e.target.value)}
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label small fw-semibold text-secondary">Description / Reference ID</label>
+                    <label className="form-label small fw-semibold text-secondary">{t('verification_page.member.description_reference_id', 'Description / Reference ID')}</label>
                     <input
                       type="text"
                       className="form-control form-control-sm"
-                      placeholder="e.g. Membership ID #4928"
+                      placeholder={t('verification_page.member.reference_placeholder', 'e.g. Membership ID #4928')}
                       value={newDocDesc}
                       onChange={(e) => setNewDocDesc(e.target.value)}
                     />
                   </div>
                   <DocumentUpload
                     id="newDocFile"
-                    label="Document File (JPG, PNG, PDF - Max 5MB)"
+                    label={t('verification_page.member.document_file_label', 'Document File (JPG, PNG, PDF - Max 5MB)')}
                     required
                     file={newDocFile}
                     onChange={(file) => setNewDocFile(file)}
@@ -824,7 +832,7 @@ const MemberVerification = () => {
                 </div>
                 <div className="modal-footer bg-light p-3">
                   <button type="button" className="btn btn-sm btn-secondary" onClick={() => setShowAddDocModal(false)}>
-                    Cancel
+                    {t('verification_page.member.cancel', 'Cancel')}
                   </button>
                   <button
                     type="submit"
@@ -832,7 +840,9 @@ const MemberVerification = () => {
                     style={{ backgroundColor: '#235665' }}
                     disabled={uploadingDoc || !newDocFile}
                   >
-                    {uploadingDoc ? 'Uploading…' : 'Upload Document'}
+                    {uploadingDoc
+                      ? t('verification_page.member.uploading', 'Uploading…')
+                      : t('verification_page.member.upload_document', 'Upload Document')}
                   </button>
                 </div>
               </form>
